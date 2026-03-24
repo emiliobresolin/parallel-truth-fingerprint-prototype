@@ -1,6 +1,6 @@
 # Story 1.2: Implement Sensor Simulation With Controlled Normal Behavior
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -19,27 +19,27 @@ so that the prototype can produce realistic local observations for demonstration
 
 ## Tasks / Subtasks
 
-- [ ] Define the simulation configuration model for one compressor and three sensors. (AC: 1, 2)
-  - [ ] Add configuration placeholders for normal ranges, baseline operating values, and `compressor_power`.
-  - [ ] Keep the configuration simple and local, without introducing scenario execution logic outside the simulation boundary.
-- [ ] Implement a simple operational behavior model in `sensor_simulation/`. (AC: 1, 2)
-  - [ ] Generate temperature, pressure, and RPM readings for one compressor.
-  - [ ] Make the generated readings vary over time in a simple, observable pattern.
-  - [ ] Make the three sensor behaviors respond coherently to `compressor_power`.
-- [ ] Implement the temperature-driven noise model in the simulation layer only. (AC: 3)
-  - [ ] Increase variability as temperature rises.
-  - [ ] Ensure noise affects temperature, pressure, and RPM outputs.
-  - [ ] Keep this model isolated from consensus, comparison, persistence, and LSTM concerns.
-- [ ] Expose upstream scenario-control hooks without implementing full scenarios yet. (AC: 4)
-  - [ ] Define simple input/control points that later stories can use for controlled deviations.
-  - [ ] Ensure those hooks alter simulated inputs only and do not bypass later acquisition, MQTT, or consensus flow.
-- [ ] Add observability for the simulation stage. (AC: 1, 2, 3)
-  - [ ] Make outputs easy to inspect through logs or simple local state output.
-  - [ ] Keep the observability focused on simulation behavior, not downstream validation states.
-- [ ] Add minimal tests or checks for simulation structure and behavior. (AC: 1, 2, 3, 4)
-  - [ ] Verify the simulator produces all three sensor outputs.
-  - [ ] Verify `compressor_power` affects expected sensor directionality.
-  - [ ] Verify rising temperature increases noise/variability.
+- [x] Define the simulation configuration model for one compressor and three sensors. (AC: 1, 2)
+  - [x] Add configuration placeholders for normal ranges, baseline operating values, and `compressor_power`.
+  - [x] Keep the configuration simple and local, without introducing scenario execution logic outside the simulation boundary.
+- [x] Implement a simple operational behavior model in `sensor_simulation/`. (AC: 1, 2)
+  - [x] Generate temperature, pressure, and RPM readings for one compressor.
+  - [x] Make the generated readings vary over time in a simple, observable pattern.
+  - [x] Make the three sensor behaviors respond coherently to `compressor_power`.
+- [x] Implement the temperature-driven noise model in the simulation layer only. (AC: 3)
+  - [x] Increase variability as temperature rises.
+  - [x] Ensure noise affects temperature, pressure, and RPM outputs.
+  - [x] Keep this model isolated from consensus, comparison, persistence, and LSTM concerns.
+- [x] Expose upstream scenario-control hooks without implementing full scenarios yet. (AC: 4)
+  - [x] Define simple input/control points that later stories can use for controlled deviations.
+  - [x] Ensure those hooks alter simulated inputs only and do not bypass later acquisition, MQTT, or consensus flow.
+- [x] Add observability for the simulation stage. (AC: 1, 2, 3)
+  - [x] Make outputs easy to inspect through logs or simple local state output.
+  - [x] Keep the observability focused on simulation behavior, not downstream validation states.
+- [x] Add minimal tests or checks for simulation structure and behavior. (AC: 1, 2, 3, 4)
+  - [x] Verify the simulator produces all three sensor outputs.
+  - [x] Verify `compressor_power` affects expected sensor directionality.
+  - [x] Verify rising temperature increases noise/variability.
 
 ## Dev Notes
 
@@ -132,13 +132,31 @@ GPT-5 Codex
 - Story generated after Story 1.1 implementation.
 - Git is now present in the workspace, but no commit history analysis was required for this story-generation step.
 - No sprint-status file exists yet.
+- `venv\\Scripts\\python -m unittest tests.sensor_simulation.test_simulator`
+- `venv\\Scripts\\python -m unittest discover -s tests`
 
 ### Completion Notes List
 
 - Story 1.2 context generated with updated terminology for edge-local replicated state.
 - MQTT explicitly constrained to passive relay infrastructure outside the trust model.
 - Story kept intentionally simple, observable, and simulation-only.
+- Added a deterministic `CompressorSimulator` with one-compressor, three-sensor behavior driven by `compressor_power`.
+- Added explicit normal operating ranges and a reusable default simulation profile under `config/` and `sensor_simulation/`.
+- Added temperature-driven noise that increases variability for temperature, pressure, and RPM without introducing any downstream trust or messaging logic.
+- Added upstream-only simulation control hooks and inspectable snapshot metadata for later scenario-control stories.
+- Added focused unit tests covering output shape, power directionality, temperature-driven variability, and control-hook behavior.
 
 ### File List
 
 - `_bmad-output/implementation-artifacts/1-2-implement-sensor-simulation-with-controlled-normal-behavior.md`
+- `src/parallel_truth_fingerprint/config/ranges.py`
+- `src/parallel_truth_fingerprint/sensor_simulation/__init__.py`
+- `src/parallel_truth_fingerprint/sensor_simulation/behavior_model.py`
+- `src/parallel_truth_fingerprint/sensor_simulation/normal_profiles.py`
+- `src/parallel_truth_fingerprint/sensor_simulation/simulator.py`
+- `tests/sensor_simulation/__init__.py`
+- `tests/sensor_simulation/test_simulator.py`
+
+### Change Log
+
+- 2026-03-24: Implemented Story 1.2 simulation configuration, behavior model, temperature-driven noise, upstream-only control hooks, and focused unit tests.
