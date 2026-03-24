@@ -1,0 +1,30 @@
+{
+ "protocol": "HART",
+ "gateway_id": "GW-EDGE-01",
+ "timestamp": "2025-07-16T13:01:45.123Z",
+ "device_info": {
+   "tag": "PIT-101",
+   "long_tag": "Pressure_Compressor_Inlet",
+   "manufacturer_id": 26,  // Ex: Endress+Hauser, Rosemount, etc.
+   "device_type": 44
+ },
+ "process_data": {
+   "pv": { // Primary Variable (Ex: Pressão)
+     "value": 18.22,
+     "unit": "bar",
+     "unit_code": 7 // Código HART para Bar
+   },
+   "sv": { // Secondary Variable (Ex: Temperatura do Sensor)
+     "value": 45.5,
+     "unit": "degC"
+   },
+   "loop_current_ma": 12.55, // O valor real da corrente lida
+   "pv_percent_range": 53.4 // % da escala
+ },
+ "diagnostics": {
+   "device_status_hex": "0x00", // 0x00 = Tudo OK
+   "field_device_malfunction": false,
+   "loop_current_saturated": false, // Importante: avisa se estourou a escala (4 ou 20mA)
+   "cold_start": false // Avisa se o sensor reiniciou recentemente
+ }
+}

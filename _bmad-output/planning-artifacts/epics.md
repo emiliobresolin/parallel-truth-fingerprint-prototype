@@ -1,0 +1,584 @@
+---
+stepsCompleted:
+  - step-01-validate-prerequisites
+  - step-02-design-epics
+  - step-03-create-stories
+  - step-04-final-validation
+inputDocuments:
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/prd.md
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/architecture.md
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/product-brief-parallel-truth-fingerprint-prototype-2026-03-23.md
+---
+
+# parallel-truth-fingerprint-prototype - Epic Breakdown
+
+## Overview
+
+This document provides the complete epic and story breakdown for parallel-truth-fingerprint-prototype, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories.
+
+At this stage, `prd.md` and `architecture.md` are the only authoritative requirement sources. The product brief is retained in `inputDocuments` for supporting traceability only and must not introduce, modify, or expand requirements.
+
+## Requirements Inventory
+
+### Functional Requirements
+
+FR1: The system can simulate 3 sensors of one compressor.
+FR2: Each edge can collect only its local sensor.
+FR3: Each edge can publish data to MQTT.
+FR4: Each edge can consume data from the other edges.
+FR5: The system can maintain a local replicated view of the compressor at each edge.
+FR6: The system can execute Byzantine consensus between the edges.
+FR7: The consensus can produce trust ranking and this must be included in the package that goes to the bucket.
+FR8: The system can exclude a suspicious edge from the round.
+FR9: The system can expose the participating edges in each consensus round.
+FR10: The system can expose the excluded edges in each consensus round and the reason for exclusion.
+FR11: The system can expose the resulting trust ranking for all edges in the round.
+FR12: The system can explicitly indicate when a valid consensus cannot be achieved.
+FR13: The system can generate structured logs describing each consensus round.
+FR14: The system can generate alerts when consensus fails or when multiple edges are considered invalid.
+FR15: The system can expose a fake SCADA in OPC UA.
+FR16: The system can execute sensor-by-sensor comparison with tolerance.
+FR17: The system can generate an alert when SCADA diverges from the consensused physical state.
+FR18: The system can persist valid data in local storage (bucket).
+FR19: The system can train an LSTM using normal data.
+FR20: The system can generate an equipment fingerprint.
+FR21: The system can generate anomaly score and normal/anomalous class.
+FR22: The system can save the model/fingerprint.
+FR23: The system can detect a replay scenario.
+
+### NonFunctional Requirements
+
+NFR1: The prototype must execute locally with a collection cadence aligned with the one-minute reference defined in the approved materials.
+NFR2: The execution flow must remain suitable for live demonstration and academic inspection, without requiring high-frequency or real-time optimization.
+NFR3: The prototype must preserve validation-before-trust by ensuring that shared edge state is not treated as valid until Byzantine-style consensus has completed.
+NFR4: Only consensused valid data may be used for downstream processing steps such as SCADA comparison, persistence, and LSTM training or inference.
+NFR5: The prototype must keep SCADA divergence alerting and fingerprint-based anomaly alerting as distinct outputs.
+NFR6: The prototype must run locally.
+NFR7: The prototype must explicitly indicate when valid consensus cannot be achieved.
+NFR8: The prototype must produce clear, structured logs that allow each pipeline stage and each consensus round to be inspected during demonstration and evaluation.
+NFR9: The structured logs must provide full traceability of each consensus round, including identification of participating edges, excluded edges, and the reasons for exclusion.
+NFR10: The prototype execution must be reproducible for academic presentation and validation.
+NFR11: The prototype must integrate locally with MQTT for edge communication, HART-based collection semantics for sensor acquisition, OPC UA for fake SCADA exposure, MinIO for object storage, and an LSTM service for fingerprint training and inference.
+NFR12: The integration model must remain simple and local, without requiring real cloud infrastructure or external industrial systems.
+NFR13: The prototype must prioritize Python.
+NFR14: The prototype must be simple and demonstrable.
+NFR15: The prototype must have clear logs for presentation.
+NFR16: The prototype must be modular.
+NFR17: The prototype must permit future replacement of the local storage by a real cloud storage solution.
+
+### Additional Requirements
+
+- Epic 1 Story 1 must initialize the project with `uv init --bare`.
+- The project structure must remain architecture-driven and must not introduce a framework or starter that imposes unintended constraints.
+- Each edge must remain an independent logical node with its own local acquisition, MQTT publication and consumption, and consensus execution context, even in local execution.
+- MQTT broker infrastructure is a passive message relay only. It supports publish/subscribe exchange between edges but is not part of the trust model.
+- Each edge-local replicated state is an intermediate state only and must not be treated as valid by default.
+- Only the consensused valid state may feed SCADA comparison, persistence, and LSTM processing.
+- Consensus output must include participating edges, excluded edges, reasons for exclusion, trust ranking, valid or invalid consensus status, and resulting consensused valid state when available.
+- Structured logging must be used throughout the system, with consensus-round logs capturing round identifier, participating edges, excluded edges, exclusion reasons, trust ranking, consensus success or failure status, and consensused valid state reference when available.
+- Separate alert categories must be preserved for SCADA divergence alerts, LSTM anomaly alerts, and consensus-failure alerts.
+- Scenario-control and fault-injection must be first-class architectural components.
+- Scenario-control and fault-injection must be implemented only through explicit upstream control points and must not bypass the normal pipeline.
+- Supported controlled scenarios must include temporary removal or invalidation of one or more edges, failed-consensus scenarios, replay-style reintroduction of previously valid data, and SCADA-side manipulation that creates divergence from the consensused valid state.
+- Sensor simulation must use defined normal ranges, simple time-varying realistic patterns, and controlled deviations to support anomaly and divergence scenarios.
+- No raw observations, pre-consensus edge-local replicated state, or invalid-round outputs may enter the LSTM training pipeline.
+- The prototype remains fully local, but local orchestration may use a mixed process/container model when that improves reproducibility and setup simplicity.
+- The MQTT broker should run as a local containerized service.
+- The LSTM service may run as a local containerized service.
+- MinIO may run as a local containerized service.
+- Edge nodes and core Python orchestration logic may remain regular local Python processes.
+- Mixed local process/container orchestration is a reproducibility and setup choice only and must not change architectural boundaries, collapse decentralization, or introduce production-oriented deployment complexity.
+- Service ownership and module boundaries must remain explicit across sensor simulation, edge nodes, consensus, SCADA, comparison, persistence, LSTM service, observability, scenario control, and optional minimal visualization.
+- State-boundary rules, service ownership rules, and scenario-control constraints are architectural invariants and must be treated as mandatory in all implementation stories.
+
+### UX Design Requirements
+
+No separate UX design document exists for this workflow. Any optional minimal visualization remains constrained by the PRD and architecture and does not add standalone UX requirements at this stage.
+
+### FR Coverage Map
+
+FR1: Epic 1 - Simulate compressor sensors
+FR2: Epic 1 - Local sensor collection per edge
+FR3: Epic 1 - MQTT publish from each edge
+FR4: Epic 1 - MQTT consume across edges
+FR5: Epic 1 - Edge-local replicated compressor state
+FR6: Epic 2 - Byzantine consensus execution
+FR7: Epic 2 - Trust ranking included in persisted package
+FR8: Epic 2 - Suspicious edge exclusion
+FR9: Epic 2 - Participating-edge visibility
+FR10: Epic 2 - Excluded-edge visibility and exclusion reason
+FR11: Epic 2 - Full trust-ranking visibility
+FR12: Epic 2 - Explicit failed-consensus outcome
+FR13: Epic 2 - Structured consensus-round logs
+FR14: Epic 2 - Alerts for consensus failure or multiple invalid edges
+FR15: Epic 3 - Fake OPC UA SCADA exposure
+FR16: Epic 3 - Sensor-by-sensor operational-context comparison
+FR17: Epic 3 - SCADA divergence alerting
+FR18: Epic 3 - Persist valid data only
+FR19: Epic 4 - Train LSTM with normal data
+FR20: Epic 4 - Generate equipment fingerprint
+FR21: Epic 4 - Produce anomaly score and classification
+FR22: Epic 4 - Save model/fingerprint
+FR23: Epic 4 - Detect replay scenario
+
+## Epic List
+
+### Epic 1: Reproducible Local Edge Observation Foundation
+The researcher can start the local prototype, run the decentralized edge observation flow, and inspect the edge-local replicated compressor views produced through local acquisition and MQTT exchange without collapsing the architecture into a centralized design.
+**FRs covered:** FR1, FR2, FR3, FR4, FR5
+
+### Epic 2: Trusted Consensus Validation and Consensus Auditability
+The researcher can validate edge contributions through Byzantine-style consensus, inspect trust ranking and exclusion decisions, and observe failed-consensus outcomes as explicit system results with full round traceability.
+**FRs covered:** FR6, FR7, FR8, FR9, FR10, FR11, FR12, FR13, FR14
+
+### Epic 3: SCADA Integrity Comparison and Valid-State Persistence
+The researcher can compare the consensused physical-side state against the logical SCADA state, receive divergence alerts based on operational context, and persist only the valid structured consensus artifact to local storage.
+**FRs covered:** FR15, FR16, FR17, FR18
+
+### Epic 4: Fingerprint Training, Replay Detection, and Controlled Demonstration Scenarios
+The researcher can train a reusable LSTM fingerprint from validated normal data, generate anomaly outputs for replay-oriented temporal inconsistency, and execute controlled demonstration scenarios without bypassing the normal pipeline.
+**FRs covered:** FR19, FR20, FR21, FR22, FR23
+
+## Epic 1: Reproducible Local Edge Observation Foundation
+
+The researcher can start the local prototype, run the decentralized edge observation flow, and inspect the edge-local replicated compressor views produced through local acquisition and MQTT exchange without collapsing the architecture into a centralized design.
+
+### Story 1.1: Initialize the Architecture-Driven Local Prototype Skeleton
+
+As a researcher,
+I want the local prototype skeleton initialized with the approved architecture-driven structure,
+So that implementation starts from a reproducible foundation without introducing unintended framework constraints.
+
+**Acceptance Criteria:**
+
+**Given** the approved architecture and execution model
+**When** the project is initialized
+**Then** it uses `uv init --bare` as the bootstrap approach
+**And** the repository structure reflects the defined logical service boundaries for edges, consensus, SCADA, comparison, persistence, LSTM, observability, scenario control, and optional minimal visualization.
+
+**Given** the mixed local reproducibility model
+**When** local orchestration files are created
+**Then** they allow MQTT broker containerization and optional MinIO/LSTM containerization
+**And** they do not change the architecture into a centralized or production-style deployment.
+
+### Story 1.2: Implement Sensor Simulation With Controlled Normal Behavior
+
+As a researcher,
+I want simulated compressor sensors with explicit normal behavior ranges and patterns,
+So that the prototype can produce realistic local observations for demonstration and later anomaly scenarios.
+
+**Acceptance Criteria:**
+
+**Given** the compressor prototype scope
+**When** the sensor simulation runs
+**Then** it produces temperature, pressure, and RPM values for one compressor
+**And** each sensor follows a defined normal range and a simple time-varying behavior pattern driven by compressor operational context, including `compressor_power`.
+
+**Given** the physical behavior model
+**When** `compressor_power` changes
+**Then** higher power results in higher expected temperature, pressure, and RPM behavior
+**And** lower power results in lower expected values across those variables.
+
+**Given** the required simulation realism
+**When** temperature increases
+**Then** the simulation increases sensor noise and variability for temperature, pressure, and RPM
+**And** that temperature-driven noise model is implemented only in the sensor simulation layer.
+
+**Given** the architecture constraints for scenario support
+**When** the simulation layer is implemented
+**Then** it exposes explicit upstream control points for later deviation and fault-injection scenarios
+**And** those control points do not bypass the normal observation pipeline.
+
+### Story 1.3: Implement Logically Independent Edge Acquisition Services
+
+As a researcher,
+I want each edge to acquire only its own local sensor through pre-PLC acquisition semantics,
+So that the prototype preserves decentralized physical-side observation even on one machine.
+
+**Acceptance Criteria:**
+
+**Given** three logical edge nodes
+**When** the local edge services run
+**Then** Edge 1 acquires only temperature, Edge 2 only pressure, and Edge 3 only RPM
+**And** each edge uses pre-PLC physical acquisition semantics (conceptual HART / 4-20 mA reference) at the local acquisition boundary.
+
+**Given** the payload-driven data model
+**When** an edge emits a local acquisition payload
+**Then** it follows the raw HART-style payload structure used by the project
+**And** it includes process variables, loop current, diagnostics, and available local physics metrics needed for downstream enrichment.
+
+**Given** local co-location on one machine
+**When** edge services execute
+**Then** each edge maintains its own acquisition flow and local runtime context
+**And** no shared mutable state collapses the decentralized edge model.
+
+### Story 1.4: Implement MQTT Exchange and Shared State Reconstruction
+
+As a researcher,
+I want each edge to publish its local observation and consume the others through MQTT,
+So that every edge reconstructs its own local replicated compressor-state view needed for later validation.
+
+**Acceptance Criteria:**
+
+**Given** active edge services and a local MQTT broker
+**When** an edge collects a local observation
+**Then** it publishes that observation through MQTT
+**And** the other edges consume it through the brokered publish/subscribe flow while the broker remains a passive message relay only.
+
+**Given** cross-edge observation exchange
+**When** all current sensor observations are received
+**Then** each edge reconstructs its own local replicated view containing temperature, pressure, and RPM from its own sensor data plus peer data received through MQTT
+**And** that edge-local replicated state is explicitly marked or handled as non-validated and not yet valid for downstream processing.
+
+### Story 1.5: Add Observation-Flow Logging and Demonstration Visibility
+
+As a researcher,
+I want clear logs and observable state for the acquisition and MQTT replication flow,
+So that the decentralized observation stage is demonstrable and traceable before consensus is introduced.
+
+**Acceptance Criteria:**
+
+**Given** the sensor simulation and edge communication flow
+**When** the prototype runs
+**Then** logs show sensor generation, local edge acquisition, MQTT publication, MQTT consumption, and shared-state reconstruction
+**And** the outputs are presentation-friendly and reproducible.
+
+**Given** the trust-boundary rules
+**When** an edge-local replicated state is displayed or logged
+**Then** it is distinguishable from future consensused valid state
+**And** the system does not present it as validated output.
+
+**Given** optional minimal visualization support
+**When** an edge-local replicated intermediate state is shown to support demonstration
+**Then** it may be displayed through logs, simple charts, or simple metrics
+**And** it remains clearly identified as non-validated intermediate state.
+
+## Epic 2: Trusted Consensus Validation and Consensus Auditability
+
+The researcher can validate edge contributions through Byzantine-style consensus, inspect trust ranking and exclusion decisions, and observe failed-consensus outcomes as explicit system results with full round traceability.
+
+### Story 2.1: Define Consensus Contracts and Trust-State Models
+
+As a researcher,
+I want explicit consensus contracts and trust-state models,
+So that consensus outcomes are represented clearly and the system cannot confuse edge-local replicated state with validated state.
+
+**Acceptance Criteria:**
+
+**Given** the approved architecture constraints
+**When** consensus-related contracts are implemented
+**Then** they include at least consensus round input, consensus result, trust ranking, exclusion details, and consensused valid state
+**And** the contracts keep edge-local replicated intermediate state distinct from consensused valid state.
+
+**Given** the requirement for explicit auditability
+**When** a consensus result is produced
+**Then** it can represent both successful consensus and failed-consensus outcomes
+**And** it includes participating edges, excluded edges, reasons for exclusion, and round status.
+
+**Given** the payload-driven architecture
+**When** consensus contracts are finalized
+**Then** they define the transformation from raw HART-style edge payloads into a unified consensused payload
+**And** that unified payload carries the data needed downstream, including process data, loop current, physics metrics, diagnostics, trust metadata, and operational context such as `compressor_power`.
+
+### Story 2.2: Implement Byzantine-Style Consensus Evaluation
+
+As a researcher,
+I want the system to evaluate edge contributions through Byzantine-style consensus,
+So that suspicious edge data is filtered before any state is trusted.
+
+**Acceptance Criteria:**
+
+**Given** each edge has built its own local replicated state from self-observation plus peer observations
+**When** a consensus round executes
+**Then** the system evaluates edge contributions and produces a trust ranking for all participating edges
+**And** it excludes suspicious edge contributions within the active round when required.
+
+**Given** a successful consensus round
+**When** the round completes
+**Then** the system produces a consensused valid state
+**And** that state is the only state marked as valid for downstream use.
+
+### Story 2.3: Implement Failed-Consensus Handling as an Explicit Outcome
+
+As a researcher,
+I want the system to signal when valid consensus cannot be achieved,
+So that consensus failure is observable and handled as part of the architecture rather than hidden as a generic error.
+
+**Acceptance Criteria:**
+
+**Given** a round where insufficient valid edges remain
+**When** the consensus engine cannot produce a valid state
+**Then** it emits an explicit failed-consensus outcome
+**And** it does not emit a consensused valid state for downstream processing.
+
+**Given** a failed-consensus outcome
+**When** the round result is recorded
+**Then** the result identifies participating edges, excluded edges, and reasons for exclusion
+**And** the system blocks downstream stages that require a consensused valid state.
+
+### Story 2.4: Add Consensus Round Logging and Exclusion Visibility
+
+As a researcher,
+I want each consensus round to be fully traceable in logs and outputs,
+So that I can explain which edges participated, which were excluded, and why the trust decision was made.
+
+**Acceptance Criteria:**
+
+**Given** any consensus round
+**When** the round is executed
+**Then** structured logs capture the round identifier, participating edges, trust ranking, excluded edges, exclusion reasons, and round success or failure status
+**And** the logs remain clear enough for academic demonstration and evaluation.
+
+**Given** a suspicious-edge exclusion
+**When** the exclusion is logged or displayed
+**Then** the output identifies exactly which edge was excluded
+**And** it records the reason for exclusion in a structured and inspectable form.
+
+**Given** the unified payload-driven data model
+**When** consensus observability is implemented
+**Then** consensus logs and outputs follow the same structured payload conventions used by downstream stages
+**And** they preserve visibility of both trust decisions and the resulting consensused payload state when available.
+
+### Story 2.5: Generate Consensus Failure and Multi-Invalid-Edge Alerts
+
+As a researcher,
+I want explicit alerts when consensus fails or when multiple edges are considered invalid,
+So that critical trust-breakdown conditions are visible during demonstration and evaluation.
+
+**Acceptance Criteria:**
+
+**Given** a consensus failure or multiple invalid-edge condition
+**When** the round completes
+**Then** the system generates a consensus-related alert
+**And** that alert remains distinct from future SCADA divergence and LSTM anomaly alerts.
+
+**Given** a consensus-related alert
+**When** it is emitted
+**Then** it references the associated round outcome and exclusion context
+**And** it does not bypass the normal consensus execution path.
+
+## Epic 3: SCADA Integrity Comparison and Valid-State Persistence
+
+The researcher can compare the consensused physical-side state against the logical SCADA state, receive divergence alerts based on operational context, and persist only the valid structured consensus artifact to local storage.
+
+### Story 3.1: Implement OPC UA-First Logical SCADA Service With Local Fallback
+
+As a researcher,
+I want the logical supervisory state to be exposed through a realistic local SCADA interface,
+So that the prototype prioritizes industrial alignment without adding production complexity.
+
+**Acceptance Criteria:**
+
+**Given** the approved local prototype scope
+**When** the SCADA component is implemented
+**Then** the preferred implementation is a simple local Python OPC UA server
+**And** it represents the logical supervisory state rather than the physical truth source.
+
+**Given** OPC UA implementation is not feasible in the local environment
+**When** a fallback is needed
+**Then** a lightweight local FastAPI service may simulate the SCADA values
+**And** it preserves the same logical supervisory role without changing the architecture.
+
+**Given** the controlled demonstration scenarios
+**When** SCADA-side divergence behavior is exercised
+**Then** the SCADA layer can intentionally produce replayed, frozen, or offset supervisory values
+**And** those values remain part of the normal comparison pipeline as a logical-state divergence source.
+
+### Story 3.2: Implement Operational-Context SCADA Comparison on Consensused Valid Payloads
+
+As a researcher,
+I want SCADA comparison to use operational context rather than static thresholds,
+So that divergence is evaluated using expected compressor behavior and physical consistency.
+
+**Acceptance Criteria:**
+
+**Given** a consensused valid payload and current SCADA state
+**When** the comparison service executes
+**Then** it evaluates temperature, pressure, and RPM using operational context, including `compressor_power`
+**And** it uses physical consistency and cross-variable relationships rather than configurable static tolerance thresholds.
+
+**Given** the operational model
+**When** `compressor_power` changes
+**Then** the comparison logic interprets higher power as supporting higher temperature, pressure, and RPM expectations
+**And** lower power as supporting lower expected values.
+
+**Given** no consensused valid state exists
+**When** comparison would otherwise run
+**Then** the comparison service remains blocked
+**And** it does not execute against edge-local replicated intermediate state or invalid consensus output.
+
+### Story 3.3: Produce Structured Per-Sensor SCADA Comparison Outputs and Alerts
+
+As a researcher,
+I want structured comparison outputs for each sensor,
+So that SCADA divergence can be explained clearly and remain separate from other alert paths.
+
+**Acceptance Criteria:**
+
+**Given** a comparison between consensused valid payloads and SCADA values
+**When** the comparison completes
+**Then** the output for each sensor includes the consensused physical value, the SCADA value, the contextual evaluation, and a divergence classification
+**And** the format remains consistent with the unified payload-driven design.
+
+**Given** divergence is detected
+**When** an alert is emitted
+**Then** the system generates a SCADA divergence alert as a separate alert path
+**And** it remains distinct from consensus failure alerts and LSTM anomaly alerts.
+
+### Story 3.4: Persist Structured Consensus Artifacts Only for Valid States
+
+As a researcher,
+I want valid structured consensus artifacts persisted in local storage,
+So that downstream training and audit evidence use only validated data.
+
+**Acceptance Criteria:**
+
+**Given** a successful consensus outcome
+**When** persistence executes
+**Then** the stored artifact includes at least timestamp, consensus_state based on the unified payload, trust_scores, excluded_edges, SCADA comparison results, and diagnostics
+**And** it is written only for valid consensused states.
+
+**Given** a failed consensus outcome, any edge-local replicated intermediate state, or other non-validated data
+**When** persistence would otherwise execute
+**Then** the system blocks persistence of that data as valid artifact
+**And** invalid or pre-consensus data does not enter the training-ready storage path.
+
+### Story 3.5: Add Payload-Driven Observability for Comparison and Persistence
+
+As a researcher,
+I want logs and outputs to reflect the full payload-driven pipeline through comparison and persistence,
+So that the system remains explainable and auditable during demonstration.
+
+**Acceptance Criteria:**
+
+**Given** edge contributions, consensus results, SCADA comparison, and persistence actions
+**When** the prototype runs
+**Then** logs reflect those stages using the agreed payload structure
+**And** they show excluded edges, comparison outcomes, and persistence actions in a presentation-ready format.
+
+**Given** comparison or persistence is blocked because no consensused valid state exists
+**When** the block occurs
+**Then** the blocked flow is logged explicitly
+**And** the output makes clear that the pipeline stopped for trust-boundary reasons rather than silent failure.
+
+## Epic 4: Fingerprint Training, Replay Detection, and Controlled Demonstration Scenarios
+
+The researcher can train a reusable LSTM fingerprint from validated normal data, generate anomaly outputs for replay-oriented temporal inconsistency, and execute controlled demonstration scenarios without bypassing the normal pipeline.
+
+### Story 4.1: Build Training Sequences From Full Valid Persisted Payload Artifacts
+
+As a researcher,
+I want the LSTM training dataset built from the full structured persisted payload artifacts,
+So that the fingerprint models physical-operational behavior rather than isolated values.
+
+**Acceptance Criteria:**
+
+**Given** persisted consensus artifacts in local storage
+**When** the dataset-building process runs
+**Then** it selects only valid consensused records marked as normal for training
+**And** it excludes raw edge payloads, edge-local replicated intermediate state, failed-consensus outputs, and other non-validated data.
+
+**Given** the payload-driven architecture
+**When** training sequences are derived
+**Then** they retain the complete relevant structure from the persisted artifacts, including process variables, loop current, physics metrics, diagnostics, and operational context such as `compressor_power`
+**And** they do not reduce the fingerprint input to a value-only or arbitrarily flattened subset.
+
+**Given** the prototype demonstration scope
+**When** temporal sequences are prepared
+**Then** they use a simple fixed-length sequence window aligned with the collection cadence
+**And** the sequence length remains sufficient for demonstration without introducing unnecessary complexity.
+
+### Story 4.2: Train and Save a Reusable Local LSTM Fingerprint Model
+
+As a researcher,
+I want the system to train and save an LSTM fingerprint model from validated normal data,
+So that the prototype can reuse the model for later inference during demonstrations.
+
+**Acceptance Criteria:**
+
+**Given** a prepared normal training dataset
+**When** model training executes
+**Then** the system trains an LSTM model for the compressor physical-operational fingerprint
+**And** it saves the resulting model or fingerprint artifact for reuse.
+
+**Given** the project scope
+**When** the training flow is implemented
+**Then** it remains a simple local component within the prototype pipeline
+**And** it does not require separate deployment, separate containerization, or distributed ML infrastructure.
+
+### Story 4.3: Implement Fingerprint Inference With Anomaly Score and Classification
+
+As a researcher,
+I want inference outputs with anomaly score and normal/anomalous classification,
+So that temporal behavior can be evaluated during execution.
+
+**Acceptance Criteria:**
+
+**Given** a saved fingerprint model and valid runtime input
+**When** inference executes
+**Then** the system produces an anomaly score and a normal/anomalous classification
+**And** the result remains distinct from SCADA divergence and consensus-failure outputs.
+
+**Given** runtime inference input
+**When** the inference path runs
+**Then** it consumes only valid downstream inputs derived from the approved persisted payload pipeline
+**And** it does not accept non-validated state as inference input.
+
+### Story 4.4: Detect SCADA-Side Replay as a Behavioral Anomaly
+
+As a researcher,
+I want SCADA-side replay behavior to produce anomaly output through the fingerprint path,
+So that the prototype demonstrates temporal inconsistency detection without redefining replay as a consensus or comparison problem.
+
+**Acceptance Criteria:**
+
+**Given** a controlled replay scenario
+**When** the SCADA layer provides previously valid, frozen, or replayed supervisory values
+**Then** the edge layer and consensus continue defining the trusted physical reference
+**And** the replay origin remains on the SCADA side rather than in edge or physical payload generation.
+
+**Given** a SCADA-side replay condition
+**When** the scenario flows through the normal pipeline over time
+**Then** the LSTM inference path can identify temporal inconsistency and produce anomaly behavior
+**And** replay detection is positioned as a behavioral anomaly rather than a consensus trust failure.
+
+**Given** a replay scenario
+**When** SCADA comparison also executes
+**Then** direct SCADA comparison may or may not detect the issue depending on the case
+**And** the fingerprint path remains the intended mechanism for detecting the temporal anomaly.
+
+### Story 4.5: Implement Scenario-Control for Demonstration Without Pipeline Bypass
+
+As a researcher,
+I want controlled fault-injection and scenario-control capabilities for replay, SCADA divergence, and edge invalidation,
+So that demonstrations can exercise the full architecture faithfully.
+
+**Acceptance Criteria:**
+
+**Given** the approved demonstration scenarios
+**When** scenario-control is implemented
+**Then** it supports edge invalidation or removal, SCADA-side replayed, frozen, or offset values, and other approved divergence behaviors
+**And** those controls operate through explicit upstream control points.
+
+**Given** a controlled scenario is activated
+**When** the prototype runs
+**Then** the data still flows through sensor simulation, edge acquisition, MQTT exchange, consensus, SCADA comparison, persistence, and LSTM inference as applicable
+**And** scenario-control does not inject outputs directly into downstream stages.
+
+### Story 4.6: Add End-to-End Anomaly and Scenario Observability
+
+As a researcher,
+I want the anomaly path and demonstration scenarios to be fully observable,
+So that I can explain how replay detection and controlled divergences exercise the architecture.
+
+**Acceptance Criteria:**
+
+**Given** training, inference, and controlled scenarios
+**When** the prototype runs
+**Then** logs or optional minimal visualization show the active scenario state, persisted valid input basis, model usage, anomaly outputs, and alert separation
+**And** the outputs remain clear for academic presentation.
+
+**Given** anomaly or scenario outputs are shown
+**When** they are displayed
+**Then** they preserve separation between consensus alerts, SCADA divergence alerts, and LSTM anomaly alerts
+**And** they make clear which stage of the architecture produced the observed result.

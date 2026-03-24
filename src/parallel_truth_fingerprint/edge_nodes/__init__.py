@@ -1,0 +1,1 @@
+"""Edge node package placeholder."""

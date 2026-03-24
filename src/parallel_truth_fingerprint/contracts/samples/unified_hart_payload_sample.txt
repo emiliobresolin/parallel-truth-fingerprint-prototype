@@ -1,0 +1,170 @@
+
+
+           "manufacturer_id": 26, // Endress+Hauser
+           "device_type": 44,
+           "device_revision": 1,
+           "hardware_revision": 2
+         },
+         "data_consensus": {
+           // DADOS DO PROCESSO (Consensuados)
+           "pv": {
+             "value": 1250.5,
+             "unit": "kg/h",
+             "unit_code": 61,
+             "percent_range": 62.5
+           },
+           "sv": {
+             "value": 42.1,
+             "unit": "degC",
+             "description": "Sensor_Body_Temperature"
+           },
+           "tv": {
+             "value": 124005.0,
+             "unit": "kg",
+             "description": "Totalizer_Mass"
+           },
+           "qv": {
+             "value": 0,
+             "unit": "none",
+             "description": "Frequency_Output"
+           },
+           "loop_current_ma": 14.00, // Importante para fingerprint elétrico
+          
+           // MÉTRICAS FÍSICAS (Cálculo dos Edges)
+           "physics_metrics": {
+             "noise_floor": 0.08,
+             "rate_of_change_dtdt": 2.5,
+             "local_stability_score": 0.99
+           }
+         },
+         "diagnostics": {
+           "device_status_hex": "0x00",
+           "field_device_malfunction": false,
+           "loop_current_saturated": false, // Se true, o DL sabe que o valor está clipado
+           "cold_start": false,
+           "more_status_available": false
+         }
+       },
+       {
+         // SENSOR 2: Transmissor de Pressão (Saída)
+         "tag": "PIT-102",
+         "long_tag": "Pressure_Discharge_CC101",
+         "device_info": {
+           "manufacturer_id": 38, // Rosemount
+           "device_type": 12,
+           "device_revision": 3,
+           "hardware_revision": 1
+         },
+         "data_consensus": {
+           "pv": {
+             "value": 45.2,
+             "unit": "bar",
+             "unit_code": 7,
+             "percent_range": 88.2
+           },
+           "sv": {
+             "value": 65.4,
+             "unit": "degC",
+             "description": "Sensor_Module_Temp" // DL pode correlacionar temp do módulo com drift de pressão
+           },
+           "loop_current_ma": 18.11,
+          
+           "physics_metrics": {
+             "noise_floor": 0.01, // Pressão estável
+             "rate_of_change_dtdt": 0.02,
+             "local_stability_score": 1.0
+           }
+         },
+         "diagnostics": {
+           "device_status_hex": "0x08", // Ex: 0x08 pode indicar "More Status Available"
+           "field_device_malfunction": false,
+           "loop_current_saturated": false,
+           "cold_start": false
+         }
+       }
+     ]
+   },
+
+
+   // --- EQUIPAMENTO 2: Trocador de Calor ---
+   "HeatExchanger-HX200": {
+     "equipment_type": "Shell_Tube_Exchanger",
+     "sensors": [
+       {
+         // SENSOR 3: Temperatura (Lado Casco)
+         "tag": "TIT-201",
+         "long_tag": "Temp_Shell_Inlet",
+         "device_info": {
+           "manufacturer_id": 26,
+           "device_type": 33,
+           "device_revision": 2,
+           "hardware_revision": 2
+         },
+         "data_consensus": {
+           "pv": {
+             "value": 180.5,
+             "unit": "degC",
+             "unit_code": 32,
+             "percent_range": 45.0
+           },
+           "sv": {
+             "value": 24.5,
+             "unit": "degC",
+             "description": "Terminal_Block_Temp"
+           },
+           "loop_current_ma": 11.20,
+          
+           "physics_metrics": {
+             "noise_floor": 0.15, // Ruído térmico mais alto
+             "rate_of_change_dtdt": -0.1,
+             "local_stability_score": 0.95
+           }
+         },
+         "diagnostics": {
+           "device_status_hex": "0x00",
+           "field_device_malfunction": false,
+           "loop_current_saturated": false,
+           "cold_start": false
+         }
+       },
+       {
+         // SENSOR 4: Pressão Diferencial (Sujeira no filtro)
+         "tag": "PDIT-202",
+         "long_tag": "Diff_Press_Filter",
+         "device_info": {
+           "manufacturer_id": 26,
+           "device_type": 44,
+           "device_revision": 1,
+           "hardware_revision": 2
+         },
+         "data_consensus": {
+           "pv": {
+             "value": 0.45,
+             "unit": "bar",
+             "unit_code": 7,
+             "percent_range": 12.5
+           },
+           "sv": {
+             "value": 30.1,
+             "unit": "degC",
+             "description": "Static_Pressure"
+           },
+           "loop_current_ma": 6.00,
+          
+           "physics_metrics": {
+             "noise_floor": 0.005,
+             "rate_of_change_dtdt": 0.001,
+             "local_stability_score": 1.0
+           }
+         },
+         "diagnostics": {
+           "device_status_hex": "0x10", // Ex: "Configuration Changed"
+           "field_device_malfunction": false,
+           "loop_current_saturated": false,
+           "cold_start": true // OOPS! Sensor reiniciou. DL deve notar isso.
+         }
+       }
+     ]
+   }
+ }
+}
