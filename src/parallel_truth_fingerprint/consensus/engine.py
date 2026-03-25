@@ -22,7 +22,7 @@ class ConsensusEngine:
     """Edge-local deterministic consensus evaluation."""
 
     def evaluate(self, round_input: ConsensusRoundInput) -> ConsensusAuditPackage:
-        trust_ranking, exclusions = evaluate_trust(
+        trust_ranking, exclusions, trust_evidence = evaluate_trust(
             round_identity=round_input.round_identity,
             participating_edges=round_input.participating_edges,
             replicated_states=round_input.replicated_states,
@@ -58,6 +58,7 @@ class ConsensusEngine:
             round_input=round_input,
             trust_ranking=trust_ranking,
             exclusions=exclusions,
+            trust_evidence=trust_evidence,
             final_status=status,
             consensus_result=result,
             consensused_valid_state=valid_state,

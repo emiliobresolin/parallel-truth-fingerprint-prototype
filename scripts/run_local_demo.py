@@ -15,7 +15,10 @@ if str(SRC_PATH) not in sys.path:
 from parallel_truth_fingerprint.config.runtime import load_runtime_demo_config
 from parallel_truth_fingerprint.consensus import (
     ConsensusEngine,
+    build_round_log,
     build_round_summary,
+    format_round_log_compact,
+    format_round_log_detailed,
     format_round_summary,
 )
 from parallel_truth_fingerprint.contracts.consensus_round_input import ConsensusRoundInput
@@ -112,10 +115,17 @@ def main() -> None:
     consensus_engine = ConsensusEngine()
     consensus_audit = consensus_engine.evaluate(consensus_round_input)
     consensus_summary = build_round_summary(consensus_audit)
+    consensus_log = build_round_log(consensus_audit)
 
     print("\nConsensus summary:")
     print(f"- {format_round_summary(consensus_summary)}")
     print(json.dumps(consensus_summary.to_dict(), indent=2))
+    print("\nConsensus log compact:")
+    print(f"- {format_round_log_compact(consensus_log)}")
+    print("\nConsensus log detailed:")
+    print(format_round_log_detailed(consensus_log))
+    print("\nConsensus log structured:")
+    print(json.dumps(consensus_log.to_dict(), indent=2))
 
     print("\nDetailed view:")
     for edge in edges:

@@ -11,6 +11,10 @@ from parallel_truth_fingerprint.contracts.edge_local_replicated_state import (
 from parallel_truth_fingerprint.contracts.exclusion_decision import ExclusionDecision
 from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReason
 from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
+from parallel_truth_fingerprint.contracts.trust_evidence import (
+    PerEdgeTrustEvidence,
+    SensorDeviationEvidence,
+)
 from parallel_truth_fingerprint.contracts.trust_ranking import TrustRankEntry, TrustRanking
 
 
@@ -36,7 +40,11 @@ def evaluate_trust(
     round_identity: RoundIdentity,
     participating_edges: tuple[str, ...],
     replicated_states: tuple[EdgeLocalReplicatedStateContract, ...],
-) -> tuple[TrustRanking, tuple[ExclusionDecision, ...]]:
+) -> tuple[
+    TrustRanking,
+    tuple[ExclusionDecision, ...],
+    tuple[PerEdgeTrustEvidence, ...],
+]:
     """Compute deterministic trust ranking and bounded exclusions."""
 
     by_edge = {state.owner_edge_id: state for state in replicated_states}
@@ -49,17 +57,27 @@ def evaluate_trust(
 
     ranking_entries: list[TrustRankEntry] = []
     exclusions: list[ExclusionDecision] = []
+    trust_evidence: list[PerEdgeTrustEvidence] = []
 
     for edge_id in participating_edges:
         state = by_edge[edge_id]
         max_ratio = 0.0
         primary_reason: ExclusionReason | None = None
         detail_parts: list[str] = []
+        deviations: list[SensorDeviationEvidence] = []
 
         for sensor_name, tolerance in SENSOR_TOLERANCES.items():
-            deviation = abs(_sensor_value(state, sensor_name) - medians[sensor_name])
+            payload = state.observations_by_sensor[sensor_name]
+            deviation = abs(payload.process_data.pv.value - medians[sensor_name])
             ratio = deviation / tolerance.suspicious_threshold
             max_ratio = max(max_ratio, ratio)
+            deviations.append(
+                SensorDeviationEvidence(
+                    sensor_name=sensor_name,
+                    deviation_value=round(deviation, 3),
+                    unit=payload.process_data.pv.unit,
+                )
+            )
 
             if deviation > tolerance.suspicious_threshold:
                 primary_reason = ExclusionReason.SUSPECTED_BYZANTINE_BEHAVIOR
@@ -70,6 +88,14 @@ def evaluate_trust(
 
         score = round(max(0.0, 1.0 - max_ratio), 3)
         ranking_entries.append(TrustRankEntry(edge_id=edge_id, score=score))
+        trust_evidence.append(
+            PerEdgeTrustEvidence(
+                round_identity=round_identity,
+                edge_id=edge_id,
+                score=score,
+                sensor_deviations=tuple(deviations),
+            )
+        )
 
         if primary_reason is not None:
             exclusions.append(
@@ -86,4 +112,4 @@ def evaluate_trust(
         participating_edges=participating_edges,
         entries=tuple(ranking_entries),
     )
-    return ranking, tuple(exclusions)
+    return ranking, tuple(exclusions), tuple(trust_evidence)

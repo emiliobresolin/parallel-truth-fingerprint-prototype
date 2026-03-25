@@ -118,6 +118,81 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIn("status=failed_consensus", formatted)
         self.assertIn("valid_state=absent", formatted)
 
+    def test_format_round_log_outputs_compact_and_detailed_views(self) -> None:
+        from datetime import datetime, timedelta, timezone
+
+        from parallel_truth_fingerprint.consensus.logging import (
+            format_round_log_compact,
+            format_round_log_detailed,
+        )
+        from parallel_truth_fingerprint.contracts.consensus_round_log import (
+            ConsensusRoundLog,
+        )
+        from parallel_truth_fingerprint.contracts.consensus_status import ConsensusStatus
+        from parallel_truth_fingerprint.contracts.exclusion_decision import ExclusionDecision
+        from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReason
+        from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
+        from parallel_truth_fingerprint.contracts.trust_evidence import (
+            PerEdgeTrustEvidence,
+            SensorDeviationEvidence,
+        )
+        from parallel_truth_fingerprint.contracts.trust_ranking import (
+            TrustRankEntry,
+            TrustRanking,
+        )
+
+        round_identity = RoundIdentity(
+            round_id="round-456",
+            window_started_at=datetime(2026, 3, 25, 12, 0, tzinfo=timezone.utc),
+            window_ended_at=datetime(2026, 3, 25, 12, 1, tzinfo=timezone.utc),
+        )
+        round_log = ConsensusRoundLog(
+            round_identity=round_identity,
+            participating_edges=("edge-1", "edge-2", "edge-3"),
+            trust_ranking=TrustRanking(
+                round_identity=round_identity,
+                participating_edges=("edge-1", "edge-2", "edge-3"),
+                entries=(
+                    TrustRankEntry(edge_id="edge-1", score=1.0),
+                    TrustRankEntry(edge_id="edge-2", score=0.95),
+                    TrustRankEntry(edge_id="edge-3", score=0.1),
+                ),
+            ),
+            exclusions=(
+                ExclusionDecision(
+                    round_identity=round_identity,
+                    edge_id="edge-3",
+                    reason=ExclusionReason.SUSPECTED_BYZANTINE_BEHAVIOR,
+                    detail="temperature:39.500",
+                ),
+            ),
+            trust_evidence=(
+                PerEdgeTrustEvidence(
+                    round_identity=round_identity,
+                    edge_id="edge-1",
+                    score=1.0,
+                    sensor_deviations=(
+                        SensorDeviationEvidence(
+                            sensor_name="temperature",
+                            deviation_value=0.0,
+                            unit="degC",
+                        ),
+                    ),
+                ),
+            ),
+            final_status=ConsensusStatus.SUCCESS,
+            consensused_valid_state=None,
+        )
+
+        compact = format_round_log_compact(round_log)
+        detailed = format_round_log_detailed(round_log)
+
+        self.assertIn("round-456:", compact)
+        self.assertIn("exclusions[edge-3:suspected_byzantine_behavior]", compact)
+        self.assertIn("round=round-456", detailed)
+        self.assertIn("edge=edge-1 score=1.000", detailed)
+        self.assertIn("excluded=edge-3 reason=suspected_byzantine_behavior", detailed)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -11,6 +11,7 @@ from parallel_truth_fingerprint.contracts.consensused_valid_state import (
     ConsensusedValidState,
 )
 from parallel_truth_fingerprint.contracts.exclusion_decision import ExclusionDecision
+from parallel_truth_fingerprint.contracts.trust_evidence import PerEdgeTrustEvidence
 from parallel_truth_fingerprint.contracts.trust_ranking import TrustRanking
 
 
@@ -21,6 +22,7 @@ class ConsensusAuditPackage:
     round_input: ConsensusRoundInput
     trust_ranking: TrustRanking
     exclusions: tuple[ExclusionDecision, ...]
+    trust_evidence: tuple[PerEdgeTrustEvidence, ...]
     final_status: ConsensusStatus
     consensus_result: ConsensusResult
     consensused_valid_state: ConsensusedValidState | None
@@ -32,6 +34,10 @@ class ConsensusAuditPackage:
         for exclusion in self.exclusions:
             if exclusion.round_identity != self.round_input.round_identity:
                 raise ValueError("Exclusions must be scoped to the audit round.")
+
+        for evidence in self.trust_evidence:
+            if evidence.round_identity != self.round_input.round_identity:
+                raise ValueError("Trust evidence must be scoped to the audit round.")
 
         if self.consensus_result.round_identity != self.round_input.round_identity:
             raise ValueError("Consensus result must share the round identity of the input.")
