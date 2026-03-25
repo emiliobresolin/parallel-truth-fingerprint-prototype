@@ -57,6 +57,8 @@ The defaults are already present in [.env.example](./.env.example):
 - `MQTT_TOPIC=edges/observations`
 - `DEMO_STEPS=3`
 - `DEMO_POWER=65.0`
+- `DEMO_FAULT_MODE=none`
+- `DEMO_FAULTY_EDGES=`
 
 ### 4. Run the local demo
 
@@ -82,6 +84,33 @@ Two MQTT transport modes are supported behind the same edge communication bounda
 - `real`: real MQTT clients against the local broker for runtime/demo
 
 Switch mode through `MQTT_TRANSPORT`.
+
+## Demo Fault Injection
+
+The local demo can inject deterministic inconsistent-edge scenarios without changing the consensus engine.
+
+- `DEMO_FAULT_MODE=none`
+  normal behavior
+- `DEMO_FAULT_MODE=single_edge_exclusion`
+  inject one faulty edge so quorum is preserved and consensus still succeeds
+- `DEMO_FAULT_MODE=quorum_loss`
+  inject two faulty edges so quorum is lost and `failed_consensus` is triggered
+
+Optional target edges can be supplied with `DEMO_FAULTY_EDGES`.
+
+Examples:
+
+```powershell
+$env:DEMO_FAULT_MODE='single_edge_exclusion'
+$env:DEMO_FAULTY_EDGES='edge-3'
+.\venv\Scripts\python scripts\run_local_demo.py
+```
+
+```powershell
+$env:DEMO_FAULT_MODE='quorum_loss'
+$env:DEMO_FAULTY_EDGES='edge-2,edge-3'
+.\venv\Scripts\python scripts\run_local_demo.py
+```
 
 ## Architectural Notes
 

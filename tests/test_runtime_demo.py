@@ -9,14 +9,20 @@ class RuntimeDemoConfigTest(unittest.TestCase):
     def test_runtime_demo_config_reads_environment(self) -> None:
         previous_transport = os.environ.get("MQTT_TRANSPORT")
         previous_steps = os.environ.get("DEMO_STEPS")
+        previous_fault_mode = os.environ.get("DEMO_FAULT_MODE")
+        previous_faulty_edges = os.environ.get("DEMO_FAULTY_EDGES")
         try:
             os.environ["MQTT_TRANSPORT"] = "passive"
             os.environ["DEMO_STEPS"] = "5"
+            os.environ["DEMO_FAULT_MODE"] = "single_edge_exclusion"
+            os.environ["DEMO_FAULTY_EDGES"] = "edge-3"
 
             config = load_runtime_demo_config()
 
             self.assertEqual(config.mqtt_transport, "passive")
             self.assertEqual(config.demo_steps, 5)
+            self.assertEqual(config.demo_fault_mode, "single_edge_exclusion")
+            self.assertEqual(config.demo_faulty_edges, ("edge-3",))
         finally:
             if previous_transport is None:
                 os.environ.pop("MQTT_TRANSPORT", None)
@@ -26,6 +32,14 @@ class RuntimeDemoConfigTest(unittest.TestCase):
                 os.environ.pop("DEMO_STEPS", None)
             else:
                 os.environ["DEMO_STEPS"] = previous_steps
+            if previous_fault_mode is None:
+                os.environ.pop("DEMO_FAULT_MODE", None)
+            else:
+                os.environ["DEMO_FAULT_MODE"] = previous_fault_mode
+            if previous_faulty_edges is None:
+                os.environ.pop("DEMO_FAULTY_EDGES", None)
+            else:
+                os.environ["DEMO_FAULTY_EDGES"] = previous_faulty_edges
 
 
 class AppTransportTest(unittest.TestCase):
@@ -48,6 +62,13 @@ class AppTransportTest(unittest.TestCase):
 
 
 class DemoFormattingTest(unittest.TestCase):
+    def test_default_faulty_edges_match_demo_modes(self) -> None:
+        from scripts.run_local_demo import default_faulty_edges
+
+        self.assertEqual(default_faulty_edges("none"), ())
+        self.assertEqual(default_faulty_edges("single_edge_exclusion"), ("edge-3",))
+        self.assertEqual(default_faulty_edges("quorum_loss"), ("edge-2", "edge-3"))
+
     def test_format_edge_summary_returns_compact_live_view(self) -> None:
         from scripts.run_local_demo import format_edge_summary
 
@@ -192,6 +213,150 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIn("round=round-456", detailed)
         self.assertIn("edge=edge-1 score=1.000", detailed)
         self.assertIn("excluded=edge-3 reason=suspected_byzantine_behavior", detailed)
+
+    def test_format_consensus_alert_outputs_none_and_failed_views(self) -> None:
+        from datetime import datetime, timedelta, timezone
+
+        from parallel_truth_fingerprint.consensus.alerts import (
+            format_consensus_alert_compact,
+            format_consensus_alert_detailed,
+        )
+        from parallel_truth_fingerprint.contracts.consensus_alert import (
+            ConsensusAlert,
+            ConsensusAlertType,
+        )
+        from parallel_truth_fingerprint.contracts.consensus_status import ConsensusStatus
+        from parallel_truth_fingerprint.contracts.exclusion_decision import ExclusionDecision
+        from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReason
+        from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
+        from parallel_truth_fingerprint.contracts.trust_evidence import (
+            PerEdgeTrustEvidence,
+            SensorDeviationEvidence,
+        )
+
+        round_identity = RoundIdentity(
+            round_id="round-789",
+            window_started_at=datetime(2026, 3, 25, 12, 0, tzinfo=timezone.utc),
+            window_ended_at=datetime(2026, 3, 25, 12, 1, tzinfo=timezone.utc),
+        )
+        alert = ConsensusAlert(
+            alert_type=ConsensusAlertType.CONSENSUS_FAILED,
+            round_identity=round_identity,
+            final_status=ConsensusStatus.FAILED_CONSENSUS,
+            exclusions=(
+                ExclusionDecision(
+                    round_identity=round_identity,
+                    edge_id="edge-2",
+                    reason=ExclusionReason.SUSPECTED_BYZANTINE_BEHAVIOR,
+                    detail="temperature:70.000",
+                ),
+            ),
+            trust_evidence=(
+                PerEdgeTrustEvidence(
+                    round_identity=round_identity,
+                    edge_id="edge-2",
+                    score=0.0,
+                    sensor_deviations=(
+                        SensorDeviationEvidence(
+                            sensor_name="temperature",
+                            deviation_value=70.0,
+                            unit="degC",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        self.assertEqual(format_consensus_alert_compact(None), "none")
+        self.assertEqual(format_consensus_alert_detailed(None), "consensus_alert=none")
+        self.assertIn("alert=consensus_failed", format_consensus_alert_compact(alert))
+        self.assertIn("alert_type=consensus_failed", format_consensus_alert_detailed(alert))
+
+
+class DemoFaultInjectionTest(unittest.TestCase):
+    def test_inject_faults_can_preserve_quorum_with_single_faulty_edge(self) -> None:
+        from parallel_truth_fingerprint.config.runtime import RuntimeDemoConfig
+        from parallel_truth_fingerprint.consensus import ConsensusEngine, build_round_summary
+        from scripts.run_local_demo import inject_faults
+
+        from tests.consensus.test_summary import make_replicated_state
+        from parallel_truth_fingerprint.contracts.consensus_round_input import (
+            ConsensusRoundInput,
+        )
+        from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
+        from datetime import datetime, timedelta, timezone
+
+        round_identity = RoundIdentity(
+            round_id="round-fault-single",
+            window_started_at=datetime(2026, 3, 25, 12, 0, tzinfo=timezone.utc),
+            window_ended_at=datetime(2026, 3, 25, 12, 1, tzinfo=timezone.utc),
+        )
+        round_input = ConsensusRoundInput(
+            round_identity=round_identity,
+            participating_edges=("edge-1", "edge-2", "edge-3"),
+            replicated_states=(
+                make_replicated_state(round_identity, "edge-1", 80.0, 6.0, 3200.0),
+                make_replicated_state(round_identity, "edge-2", 82.0, 6.2, 3220.0),
+                make_replicated_state(round_identity, "edge-3", 81.0, 6.1, 3210.0),
+            ),
+        )
+
+        injected = inject_faults(
+            round_input,
+            RuntimeDemoConfig(
+                mqtt_transport="passive",
+                demo_fault_mode="single_edge_exclusion",
+                demo_faulty_edges=("edge-3",),
+            ),
+        )
+        summary = build_round_summary(ConsensusEngine().evaluate(injected))
+
+        self.assertEqual(summary.final_consensus_status.value, "success")
+        self.assertEqual(summary.valid_participants_after_exclusions, 2)
+        self.assertEqual(summary.excluded_edge_ids, ("edge-3",))
+
+    def test_inject_faults_can_force_failed_consensus(self) -> None:
+        from parallel_truth_fingerprint.config.runtime import RuntimeDemoConfig
+        from parallel_truth_fingerprint.consensus import (
+            ConsensusEngine,
+            build_round_summary,
+        )
+        from scripts.run_local_demo import inject_faults
+
+        from tests.consensus.test_summary import make_replicated_state
+        from parallel_truth_fingerprint.contracts.consensus_round_input import (
+            ConsensusRoundInput,
+        )
+        from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
+        from datetime import datetime, timedelta, timezone
+
+        round_identity = RoundIdentity(
+            round_id="round-fault-quorum",
+            window_started_at=datetime(2026, 3, 25, 12, 0, tzinfo=timezone.utc),
+            window_ended_at=datetime(2026, 3, 25, 12, 1, tzinfo=timezone.utc),
+        )
+        round_input = ConsensusRoundInput(
+            round_identity=round_identity,
+            participating_edges=("edge-1", "edge-2", "edge-3"),
+            replicated_states=(
+                make_replicated_state(round_identity, "edge-1", 80.0, 6.0, 3200.0),
+                make_replicated_state(round_identity, "edge-2", 82.0, 6.2, 3220.0),
+                make_replicated_state(round_identity, "edge-3", 81.0, 6.1, 3210.0),
+            ),
+        )
+
+        injected = inject_faults(
+            round_input,
+            RuntimeDemoConfig(
+                mqtt_transport="passive",
+                demo_fault_mode="quorum_loss",
+                demo_faulty_edges=("edge-2", "edge-3"),
+            ),
+        )
+        summary = build_round_summary(ConsensusEngine().evaluate(injected))
+
+        self.assertEqual(summary.final_consensus_status.value, "failed_consensus")
+        self.assertEqual(summary.valid_participants_after_exclusions, 1)
 
 
 if __name__ == "__main__":
