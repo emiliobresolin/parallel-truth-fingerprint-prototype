@@ -1,6 +1,6 @@
 # Story 2.2: Implement Byzantine-Style Consensus Evaluation
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -21,32 +21,32 @@ so that suspicious edge data is filtered before any state is trusted.
 
 ## Tasks / Subtasks
 
-- [ ] Implement the quorum model explicitly in the consensus execution layer. (AC: 1, 3, 4, 6)
-  - [ ] Compute quorum as `floor(N/2) + 1`.
-  - [ ] Enforce quorum against the current valid set after exclusions.
-  - [ ] Produce `failed_consensus` when the valid set drops below quorum.
-- [ ] Implement trust evaluation and immediate round-scoped exclusion. (AC: 1, 4, 6)
-  - [ ] Consume `ConsensusRoundInput` and evaluate participating replicated states.
-  - [ ] Produce a trust ranking for participating edges in that round.
-  - [ ] Produce immediate exclusion decisions with bounded typed reasons when required.
-- [ ] Implement the consensus result builder with explicit success/failure behavior. (AC: 2, 3, 4)
-  - [ ] Emit `ConsensusResult` with `success` only when quorum is satisfied and a valid state can be produced.
-  - [ ] Emit `ConsensusResult` with `failed_consensus` when quorum cannot be satisfied.
-  - [ ] Ensure `ConsensusedValidState` is present only on success and absent on failed consensus.
-- [ ] Add a separate unified audit package contract and builder. (AC: 5, 6)
-  - [ ] Define a distinct `ConsensusAuditPackage` contract separate from `ConsensusResult`.
-  - [ ] Include replicated-state inputs, trust ranking, exclusion decisions, final status, and consensused valid state only if present.
-  - [ ] Keep the package auditable and ready for later logging, persistence, and downstream use without introducing those stages here.
-- [ ] Keep the implementation aligned with the existing BBF-oriented consensus direction. (AC: 1, 6)
-  - [ ] Use the existing BBF/Byzantine project reference as the conceptual basis for trust evaluation and exclusion flow.
-  - [ ] Keep the algorithm minimal and prototype-scoped.
-  - [ ] Do not add any new framework dependency in this story.
-- [ ] Add focused tests for quorum, failed-consensus, and audit package behavior. (AC: 1, 2, 3, 4, 5, 6)
-  - [ ] Verify quorum calculation for `N=3` requires at least `2`.
-  - [ ] Verify exclusions can cause the round to become `failed_consensus`.
-  - [ ] Verify failed consensus still produces trust ranking and exclusion decisions.
-  - [ ] Verify the audit package always contains the round inputs and final status.
-  - [ ] Verify the audit package includes `ConsensusedValidState` only on success.
+- [x] Implement the quorum model explicitly in the consensus execution layer. (AC: 1, 3, 4, 6)
+  - [x] Compute quorum as `floor(N/2) + 1`.
+  - [x] Enforce quorum against the current valid set after exclusions.
+  - [x] Produce `failed_consensus` when the valid set drops below quorum.
+- [x] Implement trust evaluation and immediate round-scoped exclusion. (AC: 1, 4, 6)
+  - [x] Consume `ConsensusRoundInput` and evaluate participating replicated states.
+  - [x] Produce a trust ranking for participating edges in that round.
+  - [x] Produce immediate exclusion decisions with bounded typed reasons when required.
+- [x] Implement the consensus result builder with explicit success/failure behavior. (AC: 2, 3, 4)
+  - [x] Emit `ConsensusResult` with `success` only when quorum is satisfied and a valid state can be produced.
+  - [x] Emit `ConsensusResult` with `failed_consensus` when quorum cannot be satisfied.
+  - [x] Ensure `ConsensusedValidState` is present only on success and absent on failed consensus.
+- [x] Add a separate unified audit package contract and builder. (AC: 5, 6)
+  - [x] Define a distinct `ConsensusAuditPackage` contract separate from `ConsensusResult`.
+  - [x] Include replicated-state inputs, trust ranking, exclusion decisions, final status, and consensused valid state only if present.
+  - [x] Keep the package auditable and ready for later logging, persistence, and downstream use without introducing those stages here.
+- [x] Keep the implementation aligned with the existing BBF-oriented consensus direction. (AC: 1, 6)
+  - [x] Use the existing BBF/Byzantine project reference as the conceptual basis for trust evaluation and exclusion flow.
+  - [x] Keep the algorithm minimal and prototype-scoped.
+  - [x] Do not add any new framework dependency in this story.
+- [x] Add focused tests for quorum, failed-consensus, and audit package behavior. (AC: 1, 2, 3, 4, 5, 6)
+  - [x] Verify quorum calculation for `N=3` requires at least `2`.
+  - [x] Verify exclusions can cause the round to become `failed_consensus`.
+  - [x] Verify failed consensus still produces trust ranking and exclusion decisions.
+  - [x] Verify the audit package always contains the round inputs and final status.
+  - [x] Verify the audit package includes `ConsensusedValidState` only on success.
 
 ## Dev Notes
 
@@ -182,11 +182,29 @@ GPT-5 Codex
 - Story created from Epic 2, Story 2.2 with explicit quorum and audit-package constraints from the user.
 - No sprint-status file exists yet.
 - Existing BBF/Byzantine reference was found in project docs, but no implemented BBF code exists in the current workspace.
+- `venv\\Scripts\\python -m unittest tests.consensus.test_engine`
+- `venv\\Scripts\\python -m unittest discover -s tests`
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Added an explicit `ConsensusAuditPackage` contract so every round emits one auditable bundle separate from `ConsensusResult`.
+- Implemented deterministic quorum enforcement with `floor(N/2) + 1`, including explicit `failed_consensus` when exclusions reduce the valid set below quorum.
+- Implemented deterministic trust evaluation using bounded absolute-difference checks and round-scoped exclusions with typed reasons.
+- Implemented consensused valid state construction as a simple average across non-excluded edges only.
+- Added focused consensus engine tests for quorum, failed consensus, audit-package emission, and successful averaging behavior.
 
 ### File List
 
 - `_bmad-output/implementation-artifacts/2-2-implement-byzantine-style-consensus-evaluation.md`
+- `src/parallel_truth_fingerprint/contracts/consensus_audit_package.py`
+- `src/parallel_truth_fingerprint/consensus/__init__.py`
+- `src/parallel_truth_fingerprint/consensus/engine.py`
+- `src/parallel_truth_fingerprint/consensus/quorum.py`
+- `src/parallel_truth_fingerprint/consensus/trust_model.py`
+- `src/parallel_truth_fingerprint/contracts/__init__.py`
+- `tests/consensus/test_engine.py`
+
+### Change Log
+
+- 2026-03-25: Implemented Story 2.2 deterministic consensus engine, quorum enforcement, unified audit package, and focused tests.
