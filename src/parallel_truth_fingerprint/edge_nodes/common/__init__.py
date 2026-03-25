@@ -8,7 +8,11 @@ from parallel_truth_fingerprint.edge_nodes.common.acquisition import (
 from parallel_truth_fingerprint.edge_nodes.common.local_state import (
     EdgeLocalReplicatedState,
 )
-from parallel_truth_fingerprint.edge_nodes.common.mqtt_io import PassiveMqttRelay
+from parallel_truth_fingerprint.edge_nodes.common.mqtt_io import (
+    PassiveMqttRelay,
+    RealMqttTransport,
+    create_transport,
+)
 
 __all__ = [
     "EDGE_DEVICE_CONFIGS",
@@ -16,4 +20,6 @@ __all__ = [
     "EdgeDeviceConfig",
     "EdgeLocalReplicatedState",
     "PassiveMqttRelay",
+    "RealMqttTransport",
+    "create_transport",
 ]

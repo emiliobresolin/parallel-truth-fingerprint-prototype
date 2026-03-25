@@ -3,3 +3,6 @@ name = "parallel-truth-fingerprint-prototype"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = []
+
+[project.optional-dependencies]
+runtime-demo = ["paho-mqtt>=2.1,<3"]

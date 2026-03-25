@@ -9,7 +9,7 @@ Each edge behaves like a local sensor reader:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
 from parallel_truth_fingerprint.config.ranges import SensorRange, DEFAULT_COMPRESSOR_PROFILE
@@ -24,7 +24,7 @@ from parallel_truth_fingerprint.contracts.raw_hart_payload import (
 from parallel_truth_fingerprint.edge_nodes.common.local_state import (
     EdgeLocalReplicatedState,
 )
-from parallel_truth_fingerprint.edge_nodes.common.mqtt_io import PassiveMqttRelay
+from parallel_truth_fingerprint.edge_nodes.common.mqtt_io import MqttTransport
 from parallel_truth_fingerprint.sensor_simulation.simulator import (
     CompressorSimulator,
     SimulationSnapshot,
@@ -53,6 +53,7 @@ class EdgeRuntimeContext:
     last_payload_timestamp: str | None = None
     published_observation_count: int = 0
     peer_observation_count: int = 0
+    observation_flow_log: list[dict[str, object]] = field(default_factory=list)
 
 
 EDGE_DEVICE_CONFIGS: dict[str, EdgeDeviceConfig] = {
@@ -130,7 +131,7 @@ class EdgeAcquisitionService:
         self.device_config = device_config
         self._simulator = simulator or CompressorSimulator()
         self._runtime = EdgeRuntimeContext()
-        self._relay: PassiveMqttRelay | None = None
+        self._transport: MqttTransport | None = None
         self._replicated_state = EdgeLocalReplicatedState(owner_edge_id=device_config.edge_id)
 
     def acquire(
@@ -146,6 +147,15 @@ class EdgeAcquisitionService:
         """
 
         reading = snapshot or self._simulator.step(compressor_power=compressor_power)
+        self._runtime.observation_flow_log.append(
+            {
+                "stage": "sensor_generation",
+                "edge_id": self.device_config.edge_id,
+                "sensor_name": self.device_config.sensor_name,
+                "compressor_power": reading.compressor_power,
+                "value": reading.sensors[self.device_config.sensor_name],
+            }
+        )
         pv_value = round(reading.sensors[self.device_config.sensor_name], 3)
         percent_range = _percent_range(pv_value, self.device_config.sensor_range)
         loop_current = _loop_current_from_percent(percent_range)
@@ -198,22 +208,41 @@ class EdgeAcquisitionService:
         self._runtime.acquisition_count += 1
         self._runtime.previous_pv = pv_value
         self._runtime.last_payload_timestamp = payload.timestamp
+        self._runtime.observation_flow_log.append(
+            {
+                "stage": "local_edge_acquisition",
+                "edge_id": self.device_config.edge_id,
+                "sensor_name": self.device_config.sensor_name,
+                "payload_timestamp": payload.timestamp,
+                "pv_value": pv_value,
+            }
+        )
         return payload
 
-    def attach_relay(
+    def attach_transport(
         self,
-        relay: PassiveMqttRelay,
+        transport: MqttTransport,
         *,
         topic: str = "edges/observations",
     ) -> None:
-        """Attach the passive relay and subscribe for peer observations."""
+        """Attach the selected transport and subscribe for peer observations."""
 
-        self._relay = relay
-        relay.subscribe(
+        self._transport = transport
+        transport.subscribe(
             topic=topic,
             subscriber_id=self.device_config.edge_id,
             callback=self.consume_peer_observation,
         )
+
+    def attach_relay(
+        self,
+        relay: MqttTransport,
+        *,
+        topic: str = "edges/observations",
+    ) -> None:
+        """Backward-compatible alias for tests and earlier story code."""
+
+        self.attach_transport(relay, topic=topic)
 
     def publish_local_observation(
         self,
@@ -225,24 +254,60 @@ class EdgeAcquisitionService:
 
         self._replicated_state.update_from_payload(payload)
         self._runtime.published_observation_count += 1
-        if self._relay is None:
-            raise RuntimeError("Passive relay must be attached before publishing observations.")
-        self._relay.publish(
+        self._runtime.observation_flow_log.append(
+            {
+                "stage": "edge_local_replicated_state",
+                "edge_id": self.device_config.edge_id,
+                "state": self._replicated_state.to_dict(),
+            }
+        )
+        if self._transport is None:
+            raise RuntimeError("MQTT transport must be attached before publishing observations.")
+        self._transport.publish(
             topic=topic,
             publisher_id=self.device_config.edge_id,
             payload=payload,
         )
+        self._runtime.observation_flow_log.append(
+            {
+                "stage": "mqtt_publication",
+                "edge_id": self.device_config.edge_id,
+                "topic": topic,
+                "payload_timestamp": payload.timestamp,
+            }
+        )
 
-    def consume_peer_observation(self, payload: RawHartPayload) -> None:
+    def consume_peer_observation(self, publisher_id: str, payload: RawHartPayload) -> None:
         """Consume a peer observation relayed by the passive MQTT broker."""
 
         self._replicated_state.update_from_payload(payload)
         self._runtime.peer_observation_count += 1
+        self._runtime.observation_flow_log.append(
+            {
+                "stage": "mqtt_consumption",
+                "edge_id": self.device_config.edge_id,
+                "publisher_id": publisher_id,
+                "source_tag": payload.device_info.tag,
+                "payload_timestamp": payload.timestamp,
+            }
+        )
+        self._runtime.observation_flow_log.append(
+            {
+                "stage": "edge_local_replicated_state",
+                "edge_id": self.device_config.edge_id,
+                "state": self._replicated_state.to_dict(),
+            }
+        )
 
     def local_replicated_state(self) -> dict[str, object]:
         """Return this edge's own intermediate replicated shared view."""
 
         return self._replicated_state.to_dict()
+
+    def observation_flow_log(self) -> list[dict[str, object]]:
+        """Return the upstream observation-flow events for this edge."""
+
+        return list(self._runtime.observation_flow_log)
 
     def runtime_state(self) -> dict[str, object]:
         """Return a small inspectable snapshot of this edge's local runtime context."""

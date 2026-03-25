@@ -1,6 +1,6 @@
 # Story 1.5: Add Observation-Flow Logging and Runtime MQTT Demo Support
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -19,24 +19,24 @@ so that the decentralized observation stage is demonstrable and traceable before
 
 ## Tasks / Subtasks
 
-- [ ] Add structured observation-flow logging for the upstream pipeline. (AC: 1, 2)
-  - [ ] Log sensor generation, local edge acquisition, MQTT publication, MQTT consumption, and edge-local replicated-state reconstruction.
-  - [ ] Keep logs presentation-friendly and explicit about intermediate non-validated state.
-- [ ] Add simple observation-state display helpers. (AC: 2, 3)
-  - [ ] Provide a lightweight way to inspect edge-local replicated state through logs or simple local metrics/state output.
-  - [ ] Ensure any displayed state is clearly marked as non-validated intermediate state.
-- [ ] Introduce a transport abstraction that supports passive relay for tests and real MQTT for runtime/demo. (AC: 4)
-  - [ ] Keep the passive in-memory relay available for deterministic tests.
-  - [ ] Add a real MQTT transport path for runtime/demo use.
-  - [ ] Ensure both transport paths preserve the same edge-owned publish/consume responsibilities.
-- [ ] Add real MQTT broker/client demo support. (AC: 4)
-  - [ ] Use the local Mosquitto broker from `compose.local.yml` as the real runtime broker.
-  - [ ] Make edges connect as real MQTT clients in the runtime/demo path.
-  - [ ] Keep the broker as passive infrastructure only, outside the trust model.
-- [ ] Add focused tests for observability and transport switching. (AC: 1, 2, 4)
-  - [ ] Verify observation-flow logs or outputs include the required upstream stages.
-  - [ ] Verify transport selection can use passive relay in tests.
-  - [ ] Verify the real MQTT transport path is isolated behind the same transport boundary, even if exercised with integration-style checks only.
+- [x] Add structured observation-flow logging for the upstream pipeline. (AC: 1, 2)
+  - [x] Log sensor generation, local edge acquisition, MQTT publication, MQTT consumption, and edge-local replicated-state reconstruction.
+  - [x] Keep logs presentation-friendly and explicit about intermediate non-validated state.
+- [x] Add simple observation-state display helpers. (AC: 2, 3)
+  - [x] Provide a lightweight way to inspect edge-local replicated state through logs or simple local metrics/state output.
+  - [x] Ensure any displayed state is clearly marked as non-validated intermediate state.
+- [x] Introduce a transport abstraction that supports passive relay for tests and real MQTT for runtime/demo. (AC: 4)
+  - [x] Keep the passive in-memory relay available for deterministic tests.
+  - [x] Add a real MQTT transport path for runtime/demo use.
+  - [x] Ensure both transport paths preserve the same edge-owned publish/consume responsibilities.
+- [x] Add real MQTT broker/client demo support. (AC: 4)
+  - [x] Use the local Mosquitto broker from `compose.local.yml` as the real runtime broker.
+  - [x] Make edges connect as real MQTT clients in the runtime/demo path.
+  - [x] Keep the broker as passive infrastructure only, outside the trust model.
+- [x] Add focused tests for observability and transport switching. (AC: 1, 2, 4)
+  - [x] Verify observation-flow logs or outputs include the required upstream stages.
+  - [x] Verify transport selection can use passive relay in tests.
+  - [x] Verify the real MQTT transport path is isolated behind the same transport boundary, even if exercised with integration-style checks only.
 
 ## Dev Notes
 
@@ -146,11 +146,28 @@ GPT-5 Codex
 - Story created from Epic 1, Story 1.5 plus the new runtime/demo MQTT requirement.
 - No sprint-status file exists yet.
 - Previous passive-relay implementation and local broker scaffold reviewed for guardrails.
+- `venv\\Scripts\\python -m unittest tests.edge_nodes.test_mqtt_replication`
+- `venv\\Scripts\\python -m unittest discover -s tests`
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Added upstream observation-flow event logging for sensor generation, local acquisition, MQTT publication, MQTT consumption, and edge-local replicated-state reconstruction.
+- Kept the passive in-memory relay for deterministic tests and introduced a shared transport boundary with `create_transport(...)`.
+- Added a real MQTT transport path for runtime/demo behind the same transport interface, with runtime use expecting a local Mosquitto broker and `paho-mqtt`.
+- Preserved the broker as passive infrastructure only and kept edge-owned publish, consume, and replicated-state responsibilities unchanged.
+- Added focused tests for observation-flow visibility, passive transport selection, and the real transport path behind the same boundary using a fake client.
+- Declared the runtime MQTT client as an optional dependency in `pyproject.toml`; it was not installed during this story implementation.
 
 ### File List
 
 - `_bmad-output/implementation-artifacts/1-5-add-observation-flow-logging-and-runtime-mqtt-demo-support.md`
+- `pyproject.toml`
+- `src/parallel_truth_fingerprint/edge_nodes/common/__init__.py`
+- `src/parallel_truth_fingerprint/edge_nodes/common/acquisition.py`
+- `src/parallel_truth_fingerprint/edge_nodes/common/mqtt_io.py`
+- `tests/edge_nodes/test_mqtt_replication.py`
+
+### Change Log
+
+- 2026-03-24: Implemented Story 1.5 transport abstraction, runtime/demo MQTT path, and upstream observation-flow logging with focused tests.
