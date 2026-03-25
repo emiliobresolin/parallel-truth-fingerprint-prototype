@@ -79,6 +79,45 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIn("validated=False", summary)
         self.assertIn("temperature=78.254", summary)
 
+    def test_format_round_summary_returns_compact_consensus_view(self) -> None:
+        from parallel_truth_fingerprint.contracts.consensus_round_summary import (
+            ConsensusRoundSummary,
+            ExcludedEdgeSummary,
+        )
+        from parallel_truth_fingerprint.consensus.summary import format_round_summary
+        from parallel_truth_fingerprint.contracts.consensus_status import ConsensusStatus
+
+        summary = ConsensusRoundSummary(
+            round_id="round-123",
+            total_participants=3,
+            quorum_required=2,
+            valid_participants_after_exclusions=1,
+            excluded_edge_ids=("edge-2", "edge-3"),
+            exclusion_reasons=(
+                "suspected_byzantine_behavior",
+                "suspected_byzantine_behavior",
+            ),
+            excluded_edges=(
+                ExcludedEdgeSummary(
+                    edge_id="edge-2",
+                    reason="suspected_byzantine_behavior",
+                ),
+                ExcludedEdgeSummary(
+                    edge_id="edge-3",
+                    reason="suspected_byzantine_behavior",
+                ),
+            ),
+            final_consensus_status=ConsensusStatus.FAILED_CONSENSUS,
+            has_consensused_valid_state=False,
+        )
+
+        formatted = format_round_summary(summary)
+
+        self.assertIn("round-123:", formatted)
+        self.assertIn("quorum=2", formatted)
+        self.assertIn("status=failed_consensus", formatted)
+        self.assertIn("valid_state=absent", formatted)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,6 @@
 # Story 2.3: Implement Failed-Consensus Handling and Consensus Observability
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -19,26 +19,26 @@ so that I can demonstrate and audit successful and failed rounds without treatin
 
 ## Tasks / Subtasks
 
-- [ ] Define a compact round-observability model for consensus outcomes. (AC: 1, 2, 3, 4)
-  - [ ] Add a simple typed summary contract or formatter output shape for round visibility.
-  - [ ] Include `round_id`, participant counts, quorum required, excluded edges, exclusion reasons, and final status.
-  - [ ] Keep the model minimal, serializable, and derived directly from `ConsensusAuditPackage`.
-- [ ] Implement explicit failed-consensus visibility on top of the existing engine output. (AC: 2, 4)
-  - [ ] Surface `failed_consensus` as an expected result, not an exception path.
-  - [ ] Ensure the observability output makes it explicit that no `ConsensusedValidState` exists on failed rounds.
-  - [ ] Preserve the existing result invariants from Story 2.2.
-- [ ] Add demo-friendly summary rendering for successful and failed rounds. (AC: 1, 3, 4)
-  - [ ] Render a compact per-round summary suitable for terminal/demo output.
-  - [ ] Keep excluded edge identity and typed exclusion reason visible.
-  - [ ] Make successful and failed rounds visually distinguishable without introducing UI complexity.
-- [ ] Integrate consensus summary emission into the local runtime/demo path. (AC: 1, 2, 3, 4)
-  - [ ] Reuse the current local runtime/demo structure and keep the integration inside the consensus/observability boundary.
-  - [ ] Do not introduce downstream consumers such as SCADA comparison, persistence, or LSTM.
-- [ ] Add focused tests for round summaries and failed-consensus visibility. (AC: 1, 2, 3, 4)
-  - [ ] Verify compact summaries include the required round fields.
-  - [ ] Verify failed-consensus summaries show the failed status and absence of valid state.
-  - [ ] Verify exclusion identity and reasons are preserved in the observable output.
-  - [ ] Verify successful rounds remain distinguishable from failed rounds.
+- [x] Define a compact round-observability model for consensus outcomes. (AC: 1, 2, 3, 4)
+  - [x] Add a simple typed summary contract or formatter output shape for round visibility.
+  - [x] Include `round_id`, participant counts, quorum required, excluded edges, exclusion reasons, and final status.
+  - [x] Keep the model minimal, serializable, and derived directly from `ConsensusAuditPackage`.
+- [x] Implement explicit failed-consensus visibility on top of the existing engine output. (AC: 2, 4)
+  - [x] Surface `failed_consensus` as an expected result, not an exception path.
+  - [x] Ensure the observability output makes it explicit that no `ConsensusedValidState` exists on failed rounds.
+  - [x] Preserve the existing result invariants from Story 2.2.
+- [x] Add demo-friendly summary rendering for successful and failed rounds. (AC: 1, 3, 4)
+  - [x] Render a compact per-round summary suitable for terminal/demo output.
+  - [x] Keep excluded edge identity and typed exclusion reason visible.
+  - [x] Make successful and failed rounds visually distinguishable without introducing UI complexity.
+- [x] Integrate consensus summary emission into the local runtime/demo path. (AC: 1, 2, 3, 4)
+  - [x] Reuse the current local runtime/demo structure and keep the integration inside the consensus/observability boundary.
+  - [x] Do not introduce downstream consumers such as SCADA comparison, persistence, or LSTM.
+- [x] Add focused tests for round summaries and failed-consensus visibility. (AC: 1, 2, 3, 4)
+  - [x] Verify compact summaries include the required round fields.
+  - [x] Verify failed-consensus summaries show the failed status and absence of valid state.
+  - [x] Verify exclusion identity and reasons are preserved in the observable output.
+  - [x] Verify successful rounds remain distinguishable from failed rounds.
 
 ## Dev Notes
 
@@ -167,11 +167,30 @@ GPT-5 Codex
 - Story created from Epic 2, Story 2.3 with explicit failed-consensus visibility and demo-summary constraints from the user.
 - No sprint-status file exists yet.
 - Story 2.2 implementation was used as the direct architectural baseline.
+- `venv\\Scripts\\python -m unittest tests.consensus.test_summary`
+- `venv\\Scripts\\python -m unittest discover -s tests`
 
 ### Completion Notes List
 
 - Ultimate context engine analysis completed - comprehensive developer guide created.
+- Added a structured `ConsensusRoundSummary` contract and deterministic serialization path derived directly from `ConsensusAuditPackage`.
+- Added deterministic consensus summary formatting that keeps failed consensus explicit and preserves excluded edge identity and typed exclusion reasons.
+- Added typed export of edge-local replicated state for consensus/demo wiring without changing the consensus engine semantics.
+- Integrated compact consensus summary output into the local demo path on top of the existing engine.
+- Added focused tests for structured summary contents, failed-consensus visibility, serialization stability, and demo formatting.
 
 ### File List
 
 - `_bmad-output/implementation-artifacts/2-3-implement-failed-consensus-handling-and-observability.md`
+- `src/parallel_truth_fingerprint/contracts/consensus_round_summary.py`
+- `src/parallel_truth_fingerprint/contracts/__init__.py`
+- `src/parallel_truth_fingerprint/consensus/summary.py`
+- `src/parallel_truth_fingerprint/consensus/__init__.py`
+- `src/parallel_truth_fingerprint/edge_nodes/common/acquisition.py`
+- `scripts/run_local_demo.py`
+- `tests/consensus/test_summary.py`
+- `tests/test_runtime_demo.py`
+
+### Change Log
+
+- 2026-03-25: Implemented Story 2.3 structured round summaries, deterministic failed-consensus visibility, and demo integration.

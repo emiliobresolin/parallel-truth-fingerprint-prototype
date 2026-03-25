@@ -13,6 +13,12 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from parallel_truth_fingerprint.config.runtime import load_runtime_demo_config
+from parallel_truth_fingerprint.consensus import (
+    ConsensusEngine,
+    build_round_summary,
+    format_round_summary,
+)
+from parallel_truth_fingerprint.contracts.consensus_round_input import ConsensusRoundInput
 from parallel_truth_fingerprint.edge_nodes.common.mqtt_io import create_transport
 from parallel_truth_fingerprint.edge_nodes.edge_1.service import TemperatureEdgeService
 from parallel_truth_fingerprint.edge_nodes.edge_2.service import PressureEdgeService
@@ -36,6 +42,25 @@ def format_edge_summary(edge) -> str:
         f"complete={replicated_state['is_complete']} "
         f"validated={replicated_state['is_validated']} "
         f"view[{sensors_text}]"
+    )
+
+
+def build_consensus_round_input(edges) -> ConsensusRoundInput:
+    """Build one deterministic consensus round input from the current edge views."""
+
+    participating_edges = tuple(edge.runtime_state()["edge_id"] for edge in edges)
+    round_identity = edges[0].consensus_round_identity()
+    replicated_states = tuple(
+        edge.replicated_state_contract(
+            round_identity=round_identity,
+            participating_edges=participating_edges,
+        )
+        for edge in edges
+    )
+    return ConsensusRoundInput(
+        round_identity=round_identity,
+        participating_edges=participating_edges,
+        replicated_states=replicated_states,
     )
 
 
@@ -82,6 +107,15 @@ def main() -> None:
     print("Compact view:")
     for edge in edges:
         print(f"- {format_edge_summary(edge)}")
+
+    consensus_round_input = build_consensus_round_input(edges)
+    consensus_engine = ConsensusEngine()
+    consensus_audit = consensus_engine.evaluate(consensus_round_input)
+    consensus_summary = build_round_summary(consensus_audit)
+
+    print("\nConsensus summary:")
+    print(f"- {format_round_summary(consensus_summary)}")
+    print(json.dumps(consensus_summary.to_dict(), indent=2))
 
     print("\nDetailed view:")
     for edge in edges:

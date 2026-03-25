@@ -10,9 +10,12 @@ Each edge behaves like a local sensor reader:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from parallel_truth_fingerprint.config.ranges import SensorRange, DEFAULT_COMPRESSOR_PROFILE
+from parallel_truth_fingerprint.contracts.edge_local_replicated_state import (
+    EdgeLocalReplicatedStateContract,
+)
 from parallel_truth_fingerprint.contracts.raw_hart_payload import (
     DeviceInfo,
     Diagnostics,
@@ -21,6 +24,7 @@ from parallel_truth_fingerprint.contracts.raw_hart_payload import (
     ProcessVariable,
     RawHartPayload,
 )
+from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
 from parallel_truth_fingerprint.edge_nodes.common.local_state import (
     EdgeLocalReplicatedState,
 )
@@ -303,6 +307,38 @@ class EdgeAcquisitionService:
         """Return this edge's own intermediate replicated shared view."""
 
         return self._replicated_state.to_dict()
+
+    def replicated_state_contract(
+        self,
+        *,
+        round_identity: RoundIdentity,
+        participating_edges: tuple[str, ...],
+    ) -> EdgeLocalReplicatedStateContract:
+        """Export the current edge-local replicated state as a typed contract."""
+
+        return EdgeLocalReplicatedStateContract(
+            round_identity=round_identity,
+            owner_edge_id=self.device_config.edge_id,
+            participating_edges=participating_edges,
+            observations_by_sensor=dict(self._replicated_state.observations),
+            is_validated=False,
+        )
+
+    def consensus_round_identity(self) -> RoundIdentity:
+        """Build a small round identity anchored to the last local acquisition timestamp."""
+
+        if self._runtime.last_payload_timestamp is None:
+            raise RuntimeError("At least one acquisition is required before building a round.")
+
+        window_ended_at = datetime.fromisoformat(
+            self._runtime.last_payload_timestamp.replace("Z", "+00:00")
+        )
+        window_started_at = window_ended_at - timedelta(minutes=1)
+        return RoundIdentity(
+            round_id=f"round-{window_ended_at.strftime('%Y%m%d%H%M%S%f')}",
+            window_started_at=window_started_at,
+            window_ended_at=window_ended_at,
+        )
 
     def observation_flow_log(self) -> list[dict[str, object]]:
         """Return the upstream observation-flow events for this edge."""

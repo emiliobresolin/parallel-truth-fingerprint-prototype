@@ -5,6 +5,10 @@ from parallel_truth_fingerprint.contracts.consensus_audit_package import (
 )
 from parallel_truth_fingerprint.contracts.consensus_result import ConsensusResult
 from parallel_truth_fingerprint.contracts.consensus_round_input import ConsensusRoundInput
+from parallel_truth_fingerprint.contracts.consensus_round_summary import (
+    ConsensusRoundSummary,
+    ExcludedEdgeSummary,
+)
 from parallel_truth_fingerprint.contracts.consensus_status import ConsensusStatus
 from parallel_truth_fingerprint.contracts.consensused_valid_state import (
     ConsensusedValidState,
@@ -22,9 +26,11 @@ __all__ = [
     "ConsensusAuditPackage",
     "ConsensusResult",
     "ConsensusRoundInput",
+    "ConsensusRoundSummary",
     "ConsensusStatus",
     "ConsensusedValidState",
     "EdgeLocalReplicatedStateContract",
+    "ExcludedEdgeSummary",
     "ExclusionDecision",
     "ExclusionReason",
     "RawHartPayload",
