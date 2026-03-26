@@ -66,6 +66,31 @@ The architecture must preserve the following constraints and dependencies:
 - the LSTM service must train only on validated normal data
 - the implementation must remain modular, simple, and suitable for demonstration and academic evaluation
 
+### Real vs Simulated Component Classification
+
+To keep the prototype academically valid without increasing scope, the architecture makes an explicit distinction between components that are implemented as real executable system pillars and components that represent a simulated environment.
+
+**Real implementation components**
+- MQTT broker and MQTT-based inter-edge communication
+- decentralized edge-service execution and edge-local replicated-state reconstruction
+- consensus execution as a real executable validation component
+- comparison logic as a real executable service operating on available inputs
+- local object storage used as the persistence target
+- LSTM training and inference service executed as a real downstream component
+- observability, audit logging, and alerting logic
+
+**Simulated environment components**
+- physical sensors and compressor process behavior
+- edge hardware as physical devices
+- SCADA environment, represented through a fake OPC UA service
+- cloud environment, represented through local storage and local execution only
+- industrial network and plant environment beyond the explicit local communication path used by the prototype
+
+**Interpretation rule**
+- real components must execute real code paths and produce actual runtime outputs inside the prototype
+- simulated components may stand in for unavailable field or enterprise infrastructure, but they must still be exercised through the normal architecture
+- no simulated environment component may be used to bypass validation, comparison, persistence, or LSTM boundaries
+
 ### Cross-Cutting Concerns Identified
 
 The following concerns affect multiple architectural components and will drive subsequent design decisions:

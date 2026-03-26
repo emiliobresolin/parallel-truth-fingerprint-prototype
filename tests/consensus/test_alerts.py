@@ -110,7 +110,7 @@ class ConsensusAlertTest(unittest.TestCase):
         assert alert is not None
         self.assertEqual(alert.alert_type.value, "consensus_failed")
         self.assertEqual(alert.final_status.value, "failed_consensus")
-        self.assertEqual(tuple(ex.edge_id for ex in alert.exclusions), ("edge-2", "edge-3"))
+        self.assertEqual(tuple(ex.edge_id for ex in alert.exclusions), ("edge-1", "edge-2", "edge-3"))
 
     def test_successful_round_does_not_produce_alert(self) -> None:
         alert = self._build_alert(
@@ -135,7 +135,8 @@ class ConsensusAlertTest(unittest.TestCase):
         assert alert is not None
         self.assertGreaterEqual(len(alert.trust_evidence), 3)
         self.assertEqual(alert.trust_evidence[1].sensor_deviations[0].unit, "degC")
-        self.assertEqual(alert.trust_evidence[1].sensor_deviations[0].deviation_value, 70.0)
+        self.assertEqual(alert.trust_evidence[1].sensor_deviations[0].deviation_value, 100.0)
+        self.assertGreaterEqual(len(alert.trust_evidence[1].pairwise_distances), 6)
 
     def test_alert_formatting_is_readable_and_deterministic(self) -> None:
         alert = self._build_alert(
@@ -153,6 +154,7 @@ class ConsensusAlertTest(unittest.TestCase):
         self.assertIn("status=failed_consensus", compact)
         self.assertIn("alert_type=consensus_failed", detailed)
         self.assertIn("excluded=edge-2 reason=suspected_byzantine_behavior", detailed)
+        self.assertIn("compatible_peers=0", detailed)
         self.assertEqual(compact, format_consensus_alert_compact(alert))
 
 

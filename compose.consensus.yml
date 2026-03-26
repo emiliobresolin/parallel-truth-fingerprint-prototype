@@ -1,0 +1,75 @@
+services:
+  abci-node0:
+    build:
+      context: ./abci/consensus_app
+    command:
+      - --home
+      - /state/node0
+      - --socket-addr
+      - tcp://0.0.0.0:26658
+    volumes:
+      - ./.cometbft/state/node0:/state/node0
+
+  abci-node1:
+    build:
+      context: ./abci/consensus_app
+    command:
+      - --home
+      - /state/node1
+      - --socket-addr
+      - tcp://0.0.0.0:26658
+    volumes:
+      - ./.cometbft/state/node1:/state/node1
+
+  abci-node2:
+    build:
+      context: ./abci/consensus_app
+    command:
+      - --home
+      - /state/node2
+      - --socket-addr
+      - tcp://0.0.0.0:26658
+    volumes:
+      - ./.cometbft/state/node2:/state/node2
+
+  node0:
+    image: cometbft/cometbft:latest
+    depends_on:
+      - abci-node0
+    command:
+      - node
+      - --home
+      - /cometbft
+    volumes:
+      - ./.cometbft/testnet/node0:/cometbft
+    ports:
+      - "26657:26657"
+      - "26656:26656"
+
+  node1:
+    image: cometbft/cometbft:latest
+    depends_on:
+      - abci-node1
+    command:
+      - node
+      - --home
+      - /cometbft
+    volumes:
+      - ./.cometbft/testnet/node1:/cometbft
+    ports:
+      - "26667:26657"
+      - "26666:26656"
+
+  node2:
+    image: cometbft/cometbft:latest
+    depends_on:
+      - abci-node2
+    command:
+      - node
+      - --home
+      - /cometbft
+    volumes:
+      - ./.cometbft/testnet/node2:/cometbft
+    ports:
+      - "26677:26657"
+      - "26676:26656"

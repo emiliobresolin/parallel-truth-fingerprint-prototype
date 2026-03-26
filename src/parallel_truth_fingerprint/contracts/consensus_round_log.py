@@ -53,6 +53,8 @@ class ConsensusRoundLog:
                 {
                     "edge_id": evidence.edge_id,
                     "score": evidence.score,
+                    "compatible_peer_count": evidence.compatible_peer_count,
+                    "overall_normalized_deviation": evidence.overall_normalized_deviation,
                     "sensor_deviations": [
                         {
                             "sensor_name": deviation.sensor_name,
@@ -60,6 +62,15 @@ class ConsensusRoundLog:
                             "unit": deviation.unit,
                         }
                         for deviation in evidence.sensor_deviations
+                    ],
+                    "pairwise_distances": [
+                        {
+                            "peer_edge_id": pairwise.peer_edge_id,
+                            "sensor_name": pairwise.sensor_name,
+                            "distance_value": pairwise.distance_value,
+                            "unit": pairwise.unit,
+                        }
+                        for pairwise in evidence.pairwise_distances
                     ],
                 }
                 for evidence in self.trust_evidence

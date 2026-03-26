@@ -12,10 +12,12 @@ class RuntimeDemoConfig:
     mqtt_broker_host: str = "localhost"
     mqtt_broker_port: int = 1883
     mqtt_topic: str = "edges/observations"
+    cometbft_rpc_url: str = "http://127.0.0.1:26657"
     demo_steps: int = 3
     demo_power: float = 65.0
     demo_fault_mode: str = "none"
     demo_faulty_edges: tuple[str, ...] = ()
+    demo_log_path: str = "logs/run_local_demo.log"
 
 
 def load_runtime_demo_config() -> RuntimeDemoConfig:
@@ -31,8 +33,10 @@ def load_runtime_demo_config() -> RuntimeDemoConfig:
         mqtt_broker_host=os.getenv("MQTT_BROKER_HOST", "localhost"),
         mqtt_broker_port=int(os.getenv("MQTT_BROKER_PORT", "1883")),
         mqtt_topic=os.getenv("MQTT_TOPIC", "edges/observations"),
+        cometbft_rpc_url=os.getenv("COMETBFT_RPC_URL", "http://127.0.0.1:26657"),
         demo_steps=int(os.getenv("DEMO_STEPS", "3")),
         demo_power=float(os.getenv("DEMO_POWER", "65.0")),
         demo_fault_mode=os.getenv("DEMO_FAULT_MODE", "none"),
         demo_faulty_edges=faulty_edges,
+        demo_log_path=os.getenv("DEMO_LOG_PATH", "logs/run_local_demo.log"),
     )

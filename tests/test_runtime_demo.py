@@ -1,5 +1,6 @@
 import os
 import unittest
+from unittest import mock
 
 from parallel_truth_fingerprint.config.runtime import load_runtime_demo_config
 from parallel_truth_fingerprint.edge_nodes.common.mqtt_io import PassiveMqttRelay
@@ -11,11 +12,15 @@ class RuntimeDemoConfigTest(unittest.TestCase):
         previous_steps = os.environ.get("DEMO_STEPS")
         previous_fault_mode = os.environ.get("DEMO_FAULT_MODE")
         previous_faulty_edges = os.environ.get("DEMO_FAULTY_EDGES")
+        previous_rpc = os.environ.get("COMETBFT_RPC_URL")
+        previous_log_path = os.environ.get("DEMO_LOG_PATH")
         try:
             os.environ["MQTT_TRANSPORT"] = "passive"
             os.environ["DEMO_STEPS"] = "5"
             os.environ["DEMO_FAULT_MODE"] = "single_edge_exclusion"
             os.environ["DEMO_FAULTY_EDGES"] = "edge-3"
+            os.environ["COMETBFT_RPC_URL"] = "http://127.0.0.1:26657"
+            os.environ["DEMO_LOG_PATH"] = "logs/custom-demo.log"
 
             config = load_runtime_demo_config()
 
@@ -23,6 +28,8 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             self.assertEqual(config.demo_steps, 5)
             self.assertEqual(config.demo_fault_mode, "single_edge_exclusion")
             self.assertEqual(config.demo_faulty_edges, ("edge-3",))
+            self.assertEqual(config.cometbft_rpc_url, "http://127.0.0.1:26657")
+            self.assertEqual(config.demo_log_path, "logs/custom-demo.log")
         finally:
             if previous_transport is None:
                 os.environ.pop("MQTT_TRANSPORT", None)
@@ -40,6 +47,14 @@ class RuntimeDemoConfigTest(unittest.TestCase):
                 os.environ.pop("DEMO_FAULTY_EDGES", None)
             else:
                 os.environ["DEMO_FAULTY_EDGES"] = previous_faulty_edges
+            if previous_rpc is None:
+                os.environ.pop("COMETBFT_RPC_URL", None)
+            else:
+                os.environ["COMETBFT_RPC_URL"] = previous_rpc
+            if previous_log_path is None:
+                os.environ.pop("DEMO_LOG_PATH", None)
+            else:
+                os.environ["DEMO_LOG_PATH"] = previous_log_path
 
 
 class AppTransportTest(unittest.TestCase):
@@ -100,6 +115,35 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIn("validated=False", summary)
         self.assertIn("temperature=78.254", summary)
 
+    def test_default_demo_log_path_resolves_relative_and_absolute_paths(self) -> None:
+        from scripts.run_local_demo import PROJECT_ROOT, default_demo_log_path
+
+        relative = default_demo_log_path("logs/dev.log")
+        absolute = default_demo_log_path(str(PROJECT_ROOT / "logs" / "abs.log"))
+
+        self.assertEqual(relative, PROJECT_ROOT / "logs" / "dev.log")
+        self.assertEqual(absolute, PROJECT_ROOT / "logs" / "abs.log")
+
+    def test_write_detailed_log_persists_json_payload(self) -> None:
+        import json
+        from pathlib import Path
+
+        from scripts.run_local_demo import PROJECT_ROOT, write_detailed_log
+
+        scratch_dir = PROJECT_ROOT / "tests" / "_tmp"
+        path = scratch_dir / "demo.log"
+        try:
+            write_detailed_log(path, {"status": "ok", "items": [1, 2, 3]})
+            payload = json.loads(path.read_text(encoding="utf-8"))
+
+            self.assertEqual(payload["status"], "ok")
+            self.assertEqual(payload["items"], [1, 2, 3])
+        finally:
+            if path.exists():
+                path.unlink()
+            if scratch_dir.exists():
+                scratch_dir.rmdir()
+
     def test_format_round_summary_returns_compact_consensus_view(self) -> None:
         from parallel_truth_fingerprint.contracts.consensus_round_summary import (
             ConsensusRoundSummary,
@@ -154,6 +198,7 @@ class DemoFormattingTest(unittest.TestCase):
         from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReason
         from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
         from parallel_truth_fingerprint.contracts.trust_evidence import (
+            PairwiseDistanceEvidence,
             PerEdgeTrustEvidence,
             SensorDeviationEvidence,
         )
@@ -192,10 +237,20 @@ class DemoFormattingTest(unittest.TestCase):
                     round_identity=round_identity,
                     edge_id="edge-1",
                     score=1.0,
+                    compatible_peer_count=2,
+                    overall_normalized_deviation=0.0,
                     sensor_deviations=(
                         SensorDeviationEvidence(
                             sensor_name="temperature",
                             deviation_value=0.0,
+                            unit="degC",
+                        ),
+                    ),
+                    pairwise_distances=(
+                        PairwiseDistanceEvidence(
+                            peer_edge_id="edge-2",
+                            sensor_name="temperature",
+                            distance_value=0.0,
                             unit="degC",
                         ),
                     ),
@@ -212,6 +267,7 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIn("exclusions[edge-3:suspected_byzantine_behavior]", compact)
         self.assertIn("round=round-456", detailed)
         self.assertIn("edge=edge-1 score=1.000", detailed)
+        self.assertIn("compatible_peers=2", detailed)
         self.assertIn("excluded=edge-3 reason=suspected_byzantine_behavior", detailed)
 
     def test_format_consensus_alert_outputs_none_and_failed_views(self) -> None:
@@ -230,6 +286,7 @@ class DemoFormattingTest(unittest.TestCase):
         from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReason
         from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
         from parallel_truth_fingerprint.contracts.trust_evidence import (
+            PairwiseDistanceEvidence,
             PerEdgeTrustEvidence,
             SensorDeviationEvidence,
         )
@@ -256,10 +313,20 @@ class DemoFormattingTest(unittest.TestCase):
                     round_identity=round_identity,
                     edge_id="edge-2",
                     score=0.0,
+                    compatible_peer_count=0,
+                    overall_normalized_deviation=1.5,
                     sensor_deviations=(
                         SensorDeviationEvidence(
                             sensor_name="temperature",
                             deviation_value=70.0,
+                            unit="degC",
+                        ),
+                    ),
+                    pairwise_distances=(
+                        PairwiseDistanceEvidence(
+                            peer_edge_id="edge-1",
+                            sensor_name="temperature",
+                            distance_value=70.0,
                             unit="degC",
                         ),
                     ),
@@ -356,7 +423,79 @@ class DemoFaultInjectionTest(unittest.TestCase):
         summary = build_round_summary(ConsensusEngine().evaluate(injected))
 
         self.assertEqual(summary.final_consensus_status.value, "failed_consensus")
-        self.assertEqual(summary.valid_participants_after_exclusions, 1)
+        self.assertEqual(summary.valid_participants_after_exclusions, 0)
+
+
+class DemoConsensusPathTest(unittest.TestCase):
+    def test_demo_uses_cometbft_client_for_live_consensus_path(self) -> None:
+        from parallel_truth_fingerprint.config.runtime import RuntimeDemoConfig
+        from scripts import run_local_demo
+
+        committed_round = {
+            "round_id": "round-20260326100000000000",
+            "window_started_at": "2026-03-26T10:00:00+00:00",
+            "window_ended_at": "2026-03-26T10:01:00+00:00",
+            "participating_edges": ["edge-1", "edge-2", "edge-3"],
+            "replicated_states": [],
+            "trust_ranking": [
+                {"edge_id": "edge-1", "score": 1.0},
+                {"edge_id": "edge-2", "score": 0.99},
+                {"edge_id": "edge-3", "score": 0.98},
+            ],
+            "exclusions": [],
+            "trust_evidence": [],
+            "final_status": "success",
+            "consensused_valid_state": {
+                "source_edges": ["edge-1", "edge-2", "edge-3"],
+                "sensor_values": {
+                    "temperature": 80.0,
+                    "pressure": 6.0,
+                    "rpm": 3200.0,
+                },
+            },
+            "commit_height": 11,
+        }
+
+        class FakeClient:
+            def __init__(self, rpc_url: str) -> None:
+                self.rpc_url = rpc_url
+
+            def status(self):
+                return {
+                    "node_info": {"version": "1.0.0"},
+                    "sync_info": {"latest_block_height": "10"},
+                }
+
+            def broadcast_round(self, round_input):
+                return type(
+                    "Receipt",
+                    (),
+                    {
+                        "round_id": round_input.round_identity.round_id,
+                        "height": 11,
+                        "tx_hash": "DEADBEEF",
+                        "check_tx_code": 0,
+                        "deliver_tx_code": 0,
+                    },
+                )()
+
+            def query_committed_round(self, round_id: str):
+                payload = dict(committed_round)
+                payload["round_id"] = round_id
+                return payload
+
+        config = RuntimeDemoConfig(
+            mqtt_transport="passive",
+            cometbft_rpc_url="http://127.0.0.1:26657",
+            demo_steps=1,
+            demo_power=65.0,
+            demo_fault_mode="none",
+        )
+
+        with mock.patch.object(run_local_demo, "CometBftRpcClient", FakeClient):
+            with mock.patch.object(run_local_demo, "load_runtime_demo_config", return_value=config):
+                with mock.patch("sys.stdout"):
+                    run_local_demo.main()
 
 
 if __name__ == "__main__":

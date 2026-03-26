@@ -9,10 +9,20 @@ from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
 
 @dataclass(frozen=True)
 class SensorDeviationEvidence:
-    """Per-sensor numeric deviation evidence with units."""
+    """Per-sensor mean deviation evidence with units."""
 
     sensor_name: str
     deviation_value: float
+    unit: str
+
+
+@dataclass(frozen=True)
+class PairwiseDistanceEvidence:
+    """Pairwise distance from one edge to one peer for one sensor."""
+
+    peer_edge_id: str
+    sensor_name: str
+    distance_value: float
     unit: str
 
 
@@ -23,5 +33,7 @@ class PerEdgeTrustEvidence:
     round_identity: RoundIdentity
     edge_id: str
     score: float
+    compatible_peer_count: int
+    overall_normalized_deviation: float
     sensor_deviations: tuple[SensorDeviationEvidence, ...]
-
+    pairwise_distances: tuple[PairwiseDistanceEvidence, ...]

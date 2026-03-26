@@ -77,7 +77,16 @@ def format_consensus_alert_detailed(alert: ConsensusAlert | None) -> str:
             f"{deviation.sensor_name}={deviation.deviation_value:.3f} {deviation.unit}"
             for deviation in evidence.sensor_deviations
         )
+        pairwise_text = ", ".join(
+            f"{pairwise.peer_edge_id}:{pairwise.sensor_name}={pairwise.distance_value:.3f} {pairwise.unit}"
+            for pairwise in evidence.pairwise_distances
+        )
         lines.append(
-            f"evidence={evidence.edge_id} score={evidence.score:.3f} deviations[{deviation_text}]"
+            f"evidence={evidence.edge_id} "
+            f"score={evidence.score:.3f} "
+            f"compatible_peers={evidence.compatible_peer_count} "
+            f"overall_dev={evidence.overall_normalized_deviation:.3f} "
+            f"deviations[{deviation_text}] "
+            f"pairwise[{pairwise_text}]"
         )
     return "\n".join(lines)

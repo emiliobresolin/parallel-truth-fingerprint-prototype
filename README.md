@@ -15,7 +15,7 @@ The repository now includes the upstream observation path for Epic 1:
 - edge-local replicated shared view reconstruction as explicit non-validated intermediate state
 - upstream observation-flow logging for demo visibility
 
-Consensus, SCADA comparison, persistence, and LSTM stages are still intentionally out of scope in the current code.
+The consensus pillar now uses a real CometBFT-backed path for the live demo. SCADA comparison, persistence, and LSTM stages remain intentionally out of scope in the current code.
 
 ## Local Execution Model
 
@@ -23,6 +23,7 @@ The prototype remains fully local.
 
 - Edge nodes and core orchestration run as local Python processes.
 - MQTT infrastructure runs as a local containerized service.
+- The live consensus demo runs against a local 3-validator CometBFT network with a Go ABCI application.
 - MinIO and the LSTM service may also run as local containerized services later if that improves reproducibility.
 
 This mixed process/container model is a local setup decision only. It is not a production deployment model.
@@ -47,7 +48,28 @@ uv sync --extra runtime-demo
 docker compose -f compose.local.yml up -d mqtt-broker
 ```
 
-### 3. Set the demo environment
+### 3. Start the local CometBFT consensus stack
+
+Initialize the 3-validator local network once:
+
+```powershell
+.\scripts\init_cometbft_testnet.ps1
+```
+
+Then start the validators plus the 3 ABCI app instances:
+
+```powershell
+.\scripts\start_consensus_stack.ps1
+```
+
+This stack is the source of truth for the final consensus result in the live demo:
+
+- CometBFT is the real BFT consensus layer
+- the Go ABCI application computes the deterministic trust/exclusion result
+- the Python layer submits the round and reads back the committed state
+- Python no longer finalizes consensus independently on the live demo path
+
+### 4. Set the demo environment
 
 The defaults are already present in [.env.example](./.env.example):
 
@@ -55,12 +77,13 @@ The defaults are already present in [.env.example](./.env.example):
 - `MQTT_BROKER_HOST=localhost`
 - `MQTT_BROKER_PORT=1883`
 - `MQTT_TOPIC=edges/observations`
+- `COMETBFT_RPC_URL=http://127.0.0.1:26657`
 - `DEMO_STEPS=3`
 - `DEMO_POWER=65.0`
 - `DEMO_FAULT_MODE=none`
 - `DEMO_FAULTY_EDGES=`
 
-### 4. Run the local demo
+### 5. Run the local demo
 
 ```powershell
 $env:PYTHONPATH='src'
@@ -74,7 +97,16 @@ This will:
 - publish local edge observations
 - consume peer observations
 - reconstruct one edge-local replicated shared view per edge
-- print runtime state, replicated state, and observation-flow events
+- submit the consensus round to CometBFT
+- query the committed round result back from CometBFT
+- build summary/log/alert output from that committed state only
+- print runtime state, replicated state, commit metadata, and observation-flow events
+
+### 6. Stop the consensus stack
+
+```powershell
+.\scripts\stop_consensus_stack.ps1
+```
 
 ## Transport Modes
 
@@ -87,14 +119,14 @@ Switch mode through `MQTT_TRANSPORT`.
 
 ## Demo Fault Injection
 
-The local demo can inject deterministic inconsistent-edge scenarios without changing the consensus engine.
+The local demo can inject deterministic inconsistent-edge scenarios without changing the CometBFT-backed live path.
 
 - `DEMO_FAULT_MODE=none`
   normal behavior
 - `DEMO_FAULT_MODE=single_edge_exclusion`
-  inject one faulty edge so quorum is preserved and consensus still succeeds
+  inject one faulty edge so quorum is preserved and the committed result still succeeds
 - `DEMO_FAULT_MODE=quorum_loss`
-  inject two faulty edges so quorum is lost and `failed_consensus` is triggered
+  inject two faulty edges so quorum is lost and the committed result returns `failed_consensus`
 
 Optional target edges can be supplied with `DEMO_FAULTY_EDGES`.
 
@@ -117,7 +149,9 @@ $env:DEMO_FAULTY_EDGES='edge-2,edge-3'
 - MQTT is transport only. The broker is a passive relay and is not part of the trust model.
 - Each edge independently acquires, publishes, consumes, and reconstructs its own local replicated shared view.
 - The replicated shared view is intermediate, non-validated, and not trusted.
-- Only later consensus stages will turn that intermediate view into validated state.
+- CometBFT is the source of truth for the final consensus result in the live demo.
+- The committed state returned from CometBFT defines the valid system state.
+- The Python layer no longer finalizes consensus independently on the live demo path.
 
 ## Tests
 

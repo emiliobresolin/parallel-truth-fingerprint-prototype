@@ -26,6 +26,7 @@ from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReaso
 from parallel_truth_fingerprint.contracts.raw_hart_payload import RawHartPayload
 from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
 from parallel_truth_fingerprint.contracts.trust_evidence import (
+    PairwiseDistanceEvidence,
     PerEdgeTrustEvidence,
     SensorDeviationEvidence,
 )
@@ -45,6 +46,7 @@ __all__ = [
     "ExcludedEdgeSummary",
     "ExclusionDecision",
     "ExclusionReason",
+    "PairwiseDistanceEvidence",
     "PerEdgeTrustEvidence",
     "RawHartPayload",
     "RoundIdentity",

@@ -147,6 +147,62 @@ class ConsensusEngineTest(unittest.TestCase):
             ),
         )
 
+    def test_trust_ranking_is_derived_from_pairwise_deviation(self) -> None:
+        round_input = ConsensusRoundInput(
+            round_identity=self.round_identity,
+            participating_edges=("edge-1", "edge-2", "edge-3"),
+            replicated_states=(
+                make_replicated_state(self.round_identity, "edge-1", 80.0, 6.0, 3200.0),
+                make_replicated_state(self.round_identity, "edge-2", 81.0, 6.1, 3210.0),
+                make_replicated_state(self.round_identity, "edge-3", 120.0, 9.5, 4700.0),
+            ),
+        )
+
+        audit_package = ConsensusEngine().evaluate(round_input)
+        ranking_by_edge = {
+            entry.edge_id: entry.score
+            for entry in audit_package.consensus_result.trust_ranking.entries
+        }
+
+        self.assertGreater(ranking_by_edge["edge-1"], ranking_by_edge["edge-3"])
+        self.assertGreater(ranking_by_edge["edge-2"], ranking_by_edge["edge-3"])
+
+    def test_replay_style_stale_view_produces_detectable_inconsistency(self) -> None:
+        round_input = ConsensusRoundInput(
+            round_identity=self.round_identity,
+            participating_edges=("edge-1", "edge-2", "edge-3"),
+            replicated_states=(
+                make_replicated_state(self.round_identity, "edge-1", 85.0, 6.8, 3400.0),
+                make_replicated_state(self.round_identity, "edge-2", 84.5, 6.7, 3390.0),
+                make_replicated_state(self.round_identity, "edge-3", 74.0, 5.7, 3080.0),
+            ),
+        )
+
+        audit_package = ConsensusEngine().evaluate(round_input)
+        excluded_edges = {decision.edge_id for decision in audit_package.consensus_result.exclusions}
+
+        self.assertIn("edge-3", excluded_edges)
+
+    def test_small_drift_reduces_trust_without_breaking_quorum(self) -> None:
+        round_input = ConsensusRoundInput(
+            round_identity=self.round_identity,
+            participating_edges=("edge-1", "edge-2", "edge-3"),
+            replicated_states=(
+                make_replicated_state(self.round_identity, "edge-1", 80.0, 6.0, 3200.0),
+                make_replicated_state(self.round_identity, "edge-2", 80.8, 6.08, 3208.0),
+                make_replicated_state(self.round_identity, "edge-3", 83.5, 6.4, 3280.0),
+            ),
+        )
+
+        audit_package = ConsensusEngine().evaluate(round_input)
+        ranking_by_edge = {
+            entry.edge_id: entry.score
+            for entry in audit_package.consensus_result.trust_ranking.entries
+        }
+
+        self.assertEqual(audit_package.final_status, ConsensusStatus.SUCCESS)
+        self.assertLess(ranking_by_edge["edge-3"], ranking_by_edge["edge-1"])
+
     def test_audit_package_contains_inputs_status_and_valid_state_only_on_success(self) -> None:
         round_input = ConsensusRoundInput(
             round_identity=self.round_identity,

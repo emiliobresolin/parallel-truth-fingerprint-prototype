@@ -99,6 +99,8 @@ class ConsensusLoggingTest(unittest.TestCase):
         self.assertEqual(round_log.round_identity.round_id, "round-log")
         self.assertEqual(round_log.participating_edges, ("edge-1", "edge-2", "edge-3"))
         self.assertEqual(len(round_log.trust_evidence), 3)
+        self.assertGreaterEqual(len(round_log.trust_evidence[0].pairwise_distances), 6)
+        self.assertEqual(round_log.trust_evidence[0].compatible_peer_count, 2)
         self.assertEqual(
             tuple(deviation.sensor_name for deviation in round_log.trust_evidence[0].sensor_deviations),
             ("temperature", "pressure", "rpm"),
@@ -127,9 +129,10 @@ class ConsensusLoggingTest(unittest.TestCase):
         excluded_evidence = next(
             evidence for evidence in round_log.trust_evidence if evidence.edge_id == "edge-3"
         )
-        self.assertEqual(excluded_evidence.sensor_deviations[0].deviation_value, 39.5)
+        self.assertEqual(excluded_evidence.sensor_deviations[0].deviation_value, 39.75)
         self.assertIn("excluded=edge-3 reason=suspected_byzantine_behavior", detailed)
-        self.assertIn("temperature=39.500 degC", detailed)
+        self.assertIn("temperature=39.750 degC", detailed)
+        self.assertIn("edge-1:temperature=40.000 degC", detailed)
 
     def test_round_log_serialization_is_deterministic(self) -> None:
         round_input = ConsensusRoundInput(

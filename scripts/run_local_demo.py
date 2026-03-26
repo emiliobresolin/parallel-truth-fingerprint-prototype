@@ -15,22 +15,32 @@ if str(SRC_PATH) not in sys.path:
 
 from parallel_truth_fingerprint.config.runtime import load_runtime_demo_config
 from parallel_truth_fingerprint.consensus import (
-    ConsensusEngine,
     build_consensus_alert,
     build_round_log,
     build_round_summary,
+    committed_round_to_audit_package,
     format_consensus_alert_compact,
     format_consensus_alert_detailed,
     format_round_log_compact,
     format_round_log_detailed,
     format_round_summary,
 )
+from parallel_truth_fingerprint.consensus.cometbft_client import CometBftRpcClient
 from parallel_truth_fingerprint.contracts.consensus_round_input import ConsensusRoundInput
 from parallel_truth_fingerprint.edge_nodes.common.mqtt_io import create_transport
 from parallel_truth_fingerprint.edge_nodes.edge_1.service import TemperatureEdgeService
 from parallel_truth_fingerprint.edge_nodes.edge_2.service import PressureEdgeService
 from parallel_truth_fingerprint.edge_nodes.edge_3.service import RpmEdgeService
 from parallel_truth_fingerprint.sensor_simulation.simulator import CompressorSimulator
+
+
+def default_demo_log_path(log_path: str) -> Path:
+    """Resolve the configured demo log path relative to the project root."""
+
+    candidate = Path(log_path)
+    if candidate.is_absolute():
+        return candidate
+    return PROJECT_ROOT / candidate
 
 
 def format_edge_summary(edge) -> str:
@@ -133,6 +143,69 @@ def inject_faults(round_input: ConsensusRoundInput, config) -> ConsensusRoundInp
     return replace(round_input, replicated_states=tuple(injected_states))
 
 
+def build_detailed_log_payload(
+    *,
+    config,
+    node_status,
+    commit_receipt,
+    committed_round,
+    consensus_summary,
+    consensus_log,
+    consensus_alert,
+    edges,
+    fault_edges: tuple[str, ...],
+) -> dict:
+    """Build the full deterministic development log payload."""
+
+    return {
+        "demo": {
+            "mqtt_transport": config.mqtt_transport,
+            "mqtt_topic": config.mqtt_topic,
+            "fault_mode": config.demo_fault_mode,
+            "faulty_edges": list(fault_edges),
+            "log_path": config.demo_log_path,
+        },
+        "cometbft": {
+            "node_version": node_status["node_info"]["version"],
+            "latest_block_height": node_status["sync_info"]["latest_block_height"],
+            "committed_height": commit_receipt.height,
+            "tx_hash": commit_receipt.tx_hash,
+            "check_tx_code": commit_receipt.check_tx_code,
+            "deliver_tx_code": commit_receipt.deliver_tx_code,
+        },
+        "consensus_summary": consensus_summary.to_dict(),
+        "committed_round_state": committed_round,
+        "consensus_log": {
+            "compact": format_round_log_compact(consensus_log),
+            "detailed": format_round_log_detailed(consensus_log),
+            "structured": consensus_log.to_dict(),
+        },
+        "consensus_alert": {
+            "compact": format_consensus_alert_compact(consensus_alert),
+            "detailed": format_consensus_alert_detailed(consensus_alert),
+            "structured": None if consensus_alert is None else consensus_alert.to_dict(),
+        },
+        "edges": [
+            {
+                "edge_id": edge.runtime_state()["edge_id"],
+                "summary": format_edge_summary(edge),
+                "runtime_state": edge.runtime_state(),
+                "replicated_state": edge.local_replicated_state(),
+                "observation_flow": edge.observation_flow_log(),
+            }
+            for edge in edges
+        ],
+    }
+
+
+def write_detailed_log(log_path: Path, payload: dict) -> Path:
+    """Persist the full development trace for one demo run."""
+
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return log_path
+
+
 def main() -> None:
     config = load_runtime_demo_config()
     simulator = CompressorSimulator(seed=101)
@@ -179,41 +252,54 @@ def main() -> None:
 
     consensus_round_input = build_consensus_round_input(edges)
     consensus_round_input = inject_faults(consensus_round_input, config)
-    consensus_engine = ConsensusEngine()
-    consensus_audit = consensus_engine.evaluate(consensus_round_input)
+    cometbft_client = CometBftRpcClient(config.cometbft_rpc_url)
+    node_status = cometbft_client.status()
+    commit_receipt = cometbft_client.broadcast_round(consensus_round_input)
+    committed_round = cometbft_client.query_committed_round(commit_receipt.round_id)
+    consensus_audit = committed_round_to_audit_package(
+        consensus_round_input,
+        committed_round,
+    )
     consensus_summary = build_round_summary(consensus_audit)
     consensus_log = build_round_log(consensus_audit)
     consensus_alert = build_consensus_alert(consensus_audit, consensus_log)
+    fault_edges = resolve_faulty_edges(config, consensus_round_input.participating_edges)
+    detailed_log_payload = build_detailed_log_payload(
+        config=config,
+        node_status=node_status,
+        commit_receipt=commit_receipt,
+        committed_round=committed_round,
+        consensus_summary=consensus_summary,
+        consensus_log=consensus_log,
+        consensus_alert=consensus_alert,
+        edges=edges,
+        fault_edges=fault_edges,
+    )
+    detailed_log_path = write_detailed_log(
+        default_demo_log_path(config.demo_log_path),
+        detailed_log_payload,
+    )
 
     print("\nConsensus summary:")
     print(
+        f"- source=cometbft "
+        f"node_version={node_status['node_info']['version']} "
+        f"latest_block_height={node_status['sync_info']['latest_block_height']}"
+    )
+    print(
+        f"- committed_height={commit_receipt.height} "
+        f"tx_hash={commit_receipt.tx_hash} "
+        f"check_tx_code={commit_receipt.check_tx_code} "
+        f"deliver_tx_code={commit_receipt.deliver_tx_code}"
+    )
+    print(
         f"- fault_mode={config.demo_fault_mode} "
-        f"faulty_edges={list(resolve_faulty_edges(config, consensus_round_input.participating_edges))}"
+        f"faulty_edges={list(fault_edges)}"
     )
     print(f"- {format_round_summary(consensus_summary)}")
-    print(json.dumps(consensus_summary.to_dict(), indent=2))
-    print("\nConsensus log compact:")
     print(f"- {format_round_log_compact(consensus_log)}")
-    print("\nConsensus log detailed:")
-    print(format_round_log_detailed(consensus_log))
-    print("\nConsensus log structured:")
-    print(json.dumps(consensus_log.to_dict(), indent=2))
-    print("\nConsensus alert compact:")
     print(f"- {format_consensus_alert_compact(consensus_alert)}")
-    print("\nConsensus alert detailed:")
-    print(format_consensus_alert_detailed(consensus_alert))
-    print("\nConsensus alert structured:")
-    print(json.dumps(None if consensus_alert is None else consensus_alert.to_dict(), indent=2))
-
-    print("\nDetailed view:")
-    for edge in edges:
-        print(f"\n[{edge.runtime_state()['edge_id']}]")
-        print("Runtime state:")
-        print(json.dumps(edge.runtime_state(), indent=2))
-        print("Replicated state:")
-        print(json.dumps(edge.local_replicated_state(), indent=2))
-        #print("Observation flow:")
-        #print(json.dumps(edge.observation_flow_log(), indent=2))
+    print(f"- detailed_log={detailed_log_path}")
 
 
 if __name__ == "__main__":

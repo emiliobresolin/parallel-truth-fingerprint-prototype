@@ -121,12 +121,16 @@ class ConsensusSummaryTest(unittest.TestCase):
         summary = build_round_summary(ConsensusEngine().evaluate(round_input))
         formatted = format_round_summary(summary)
 
-        self.assertEqual(summary.valid_participants_after_exclusions, 1)
+        self.assertEqual(summary.valid_participants_after_exclusions, 0)
         self.assertFalse(summary.has_consensused_valid_state)
-        self.assertEqual(summary.excluded_edge_ids, ("edge-2", "edge-3"))
+        self.assertEqual(summary.excluded_edge_ids, ("edge-1", "edge-2", "edge-3"))
         self.assertEqual(
             summary.exclusion_reasons,
-            ("suspected_byzantine_behavior", "suspected_byzantine_behavior"),
+            (
+                "suspected_byzantine_behavior",
+                "suspected_byzantine_behavior",
+                "suspected_byzantine_behavior",
+            ),
         )
         self.assertIn("status=failed_consensus", formatted)
         self.assertIn("valid_state=absent", formatted)
