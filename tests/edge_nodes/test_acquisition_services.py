@@ -9,7 +9,7 @@ from parallel_truth_fingerprint.sensor_simulation.simulator import CompressorSim
 class EdgeAcquisitionServicesTest(unittest.TestCase):
     def setUp(self) -> None:
         simulator = CompressorSimulator(seed=31)
-        self.snapshot = simulator.step(compressor_power=60.0)
+        self.snapshot = simulator.step(operating_state_pct=60.0)
 
     def test_each_edge_acquires_only_its_assigned_sensor(self) -> None:
         edge_1_payload = TemperatureEdgeService().acquire(snapshot=self.snapshot)
@@ -68,6 +68,35 @@ class EdgeAcquisitionServicesTest(unittest.TestCase):
             temperature_state["last_payload_timestamp"],
             pressure_state["last_payload_timestamp"],
         )
+
+    def test_sv_is_optional_and_sensor_justified_only(self) -> None:
+        temperature_payload = TemperatureEdgeService().acquire(snapshot=self.snapshot)
+        pressure_payload = PressureEdgeService().acquire(snapshot=self.snapshot)
+        rpm_payload = RpmEdgeService().acquire(snapshot=self.snapshot)
+
+        self.assertIsNotNone(temperature_payload.process_data.sv)
+        self.assertEqual(
+            temperature_payload.process_data.sv.description,
+            "Sensor_Body_Temperature",
+        )
+        self.assertIsNotNone(pressure_payload.process_data.sv)
+        self.assertEqual(
+            pressure_payload.process_data.sv.description,
+            "Transmitter_Module_Temperature",
+        )
+        self.assertIsNone(rpm_payload.process_data.sv)
+        self.assertNotIn("sv", rpm_payload.to_dict()["process_data"])
+
+    def test_payload_preserves_temporal_and_physics_context_for_replay_checks(self) -> None:
+        edge_service = TemperatureEdgeService()
+
+        first_payload = edge_service.acquire(snapshot=self.snapshot)
+        second_payload = edge_service.acquire(snapshot=self.snapshot)
+
+        self.assertNotEqual(first_payload.timestamp, second_payload.timestamp)
+        self.assertIn("T", first_payload.timestamp)
+        self.assertEqual(second_payload.process_data.physics_metrics.rate_of_change_dtdt, 0.0)
+        self.assertIn("noise_floor", second_payload.to_dict()["process_data"]["physics_metrics"])
 
 
 if __name__ == "__main__":

@@ -1,0 +1,166 @@
+8 METODOLOGIA DE PESQUISA 
+8.1 Natureza da Pesquisa 
+Esta pesquisa tem caráter teórico-propositivo e exploratório, com foco na definição e análise de 
+uma arquitetura para validação de integridade e detecção de intrusão em sistemas industriais 
+legados. O trabalho se baseia na análise da literatura, na identificação de limitações práticas 
+dos ambientes SCADA e redes industriais e na proposta de uma arquitetura coerente com 
+essas restrições, especialmente com uso de Edge Computing.  
+O objetivo não é validar experimentalmente um sistema completo, mas demonstrar, de forma 
+estruturada, a viabilidade conceitual da solução proposta e o seu alinhamento com os desafios 
+reais desse tipo de ambiente. 
+8.2 Estratégia Metodológica 
+A metodologia adotada neste trabalho segue uma sequência lógica de decisões técnicas, 
+alinhadas aos objetivos do projeto e aos componentes da arquitetura proposta. Inicialmente, o 
+escopo é definido considerando sistemas industriais legados, ambientes SCADA e redes 
+industriais, estabelecendo quais elementos mínimos são necessários para representar esse 
+cenário. Em seguida, é construído um modelo de ameaça com foco em adulteração silenciosa 
+de dados e no comprometimento de nós de edge, que serve de base para a definição dos 
+requisitos da solução. 
+A partir disso, a arquitetura é especificada de forma progressiva, descrevendo o pipeline 
+proposto, as camadas envolvidas, os fluxos de dados, as interfaces e os artefatos gerados ao 
+longo do processo. São então definidos os mecanismos de validação e consistência, incluindo 
+a comparação entre dados físicos e lógicos e a estratégia de tolerância a falhas bizantinas no 
+edge.  
+Por fim, é descrito o processo de geração do dataset e o treinamento do modelo de Deep 
+Learning na nuvem, seguido de uma validação teórica da proposta, baseada na análise de 
+consistência, na cobertura do modelo de ameaça e na comparação estruturada com os 
+trabalhos relacionados. 
+8.3 Escopo Considerado e Condições do Estudo 
+Este trabalho considera sistemas industriais legados nos quais sensores e instrumentos de 
+campo produzem sinais físicos analógicos ou digitais transmitidos ao CLPs, e nos quais 
+sistemas SCADA/HMI consomem valores disponibilizados pelo controlador por meio da rede 
+industrial. Não é assumida a substituição de sensores, CLPs ou redes existentes, sendo a 
+proposta pensada para operar de forma complementar à arquitetura já instalada, sem interferir 
+na lógica de controle do processo. 
+Como condição de operação, assume-se a introdução de uma camada de Edge Computing 
+capaz de coletar sinais físicos duplicados diretamente do processo e de acessar os valores 
+lógicos disponibilizados pelo SCADA por meio de interfaces típicas do ambiente industrial, 
+como OPC UA, Modbus, DNP3 ou APIs. Essas condições refletem cenários realistas de plantas 
+industriais legadas e orientam as decisões arquiteturais adotadas ao longo do trabalho. 
+8.4 Modelo de Ameaça e Cenários de Ataque Considerados 
+O modelo de ameaça adotado neste trabalho parte da ideia de que o domínio digital da planta 
+não pode ser assumido como confiável em todos os cenários. São considerados ataques em 
+que os dados são adulterados no caminho lógico entre CLP e a rede industrial, mantendo 
+valores plausíveis, bem como situações de replay de valores válidos em janelas temporais e 
+manipulações graduais dos dados (drift malicioso). Também é considerado o comprometimento 
+parcial de Edge Gateways, incluindo comportamentos arbitrários característicos de falhas 
+bizantinas, nos quais um edge passa a enviar leituras adulteradas ou inconsistentes ao grupo. 
+Esses cenários justificam a necessidade de uma referência física independente do domínio 
+lógico e de mecanismos de validação distribuída entre os nós de edge antes que uma leitura 
+seja aceita como representativa do estado real do processo. 
+8.5 Derivação de Requisitos 
+Com base no problema de pesquisa, no modelo de ameaça considerado e nas limitações 
+típicas de ambientes industriais, foram definidos os requisitos mínimos que orientam a solução 
+proposta. 
+O primeiro requisito é a independência em relação ao CLP. O mecanismo deve ser capaz de 
+observar o processo físico sem depender exclusivamente dos dados que trafegam a partir do 
+CLP e pela rede industrial, permitindo a detecção de inconsistências mesmo quando o caminho 
+lógico tradicional estiver comprometido. 
+O segundo requisito é a não intrusividade. A solução não deve alterar a lógica de controle 
+existente nem introduzir latência no loop de controle, de forma a manter a compatibilidade com 
+plantas industriais legadas. 
+A arquitetura também deve operar de forma distribuída no Edge (dados descentralizados), 
+permitindo que múltiplos Edge Gateways compartilhem observações do processo, evitando a 
+existência de um único ponto de confiança. 
+Outro requisito vital é a tolerância a nós comprometidos, considerando um modelo de falhas 
+bizantinas. O sistema deve limitar os efeitos de Edge Gateways maliciosos ou defeituosos 
+durante o processo de validação dos dados. 
+Além disso, a solução deve garantir rastreabilidade e histórico, produzindo dados auditáveis e 
+reprodutíveis, adequados para análise posterior. 
+Adicionalmente, a derivação dos requisitos considera explicitamente a dimensão temporal do 
+pipeline proposto. A arquitetura envolve compartilhamento periódico de observações físicas 
+entre múltiplos Edge Gateways por meio de MQTT e sua organização semântica em um broker 
+de contexto (Orion), seguido da execução de um mecanismo de validação distribuída tolerante 
+a falhas bizantinas (FABA/BBD).  
+Esses componentes introduzem custos computacionais e de comunicação que tornam ciclos de 
+alta frequência pouco eficientes e desnecessários para processos físicos industriais. Janelas 
+excessivamente curtas aumentariam o overhead de publicação, sincronização de contexto e 
+execução do consenso distribuído, sem ganho proporcional de informação, ja que variáveis 
+físicas industriais normalmente apresentam dinâmica lenta e contínua.  
+Assim, assume-se como referência janelas temporais na ordem de 1 minuto, valor que 
+representa um compromisso entre fidelidade física, viabilidade computacional no Edge e 
+efetividade da validação distribuída, mantendo a arquitetura configurável conforme a criticidade 
+do processo monitorado. 
+Por fim, os dados gerados precisam ser compatíveis com aprendizado temporal, viabilizando o 
+uso de modelos baseados em séries temporais para a construção de fingerprints 
+físico-operacionais. 
+8.6 Especificação do Pipeline Arquitetural e Artefatos (Payloads) 
+Nesta etapa, a arquitetura proposta é especificada de forma operacional, descrevendo as 
+camadas envolvidas, os fluxos de dados e os artefatos gerados ao longo do pipeline. 
+O processo inicia na aquisição dos dados físicos, por meio da duplicação do sinal do sensor 
+antes da entrada no CLP. A partir desse ponto, os Edge Gateways realizam a coleta do sinal, o 
+enriquecimento das leituras com metadados e o compartilhamento dessas observações com 
+outros nós Edge participantes. 
+Como resultado desse fluxo, são produzidos payloads estruturados, que representam artefatos 
+técnicos centrais da proposta. Esses payloads contêm os valores físicos observados, 
+informações temporais, indicadores de qualidade e campos necessários para rastreabilidade e 
+análise posterior. 
+O pipeline também define o fluxo de validação distribuída, responsável pela construção do 
+pacote de consenso físico, bem como o fluxo de comparação entre o domínio físico e o domínio 
+lógico, onde os dados físicos validados são confrontados com os valores reportados pelo 
+CLP/SCADA. 
+Por fim, os dados resultantes desse processo são persistidos de forma assíncrona em um 
+bucket na nuvem, formando o histórico operacional e o dataset utilizado nas etapas de análise 
+e aprendizado, conforme ilustrado na Figura 6. 
+Figura 6 – Consolidação e armazenamento dos dados validados para análise e aprendizado. 
+8.7 Definição do Mecanismo de Validação Distribuída 
+Com base no requisito de tolerância a nós comprometidos, é definido o mecanismo de 
+validação distribuída executado no nível do Edge. 
+Esse mecanismo opera sobre janelas temporais, agrupando leituras físicas correspondentes ao 
+mesmo intervalo de tempo. Para cada janela, os dados recebidos de múltiplos Edge Gateways 
+são comparados entre si, permitindo avaliar a consistência das observações. 
+A partir dessa comparação, cada nó Edge é classificado de acordo com o seu comportamento, 
+sendo possível identificar leituras consistentes e nós que apresentam desvios relevantes em 
+relação ao conjunto. Esse processo permite lidar com situações em que um ou mais Edge 
+Gateways estejam defeituosos ou comprometidos. 
+Como resultado da validação distribuída, é gerado um pacote de consenso físico, que 
+representa a melhor estimativa dos valores físicos observados naquele instante, considerando 
+apenas as leituras consideradas confiáveis. 
+A escolha do mecanismo específico de validação (como abordagens baseadas em tolerância a 
+falhas bizantinas) é tratada como uma decisão técnica do projeto, alinhada às restrições 
+computacionais do Edge e ao modelo de ameaça considerado. 
+8.8 Definição do Processo de Comparação Físico × Lógico 
+Após a obtenção do consenso físico no nível do Edge, define-se o processo de comparação 
+entre os dados físicos validados e os dados lógicos reportados pela arquitetura tradicional da 
+planta. 
+Nesse processo, o valor físico consensuado é comparado com o valor lógico correspondente 
+que trafega a partir do CLP e pelo SCADA, acessado por meio das interfaces disponíveis no 
+sistema industrial. 
+A comparação é realizada com base nos valores disponíveis no sistema. Sempre que 
+informações adicionais estiverem acessíveis, como indicadores de estado ou saúde do 
+instrumento, elas também são consideradas. Caso contrário, o foco da análise permanece no 
+valor do processo. 
+Quando uma divergência relevante é identificada, o sistema registra o evento, armazenando o 
+valor físico validado, o valor lógico observado e o timestamp correspondente. Esses dados 
+passam a compor o registro físico-lógico daquele instante. 
+O resultado desse processo é incorporado ao histórico da arquitetura e utilizado tanto para 
+análise operacional quanto para a construção do dataset do estudo. 
+8.9 Construção do Dataset e Premissas para Aprendizado Profundo 
+O dataset utilizado neste trabalho é construído como resultado direto do pipeline proposto, 
+combinando dados físicos enriquecidos, resultados do consenso distribuído e informações da 
+comparação físico-lógica. Esses dados são armazenados de forma assíncrona em buckets na 
+nuvem, em formatos adequados para análise e processamento posterior. 
+A organização do dataset considera janelas temporais, variáveis observadas, metadados e 
+informações de rastreabilidade, como origem do dado e timestamps. Há uma separação clara 
+entre as etapas executadas no Edge (coleta, validação e comparação) e as etapas realizadas 
+na nuvem, voltadas ao armazenamento histórico e ao aprendizado. 
+Os dados validados servem como base para o uso de modelos temporais, como LSTM, com o 
+objetivo de aprender o comportamento físico-operacional normal dos equipamentos. Essa 
+separação reduz o risco de treinamento sobre dados contaminados ou inconsistentes. 
+8.10 Validação Teórica da Proposta 
+A validação adotada nesse PEP é de natureza teórica e analítica. O objetivo não é a 
+experimentação em uma planta industrial real, mas a verificação da coerência e da viabilidade 
+conceitual da proposta. 
+Essa validação é conduzida por meio da análise da consistência interna da arquitetura em 
+relação aos requisitos definidos, da cobertura dos cenários previstos no modelo de ameaça e 
+da comparação estruturada com os trabalhos relacionados discutidos na literatura. 
+Também é avaliada a compatibilidade da proposta com restrições típicas de sistemas 
+industriais legados, como não intrusividade, limitações computacionais no Edge e uso de 
+comunicação assíncrona com a nuvem. Esse conjunto de análises permite verificar se a 
+arquitetura proposta é plausível e alinhada com o estado da arte. 
+8.11 Síntese da Metodologia 
+Para desenvolver a solução, será adotada uma abordagem incremental. Primeiro, serão 
+definidos os requisitos com base nas falhas reais de sistemas legados, em seguida, a 
+arquitetura será esquematizada. 
+Essa organização garante coerência entre o problema de pesquisa, os objetivos definidos e a 
+solução proposta, além de facilitar a rastreabilidade das decisões técnicas ao longo do estudo.

@@ -1,0 +1,32 @@
+DEFINIÇÃO DO PROBLEMA3 DEFINIÇÃO DO PROBLEMA 
+Sistemas industriais legados dependem fortemente da integridade dos dados de processo para 
+garantir operação segura e eficiente. Nessas arquiteturas, sensores de campo representam a 
+única interface entre o domínio físico e os sistemas digitais, sendo suas medições convertidas, 
+processadas e distribuídas por CLPs para a rede industrial. Essa cadeia cria um modelo de 
+confiança implícito no qual os dados apresentados ao operador ou utilizados por sistemas 
+automáticos são assumidos como corretos e fiéis ao estado físico real do processo. 
+O problema central emerge quando essa confiança é explorada. Alterações maliciosas ou 
+falhas no caminho digital incluindo CLPs, gateways, redes industriais ou sistemas de 
+supervisão podem resultar na apresentação de valores plausíveis, porém incorretos, sem que o 
+sistema disponha de mecanismos independentes para validar as medições originais. Nesses 
+cenários, ataques silenciosos, como injeção de dados falsos, manipulação gradual de valores 
+ou replay de leituras válidas, tornam-se especialmente difíceis de detectar, como ilustrado na 
+Figura 1. 
+Figura 1 – Ausência de mecanismo independente para validar a integridade dos dados entre 
+sensor e a rede SCADA. 
+Embora existam soluções de Intrusion Detection Systems (IDS) aplicadas a ambientes 
+industriais, a maioria opera exclusivamente no domínio digital, analisando tráfego de rede, logs 
+ou padrões estatísticos de dados já processados. 
+Além disso, restrições práticas de ambientes industriais legados limitam a adoção de 
+mecanismos de segurança intrusivos ou computacionalmente intensivos, especialmente em 
+camadas críticas do processo. Isso reforça a necessidade de soluções que sejam compatíveis 
+com infraestruturas existentes, que não interfiram no controle do processo e respeitem 
+limitações de hardware e determinismo operacional. 
+Diante desse contexto, o problema de pesquisa pode ser formulado da seguinte forma: como 
+validar a integridade e a confiabilidade dos dados de processo em sistemas industriais legados, 
+de maneira independente do caminho digital tradicional, não intrusiva e compatível, de modo a 
+permitir a detecção de ataques silenciosos e inconsistências entre o domínio físico e o domínio 
+digital? 
+Essa definição orienta a investigação proposta neste trabalho e fundamenta a necessidade de 
+uma abordagem que explore o domínio físico como referência primária para validação de 
+integridade em sistemas industriais.

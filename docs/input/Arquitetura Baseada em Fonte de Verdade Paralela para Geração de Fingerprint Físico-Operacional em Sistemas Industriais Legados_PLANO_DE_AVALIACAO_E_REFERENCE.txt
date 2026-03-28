@@ -1,0 +1,97 @@
+9 PLANO DE AVALIAÇÃO 
+A avaliação proposta neste trabalho é de natureza teórica-prática. O objetivo aqui não é validar 
+a arquitetura em uma planta industrial real, mas verificar se a proposta faz sentido do ponto de 
+vista técnico, se é coerente com o problema definido e se cobre as lacunas identificadas na 
+literatura. 
+A avaliação é baseada em análises conceituais, a partir da implementação de um protótipo em 
+laboratório, observando a arquitetura proposta, seus componentes e os cenários de ataque 
+considerados. 
+9.1 Avaliação por Requisitos 
+A arquitetura será analisada em relação aos requisitos definidos na seção 8. A intenção é 
+verificar se cada pilar da proposta contribui diretamente para esses requisitos, como 
+independência do CLP e do SCADA, não intrusividade, descentralização no edge, tolerância a 
+nós comprometidos e suporte a aprendizado temporal. 
+Essa análise busca mostrar que os requisitos não são apenas listados, mas efetivamente 
+atendidos pela arquitetura proposta. 
+9.2 Avaliação por Modelo de Ameaça 
+Os cenários de ataque considerados neste trabalho, como falsificação de dados, replay, 
+manipulação gradual e comprometimento de Edge Gateways, serão usados como base para 
+avaliar a arquitetura. 
+Para cada cenário, será analisado de forma conceitual se os mecanismos propostos 
+conseguem evidenciar ou reduzir esse tipo de ataque. O foco não é quantificar desempenho, 
+mas verificar se existe um caminho lógico entre o modelo de ameaça assumido e as decisões 
+arquiteturais tomadas. 
+9.3 Avaliação Comparativa com a Literatura 
+A proposta também é avaliada por meio de comparação com os trabalhos relacionados 
+discutidos na seção 6. Essa comparação é feita utilizando a tabela comparativa apresentada, 
+destacando quais limitações das abordagens existentes são endereçadas por este trabalho e 
+quais pontos permanecem fora do escopo. 
+O objetivo dessa análise é posicionar a proposta em relação ao estado da arte, deixando claro 
+onde está a principal contribuição teórica do estudo. 
+9.4 Avaliação de Viabilidade Conceitual 
+Por fim, é realizada uma análise qualitativa da viabilidade da proposta em ambientes industriais 
+legados. São consideradas restrições práticas, como não interferência no controle do processo, 
+limitações de hardware dos dispositivos de edge e a necessidade de integração com 
+infraestruturas já existentes. 
+Essa análise serve para verificar se a arquitetura proposta poderia ser aplicada, em princípio, 
+em um ambiente industrial real, mesmo sem a implementação prática no escopo deste 
+trabalho. 
+9.5 Cronograma 
+ 
+A execução do PEP foi organizada ao longo de quatro semestres acadêmicos, mostrando as 
+etapas de revisão, etapa de organização arquitetural e redação final. 
+ 
+ 
+Atividade B1 B2 B3 B4 B5 B6 
+A1. Revisão bibliográfica complementar X      
+A2. Consolidação final da arquitetura X X     
+A3. Refinamento metodológico  X     
+A4. Expansão de Escala  X X    
+A5. Testes de Transição   X    
+A6. Métricas de Performance   X X   
+A7. Preparação de Pacotes Experimentais   X    
+A8. Testes Usuários / Avaliação    X   
+A9. Coleta de Feedback    X   
+A10. Escrita de Artigos X X X    
+A11. Revisão de Literatura Final X X X X   
+A12. Escrita da Dissertação   X X X  
+A13. Seminário de Andamento    X   
+A14. Defesa da Dissertação      X 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+10 REFERENCES 
+[1] P. Vrablec, V. Anofriev, S. Serebryakov, A. Grinberg, and A. Sinyavskiy, “Analysis, 
+classification and detection methods of attacks via wireless sensor networks in SCADA 
+systems,” Life Science Journal, vol. 11, no. 11s, pp. 384–388, 2014. 
+[2] M. Niedermaier, P. Kreimel, and M. Golling, “Efficient intrusion detection on low-performance 
+industrial IoT edge node devices,” in Proc. IEEE Int. Conf. on Industrial Cyber-Physical Systems 
+(ICPS), Taipei, Taiwan, 2019, pp. 345–350. 
+[3] F. A. M. do Nascimento, “Intrusion Detection System for IoT: Opportunities and Challenges 
+Offered by Edge Computing and Machine Learning,” Future Generation Computer Systems, 
+Elsevier, 2019. 
+[4] F. A. M. do Nascimento, “Decentralized Federated Learning-Based Intrusion Detection in IoT 
+Systems,” Doctoral Thesis, Escola Politécnica, PUCRS, Porto Alegre, Brazil, 2023. 
+[5] B. Olanrewaju-George and B. Pranggono, “Federated learning-based intrusion detection 
+system for the Internet of Things using unsupervised and supervised deep learning models,” 
+2024. 
+[6] B. D. M. Chi, D. H. Hoang, and D. P. Nguyen, “Homomorphic Encryption-Enabled Federated 
+Learning for Privacy-Preserving Intrusion Detection in Resource-Constrained IoT Networks,” 
+2024. 
+[7] Z. Aljohani, J. H. Alhajri, and S. Huda, “MDS-Based Cloned Device Detection in IoT-Fog 
+Network,” IEEE Internet of Things Journal, vol. 11, no. 11, June 2024. 
+[8] X. Wang, Q. Yuan, Y. Shen, Y. Wang, N. Su, and J. Teng, “Collaborative Intrusion Detection 
+Architecture in 6G Network: A Zero Trust Approach,” 2024. 
+[9] P. Blanchard, E. M. El Mhamdi, R. Guerraoui, and J. Stainer, “Machine learning with 
+adversaries: Byzantine tolerant gradient descent,” in Advances in Neural Information Processing 
+Systems (NeurIPS), 2017. 
+[10] E. Cavalcante, T. Batista, F. Barros, and M. Pitanga, “Context-aware security in the Internet 
+of Things: A review,” 2017.

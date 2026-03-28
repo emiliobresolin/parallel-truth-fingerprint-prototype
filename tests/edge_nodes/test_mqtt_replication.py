@@ -14,7 +14,7 @@ from parallel_truth_fingerprint.sensor_simulation.simulator import CompressorSim
 class EdgeMqttReplicationTest(unittest.TestCase):
     def setUp(self) -> None:
         simulator = CompressorSimulator(seed=41)
-        self.snapshot = simulator.step(compressor_power=70.0)
+        self.snapshot = simulator.step(operating_state_pct=70.0)
         self.relay = PassiveMqttRelay()
         self.edge_1 = TemperatureEdgeService()
         self.edge_2 = PressureEdgeService()
@@ -66,7 +66,9 @@ class EdgeMqttReplicationTest(unittest.TestCase):
 
         stages = [entry["stage"] for entry in self.edge_1.observation_flow_log()]
 
+        self.assertIn("process_state_generation", stages)
         self.assertIn("sensor_generation", stages)
+        self.assertIn("transmitter_observation", stages)
         self.assertIn("local_edge_acquisition", stages)
         self.assertIn("mqtt_publication", stages)
         self.assertIn("edge_local_replicated_state", stages)
@@ -125,7 +127,7 @@ class TransportSelectionTest(unittest.TestCase):
             callback=lambda publisher_id, payload: received_payloads.append((publisher_id, payload)),
         )
         sample_payload = PressureEdgeService().acquire(
-            snapshot=CompressorSimulator(seed=52).step(compressor_power=58.0)
+            snapshot=CompressorSimulator(seed=52).step(operating_state_pct=58.0)
         )
 
         transport.publish(
@@ -139,6 +141,31 @@ class TransportSelectionTest(unittest.TestCase):
         self.assertEqual(received_payloads[0][1].process_data.pv.unit, "bar")
         self.assertEqual(transport._client.connected_to, ("localhost", 1883, 60))
         self.assertTrue(transport._client.loop_started)
+
+    def test_serialization_roundtrip_supports_missing_secondary_variable(self) -> None:
+        transport = RealMqttTransport(
+            host="localhost",
+            port=1883,
+            client_factory=FakeMqttClient,
+        )
+        received_payloads = []
+        transport.subscribe(
+            topic="edges/observations",
+            subscriber_id="edge-1",
+            callback=lambda publisher_id, payload: received_payloads.append((publisher_id, payload)),
+        )
+        sample_payload = RpmEdgeService().acquire(
+            snapshot=CompressorSimulator(seed=53).step(operating_state_pct=61.0)
+        )
+
+        transport.publish(
+            topic="edges/observations",
+            publisher_id="edge-3",
+            payload=sample_payload,
+        )
+
+        self.assertEqual(len(received_payloads), 1)
+        self.assertIsNone(received_payloads[0][1].process_data.sv)
 
 
 if __name__ == "__main__":

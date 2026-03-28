@@ -1,0 +1,164 @@
+5 FUNDAMENTAÇÃO TEÓRICA 
+5.1 Sistemas Industriais Legados e Instrumentação de Campo 
+Sistemas industriais legados ainda são amplamente baseados em instrumentação cabeada, 
+utilizando sinais físicos contínuos para representar variáveis de processo. Tecnologias como 
+sinais analógicos 4~20 mA (HART), Profibus PA e outros Fieldbuses industriais continuam 
+sendo predominantes em plantas industriais devido à sua robustez, previsibilidade e longa vida 
+útil. 
+Nessas arquiteturas, sensores e transmissores convertem fenômenos físicos como pressão, 
+temperatura, vazão e nível em sinais elétricos, que são enviados diretamente aos 
+Controladores Lógicos Programáveis (CLPs). O CLP é responsável por converter esses sinais 
+físicos em valores digitais e disponibilizá-los para sistemas de supervisão (SCADA/HMI), onde 
+operadores humanos e sistemas automáticos tomam decisões com base nessas informações. 
+Essa separação entre domínio físico e domínio digital é uma característica fundamental dos 
+sistemas industriais, mas também introduz um ponto crítico de dependência: a confiança de 
+que os valores digitais apresentados representam fielmente o estado físico real do processo, 
+conforme ilustrado na Figura 2. 
+Figura 2 – Arquitetura tradicional de comunicação entre sensores, CLP e sistema SCADA. 
+5.2 Protocolos Industriais e Comunicação na Rede Industrial 
+A comunicação em sistemas industriais ocorre em múltiplas camadas, cada uma com 
+responsabilidades e características distintas. Em particular, é fundamental diferenciar a 
+comunicação de campo, responsável pela aquisição do sinal físico dos sensores, da 
+comunicação de controle e supervisão, utilizada para a troca de dados entre redes industriais e 
+sistemas SCADA. 
+5.2.1 Comunicação de Campo: Sensores e Instrumentos até o CLP 
+A comunicação de campo corresponde ao nível mais próximo do processo físico, onde 
+sensores e instrumentos transmitem grandezas como pressão, temperatura ou vazão para os 
+Controladores Lógicos Programáveis (CLPs). Nessa camada, os protocolos e tecnologias são 
+projetados para operar em ambientes ruidosos, com forte acoplamento ao domínio físico e 
+requisitos determinísticos. 
+Tecnologias amplamente utilizadas nesse nível incluem sinais analógicos padrão, como 4~20 
+mA, bem como protocolos digitais industriais como HART, PROFIBUS-PA, Fieldbus e Modbus 
+RTU, operando sobre meios seriais como RS-232 ou RS-485. 
+No contexto desta pesquisa, essa camada representa a fonte primária da verdade física do 
+processo, sendo explorada diretamente pelos dispositivos de Edge Computing para a obtenção 
+de leituras independentes do caminho lógico tradicional da planta. 
+5.2.2 Comunicação de Controle e Supervisão: CLP até a Rede Industrial 
+Após a aquisição do sinal físico, o CLP realiza a conversão, normalização e encapsulamento 
+dos dados de processo, disponibilizando-os à rede industrial e aos sistemas de supervisão. 
+Essa comunicação ocorre por meio de protocolos orientados à troca de dados digitais, 
+geralmente sobre infraestrutura Ethernet industrial. 
+Protocolos como EtherNet/IP, PROFINET, Modbus TCP e DNP3 são amplamente utilizados 
+nessa camada, permitindo a integração entre CLPs, IHMs e sistemas SCADA. Adicionalmente, 
+OPC UA destaca-se por fornecer um modelo de dados semântico, com suporte a metadados, 
+autenticação e criptografia, sendo frequentemente empregado como interface entre o domínio 
+OT e aplicações de nível superior. 
+Essa camada representa o domínio lógico da planta, no qual os valores de processo já 
+passaram por tratamento interno no CLP e são apresentados ao operador e a sistemas de 
+supervisão. Consequentemente, inconsistências ou adulterações introduzidas nesse estágio 
+podem não refletir fielmente o estado físico real do processo. 
+5.2.3 Integração com Edge Computing e Camadas Superiores 
+Além dos protocolos utilizados na comunicação de campo e na rede industrial, arquiteturas IIoT 
+modernas utilizam mecanismos leves para integrar serviços. Hoje, protocolos como o MQTT 
+são amplamente adotados por apresentarem baixo overhead, comunicação assíncrona e bom 
+suporte a arquiteturas distribuídas. 
+Na arquitetura proposta, o MQTT envia os dados coletados e validados no edge para as 
+camadas superiores de análise. Cada Gateway publica tanto as leituras brutas dos sensores 
+quanto os resultados da validação, permitindo que todos os Edge participantes do sistema 
+consumam essas informações de forma independente. 
+Esse mecanismo garante a disseminação descentralizada dos pacotes físicos validados entre 
+os Edges e para as camadas superiores. 
+A comparação com os dados lógicos do SCADA, por sua vez, só é possível porque o Edge 
+também realiza a leitura direta do sistema supervisório via OPC-UA ou Modbus TCP por 
+exemplo, acessando o valor que o CLP está efetivamente reportando na rede industrial. 
+Com isso, torna-se possível comparar os dados físicos (coletados e validados no edge) com os 
+dados lógicos (vistos pelo SCADA). Se houver qualquer divergência entre eles, fica mais claro 
+identificar se o problema é uma falha no processo, um erro de configuração ou uma possível 
+adulteração de dados na rede. 
+5.2.4 Acesso do Edge ao Sistema SCADA e ao Domínio Lógico 
+Além da integração com camadas superiores por meio de protocolos como MQTT, a arquitetura 
+proposta requer que o Edge Gateway acesse diretamente o domínio lógico da planta. Esse 
+acesso é realizado por meio de protocolos industriais de supervisão, como OPC UA ou Modbus 
+TCP, permitindo que o Edge leia os valores digitais que o CLP está efetivamente 
+disponibilizando à rede industrial e aos sistemas SCADA. 
+Diferentemente da comunicação de campo, na qual o Edge observa o sinal físico antes da 
+conversão lógica, nesse estágio o Edge atua como cliente da rede industrial, consultando 
+variáveis, estados e indicadores de qualidade já processados pelo CLP. Essa leitura não altera 
+o comportamento do sistema supervisório, sendo realizada de forma passiva e não intrusiva. O 
+Edge não interfere no tráfego da rede, podendo atuar como cliente legítimo (OPC UA, Modbus 
+TCP ou APIs REST) ou, quando necessário, como leitor passivo por meio de espelhamento de 
+porta (mirror port) em switches industriais. 
+Na prática, diferentes cenários podem ser encontrados em plantas industriais. Quando a planta 
+utiliza OPC-UA, o Edge executa um cliente OPC-UA, descobre o endpoint do servidor no CLP 
+ou no SCADA, realiza autenticação e pode efetuar operações. Em ambientes baseados em 
+Modbus TCP (porta 502), o Edge atua como cliente, conectando-se ao dispositivo ou servidor 
+que disponibiliza os dados na rede industrial e realizando leitura periódica de registradores (em 
+muitos casos é do proprio CLP pois o servidor Modbus TCP normalmente está no CLP). Caso a 
+comunicação seja serial, como Modbus RTU sobre RS-485, pode-se utilizar um gateway de 
+conversão serial-para-TCP, permitindo que o Edge acesse os dados via rede Ethernet. Em 
+protocolos como PROFINET ou EtherNet/IP, o acesso direto pode ser mais restrito; nesses 
+casos, pode-se empregar técnicas como explicit messaging (quando suportado) ou 
+espelhamento de porta para captura passiva de tráfego, embora essa abordagem seja mais 
+complexa e menos recomendada como primeira opção. Em sistemas baseados em DNP3, 
+comuns em energia, o Edge pode operar como cliente, realizando polling ou assinatura de 
+eventos. 
+Estratégicamente, a arquitetura prioriza OPC UA e Modbus TCP como mecanismos primários 
+de integração, por serem amplamente suportados e permitirem acesso não intrusivo aos dados 
+já disponibilizados pelo CLP. 
+Esse mecanismo é fundamental para a arquitetura proposta, pois viabiliza a comparação entre 
+o valor físico validado no Edge e o valor lógico apresentado ao operador. Assim, torna-se 
+possível identificar inconsistências introduzidas no domínio digital, mesmo quando os dados 
+apresentados pelo SCADA permanecem plausíveis sob uma análise puramente lógica, 
+conforme ilustrado na Figura 3. 
+Figura 3 – Integração do Edge ao sistema SCADA por meio de cliente OPC UA autenticado. 
+5.3 Edge Computing em Ambientes Industriais 
+Edge Computing refere-se à distribuição de capacidades computacionais para camadas 
+próximas à fonte dos dados, reduzindo a dependência de conectividade externa e pontos 
+únicos de falha. Em ambientes industriais, Edge Computing permite a execução de tarefas de 
+aquisição, pré-processamento e validação de dados diretamente próximos ao processo físico. 
+Dispositivos conhecidos como Edge Gateways são utilizados para esse fim, oferecendo 
+interfaces industriais, capacidade de processamento local e conectividade com redes 
+industriais e sistemas em nuvem. Esses dispositivos são projetados para operar em ambientes 
+adversos, respeitando restrições de consumo energético e robustez exigidas por plantas 
+industriais. 
+5.4 Sistemas de Detecção de Intrusão (IDS) em Ambientes Industriais 
+Legados 
+Intrusion Detection Systems (IDS) aplicados a sistemas industriais têm sido amplamente 
+estudados na literatura, com abordagens que incluem análise de tráfego de rede, inspeção de 
+pacotes, análise de logs e aplicação de técnicas de Machine Learning e Deep Learning, 
+conforme discutido por Niedermaier et al. (2019) [2] e Nascimento (2019) [3]. 
+Entretanto, grande parte dessas abordagens opera exclusivamente sobre dados digitais já 
+processados, como pacotes de rede, fluxos de comunicação ou valores disponibilizados por 
+sistemas SCADA. Essa característica limita a capacidade de detectar ataques que manipulam 
+a representação digital, mantendo valores plausíveis para operadores e sistemas automáticos, 
+especialmente em arquiteturas industriais legadas [2], [3]. 
+Além disso, ambientes industriais impõem restrições severas à adoção de mecanismos de 
+segurança intrusivos, uma vez que alterações dos dados dos dispositivos de campo, CLPs ou 
+redes podem impactar diretamente a segurança operacional e a disponibilidade do processo, 
+como observado em estudos voltados à aplicação de IDS em ambientes industriais reais [2]. 
+5.5 Falhas Bizantinas e Validação Distribuída 
+Em sistemas distribuídos, falhas bizantinas representam situações nas quais componentes 
+podem apresentar comportamentos arbitrários, incluindo envio de dados incorretos, atrasados 
+ou manipulados. Em sistemas industriais descentralizados, essa possibilidade deve ser 
+considerada. 
+A literatura em sistemas distribuídos e aprendizado colaborativo destaca a importância de 
+mecanismos de validação tolerantes a falhas bizantinas para evitar a propagação de dados 
+comprometidos e o envenenamento de processos coletivos de decisão. Esses mecanismos 
+permitem identificar e isolar fontes inconsistentes antes que seus dados sejam utilizados como 
+referência confiável. 
+5.6 Datasets para IDS Industrial e Limitações Existentes 
+A literatura sobre detecção de intrusão frequentemente menciona datasets públicos, como 
+NSL-KDD, CICIDS, TON_IoT e IoTID20. Embora esses datasets sejam amplamente utilizados, 
+eles são predominantemente focados em cenários de TI ou IoT de consumo, capturando 
+tráfego de rede, eventos de sistema ou dados gerados em ambientes controlados de 
+laboratório. 
+Esses datasets raramente incorporam sinais físicos reais, diagnósticos completos de protocolos 
+industriais ou as condições ruidosas e não determinísticas presentes em plantas industriais 
+legadas. Como consequência, eles apresentam limitações significativas para representar 
+ataques que exploram a relação entre o domínio físico e o domínio digital. 
+5.7 Aprendizado Profundo em Séries Temporais Industriais 
+Técnicas de Deep Learning têm sido investigadas para detecção de anomalias e modelagem 
+de comportamento em sistemas industriais. Em particular, modelos voltados a séries temporais 
+são adequados para capturar a dinâmica de processos físicos, nos quais variáveis apresentam 
+dependências temporais, transientes e padrões evolutivos. 
+Redes recorrentes, como Long Short-Term Memory (LSTM) e Gated Recurrent Units (GRU), 
+são frequentemente utilizadas para modelar dependências de curto e longo prazo em dados 
+industriais. Outras abordagens incluem redes convolucionais unidimensionais (CNN 1D), 
+aplicadas à extração de padrões locais em séries temporais para aprendizado de 
+representações compactas e detecção de desvios em relação a comportamentos normais. 
+5.8 Considerações Finais da Fundamentação 
+Os conceitos apresentados nesta seção estabelecem as bases necessárias para a 
+compreensão da proposta desenvolvida neste trabalho. A combinação de sistemas industriais 
+legados, comunicação por protocolos industriais, Edge Computing, validação distribuída e 
+aprendizado profundo em séries temporais, estes definem o contexto técnico no qual a 
+arquitetura proposta será apresentada e avaliada.

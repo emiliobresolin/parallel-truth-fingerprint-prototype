@@ -1,0 +1,29 @@
+4 OBJETIVOS 
+4.1 Objetivo Geral 
+Investigar e propor uma arquitetura de detecção e validação de integridade de dados para 
+sistemas industriais legados, baseada na observação física independente do processo, em 
+Edge Computing com dados descentralizados e com um modelo de Aprendizado de Máquina 
+para criação de um fingerprint comportamental de equipamentos, capaz de identificar 
+inconsistências e possíveis ataques silenciosos entre o domínio físico e o domínio digital, de 
+forma não intrusiva e compatível com ambientes industriais reais. 
+4.2 Objetivos Específicos 
+Os objetivos específicos deste trabalho são: 
+● Analisar as limitações das abordagens tradicionais de IDS aplicadas a IIoT e sistemas 
+industriais legados.  
+● Projetar uma arquitetura de aquisição redundante do sinal físico que permita a criação 
+de uma fonte de verdade física paralela, independente do CLP e do sistema SCADA, 
+sem interferir no processo industrial. 
+● Definir um mecanismo de descentralização e compartilhamento de observações físicas 
+utilizando Edge Gateways, adequado às restrições de hardware e comunicação de 
+ambientes industriais legados. 
+● Investigar e aplicar um mecanismo leve de validação distribuída tolerante a falhas 
+bizantinas para identificar leituras discrepantes e nós potencialmente comprometidos na 
+camada Edge. 
+● Desenvolver um método de comparação entre os valores físicos validados e os valores 
+reportados no domínio digital, visando a detecção de adulterações, inconsistências 
+semânticas e ataques silenciosos. 
+● Estruturar a geração de um dataset físico-operacional baseado em medições reais, 
+validadas por consenso, para suporte a técnicas de aprendizado de máquina. 
+● Avaliar o uso de modelos de aprendizado de máquina baseados em séries temporais 
+para a criação de fingerprints físico-comportamentais de equipamentos industriais, a 
+partir dos dados coletados e validados pela arquitetura proposta.

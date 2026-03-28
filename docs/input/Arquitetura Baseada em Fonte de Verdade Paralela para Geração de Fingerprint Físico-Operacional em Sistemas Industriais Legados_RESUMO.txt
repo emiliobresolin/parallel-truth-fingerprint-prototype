@@ -1,0 +1,26 @@
+RESUMO 
+Sistemas industriais legados dependem fortemente da integridade dos dados de 
+processo para garantir operações seguras e eficientes. Nessas arquiteturas, sensores 
+de campo representam a interface entre o domínio físico e os sistemas digitais, sendo 
+suas medições convertidas e disponibilizadas por CLPs a sistemas SCADA e demais 
+camadas de supervisão. Entretanto, a confiança implícita no caminho digital pode ser 
+explorada por ataques silenciosos, como falsificação de dados, replay ou manipulação 
+gradual de valores plausíveis. 
+Grande parte das abordagens atuais de Intrusion Detection Systems (IDS) opera 
+exclusivamente sobre dados já digitalizados, assumindo que a representação lógica do 
+processo reflete corretamente o estado físico real. Quando esse pressuposto é violado, 
+mecanismos de detecção e aprendizado podem operar sobre dados já comprometidos. 
+Este trabalho propõe uma arquitetura baseada na criação de uma Fonte de Verdade 
+Física Paralela, obtida por meio da duplicação não intrusiva do sinal do sensor antes da 
+entrada no CLP. As leituras físicas são coletadas por Edge Gateways, compartilhadas 
+de forma descentralizada, validadas por mecanismo tolerante a falhas bizantinas e 
+comparadas com os valores lógicos reportados na rede industrial. A partir desse 
+processo, é construído um dataset físico-operacional utilizado para treinamento de um 
+modelo de Deep Learning baseado em LSTM, responsável por gerar fingerprints 
+comportamentais dos equipamentos industriais. 
+A proposta integra duplicação física, validação distribuída e aprendizado temporal em 
+uma única arquitetura, posicionando o domínio físico como referência primária de 
+integridade. O trabalho é de natureza teórico-propositiva e avalia a coerência da 
+solução por meio de análise conceitual e comparação com o estado da arte. 
+Palavras-chave: IDS Industrial, Edge Computing, Falhas Bizantinas, Deep Learning, 
+LSTM, Sistemas Industriais Legados.

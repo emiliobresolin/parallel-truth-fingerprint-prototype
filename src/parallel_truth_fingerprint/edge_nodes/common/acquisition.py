@@ -33,6 +33,9 @@ from parallel_truth_fingerprint.sensor_simulation.simulator import (
     CompressorSimulator,
     SimulationSnapshot,
 )
+from parallel_truth_fingerprint.sensor_simulation.transmitter_observation import (
+    TransmitterVariableObservation,
+)
 
 
 @dataclass(frozen=True)
@@ -46,7 +49,6 @@ class EdgeDeviceConfig:
     device_type: int
     unit: str
     unit_code: int | None
-    secondary_description: str
     sensor_range: SensorRange
 
 
@@ -71,7 +73,6 @@ EDGE_DEVICE_CONFIGS: dict[str, EdgeDeviceConfig] = {
         device_type=33,
         unit="degC",
         unit_code=32,
-        secondary_description="Compressor_Power",
         sensor_range=DEFAULT_COMPRESSOR_PROFILE.temperature,
     ),
     "edge-2": EdgeDeviceConfig(
@@ -84,7 +85,6 @@ EDGE_DEVICE_CONFIGS: dict[str, EdgeDeviceConfig] = {
         device_type=44,
         unit="bar",
         unit_code=7,
-        secondary_description="Compressor_Power",
         sensor_range=DEFAULT_COMPRESSOR_PROFILE.pressure,
     ),
     "edge-3": EdgeDeviceConfig(
@@ -97,21 +97,9 @@ EDGE_DEVICE_CONFIGS: dict[str, EdgeDeviceConfig] = {
         device_type=52,
         unit="rpm",
         unit_code=None,
-        secondary_description="Compressor_Power",
         sensor_range=DEFAULT_COMPRESSOR_PROFILE.rpm,
     ),
 }
-
-
-def _percent_range(value: float, sensor_range: SensorRange) -> float:
-    span = sensor_range.maximum - sensor_range.minimum
-    if span <= 0:
-        return 0.0
-    return round(((value - sensor_range.minimum) / span) * 100.0, 3)
-
-
-def _loop_current_from_percent(percent_range: float) -> float:
-    return round(4.0 + (16.0 * (percent_range / 100.0)), 3)
 
 
 def _stability_score(rate_of_change: float, noise_floor: float) -> float:
@@ -142,6 +130,7 @@ class EdgeAcquisitionService:
         self,
         *,
         snapshot: SimulationSnapshot | None = None,
+        operating_state_pct: float | None = None,
         compressor_power: float | None = None,
     ) -> RawHartPayload:
         """Read, interpret, and encode one local physical measurement.
@@ -150,19 +139,41 @@ class EdgeAcquisitionService:
         The edge then transforms that observation into a digital raw payload.
         """
 
-        reading = snapshot or self._simulator.step(compressor_power=compressor_power)
+        reading = snapshot or self._simulator.step(
+            operating_state_pct=operating_state_pct,
+            compressor_power=compressor_power,
+        )
+        transmitter_observation = reading.transmitter_observations[self.device_config.sensor_name]
+        self._runtime.observation_flow_log.append(
+            {
+                "stage": "process_state_generation",
+                "edge_id": self.device_config.edge_id,
+                "sensor_name": self.device_config.sensor_name,
+                "operating_state_pct": reading.operating_state_pct,
+                "hidden_process_state": reading.metadata.get("hidden_process_state"),
+            }
+        )
         self._runtime.observation_flow_log.append(
             {
                 "stage": "sensor_generation",
                 "edge_id": self.device_config.edge_id,
                 "sensor_name": self.device_config.sensor_name,
-                "compressor_power": reading.compressor_power,
-                "value": reading.sensors[self.device_config.sensor_name],
+                "operating_state_pct": reading.operating_state_pct,
+                "value": transmitter_observation.pv.value,
             }
         )
-        pv_value = round(reading.sensors[self.device_config.sensor_name], 3)
-        percent_range = _percent_range(pv_value, self.device_config.sensor_range)
-        loop_current = _loop_current_from_percent(percent_range)
+        self._runtime.observation_flow_log.append(
+            {
+                "stage": "transmitter_observation",
+                "edge_id": self.device_config.edge_id,
+                "sensor_name": self.device_config.sensor_name,
+                "observation": transmitter_observation.to_dict(),
+            }
+        )
+
+        pv_value = round(transmitter_observation.pv.value, 3)
+        percent_range = transmitter_observation.pv_percent_range
+        loop_current = transmitter_observation.loop_current_ma
         rate_of_change = 0.0
         if self._runtime.previous_pv is not None:
             rate_of_change = round(pv_value - self._runtime.previous_pv, 3)
@@ -189,22 +200,19 @@ class EdgeAcquisitionService:
             process_data=ProcessData(
                 pv=ProcessVariable(
                     value=pv_value,
-                    unit=self.device_config.unit,
-                    unit_code=self.device_config.unit_code,
+                    unit=transmitter_observation.pv.unit,
+                    unit_code=transmitter_observation.pv.unit_code,
+                    description=transmitter_observation.pv.description,
                 ),
-                sv=ProcessVariable(
-                    value=round(reading.compressor_power, 3),
-                    unit="percent",
-                    description=self.device_config.secondary_description,
-                ),
+                sv=self._payload_secondary_variable(transmitter_observation.sv),
                 loop_current_ma=loop_current,
                 pv_percent_range=percent_range,
                 physics_metrics=physics_metrics,
             ),
             diagnostics=Diagnostics(
-                device_status_hex="0x00",
-                field_device_malfunction=False,
-                loop_current_saturated=loop_current <= 4.0 or loop_current >= 20.0,
+                device_status_hex=transmitter_observation.diagnostics.device_status_hex,
+                field_device_malfunction=transmitter_observation.diagnostics.field_device_malfunction,
+                loop_current_saturated=transmitter_observation.diagnostics.loop_current_saturated,
                 cold_start=self._runtime.acquisition_count == 0,
             ),
         )
@@ -219,9 +227,23 @@ class EdgeAcquisitionService:
                 "sensor_name": self.device_config.sensor_name,
                 "payload_timestamp": payload.timestamp,
                 "pv_value": pv_value,
+                "sv_present": payload.process_data.sv is not None,
             }
         )
         return payload
+
+    def _payload_secondary_variable(
+        self,
+        secondary_variable: TransmitterVariableObservation | None,
+    ) -> ProcessVariable | None:
+        if secondary_variable is None:
+            return None
+        return ProcessVariable(
+            value=secondary_variable.value,
+            unit=secondary_variable.unit,
+            unit_code=secondary_variable.unit_code,
+            description=secondary_variable.description,
+        )
 
     def attach_transport(
         self,

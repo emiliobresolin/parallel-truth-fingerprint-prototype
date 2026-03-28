@@ -1,0 +1,161 @@
+6 REVISÃO DA LITERATURA 
+A revisão da literatura priorizou trabalhos que abordam IDS no edge e proximidade do processo 
+físico, mecanismos de descentralização e comunicação leve, estratégias de tolerância a nós 
+comprometidos por meio de detecção bizantina, e o uso de aprendizado de máquina para 
+identificação de padrões temporais e fingerprints físico-operacionais a partir de dados 
+previamente validados. 
+Niedermaier et al. (2019) defendem IDS distribuídos em dispositivos/edges de baixa 
+capacidade, explorando a motivação de levar detecção “para perto” do processo e reduzindo 
+dependência de defesas centralizadas/perímetro. Complementarmente, Olanrewaju-George e 
+Pranggono (2024) discutem abordagens colaborativas baseadas em aprendizado distribuído 
+para IDS em IoT, reforçando a necessidade de arquiteturas descentralizadas em cenários com 
+nós limitados. A literatura sustenta o movimento “edge-first”, mas normalmente opera sobre 
+dados já digitalizados (rede/logs/telemetria), não sobre uma fonte física paralela. 
+Nascimento (2023) destaca que arquiteturas descentralizadas baseadas em aprendizado 
+federado podem aumentar robustez e escalabilidade em ambientes distribuídos. Cavalcante et 
+al. (2017) discutem o papel de camadas “context-aware” para organizar dados como entidades 
+com significado, suportando a visão de estruturar dados operacionais com semântica e 
+consulta, não somente transporte. 
+Blanchard et al. (2017) formalizam o problema de adversários/nós bizantinos em sistemas 
+distribuídos, enfatizando que nós podem manipular informação arbitrariamente e precisam ser 
+considerados no modelo de ameaça. A literatura oferece base forte para duvidar da confiança 
+entre nós, mas em geral discute isso em contexto de consenso, otimização e colaboração. 
+Nascimento (2019) e Olanrewaju-George e Pranggono (2024) indicam que ataques em 
+sistemas industriais tendem a se manifestar como desvios temporais sutis e progressivos, 
+difíceis de detectar. Nesse contexto, a etapa de aprendizado é posicionada como dependente 
+de um dataset operacional rico e temporal, resultando em um artefato treinado que representa 
+o comportamento físico do equipamento (“fingerprint”), capaz de detectar falsificações sutis, 
+desvios graduais e anomalias físicas incompatíveis. 
+6.1 Limitação que permanece e posicionamento do projeto 
+A literatura avança em IDS no edge, descentralização, comunicação leve, tolerância a nós 
+comprometidos e uso de aprendizado profundo para padrões temporais, mas em geral parte do 
+pressuposto de que os dados digitais fornecidos pelo controlador (CLP) ou pela rede (SCADA) 
+representam corretamente o estado físico do processo. Esse pressuposto se torna 
+problemático quando o caminho CLP/SCADA é adulterado com valores plausíveis, porém 
+fisicamente incorretos, fazendo com que mecanismos de validação e aprendizado operem 
+sobre dados já comprometidos. O projeto se posiciona exatamente nesse ponto, ao introduzir 
+uma referência física paralela, obtida diretamente do processo via edge, que é usada para 
+confrontar a representação digital antes que os dados sejam compartilhados, validados de 
+forma distribuída ou utilizados nos estágios de aprendizado. 
+6.2 Análise Comparativa dos Trabalhos (síntese crítica) 
+A comparação dos trabalhos selecionados mostra que a literatura cobre bem quatro eixos 
+isolados: IDS no Edge para reduzir latência e custo centralizado, uso de protocolos leves e 
+camadas de contexto para integração, mecanismos de robustez a nós comprometidos (linha 
+“bizantina”), e Deep Learning para modelar séries temporais e detectar anomalias. 
+Entretanto, os trabalhos tendem a assumir que o dado disponível para detecção/aprendizado já 
+é um reflexo confiável do processo. Assim, quando o caminho CLP/SCADA é adulterado com 
+valores plausíveis (false data injection, replay, manipulação gradual), as abordagens analisadas 
+não oferecem um mecanismo explícito de “fonte física independente” para confrontar o estado 
+real do processo com a representação lógica. 
+A proposta desse PEP se posiciona como um “encaixe” entre esses eixos: ela aproveita a 
+motivação do Edge-first, incorpora descentralização/compartilhamento, usa validação resiliente 
+antes de aceitar dados como verdade, e só então constrói um dataset adequado para Deep 
+Learning temporal, porém com um diferencial: a referência primária de integridade é o domínio 
+físico, paralelo ao CLP/SCADA. 
+Tabela 1: Comparação dos Trabalhos Relacionados 
+Trabalho Relacionado 
+Ano 
+Edge 
+Distribuído 
+Fonte 
+Verdade 
+Vrablec et al. 
+Niedermaier et al. 
+2014 
+2019 
+Não 
+Sim 
+Não 
+Validação 
+Distribuída 
+Não 
+Finger 
+print 
+Não 
+Físico × 
+SCADA 
+Não 
+Não 
+Nascimento 
+Blanchard et al. 
+2019 
+2017 
+Sim 
+Não 
+Não 
+Não 
+Não 
+Parcial 
+Parcial 
+Não 
+Não 
+Não 
+Sim 
+Cavalcante et al. 
+Olanrewaju-George & 
+Pranggono 
+2017 
+2024 
+Parcial 
+Sim 
+Não 
+Não 
+Não 
+Não 
+Não 
+Não 
+Não 
+Nascimento 
+Nguyen et al. 
+2023 
+2024 
+Sim 
+Sim 
+Não 
+Parcial 
+Parcial 
+Sim 
+Sim 
+Não 
+Não 
+Não 
+Aljohani et al. 
+2024 
+Parcial 
+Não 
+Parcial 
+Parcial 
+Sim 
+Não 
+Não 
+Não 
+Wang et al. 
+2024 
+Sim 
+Não 
+Parcial 
+Não 
+Proposta deste 
+Trabalho 
+2025 
+Sim 
+Sim 
+Sim 
+Sim 
+Não 
+Sim 
+A Tabela 1 mostra a comparação entre os trabalhos analisados e a proposta deste PEP. 
+Embora a literatura avance em detecção no Edge, aprendizado temporal e validação 
+distribuída, nenhuma das abordagens analisadas estabelece uma fonte de verdade baseada 
+diretamente no domínio físico, independente do CLP/SCADA, nem realiza a comparação 
+explícita entre estado físico e representação digital. A proposta deste trabalho se diferencia ao 
+integrar esses aspectos em uma única arquitetura. 
+Observação: 
+Os trabalhos de Arshad et al. (2018) — survey sobre IDS em IoT e Morris et al. (2015) — 
+ambiente de simulação para ICS, embora considerados ao longo deste estudo, não foram 
+incluídos na análise comparativa apresentada nesta tabela por não proporem arquiteturas de 
+detecção de intrusão diretamente comparáveis à proposta deste PEP. O primeiro consiste em 
+um survey sobre IDS em IoT, com foco em classificação, desempenho e desafios, enquanto o 
+segundo trata de ambientes de simulação e geração de dados para pesquisa em segurança de 
+sistemas industriais. Ambos são utilizados como fundamentação teórica e metodológica, mas 
+não como soluções arquiteturais de IDS.

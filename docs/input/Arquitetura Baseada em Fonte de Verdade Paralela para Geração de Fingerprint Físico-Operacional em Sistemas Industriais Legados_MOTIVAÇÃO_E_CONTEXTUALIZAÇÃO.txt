@@ -1,0 +1,37 @@
+2 MOTIVAÇÃO E CONTEXTUALIZAÇÃO
+2 MOTIVAÇÃO E CONTEXTUALIZAÇÃO 
+2.1 Contextualização do Cenário Industrial 
+Plantas industriais operam majoritariamente com infraestruturas legadas, nas quais sensores 
+de campo, instrumentos analógicos e redes industriais foram projetados para ambientes 
+isolados e com ciclos de vida longos. A modernização desses ambientes ocorre de forma 
+incremental, incorporando supervisão remota e integração com sistemas corporativos, sem a 
+substituição completa dos dispositivos existentes. 
+Na prática, os sensores continuam sendo responsáveis por converter fenômenos físicos em 
+sinais elétricos, que são posteriormente interpretados por controladores e sistemas de 
+supervisão. A confiabilidade operacional dessas medições é essencial, pois pequenas 
+variações ou inconsistências podem impactar diretamente a eficiência do processo, a 
+segurança de equipamentos e a tomada de decisão humana. 
+2.2 Limitações Práticas de Segurança em Sistemas Legados 
+A segurança de sistemas industriais enfrenta restrições que são diferentes de ambientes de TI 
+tradicionais. Em plantas legadas, alterações em sensores de campo são custosas, arriscadas 
+e, muitas vezes, inviáveis. 
+Além disso, mecanismos de segurança complexos como inspeção profunda de pacotes, 
+criptografia ou coleta extensiva de logs podem introduzir latência, perda de determinismo ou 
+instabilidade no controle do processo. Como consequência, muitas arquiteturas industriais 
+mantêm modelos de confiança implícitos, baseados na suposição de que dispositivos de 
+campo e controladores operam corretamente. 
+Essas limitações práticas dificultam a implementação de mecanismos de validação 
+independentes e tornam a detecção de ataques silenciosos muito difícil, já que alterações nos 
+dados podem permanecer dentro de faixas consideradas normais pelos sistemas de 
+supervisão. 
+2.3 Motivação Científica 
+Do ponto de vista científico, essas restrições evidenciam a necessidade de abordagens de 
+segurança que respeitem as características dos sistemas industriais legados.  
+A motivação deste trabalho surge pela necessidade de validar o processo industrial a partir dos 
+dados físicos coletados, e não apenas pelos dados enviados através dos pacotes de rede. 
+Busca-se estratégias que usem Edge Computing de forma descentralizada e processamento 
+descentralizado em Edge Computing, de forma não intrusiva e compatível com ambientes 
+industriais reais. Ao considerar o domínio físico como elemento central para validação de 
+integridade, abre-se espaço para novas abordagens capazes de complementar mecanismos 
+tradicionais de detecção e fortalecer a confiabilidade dos dados utilizados em sistemas de 
+automação industrial.

@@ -1,0 +1,59 @@
+1 INTRODUÇÃO 
+Apesar do rápido avanço tecnológico ocorrido nos últimos anos na indústria, o uso de sensores 
+inteligentes conectados via cabo as redes industriais para suportar operação, supervisão e 
+manutenção em tempo real ainda é uma realidade. Em ambientes SCADA, amplamente 
+utilizados pelas indústrias, os dados adquiridos de processos são utilizados não apenas para 
+monitoramento, mas também para tomada de decisão operacional, acionamento de alarmes e, 
+em muitos casos, para controle automático. Ataques aos dispositivos sensores, aos 
+dispositivos intermediários responsáveis por receber os dados dos sensores e enviar ao 
+sistema SCADA ou ao meio de comunicação através da geração de ruído e consequente 
+alteração dos dados, vem aumentando nos últimos anos, causando preocupações quanto a 
+integridade e veracidade dos dados recebidos pelo sistema SCADA para a tomada de decisão. 
+Desta forma, a integridade, confiabilidade e veracidade dos dados recebidos pelo sistema se 
+torna um requisito central de segurança. 
+Outro ponto importante que deve ser destacado é o fato de a indústria ainda operar com um 
+conjunto significativo de sistemas legados que utilizam tecnologias já ultrapassadas, mas que 
+atendem os requisitos operacionais, deixando a desejar em relação aos requisitos mínimos de 
+segurança da informação. Sistemas industriais legados frequentemente operam com 
+arquiteturas onde o Controlador Lógico Programável (CLP) e a rede SCADA/HMI atuam como 
+intermediários naturais entre o mundo físico e o mundo digital. Contudo, essa mediação cria 
+uma dependência estrutural: se o caminho digital que transporta ou representa os dados de 
+processo for adulterado, o supervisório pode receber valores plausíveis, porém falsos, sem um 
+mecanismo independente para validar a veracidade física da medição original. Assumindo que 
+os dados recebidos do processo são verdadeiros, o sistema toma decisões operacionais e 
+gerenciais que muitas vezes são equivocadas e acabam gerando custos operacionais 
+extraordinários para a indústria. Ter a possibilidade de validar os dados recebidos através de 
+um sistema de verificação complementar passa a ser importante. 
+Neste sentido, sistemas de detecção de intrusão têm (do inglês, Intrusion Detection Systems - 
+IDS) sido utilizados pela indústria para minimizar os problemas de segurança relatados. No 
+entanto, grande parte das abordagens de IDS concentram-se na análise de tráfego, 
+assinaturas, anomalias em pacotes, logs ou padrões estatísticos em dados já digitalizados. 
+Além disso, IDS atuais incorporam técnicas de aprendizado de máquina para melhor a 
+assertividade de detecção. O problema é que essas técnicas dependem de dados digitais que 
+já podem estar comprometidos. Se os dados que chegam ao sistema já são falsos, o algoritmo 
+aprende errado.  
+Considerando os fatos expostos, a questão central deste trabalho está relacionada a como ter 
+uma “fonte de verdade” física que não dependa dos valores reportados pelo CLP. Para tanto, 
+este trabalho pre-assume que os dados de sensoriamento enviados pelos dispositivos, que 
+estão no chão da fábrica, para o CLP, são corretos. Esta premissa é válida a partir do momento 
+que qualquer alteração depende de acesso físico ao dispositivo.  
+Assim, este trabalho propõe uma arquitetura de detecção/validação descentralizada, baseada 
+em verdade física, para sistemas industriais legados. A proposta parte da duplicação do sinal 
+físico do instrumento por meio de splitters industriais, enviando uma cópia ao CLP (fluxo 
+tradicional) e outra a um conjunto de Edge Gateways.  
+Os Edge Gateways encapsulam as leituras em payloads estruturados (incluindo metadados e 
+diagnósticos), compartilham essas observações entre si e aplicam um mecanismo leve de 
+consenso (por exemplo baseado no contexto histórico) para identificar leituras discrepantes e 
+nós potencialmente comprometidos. A partir de uma leitura física acordada entre todas as 
+partes, o sistema compara os valores físicos validados com os valores reportados no domínio 
+digital (rede industrial/SCADA). Divergências nesta comparação que superar um valor limite 
+(threshold), baseado no contexto histórico, são tratadas como evidência de risco de intrusão ou 
+violação de integridade. Além disso, o histórico de payloads acordado como válido e 
+comparações dos valores recebidos pelos edges gateway alimentam um custom dataset para 
+treinamento de um modelo de aprendizado de máquina voltado à criação de fingerprints 
+físico-operacionais dos equipamentos de área. Desta forma, um resultado subjacente proposto 
+por este trabalho é a construção de um benchmark para testes de soluções similares a aqui 
+proposta. 
+O restante deste documento apresenta os objetivos da pesquisa, a fundamentação necessária, 
+a revisão de trabalhos relacionados, a arquitetura proposta e o plano metodológico e de 
+avaliação.

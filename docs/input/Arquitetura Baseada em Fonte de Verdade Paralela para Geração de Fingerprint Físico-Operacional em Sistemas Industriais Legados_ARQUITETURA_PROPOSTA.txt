@@ -1,0 +1,280 @@
+7 ARQUITETURA PROPOSTA 
+7.1 Visão Geral da Arquitetura Proposta 
+Este trabalho propõe uma arquitetura de detecção e validação de integridade para sistemas 
+industriais legados baseada na criação de uma Fonte de Verdade Física Paralela, 
+independente do CLP e do caminho digital tradicional. A proposta não substitui, nem interfere 
+na lógica de controle existente, mas adiciona uma camada de observação, validação e 
+aprendizado que opera em paralelo à arquitetura industrial clássica, conforme ilustrado na 
+Figura 4. 
+Figura 4 – Arquitetura proposta baseada em Fonte de Verdade Física Paralela, 
+Descentralização de dados, Validação Bizantina e Criação de fingerprint operacional. 
+A arquitetura é estruturada em cinco pilares principais, organizados como um pipeline contínuo: 
+1. Duplicação física não intrusiva do sinal do sensor 
+2. Coleta e descentralização das leituras físicas via Edge Computing 
+3. Validação distribuída tolerante a falhas bizantinas (BBD/FABA) 
+4. Comparação entre verdade física validada e dados lógicos da rede Industrial 
+5. Aprendizado profundo para criação de fingerprint físico-comportamental 
+Esse encadeamento permite detectar adulterações digitais, falsificação de dados e 
+inconsistências físico-lógicas, mesmo quando os valores apresentados ao operador são 
+plausíveis. 
+7.2 Pilar 1 - Duplicação Física do Sinal do Sensor 
+O primeiro pilar da arquitetura consiste na duplicação física do sinal do sensor, realizada antes 
+da entrada no CLP, como parte da modificação arquitetural proposta neste trabalho. Cada 
+sensor industrial analógico (por exemplo, transmissores de pressão, temperatura ou vazão) 
+continua operando conforme a arquitetura tradicional da planta, enviando seu sinal físico (ex.: 
+4~20 mA HART ou Fieldbus) ao CLP. A proposta introduz a adição de um Edge Gateway 
+externo à arquitetura original, conectado por meio de um splitter industrial dedicado por sensor, 
+instalado em paralelo ao loop, que duplica o sinal físico e envia uma única cópia elétrica 
+independente para esse edge. Dessa forma, o sensor 1 alimenta o CLP e o Edge A, o sensor 2 
+alimenta o CLP e o Edge B, e assim sucessivamente, não havendo compartilhamento físico 
+direto do sinal de um sensor entre múltiplos edges nesse estágio. 
+Essa duplicação é não intrusiva, paralela (não em série), transparente ao CLP e sem impacto 
+operacional. Dessa forma, o CLP permanece inalterado, enquanto cada Edge Gateway recebe 
+apenas os sinais físicos dos sensores aos quais está diretamente conectado, mantendo 
+isolamento elétrico e coerência física da arquitetura.  
+Para sinais HART, o edge extrai tanto a variável analógica quanto informações digitais por meio 
+de comandos universais (CMD 3 para PV do processo e CMD 48 para diagnósticos de 
+integridade), obtendo variáveis adicionais e diagnósticos do instrumento. Em redes Profibus PA, 
+a leitura ocorre por sniffing do telegrama cíclico, incluindo a interpretação direta do byte de 
+status (por exemplo, 0x80 indicando condição Good).  
+O objetivo desse pilar é estabelecer uma referência física primária e local, independente do 
+domínio lógico. 
+7.3 Pilar 2 - Coleta e Descentralização no Edge 
+ 
+Após a duplicação física, cada Edge Gateway atua como um observador independente do 
+processo, coletando sinais físicos e estruturando os dados em payloads físico-operacionais 
+ricos. 
+ 
+Cada Edge Gateway executa um serviço local responsável por ler o sinal físico bruto 
+proveniente do sensor e aplica as escalas e conversões necessárias para criar um pacote de 
+dados representando o sensor analógico naquele momento, mostrando o nível de ruído, 
+estabilidade do sinal e taxa de variação, que serão utilizadas nas etapas seguintes de 
+validação e análise. 
+ 
+O resultado não é apenas um valor de processo, mas um payload estruturado contendo valor, 
+unidade, corrente do loop, qualidade, diagnósticos e metadados do dispositivo. 
+ 
+Exemplo de payload baseado em comunicação HART: 
+{ 
+ "protocol": "HART", 
+ "gateway_id": "GW-EDGE-01", 
+ "timestamp": "2025-07-16T13:01:45.123Z", 
+ "device_info": { 
+   "tag": "PIT-101", 
+   "long_tag": "Pressure_Compressor_Inlet", 
+   "manufacturer_id": 26,  // Ex: Endress+Hauser, Rosemount, etc. 
+   "device_type": 44 
+ }, 
+ "process_data": { 
+   "pv": { // Primary Variable (Ex: Pressão) 
+     "value": 18.22, 
+     "unit": "bar", 
+     "unit_code": 7 // Código HART para Bar 
+   }, 
+   "sv": { // Secondary Variable (Ex: Temperatura do Sensor) 
+     "value": 45.5, 
+     "unit": "degC" 
+   }, 
+   "loop_current_ma": 12.55, // O valor real da corrente lida 
+   "pv_percent_range": 53.4 // % da escala 
+ }, 
+ "diagnostics": { 
+   "device_status_hex": "0x00", // 0x00 = Tudo OK 
+   "field_device_malfunction": false, 
+   "loop_current_saturated": false, // Importante: avisa se estourou a escala (4 ou 
+20mA) 
+   "cold_start": false // Avisa se o sensor reiniciou recentemente 
+ } 
+} 
+ 
+Esses payloads são publicados via MQTT, utilizando um modelo publish/subscribe, e 
+organizados semanticamente por meio de um Context Broker (por exemplo, Orion broker ou 
+Apache Kafka), hospedado na nuvem, que armazena entidades industriais, atributos e histórico 
+temporal. 
+A escolha de MQTT se deve ao seu baixo overhead, natureza assíncrona e adequação a 
+ambientes restritos. O broker  é utilizado para prover contextualização, permitindo que os 
+dados sejam consumidos como entidades industriais, e não apenas mensagens cruas, além de 
+proporcionar escalabilidade para outros sistemas pelo fato de disponibilizar pesquisas ricas por 
+conta do contexto salvo. 
+O processo de validação distribuída opera sobre janelas temporais, com periodicidade 
+configurável. Neste trabalho, assume-se como referência uma janela da ordem de 1 minuto, 
+valor compatível com a dinâmica da maioria dos processos industriais contínuos e com as 
+limitações computacionais típicas de dispositivos Edge. 
+Como resultado, todos os Edge Gateways passam a ter acesso às leituras físicas de todos os 
+sensores, eliminando pontos únicos de confiança. 
+7.4 Pilar 3 - Validação Distribuída com Tolerância a Falhas Bizantinas 
+Uma vez descentralizados, os dados passam por um processo de validação distribuída. A 
+arquitetura assume explicitamente que nem todos os Edge Gateways são confiáveis, adotando 
+um modelo de ameaça com falhas bizantinas. 
+Cada Edge Gateway executa localmente um mecanismo de consenso baseado no algoritmo 
+BBD/FABA, que compara as leituras recebidas e classifica os nós em categorias como: 
+● válido 
+● suspeito 
+● bizantino 
+O FABA foi escolhido por ser estatístico, iterativo e computacionalmente leve, adequado a 
+dispositivos Edge. Diferentemente de algoritmos como Krum, seu custo cresce linearmente com 
+o número de nós, permitindo validação em janelas curtas de tempo. 
+O consenso utiliza métricas como: 
+● desvio absoluto mediano (MAD) 
+● distância entre leituras 
+● correlação temporal de curto prazo 
+O resultado é um Physical Consensus Package, contendo apenas dados fisicamente 
+plausíveis, além de métricas que enriquecem o dataset posterior. 
+ 
+Exemplo do Consensus Package: 
+{ 
+ "packet_type": "PHYSICAL_CONSENSUS_PACKET_FULL_HART", 
+ "consensus_uuid": "7f8a9b2c-3d4e-5f6g-7h8i-9j0k1l2m3n4o", 
+ "timestamp_sync": "2025-07-16T13:05:00.000Z", 
+ "consensus_meta": { 
+   "algorithm": "BBZ_FABA", 
+   "total_edges_participating": 5, 
+   "quorum_reached": true 
+ }, 
+ "plant_area": "Compressor_Station_Alpha", 
+  "equipments": { 
+   
+   // --- EQUIPAMENTO 1: Compressor Centrífugo --- 
+   "Compressor-CC101": { 
+     "equipment_type": "Centrifugal_Compressor", 
+     "sensors": [ 
+       { 
+         // SENSOR 1: Transmissor de Vazão (Entrada) 
+         "tag": "FIT-101", 
+         "long_tag": "Flow_Inlet_CC101", 
+         "device_info": { 
+           "manufacturer_id": 26, // Endress+Hauser 
+           "device_type": 44, 
+           "device_revision": 1, 
+           "hardware_revision": 2 
+         }, 
+         "data_consensus": { 
+           // DADOS DO PROCESSO (Consensuados) 
+           "pv": { 
+             "value": 1250.5, 
+             "unit": "kg/h", 
+             "unit_code": 61, 
+             "percent_range": 62.5 
+           }, 
+           "sv": { 
+             "value": 42.1, 
+             "unit": "degC", 
+             "description": "Sensor_Body_Temperature" 
+           }, 
+           "tv": { 
+             "value": 124005.0, 
+             "unit": "kg", 
+             "description": "Totalizer_Mass" 
+           }, 
+           "qv": { 
+             "value": 0, 
+             "unit": "none", 
+             "description": "Frequency_Output" 
+           }, 
+           "loop_current_ma": 14.00, // Importante para fingerprint 
+           
+           // MÉTRICAS FÍSICAS (Cálculo dos Edges) 
+           "physics_metrics": { 
+             "noise_floor": 0.08, 
+             "rate_of_change_dtdt": 2.5, 
+             "local_stability_score": 0.99 
+           } 
+         }, 
+         "diagnostics": { 
+           "device_status_hex": "0x00", 
+           "field_device_malfunction": false, 
+           "loop_current_saturated": false, // Se true, o DL sabe que o valor está 
+clipado 
+           "cold_start": false, 
+           "more_status_available": false 
+         } 
+       }, 
+       { 
+         // SENSOR 2: Transmissor de Pressão (Saída) 
+         "tag": "PIT-102", 
+         "long_tag": "Pressure_Discharge_CC101", 
+         "device_info": { 
+           "manufacturer_id": 38, // Rosemount 
+           "device_type": 12, 
+           "device_revision": 3, 
+           "hardware_revision": 1 
+         }, 
+         "data_consensus": { 
+           "pv": { 
+             "value": 45.2, 
+             "unit": "bar", 
+             "unit_code": 7, 
+             "percent_range": 88.2 
+           }, 
+           "sv": { 
+             "value": 65.4, 
+             "unit": "degC", 
+             "description": "Sensor_Module_Temp" // DL pode correlacionar temp do 
+módulo com drift de pressão 
+           }, 
+           "loop_current_ma": 18.11, 
+           
+           "physics_metrics": { 
+             "noise_floor": 0.01, // Pressão estável 
+             "rate_of_change_dtdt": 0.02, 
+             "local_stability_score": 1.0 
+           } 
+         }, 
+         "diagnostics": { 
+           "device_status_hex": "0x08", // Ex: 0x08 pode indicar "More Status 
+Available" 
+           "field_device_malfunction": false, 
+           "loop_current_saturated": false, 
+           "cold_start": false 
+} 
+} 
+] 
+} 
+} 
+O Physical Consensus Package resultante de cada janela de validação é serializado em 
+payloads estruturados e persistido de forma assíncrona em um bucket de armazenamento em 
+nuvem. Essa persistência garante rastreabilidade, histórico auditável e suporte às etapas 
+posteriores de comparação físico-lógica e aprendizado, sem interferir no processo de validação 
+local executado no Edge. 
+7.5 Pilar 4 - Comparação Física X Lógica com a Rede Industrial 
+No quarto pilar ocorre a detecção direta de adulterações. Cada Edge Gateway compara a 
+verdade física validada pelo consenso com os valores lógicos que existem na rede SCADA. 
+O acesso a rede industrial pode ocorrer por diferentes meios, conforme o ambiente industrial: 
+● OPC UA 
+● EtherNet/IP 
+● PROFINET 
+● Modbus TCP ou RTU 
+● DNP3 
+● APIs REST 
+O Edge atua como cliente desses sistemas, coletando valores e indicadores de qualidade, caso 
+estejam disponíveis. Divergências entre o valor físico consensuado e o valor lógico exibido são 
+tratadas como evidência de violação de integridade. 
+Essa comparação ocorre no Edge, garantindo baixa latência, independência da nuvem e 
+tolerância a falhas de conectividade. Cada comparação gera eventos e amostras que 
+alimentam um custom dataset, construído a partir de dados físicos reais, validados e cruzados 
+com o domínio lógico sendo armazenado de forma assíncrona em um bucket de 
+armazenamento em nuvem. 
+7.6 Pilar 5 - Deep Learning para Fingerprint Físico-Comportamental 
+O último pilar utiliza os dados acumulados para o treinamento de um modelo de Deep Learning 
+baseado em LSTM, executado exclusivamente na nuvem.  
+O modelo LSTM será utilizado para aprender o comportamento normal do equipamento 
+industrial, que é visto como um sistema complexo formado por múltiplos sensores (como um 
+compressor monitorado por pressão, temperatura, corrente e vibração). A vantagem desse 
+modelo é que ele não olha apenas para o momento atual: ele cruza os dados de todas as 
+variáveis ao longo do tempo, identificando padrões de longo prazo e lidando bem com ruídos e 
+variações rápidas, conforme ilustrado na Figura 5. 
+Figura 5 – Processamento em nuvem para detecção de anomalias via LSTM. 
+O modelo não é treinado para classificar ataques diretamente, mas para aprender a dinâmica 
+normal do funcionamento do equipamento, desvios tornam-se detectáveis quando essa 
+dinâmica é violada, mesmo que os valores individuais permaneçam normais.  
+O treinamento ocorre utilizando dados armazenados nos buckets, respeitando as limitações 
+computacionais do edge e mantendo isolamento entre as etapas de coleta, validação e 
+aprendizado. 
+7.7 Síntese da Proposta 
+A arquitetura proposta integra, de forma inédita, duplicação física do sinal, descentralização no 
+Edge, validação bizantina, comparação físico-lógica e aprendizado profundo. Essa combinação 
+permite detectar ataques silenciosos, falsificação de dados e inconsistências que não são 
+visíveis por abordagens baseadas apenas no domínio digital. 
+A proposta é incremental, não intrusiva e compatível com ambientes industriais legados, 
+explorando justamente as características físicas contínuas desses sistemas como base 
+primária de segurança.

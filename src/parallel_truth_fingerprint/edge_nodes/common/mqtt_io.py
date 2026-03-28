@@ -51,7 +51,11 @@ def deserialize_payload(payload_text: str) -> RawHartPayload:
         device_info=DeviceInfo(**data["device_info"]),
         process_data=ProcessData(
             pv=ProcessVariable(**process_data["pv"]),
-            sv=ProcessVariable(**process_data["sv"]),
+            sv=(
+                ProcessVariable(**process_data["sv"])
+                if process_data.get("sv") is not None
+                else None
+            ),
             loop_current_ma=process_data["loop_current_ma"],
             pv_percent_range=process_data["pv_percent_range"],
             physics_metrics=PhysicsMetrics(**physics_metrics),

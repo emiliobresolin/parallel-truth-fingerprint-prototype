@@ -35,7 +35,7 @@ class PhysicsMetrics:
 @dataclass(frozen=True)
 class ProcessData:
     pv: ProcessVariable
-    sv: ProcessVariable
+    sv: ProcessVariable | None
     loop_current_ma: float
     pv_percent_range: float
     physics_metrics: PhysicsMetrics
@@ -61,4 +61,8 @@ class RawHartPayload:
     def to_dict(self) -> dict[str, object]:
         """Return a serializable raw HART-style payload."""
 
-        return asdict(self)
+        payload = asdict(self)
+        process_data = payload["process_data"]
+        if process_data.get("sv") is None:
+            process_data.pop("sv", None)
+        return payload

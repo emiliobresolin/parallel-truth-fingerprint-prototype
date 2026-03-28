@@ -143,6 +143,8 @@ The researcher can train a reusable LSTM fingerprint from validated normal data,
 
 The researcher can start the local prototype, run the decentralized edge observation flow, and inspect the edge-local replicated compressor views produced through local acquisition and MQTT exchange without collapsing the architecture into a centralized design.
 
+Traceability note: earlier Epic 1 wording used `compressor_power` as a simplified simulator driver. The refined interpretation, aligned to the split proposal files, is a hidden operating state such as `compressor_load_pct` or `driver_speed_pct` that drives transmitter-like observations. Story 1.6 formalizes that fidelity refinement before Epic 3 begins.
+
 ### Story 1.1: Initialize the Architecture-Driven Local Prototype Skeleton
 
 As a researcher,
@@ -172,12 +174,13 @@ So that the prototype can produce realistic local observations for demonstration
 **Given** the compressor prototype scope
 **When** the sensor simulation runs
 **Then** it produces temperature, pressure, and RPM values for one compressor
-**And** each sensor follows a defined normal range and a simple time-varying behavior pattern driven by compressor operational context, including `compressor_power`.
+**And** each sensor follows a defined normal range and a simple time-varying behavior pattern driven by a hidden compressor operating state such as `compressor_load_pct` or `driver_speed_pct`
+**And** those ranges remain configurable prototype-default plausible ranges, not plant-calibrated truth.
 
 **Given** the physical behavior model
-**When** `compressor_power` changes
-**Then** higher power results in higher expected temperature, pressure, and RPM behavior
-**And** lower power results in lower expected values across those variables.
+**When** the hidden operating state increases or decreases
+**Then** higher operating state results in higher expected temperature, pressure, and RPM behavior
+**And** lower operating state results in lower expected values across those variables.
 
 **Given** the required simulation realism
 **When** temperature increases
@@ -205,6 +208,8 @@ So that the prototype preserves decentralized physical-side observation even on 
 **Given** the payload-driven data model
 **When** an edge emits a local acquisition payload
 **Then** it follows the raw HART-style payload structure used by the project
+**And** the edge interprets a simulated transmitter observation and maps it into the gateway payload while preserving PV/SV semantics
+**And** `PV` is mandatory, `SV` is optional and sensor-justified, and generic equipment context is not stored in `SV`
 **And** it includes process variables, loop current, diagnostics, and available local physics metrics needed for downstream enrichment.
 
 **Given** local co-location on one machine
@@ -252,6 +257,36 @@ So that the decentralized observation stage is demonstrable and traceable before
 **When** an edge-local replicated intermediate state is shown to support demonstration
 **Then** it may be displayed through logs, simple charts, or simple metrics
 **And** it remains clearly identified as non-validated intermediate state.
+
+### Story 1.6: Refine Sensor Simulation and Edge Acquisition Fidelity
+
+As a researcher,
+I want the simulated compressor operating state, transmitter-side observation, and edge acquisition payload to be modeled more faithfully,
+So that the prototype preserves pre-PLC physical acquisition semantics without redesigning the existing MQTT, consensus, SCADA, persistence, or LSTM pillars.
+
+**Acceptance Criteria:**
+
+**Given** the refined acquisition-fidelity boundary
+**When** the simulator and edge acquisition path are updated
+**Then** the acquisition path follows exactly three layers: hidden compressor/process state, simulated transmitter observation, and gateway acquisition payload
+**And** the hidden operating state such as `compressor_load_pct` or `driver_speed_pct` deterministically influences temperature, pressure, and RPM.
+
+**Given** the transmitter-side semantics
+**When** a sensor observation is converted into a gateway payload
+**Then** `PV` is mandatory for every transmitter-style sensor
+**And** `SV` is optional and only appears when it has a defensible transmitter-side meaning for that sensor type
+**And** generic compressor context is not stored in `SV`.
+
+**Given** the downstream architectural constraints
+**When** the refined payload is emitted
+**Then** it remains HART-inspired and includes `device_info`, `process_data`, `diagnostics`, `loop_current_ma`, `pv_percent_range`, and simple physics metrics
+**And** it remains suitable for later consensus, SCADA comparison, and LSTM training without redesigning those downstream pillars.
+
+**Given** the implementation guardrails
+**When** this fidelity refinement is implemented
+**Then** it preserves existing downstream contracts by default
+**And** only additive optional fields may be introduced if strictly required
+**And** MQTT, CometBFT, fake OPC UA SCADA, MinIO, and downstream LSTM remain unchanged.
 
 ## Epic 2: Trusted Consensus Validation and Consensus Auditability
 
