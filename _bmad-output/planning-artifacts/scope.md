@@ -17,6 +17,7 @@ These components must exist as real executable parts of the prototype:
 - local persistence flow
 - LSTM training and inference logic
 - observability, audit logs, summaries, and alerts
+- the final lightweight SCADA-inspired demo UI layer, implemented only after the backend/runtime/services are stable
 
 ## Simulated Environment Components
 
@@ -29,6 +30,15 @@ These components are intentionally represented through controlled simulation or 
 - cloud environment, represented locally rather than through a real cloud platform
 - broader industrial/plant environment outside the explicit prototype runtime
 
+## Conceptual-Only Elements
+
+These items may remain part of the dissertation or architectural rationale without becoming mandatory prototype implementation:
+
+- BBD/FABA as the theoretical consensus inspiration
+- Orion/Kafka-style cloud context-broker infrastructure
+- real cloud deployment
+- a production-grade industrial HMI or broad plant UI scope
+
 ## Scope Rule
 
 The prototype must use real executable code for the core research pillars while using simulation only for the surrounding environment that would otherwise require field hardware or enterprise infrastructure.
@@ -39,6 +49,7 @@ This means:
 - the prototype does not need a real SCADA platform
 - the prototype does not need a real cloud deployment
 - the prototype must still execute real messaging, consensus, comparison, persistence, and LSTM paths
+- the final UI is required for the demo, but only as the last lightweight layer on top of the finished runtime services
 
 ## Success Interpretation
 

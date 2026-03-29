@@ -17,7 +17,7 @@ so that suspicious edge data is filtered before any state is trusted.
 3. Given majority quorum enforcement, when the valid participating set falls below `floor(N/2) + 1`, then the round result must be `failed_consensus`.
 4. Given failed consensus is a first-class outcome, when quorum cannot be satisfied, then the system still produces a valid `ConsensusResult` with trust ranking and exclusion decisions and it contains no `ConsensusedValidState`.
 5. Given auditability requirements, when a consensus round completes, then the system emits a unified auditable package containing the replicated-state inputs used, trust ranking, exclusion decisions, final consensus status, and consensused valid state only if consensus succeeds.
-6. Given the prototype consensus architecture, when the execution engine is implemented, then consensus remains fully edge-local and decentralized and it does not introduce SCADA coupling, persistence logic, or ML logic.
+6. Given the prototype consensus architecture, when the execution engine is implemented, then it uses the real local CometBFT plus Go ABCI path and it does not introduce SCADA coupling, persistence logic, or ML logic.
 
 ## Tasks / Subtasks
 
@@ -51,7 +51,7 @@ so that suspicious edge data is filtered before any state is trusted.
 ## Dev Notes
 
 - This story is the first execution story for Epic 2. It must build on the contract layer implemented in Story 2.1 rather than redefining the consensus contracts. [Source: [2-1-define-consensus-contracts-and-trust-state-models.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/implementation-artifacts/2-1-define-consensus-contracts-and-trust-state-models.md)]
-- Consensus execution must remain fully edge-local and decentralized. Each edge runs the same logic against its own local replicated state inputs; there is no central authority. [Source: [docs/input/PROTOCOPO_ARCHITECTURE.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_ARCHITECTURE.md#L23)]
+- The approved prototype now uses a real local CometBFT validator network plus a Go ABCI application for the live consensus path. This story must preserve that implementation truth while keeping SCADA, persistence, and ML concerns outside the consensus boundary.
 - Quorum must be explicit, not implied. For this prototype:
   - `quorum = floor(N/2) + 1`
   - for `N=3`, quorum is `2`
@@ -63,7 +63,7 @@ so that suspicious edge data is filtered before any state is trusted.
   - no `ConsensusedValidState`
 - The unified audit package must be separate from `ConsensusResult`. It is required later for traceability, debugging, SCADA comparison, persistence, and LSTM training, but this story must only define and emit it, not consume it downstream.
 - No SCADA, comparison, persistence, or ML logic may appear here. This story stops at consensus execution and audit package emission.
-- Use the existing BBF/Byzantine project reference as a conceptual basis only. If no BBF code exists locally, implement the minimal prototype logic directly using the standard library and the existing contracts.
+- Use the approved BBD/FABA reference as a conceptual basis only. The real live consensus substrate is CometBFT plus Go ABCI; BBD/FABA is not the literal runtime library claim.
 
 ### Project Structure Notes
 
@@ -117,7 +117,7 @@ so that suspicious edge data is filtered before any state is trusted.
 - Stay within the current local Python project structure.
 - Use standard-library Python only unless an existing project dependency is clearly required.
 - Do not add a new consensus framework dependency in this story.
-- Use the existing BBF/Byzantine project references as conceptual guidance only.
+- Use the approved BBD/FABA references as conceptual guidance only.
 
 ### File Structure Requirements
 
@@ -169,7 +169,7 @@ so that suspicious edge data is filtered before any state is trusted.
 - Story definition and acceptance criteria: [epics.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/epics.md#L283)
 - Consensus contract layer: [2-1-define-consensus-contracts-and-trust-state-models.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/implementation-artifacts/2-1-define-consensus-contracts-and-trust-state-models.md)
 - Auditability and failed-consensus requirements: [architecture.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/architecture.md#L37)
-- Byzantine consensus execution reference: [PROTOCOPO_ARCHITECTURE.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_ARCHITECTURE.md#L23)
+- Consensus architecture reference: [ARQUITETURA_PROPOSTA.txt](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura%20Baseada%20em%20Fonte%20de%20Verdade%20Paralela%20para%20Gera%C3%A7%C3%A3o%20de%20Fingerprint%20F%C3%ADsico-Operacional%20em%20Sistemas%20Industriais%20Legados_ARQUITETURA_PROPOSTA.txt)
 
 ## Dev Agent Record
 

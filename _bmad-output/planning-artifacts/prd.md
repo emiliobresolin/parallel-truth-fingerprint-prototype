@@ -15,9 +15,12 @@ stepsCompleted:
   - step-11-polish
 inputDocuments:
   - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/product-brief-parallel-truth-fingerprint-prototype-2026-03-23.md
-  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_SCOPE.md
-  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_REQUIREMENTS.md
-  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_ARCHITECTURE.md
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_DEFINIÇÃO_DO_PROBLEMA.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_OBJECTIVOS.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_METODOLOGIA_DE_PESQUISA.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_FUNDAMENTACAO_TEORICA.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_ARQUITETURA_PROPOSTA.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_PLANO_DE_AVALIACAO_E_REFERENCE.txt
 workflowType: 'prd'
 documentCounts:
   productBriefs: 1
@@ -48,13 +51,21 @@ This consolidated state is the prototype's physical-side reference. It is compar
 
 This PRD does not redefine the architecture. It structures the approved prototype scope, preserves the existing RF/RNF requirements without modification, and translates existing success criteria into implementation-oriented acceptance criteria suitable for planning.
 
+Implementation note: in the prototype, the real consensus implementation is CometBFT plus a Go ABCI application. BBD/FABA remains conceptual and theoretical inspiration from the approved PEP, not the literal runtime library used by the codebase. Fake OPC UA SCADA, MinIO persistence, and the local LSTM path remain real prototype targets, while the surrounding SCADA and cloud environments remain simulated locally.
+
 ### What Makes This Special
 
 The defining architectural property of the prototype is that it does not treat the logical SCADA path as the primary source of trust. Instead, the trusted reference is the consensused state reconstructed from independent edge-side acquisition paths and validated through a Byzantine-style round.
 
 The prototype also keeps two validation paths distinct. The first is an integrity comparison between the consensused state and the OPC UA SCADA state, producing a SCADA divergence alert when tolerance is exceeded. The second is a behavioral validation path in which an LSTM model learns normal temporal behavior from valid stored data and produces anomaly outputs capable of revealing replay-oriented or temporally inconsistent scenarios.
 
-Its value for implementation planning is not additional feature breadth, but faithful preservation of the approved research sequence under reduced prototype complexity: simulated infrastructure, local execution, clear logs, optional minimal visualization (logs and simple charts and metrics), and no unnecessary production-grade expansion.
+Its value for implementation planning is not additional feature breadth, but faithful preservation of the approved research sequence under reduced prototype complexity: simulated infrastructure, local execution, clear logs, and a final lightweight SCADA-inspired demo UI supported by logs, simple charts, and metrics, without unnecessary production-grade expansion.
+
+## Reality Boundary
+
+- Real in the prototype: MQTT messaging, CometBFT plus Go ABCI consensus, SCADA comparison logic, fake OPC UA service, MinIO persistence, local LSTM training and inference, observability, alerts, and the final lightweight demo UI when implemented.
+- Simulated or mock in the prototype: physical sensors, compressor/process behavior, physical edge hardware, the SCADA environment itself, and the cloud environment represented locally.
+- Conceptual only from the PEP/dissertation side unless explicitly re-approved for implementation: BBD/FABA as the theoretical consensus reference, Orion/Kafka-style cloud context-broker infrastructure, real cloud deployment, and a production-grade industrial HMI scope.
 
 ## Project Classification
 
@@ -71,7 +82,7 @@ For the primary user, success means the researcher can run the prototype locally
 
 User success is achieved when the prototype:
 - can be started and executed in a local environment
-- exposes the current compressor state, consensus output, SCADA comparison results, persistence behavior, and LSTM outputs through clear logs and observable system state
+- exposes the current compressor state, consensus output, SCADA comparison results, persistence behavior, and LSTM outputs through clear logs, observable system state, and the final lightweight demo UI when that last layer is implemented
 - supports demonstration of both normal operation and anomalous scenarios, including suspicious edge participation, SCADA divergence, and replay-oriented temporal inconsistency
 - makes it possible to explain how each stage of the execution flow maps back to the approved architecture
 
@@ -146,7 +157,7 @@ The MVP includes:
 - reusable fingerprint generation
 - anomaly score and normal/anomalous classification
 - replay-oriented anomaly demonstration
-- clear logs and optional minimal visualization (logs and simple charts and metrics)
+- clear logs and the final lightweight demo UI, plus supporting charts and metrics when needed
 
 ### Growth Features (Post-MVP)
 
@@ -202,7 +213,7 @@ This journey succeeds when the replay-oriented or temporally inconsistent scenar
 
 ### Journey 4: Academic Evaluator or Technical Reader - Inspection and Validation Path
 
-The academic evaluator or technical reader does not need to operate the prototype as its primary user, but must be able to inspect and understand its structure, outputs, and architectural faithfulness. This journey begins during or after the demonstration, when the evaluator or reader observes the logs, state outputs, alerts, and any optional minimal visualization.
+The academic evaluator or technical reader does not need to operate the prototype as its primary user, but must be able to inspect and understand its structure, outputs, and architectural faithfulness. This journey begins during or after the demonstration, when the evaluator or reader observes the logs, state outputs, alerts, and the final lightweight demo UI if that last layer has been implemented.
 
 The evaluator or reader follows the execution flow from simulated sensor generation to edge acquisition, MQTT replication, consensus, SCADA comparison, persistence, and LSTM output. They verify that the prototype remains simple, local, and academically scoped, and that the simulated layers do not alter the intended architectural meaning.
 
@@ -277,7 +288,7 @@ Key domain-specific risks and the required mitigations are:
   Mitigation: keep execution local, maintain simulated infrastructure, and avoid unnecessary expansion beyond the approved prototype scope
 
 - Risk: unclear demonstration outputs
-  Mitigation: ensure logs, state outputs, trust results, alerts, and optional minimal visualization remain easy to inspect during presentation
+  Mitigation: ensure logs, state outputs, trust results, alerts, and the final lightweight demo UI remain easy to inspect during presentation
 
 ## IoT / Embedded Prototype Specific Requirements
 
@@ -359,7 +370,7 @@ Implementation should remain consistent with the current prototype constraints:
 - collection cadence should remain aligned with the one-minute reference
 - logs must remain clear and presentation-friendly
 - modular service boundaries should remain visible
-- optional minimal visualization (logs and simple charts and metrics) may be used only to support explanation, not as a production interface
+- the final lightweight SCADA-inspired demo UI, plus logs and simple charts, may be used only to support explanation, not as a production interface
 - no raw or potentially contaminated data should reach the LSTM training pipeline
 
 ## Project Scoping & Phased Development
@@ -377,7 +388,7 @@ The prototype should be implementable as a modular Python-based local system com
 - fake OPC UA SCADA service
 - local MinIO storage
 - LSTM training/inference service
-- logs and optional minimal visualization for demonstration support
+- logs and the final lightweight demo UI for demonstration support
 
 ### MVP Feature Set (Phase 1)
 
@@ -404,7 +415,7 @@ The prototype should be implementable as a modular Python-based local system com
 - reusable fingerprint model generation
 - anomaly score and normal/anomalous classification
 - replay-oriented or temporally inconsistent anomaly demonstration
-- clear logs and optional minimal visualization (logs and simple charts and metrics)
+- clear logs and the final lightweight demo UI, plus supporting charts and metrics when needed
 
 ### Post-MVP Features
 
@@ -454,7 +465,7 @@ The main resource risk is overexpansion of scope beyond what is required for a l
 - FR11: The system can expose the resulting trust ranking for all edges in the round.
 - FR12: The system can explicitly indicate when a valid consensus cannot be achieved.
 - FR13: The system can generate structured logs describing each consensus round.
-- FR14: The system can generate alerts when consensus fails or when multiple edges are considered invalid.
+- FR14: The system can generate alerts when consensus fails.
 
 ### SCADA Comparison & Integrity Alerting
 

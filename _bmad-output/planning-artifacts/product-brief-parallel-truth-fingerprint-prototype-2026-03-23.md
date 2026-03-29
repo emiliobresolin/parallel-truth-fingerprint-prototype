@@ -8,9 +8,9 @@ stepsCompleted:
   - 6
 inputDocuments:
   - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados - Emilio Bresolin.pdf
-  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_ARCHITECTURE.md
-  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_REQUIREMENTS.md
-  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_SCOPE.md
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para GeraÃ§Ã£o de Fingerprint FÃ­sico-Operacional em Sistemas Industriais Legados_DEFINIÇÃO_DO_PROBLEMA.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para GeraÃ§Ã£o de Fingerprint FÃ­sico-Operacional em Sistemas Industriais Legados_OBJECTIVOS.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para GeraÃ§Ã£o de Fingerprint FÃ­sico-Operacional em Sistemas Industriais Legados_ARQUITETURA_PROPOSTA.txt
 date: 2026-03-23
 author: Emilio
 ---
@@ -24,6 +24,8 @@ This project is an academic prototype that translates an approved research archi
 The prototype preserves the four architectural pillars defined in the approved research scope: decentralized edge observation, Byzantine-style trust validation between edges, comparison between the validated edge state and the SCADA state, and LSTM-based fingerprint generation for temporal anomaly detection. To keep the implementation feasible for a Master's degree prototype, physical sensors, PLC behavior, signal duplication hardware, SCADA infrastructure, and cloud infrastructure are simulated locally, while the architectural meaning of each layer is preserved.
 
 The demonstration scenario is a single compressor monitored through three simulated sensors: temperature, pressure, and RPM. Three independent edge nodes perform local acquisition associated with one sensor each, exchange observations through MQTT, reconstruct a shared replicated view of the compressor state, execute a Byzantine-style validation round, exclude suspicious edges in that round, and produce a consolidated valid state. This consensused state is then compared against a fake OPC UA SCADA view, persisted to local object storage when valid, and used as the basis for LSTM training and inference. The prototype must detect at least one replay scenario through fingerprint behavior and must raise a separate alert when the SCADA view diverges from the consensused edge state beyond configurable tolerance.
+
+Implementation note: in the prototype, the real consensus implementation is CometBFT plus a Go ABCI application. BBD/FABA remains conceptual inspiration from the approved PEP. The final lightweight SCADA-inspired demo UI is required for the final demonstration, but only as the last layer after the backend/runtime/services are complete and stable.
 
 ---
 

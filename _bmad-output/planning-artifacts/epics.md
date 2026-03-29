@@ -35,7 +35,7 @@ FR10: The system can expose the excluded edges in each consensus round and the r
 FR11: The system can expose the resulting trust ranking for all edges in the round.
 FR12: The system can explicitly indicate when a valid consensus cannot be achieved.
 FR13: The system can generate structured logs describing each consensus round.
-FR14: The system can generate alerts when consensus fails or when multiple edges are considered invalid.
+FR14: The system can generate alerts when consensus fails.
 FR15: The system can expose a fake SCADA in OPC UA.
 FR16: The system can execute sensor-by-sensor comparison with tolerance.
 FR17: The system can generate an alert when SCADA diverges from the consensused physical state.
@@ -88,12 +88,18 @@ NFR17: The prototype must permit future replacement of the local storage by a re
 - MinIO may run as a local containerized service.
 - Edge nodes and core Python orchestration logic may remain regular local Python processes.
 - Mixed local process/container orchestration is a reproducibility and setup choice only and must not change architectural boundaries, collapse decentralization, or introduce production-oriented deployment complexity.
-- Service ownership and module boundaries must remain explicit across sensor simulation, edge nodes, consensus, SCADA, comparison, persistence, LSTM service, observability, scenario control, and optional minimal visualization.
+- Service ownership and module boundaries must remain explicit across sensor simulation, edge nodes, consensus, SCADA, comparison, persistence, LSTM service, observability, scenario control, and the final lightweight demo UI layer.
 - State-boundary rules, service ownership rules, and scenario-control constraints are architectural invariants and must be treated as mandatory in all implementation stories.
+
+### Reality Boundary Notes
+
+- Real in the prototype: MQTT-based inter-edge communication, CometBFT plus Go ABCI consensus execution, fake OPC UA logical-state service, comparison logic, MinIO persistence, local LSTM training/inference, observability, alerts, and the final lightweight demo UI layer when implemented.
+- Simulated or mock in the prototype: physical sensors, compressor/process behavior, physical edge hardware, the SCADA environment itself, and the cloud environment represented locally.
+- Conceptual only from the PEP/dissertation side unless explicitly re-approved for implementation: BBD/FABA as the theoretical consensus inspiration, Orion/Kafka-style cloud context-broker infrastructure, production SCADA/HMI scope, and real cloud deployment.
 
 ### UX Design Requirements
 
-No separate UX design document exists for this workflow. Any optional minimal visualization remains constrained by the PRD and architecture and does not add standalone UX requirements at this stage.
+No separate UX design document exists for this workflow. The final lightweight demo UI remains constrained by the PRD and architecture, sits after the backend/runtime layers, and does not authorize a production-grade frontend scope.
 
 ### FR Coverage Map
 
@@ -110,9 +116,9 @@ FR10: Epic 2 - Excluded-edge visibility and exclusion reason
 FR11: Epic 2 - Full trust-ranking visibility
 FR12: Epic 2 - Explicit failed-consensus outcome
 FR13: Epic 2 - Structured consensus-round logs
-FR14: Epic 2 - Alerts for consensus failure or multiple invalid edges
+FR14: Epic 2 - Alerts for consensus failure
 FR15: Epic 3 - Fake OPC UA SCADA exposure
-FR16: Epic 3 - Sensor-by-sensor operational-context comparison
+FR16: Epic 3 - Sensor-by-sensor comparison with configurable tolerance
 FR17: Epic 3 - SCADA divergence alerting
 FR18: Epic 3 - Persist valid data only
 FR19: Epic 4 - Train LSTM with normal data
@@ -131,12 +137,14 @@ The researcher can start the local prototype, run the decentralized edge observa
 The researcher can validate edge contributions through Byzantine-style consensus, inspect trust ranking and exclusion decisions, and observe failed-consensus outcomes as explicit system results with full round traceability.
 **FRs covered:** FR6, FR7, FR8, FR9, FR10, FR11, FR12, FR13, FR14
 
+Prototype implementation note: the real consensus implementation in this prototype is CometBFT plus a Go ABCI application. BBD/FABA remains conceptual and theoretical inspiration from the approved PEP, not the literal runtime library used by the codebase.
+
 ### Epic 3: SCADA Integrity Comparison and Valid-State Persistence
-The researcher can compare the consensused physical-side state against the logical SCADA state, receive divergence alerts based on operational context, and persist only the valid structured consensus artifact to local storage.
+The researcher can compare the consensused physical-side state against the logical SCADA state, receive per-sensor divergence alerts based on configurable tolerance, and persist only the valid structured consensus artifact to local storage.
 **FRs covered:** FR15, FR16, FR17, FR18
 
 ### Epic 4: Fingerprint Training, Replay Detection, and Controlled Demonstration Scenarios
-The researcher can train a reusable LSTM fingerprint from validated normal data, generate anomaly outputs for replay-oriented temporal inconsistency, and execute controlled demonstration scenarios without bypassing the normal pipeline.
+The researcher can train a reusable LSTM fingerprint from validated normal data, generate anomaly outputs for replay-oriented temporal inconsistency, and execute controlled demonstration scenarios without bypassing the normal pipeline, with the final lightweight demo UI added only after the backend/runtime/services are complete.
 **FRs covered:** FR19, FR20, FR21, FR22, FR23
 
 ## Epic 1: Reproducible Local Edge Observation Foundation
@@ -156,7 +164,7 @@ So that implementation starts from a reproducible foundation without introducing
 **Given** the approved architecture and execution model
 **When** the project is initialized
 **Then** it uses `uv init --bare` as the bootstrap approach
-**And** the repository structure reflects the defined logical service boundaries for edges, consensus, SCADA, comparison, persistence, LSTM, observability, scenario control, and optional minimal visualization.
+**And** the repository structure reflects the defined logical service boundaries for edges, consensus, SCADA, comparison, persistence, LSTM, observability, scenario control, and the final lightweight demo UI layer.
 
 **Given** the mixed local reproducibility model
 **When** local orchestration files are created
@@ -313,7 +321,7 @@ So that consensus outcomes are represented clearly and the system cannot confuse
 **Given** the payload-driven architecture
 **When** consensus contracts are finalized
 **Then** they define the transformation from raw HART-style edge payloads into a unified consensused payload
-**And** that unified payload carries the data needed downstream, including process data, loop current, physics metrics, diagnostics, trust metadata, and operational context such as `compressor_power`.
+**And** that unified payload carries the data needed downstream, including process data, loop current, physics metrics, diagnostics, trust metadata, and any additive optional context fields explicitly present in the refined payload model.
 
 ### Story 2.2: Implement Byzantine-Style Consensus Evaluation
 
@@ -374,15 +382,15 @@ So that I can explain which edges participated, which were excluded, and why the
 **Then** consensus logs and outputs follow the same structured payload conventions used by downstream stages
 **And** they preserve visibility of both trust decisions and the resulting consensused payload state when available.
 
-### Story 2.5: Generate Consensus Failure and Multi-Invalid-Edge Alerts
+### Story 2.5: Generate Consensus Failure Alerts
 
 As a researcher,
-I want explicit alerts when consensus fails or when multiple edges are considered invalid,
+I want explicit alerts when consensus fails,
 So that critical trust-breakdown conditions are visible during demonstration and evaluation.
 
 **Acceptance Criteria:**
 
-**Given** a consensus failure or multiple invalid-edge condition
+**Given** a consensus failure caused by loss of quorum
 **When** the round completes
 **Then** the system generates a consensus-related alert
 **And** that alert remains distinct from future SCADA divergence and LSTM anomaly alerts.
@@ -394,9 +402,9 @@ So that critical trust-breakdown conditions are visible during demonstration and
 
 ## Epic 3: SCADA Integrity Comparison and Valid-State Persistence
 
-The researcher can compare the consensused physical-side state against the logical SCADA state, receive divergence alerts based on operational context, and persist only the valid structured consensus artifact to local storage.
+The researcher can compare the consensused physical-side state against the logical SCADA state, receive per-sensor divergence alerts based on configurable tolerance, and persist only the valid structured consensus artifact to local storage.
 
-### Story 3.1: Implement OPC UA-First Logical SCADA Service With Local Fallback
+### Story 3.1: Implement Fake OPC UA Logical SCADA Service
 
 As a researcher,
 I want the logical supervisory state to be exposed through a realistic local SCADA interface,
@@ -409,33 +417,28 @@ So that the prototype prioritizes industrial alignment without adding production
 **Then** the preferred implementation is a simple local Python OPC UA server
 **And** it represents the logical supervisory state rather than the physical truth source.
 
-**Given** OPC UA implementation is not feasible in the local environment
-**When** a fallback is needed
-**Then** a lightweight local FastAPI service may simulate the SCADA values
-**And** it preserves the same logical supervisory role without changing the architecture.
-
 **Given** the controlled demonstration scenarios
 **When** SCADA-side divergence behavior is exercised
 **Then** the SCADA layer can intentionally produce replayed, frozen, or offset supervisory values
 **And** those values remain part of the normal comparison pipeline as a logical-state divergence source.
 
-### Story 3.2: Implement Operational-Context SCADA Comparison on Consensused Valid Payloads
+### Story 3.2: Implement Sensor-by-Sensor SCADA Comparison on Consensused Valid Payloads
 
 As a researcher,
-I want SCADA comparison to use operational context rather than static thresholds,
-So that divergence is evaluated using expected compressor behavior and physical consistency.
+I want SCADA comparison to use simple sensor-by-sensor configurable tolerance as the core behavior,
+So that divergence is evaluated in a defensible, explainable, and prototype-scaled way.
 
 **Acceptance Criteria:**
 
 **Given** a consensused valid payload and current SCADA state
 **When** the comparison service executes
-**Then** it evaluates temperature, pressure, and RPM using operational context, including `compressor_power`
-**And** it uses physical consistency and cross-variable relationships rather than configurable static tolerance thresholds.
+**Then** it compares temperature, pressure, and RPM sensor by sensor using configurable tolerance against the current SCADA values
+**And** it may attach contextual evidence from the payload, physics metrics, or diagnostics when that helps explain the result.
 
-**Given** the operational model
-**When** `compressor_power` changes
-**Then** the comparison logic interprets higher power as supporting higher temperature, pressure, and RPM expectations
-**And** lower power as supporting lower expected values.
+**Given** the approved scope guardrails
+**When** comparison logic is implemented
+**Then** configurable tolerance remains the core decision rule
+**And** optional contextual evidence does not replace that core rule.
 
 **Given** no consensused valid state exists
 **When** comparison would otherwise run
@@ -452,7 +455,7 @@ So that SCADA divergence can be explained clearly and remain separate from other
 
 **Given** a comparison between consensused valid payloads and SCADA values
 **When** the comparison completes
-**Then** the output for each sensor includes the consensused physical value, the SCADA value, the contextual evaluation, and a divergence classification
+**Then** the output for each sensor includes the consensused physical value, the SCADA value, the tolerance-based evaluation, optional contextual evidence when present, and a divergence classification
 **And** the format remains consistent with the unified payload-driven design.
 
 **Given** divergence is detected
@@ -515,7 +518,7 @@ So that the fingerprint models physical-operational behavior rather than isolate
 
 **Given** the payload-driven architecture
 **When** training sequences are derived
-**Then** they retain the complete relevant structure from the persisted artifacts, including process variables, loop current, physics metrics, diagnostics, and operational context such as `compressor_power`
+**Then** they retain the complete relevant structure from the persisted artifacts, including process variables, loop current, physics metrics, diagnostics, SCADA comparison context, and other additive optional fields that exist in the approved payload model
 **And** they do not reduce the fingerprint input to a value-only or arbitrarily flattened subset.
 
 **Given** the prototype demonstration scope
@@ -600,20 +603,35 @@ So that demonstrations can exercise the full architecture faithfully.
 **Then** the data still flows through sensor simulation, edge acquisition, MQTT exchange, consensus, SCADA comparison, persistence, and LSTM inference as applicable
 **And** scenario-control does not inject outputs directly into downstream stages.
 
-### Story 4.6: Add End-to-End Anomaly and Scenario Observability
+### Story 4.6: Build the Final Lightweight SCADA-Inspired Demo UI Layer
 
 As a researcher,
-I want the anomaly path and demonstration scenarios to be fully observable,
-So that I can explain how replay detection and controlled divergences exercise the architecture.
+I want a lightweight SCADA-inspired demo interface for the final presentation,
+So that I can observe the prototype behavior and trigger approved scenarios without creating a second parallel architecture.
 
 **Acceptance Criteria:**
 
-**Given** training, inference, and controlled scenarios
-**When** the prototype runs
-**Then** logs or optional minimal visualization show the active scenario state, persisted valid input basis, model usage, anomaly outputs, and alert separation
-**And** the outputs remain clear for academic presentation.
+**Given** the backend/runtime/services are complete and stable
+**When** the final demo layer is implemented
+**Then** it is treated as the last implementation layer
+**And** it consumes existing logs, runtime outputs, and simulator/scenario-control hooks rather than introducing a second parallel architecture.
 
-**Given** anomaly or scenario outputs are shown
-**When** they are displayed
-**Then** they preserve separation between consensus alerts, SCADA divergence alerts, and LSTM anomaly alerts
-**And** they make clear which stage of the architecture produced the observed result.
+**Given** the operator-facing demo goals
+**When** the interface is rendered
+**Then** it shows interactive system-log visualization, a visual representation of the compressor and its sensors, and live numeric sensor values directly on the compressor view
+**And** it remains scoped to one compressor only.
+
+**Given** the approved simulator controls
+**When** the operator changes compressor power from `0%` to `100%`
+**Then** that action flows through the existing simulator control path
+**And** temperature, pressure, and RPM respond consistently with the existing behavior model.
+
+**Given** the approved demonstration scenarios
+**When** the operator triggers replay simulation or damaged/faulty edge simulation from the UI
+**Then** those actions use the existing scenario-control hooks
+**And** they continue through the normal MQTT, consensus, SCADA comparison, persistence, and LSTM paths as applicable.
+
+**Given** the visual direction for the demo
+**When** the UI is designed and implemented
+**Then** it is SCADA-inspired in layout style and operator feel only
+**And** it remains lightweight and demo-oriented rather than becoming a production-grade industrial HMI.

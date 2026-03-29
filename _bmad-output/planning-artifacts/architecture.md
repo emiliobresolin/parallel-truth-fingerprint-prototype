@@ -11,9 +11,12 @@ stepsCompleted:
 inputDocuments:
   - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/prd.md
   - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/product-brief-parallel-truth-fingerprint-prototype-2026-03-23.md
-  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_SCOPE.md
-  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_REQUIREMENTS.md
-  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_ARCHITECTURE.md
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_DEFINIÇÃO_DO_PROBLEMA.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_OBJECTIVOS.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_METODOLOGIA_DE_PESQUISA.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_FUNDAMENTACAO_TEORICA.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_ARQUITETURA_PROPOSTA.txt
+  - /c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados_PLANO_DE_AVALIACAO_E_REFERENCE.txt
 workflowType: 'architecture'
 project_name: 'parallel-truth-fingerprint-prototype'
 user_name: 'Emilio'
@@ -34,7 +37,7 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 **Functional Requirements:**
 The PRD defines a compact but strict capability set centered on one compressor, three sensors, and three logically independent edges. Architecturally, the functional requirements establish a pipeline in which local sensor acquisition occurs at the edge, observations are exchanged through MQTT, each edge reconstructs its own local replicated compressor-state view from self-observation plus peer observations, Byzantine-style validation determines the valid system state, SCADA comparison operates only on the consensused state, valid data is persisted to local object storage, and the LSTM stage performs fingerprint training and inference downstream of validation.
 
-The requirements also establish explicit observability obligations for the consensus process. The architecture must support identification of participating and excluded edges, reasons for exclusion, round-level trust ranking, explicit failed-consensus signaling, structured consensus logs, and alerts for failed consensus or multiple invalid edges.
+The requirements also establish explicit observability obligations for the consensus process. The architecture must support identification of participating and excluded edges, reasons for exclusion, round-level trust ranking, explicit failed-consensus signaling, structured consensus logs, and alerts for failed consensus.
 
 **Non-Functional Requirements:**
 The non-functional requirements strongly constrain the architecture toward local execution, modular Python services, and presentation-grade transparency. Architecturally significant NFRs include:
@@ -73,11 +76,12 @@ To keep the prototype academically valid without increasing scope, the architect
 **Real implementation components**
 - MQTT broker and MQTT-based inter-edge communication
 - decentralized edge-service execution and edge-local replicated-state reconstruction
-- consensus execution as a real executable validation component
+- consensus execution as a real executable validation component, implemented in the prototype through CometBFT plus a Go ABCI application
 - comparison logic as a real executable service operating on available inputs
 - local object storage used as the persistence target
 - LSTM training and inference service executed as a real downstream component
 - observability, audit logging, and alerting logic
+- the final lightweight SCADA-inspired demo UI layer, implemented only after the backend/runtime/services are stable
 
 **Simulated environment components**
 - physical sensors and compressor process behavior
@@ -85,6 +89,12 @@ To keep the prototype academically valid without increasing scope, the architect
 - SCADA environment, represented through a fake OPC UA service
 - cloud environment, represented through local storage and local execution only
 - industrial network and plant environment beyond the explicit local communication path used by the prototype
+
+**Conceptual-only PEP elements**
+- BBD/FABA as the theoretical consensus inspiration
+- Orion/Kafka-style cloud context-broker infrastructure
+- real cloud deployment
+- production-grade SCADA/HMI scope
 
 **Interpretation rule**
 - real components must execute real code paths and produce actual runtime outputs inside the prototype
@@ -148,7 +158,7 @@ uv init --bare
 
 **Styling Solution:**
 - Not applicable at starter level
-- any optional minimal visualization should remain secondary to the service architecture
+- the final lightweight SCADA-inspired demo UI should remain secondary to the service architecture and must be implemented only after the backend/runtime/services are stable
 
 **Build Tooling:**
 - lightweight Python project initialization
@@ -290,14 +300,13 @@ Not a primary architecture driver for this prototype.
 
 **Decision:**
 No production UI architecture is required.
-If a visualization layer is added, it must remain minimal and read-only in architectural significance:
-- logs
-- simple charts
-- simple metrics
-- current state display
-- alert display
-- consensus-round trace display
-- scenario-status display
+The only planned UI layer is the final lightweight SCADA-inspired demo interface.
+It must:
+- remain the last implementation layer after the backend/runtime/services are complete
+- stay limited to one compressor and its sensors
+- consume existing logs, runtime outputs, and simulator/scenario-control hooks rather than introducing a second parallel architecture
+- provide interactive log visualization, current state display, alert display, scenario-status display, and a compressor-centric sensor view with live numeric values
+- expose approved demo controls such as compressor power, replay activation, and damaged/faulty edge simulation without bypassing the pipeline
 
 ### Infrastructure & Deployment
 
@@ -570,6 +579,8 @@ The LSTM training pipeline may consume only validated normal data. No raw observ
 
 ### Complete Project Directory Structure
 
+This structure should now be read as a representative architecture map rather than a literal file inventory. Epic 1 and Epic 2 are implemented more fully than Epic 3 and Epic 4; the `scada/`, `comparison/`, `persistence/`, `lstm_service/`, and final demo UI areas remain planned boundaries until their respective epics are implemented.
+
 ```text
 parallel-truth-fingerprint-prototype/
 ├── README.md
@@ -580,9 +591,9 @@ parallel-truth-fingerprint-prototype/
 ├── compose.local.yml
 ├── docs/
 │   └── input/
-│       ├── PROTOCOPO_SCOPE.md
-│       ├── PROTOCOPO_REQUIREMENTS.md
-│       ├── PROTOCOPO_ARCHITECTURE.md
+│       ├── ..._DEFINI��O_DO_PROBLEMA.txt
+│       ├── ..._OBJECTIVOS.txt
+│       ├── ..._ARQUITETURA_PROPOSTA.txt
 │       └── Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados - Emilio Bresolin.pdf
 ├── src/
 │   └── parallel_truth_fingerprint/
@@ -939,3 +950,4 @@ uv init --bare
 ```
 
 Then implement the shared typed contracts and architectural skeleton before service logic.
+

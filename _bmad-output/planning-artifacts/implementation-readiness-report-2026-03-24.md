@@ -61,7 +61,7 @@ FR10: The system can expose the excluded edges in each consensus round and the r
 FR11: The system can expose the resulting trust ranking for all edges in the round.
 FR12: The system can explicitly indicate when a valid consensus cannot be achieved.
 FR13: The system can generate structured logs describing each consensus round.
-FR14: The system can generate alerts when consensus fails or when multiple edges are considered invalid.
+FR14: The system can generate alerts when consensus fails.
 FR15: The system can expose a fake SCADA in OPC UA.
 FR16: The system can execute sensor-by-sensor comparison with tolerance.
 FR17: The system can generate an alert when SCADA diverges from the consensused physical state.
@@ -108,7 +108,7 @@ Total NFRs: 17
 
 - The PRD contains a complete numbered FR and NFR inventory suitable for traceability checking.
 - The PRD is sufficient to validate functional coverage against epics and stories.
-- One readiness caveat is present: some comparison details in the PRD still use older tolerance-based wording, while the approved epic/story set has refined comparison behavior toward operational-context evaluation and payload-driven artifacts. This is not a missing requirement, but it is a traceability consistency point to keep in view during readiness validation.
+- One readiness caveat is present: older generated planning text still needs a wording sweep so every artifact consistently states that Epic 3 uses sensor-by-sensor configurable-tolerance comparison with optional contextual evidence. This is a documentation consistency point rather than a missing requirement.
 
 ## Epic Coverage Validation
 
@@ -129,7 +129,7 @@ Total NFRs: 17
 | FR11 | The system can expose the resulting trust ranking for all edges in the round. | Epic 2 Story 2.1, Story 2.2, Story 2.4 | Covered |
 | FR12 | The system can explicitly indicate when a valid consensus cannot be achieved. | Epic 2 Story 2.3, Story 2.5 | Covered |
 | FR13 | The system can generate structured logs describing each consensus round. | Epic 2 Story 2.4 | Covered |
-| FR14 | The system can generate alerts when consensus fails or when multiple edges are considered invalid. | Epic 2 Story 2.5 | Covered |
+| FR14 | The system can generate alerts when consensus fails. | Epic 2 Story 2.5 | Covered |
 | FR15 | The system can expose a fake SCADA in OPC UA. | Epic 3 Story 3.1 | Covered |
 | FR16 | The system can execute sensor-by-sensor comparison with tolerance. | Epic 3 Story 3.2, Story 3.3 | Covered with wording drift note |
 | FR17 | The system can generate an alert when SCADA diverges from the consensused physical state. | Epic 3 Story 3.3 | Covered |
@@ -138,7 +138,7 @@ Total NFRs: 17
 | FR20 | The system can generate an equipment fingerprint. | Epic 4 Story 4.2 | Covered |
 | FR21 | The system can generate anomaly score and normal/anomalous class. | Epic 4 Story 4.3 | Covered |
 | FR22 | The system can save the model/fingerprint. | Epic 4 Story 4.2 | Covered |
-| FR23 | The system can detect a replay scenario. | Epic 4 Story 4.4, Story 4.5, Story 4.6 | Covered |
+| FR23 | The system can detect a replay scenario. | Epic 4 Story 4.4, Story 4.5 | Covered |
 
 ### Missing Requirements
 
@@ -152,7 +152,7 @@ No functional requirements are completely missing from the epic and story set.
 
 ### Coverage Notes
 
-- FR16 is traceably covered, but the implementation stories refine the PRD's original tolerance-based wording into operational-context comparison using payload-driven physical consistency. This should be treated as a traceability-consistency point during final readiness judgment rather than as missing coverage.
+- FR16 is traceably covered through sensor-by-sensor configurable-tolerance comparison on consensused valid state, with optional contextual evidence only. The earlier operational-context wording has been superseded for scope control and prototype clarity.
 
 ## UX Alignment Assessment
 
@@ -163,11 +163,11 @@ Not found.
 ### Alignment Issues
 
 - No standalone UX-to-PRD or UX-to-Architecture alignment gaps were found because this planning set does not include a separate UX specification.
-- The planning artifacts consistently treat visualization as optional minimal support only, not as a primary product interface.
+- The planning artifacts now treat Story 4.6 as the explicit final lightweight SCADA-inspired demo UI layer, positioned after the backend/runtime/services rather than as an early or primary product interface.
 
 ### Warnings
 
-- No blocking UX warning identified. This prototype does imply logs, simple charts, simple metrics, and optional minimal visualization for demonstration, but those needs are already captured in the PRD, Architecture, and Epics artifacts and do not require a separate UX document for implementation readiness.
+- No blocking UX warning identified. This prototype now includes an explicit final lightweight demo UI story, but that layer is tightly scoped to one compressor, SCADA-inspired operator feel, and existing runtime/log/control hooks. A separate UX document is still not required before backend/runtime implementation readiness.
 
 ## Epic Quality Review
 
@@ -236,7 +236,7 @@ READY
 
 ### Recommended Next Steps
 
-1. Resolve the FR16 traceability wording drift before or during first-story generation by explicitly noting in story files that the implementation uses operational-context comparison as the approved refinement of the PRD's older tolerance phrasing.
+1. Resolve the remaining FR16 documentation drift before Epic 3 implementation by ensuring all planning artifacts use sensor-by-sensor configurable tolerance as the core comparison rule, with contextual evidence optional.
 2. When generating implementation-ready story files, add explicit FR/NFR references inside each story artifact so requirement traceability remains tight during coding and review.
 3. Proceed to `bmad-sprint-planning` or directly to `bmad-create-story` for Story 1.1, since the planning set is structurally complete and sequenced for implementation.
 

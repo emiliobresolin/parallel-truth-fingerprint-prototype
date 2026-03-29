@@ -15,7 +15,7 @@ so that consensus outcomes are represented clearly and the system cannot confuse
 1. Given the approved architecture constraints, when consensus-related contracts are implemented, then they include at least consensus round input, consensus result, trust ranking, exclusion details, and consensused valid state and the contracts keep edge-local replicated intermediate state distinct from consensused valid state.
 2. Given the requirement for explicit auditability, when consensus-related contracts are implemented, then they carry a round-scoped identity model with round identifier and timestamp window consistently across consensus round input, trust ranking, exclusion decisions, and consensus result.
 3. Given the requirement for explicit auditability, when a consensus result is produced, then it can represent both successful consensus and failed-consensus outcomes and it includes participating edges, excluded edges, typed reasons for exclusion, and explicit round status.
-4. Given the prototype consensus architecture, when the contracts are defined, then they support independent consensus execution on each edge and they do not introduce any central authority, SCADA coupling, or comparison logic.
+4. Given the prototype consensus architecture, when the contracts are defined, then they support the real local CometBFT plus Go ABCI consensus path without introducing SCADA coupling, comparison logic, persistence logic, or ML logic.
 5. Given the consensus result invariants, when status is `success`, then consensused valid state must be present and when status is `failed_consensus`, then consensused valid state must be absent.
 
 ## Tasks / Subtasks
@@ -57,7 +57,7 @@ so that consensus outcomes are represented clearly and the system cannot confuse
   These must be different typed contracts, not aliases of one another. [Source: [architecture.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/architecture.md#L518)]
 - The consensus round input must be based only on edge-local replicated state. It must not accept raw observations directly, and it must not include SCADA/comparison concerns. [Source: [architecture.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/architecture.md#L664)]
 - Failed-consensus is a first-class outcome. The result model must represent it explicitly and must not include a consensused valid state in that case. [Source: [epics.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/epics.md#L311)]
-- Consensus must be executed independently on each edge later. These contracts must support decentralized execution and must not imply a central coordinator or authoritative consensus service. [Source: [docs/input/PROTOCOPO_ARCHITECTURE.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_ARCHITECTURE.md#L23)]
+- In the current prototype, the real consensus implementation is CometBFT plus a Go ABCI application. These contracts must support that live path while remaining free of SCADA, comparison, persistence, or ML concerns.
 - The output must be explicitly auditable. Round-scoped trust ranking, exclusion decisions, reasons, and status need typed homes now so later stories can log them cleanly. [Source: [architecture.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/architecture.md#L37)]
 - Add a round identity model and carry it everywhere in the consensus contract layer. Round identifier plus timestamp window must be present in consensus round input, trust ranking, exclusion decision, and consensus result so auditability is guaranteed consistently.
 - Consensus status must not be a loose string. Use a minimal explicit enum-like contract with only:
@@ -70,7 +70,7 @@ so that consensus outcomes are represented clearly and the system cannot confuse
   - `suspected_byzantine_behavior`
   An optional detail field may exist, but the primary reason must remain typed and bounded.
 - Keep contract models minimal and serializable. Prefer simple dataclass-style models and standard-library Python only. Avoid unnecessary inheritance complexity.
-- The user asked to try to use the existing BBF framework. No implemented BBF code was found in the current workspace, so this story should treat the existing BBF/Byzantine reference in the project documents as the design anchor for contract shape only, without adding a new framework or algorithm here.
+- BBD/FABA remains conceptual inspiration from the approved PEP. This story should treat that reference as the design anchor for contract shape only, without claiming it is the literal runtime implementation.
 
 ### Project Structure Notes
 
@@ -120,14 +120,14 @@ so that consensus outcomes are represented clearly and the system cannot confuse
 - No SCADA or comparison logic may appear in these contracts.
 - No persistence or LSTM semantics may appear in these contracts.
 - These contracts must preserve validation-before-trust by keeping edge-local replicated state separate from consensused valid state.
-- The contract design must support later independent execution on each edge.
+- The contract design must support the real local CometBFT plus Go ABCI execution path and the broader decentralized system boundaries.
 
 ### Library / Framework Requirements
 
 - Stay within the current local Python project structure.
 - Use standard-library Python only unless an existing project dependency is clearly required.
 - Do not add any new consensus framework dependency in this story.
-- Use the existing BBF/Byzantine project reference as conceptual guidance only.
+- Use the approved BBD/FABA reference as conceptual guidance only.
 
 ### File Structure Requirements
 
@@ -177,7 +177,7 @@ so that consensus outcomes are represented clearly and the system cannot confuse
 - Consensus input / output requirements: [architecture.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/architecture.md#L191)
 - Trust-boundary separation: [architecture.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/architecture.md#L518)
 - Auditability requirements: [architecture.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/_bmad-output/planning-artifacts/architecture.md#L37)
-- Byzantine consensus execution reference: [PROTOCOPO_ARCHITECTURE.md](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/PROTOCOPO_ARCHITECTURE.md#L23)
+- Consensus architecture reference: [ARQUITETURA_PROPOSTA.txt](/c:/Users/emili/Desktop/Projets/parallel-truth-fingerprint-prototype/docs/input/Arquitetura%20Baseada%20em%20Fonte%20de%20Verdade%20Paralela%20para%20Gera%C3%A7%C3%A3o%20de%20Fingerprint%20F%C3%ADsico-Operacional%20em%20Sistemas%20Industriais%20Legados_ARQUITETURA_PROPOSTA.txt)
 
 ## Dev Agent Record
 

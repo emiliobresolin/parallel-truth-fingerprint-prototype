@@ -17,6 +17,12 @@ The repository now includes the upstream observation path for Epic 1:
 
 The consensus pillar now uses a real CometBFT-backed path for the live demo. SCADA comparison, persistence, and LSTM stages remain intentionally out of scope in the current code.
 
+The planning artifacts now treat the split PEP files in `docs/input/` as the research source of truth. They also distinguish explicitly between:
+
+- real prototype components such as MQTT, CometBFT plus Go ABCI, and later fake OPC UA, MinIO, and local LSTM
+- simulated environment components such as sensors, compressor behavior, the SCADA environment itself, and the cloud environment
+- conceptual-only dissertation references such as BBD/FABA, Orion/Kafka-style cloud infrastructure, and production-grade SCADA/HMI scope
+
 ## Local Execution Model
 
 The prototype remains fully local.
@@ -27,6 +33,15 @@ The prototype remains fully local.
 - MinIO and the LSTM service may also run as local containerized services later if that improves reproducibility.
 
 This mixed process/container model is a local setup decision only. It is not a production deployment model.
+
+## Planned Next Layers
+
+These layers are approved in planning but are not yet implemented in the current code:
+
+- fake OPC UA SCADA service
+- local MinIO persistence of valid artifacts
+- local LSTM training and inference
+- final lightweight SCADA-inspired demo UI, implemented only after the backend/runtime/services are stable
 
 ## Runtime/Demo Setup
 

@@ -12,20 +12,20 @@ so that the prototype can produce realistic local observations for demonstration
 
 ## Acceptance Criteria
 
-1. Given the compressor prototype scope, when the sensor simulation runs, then it produces temperature, pressure, and RPM values for one compressor and each sensor follows a defined normal range and a simple time-varying behavior pattern driven by compressor operational context, including `compressor_power`.
-2. Given the physical behavior model, when `compressor_power` changes, then higher power results in higher expected temperature, pressure, and RPM behavior and lower power results in lower expected values across those variables.
+1. Given the compressor prototype scope, when the sensor simulation runs, then it produces temperature, pressure, and RPM values for one compressor and each sensor follows a defined normal range and a simple time-varying behavior pattern driven by a hidden operating state such as `compressor_load_pct` or `driver_speed_pct`.
+2. Given the physical behavior model, when the hidden operating state changes, then higher operating state results in higher expected temperature, pressure, and RPM behavior and lower operating state results in lower expected values across those variables.
 3. Given the required simulation realism, when temperature increases, then the simulation increases sensor noise and variability for temperature, pressure, and RPM and that temperature-driven noise model is implemented only in the sensor simulation layer.
 4. Given the architecture constraints for scenario support, when the simulation layer is implemented, then it exposes explicit upstream control points for later deviation and fault-injection scenarios and those control points do not bypass the normal observation pipeline.
 
 ## Tasks / Subtasks
 
 - [x] Define the simulation configuration model for one compressor and three sensors. (AC: 1, 2)
-  - [x] Add configuration placeholders for normal ranges, baseline operating values, and `compressor_power`.
+  - [x] Add configuration placeholders for normal ranges, baseline operating values, and a hidden operating-state driver.
   - [x] Keep the configuration simple and local, without introducing scenario execution logic outside the simulation boundary.
 - [x] Implement a simple operational behavior model in `sensor_simulation/`. (AC: 1, 2)
   - [x] Generate temperature, pressure, and RPM readings for one compressor.
   - [x] Make the generated readings vary over time in a simple, observable pattern.
-  - [x] Make the three sensor behaviors respond coherently to `compressor_power`.
+  - [x] Make the three sensor behaviors respond coherently to the hidden operating-state driver.
 - [x] Implement the temperature-driven noise model in the simulation layer only. (AC: 3)
   - [x] Increase variability as temperature rises.
   - [x] Ensure noise affects temperature, pressure, and RPM outputs.
@@ -38,7 +38,7 @@ so that the prototype can produce realistic local observations for demonstration
   - [x] Keep the observability focused on simulation behavior, not downstream validation states.
 - [x] Add minimal tests or checks for simulation structure and behavior. (AC: 1, 2, 3, 4)
   - [x] Verify the simulator produces all three sensor outputs.
-  - [x] Verify `compressor_power` affects expected sensor directionality.
+  - [x] Verify the hidden operating state affects expected sensor directionality.
   - [x] Verify rising temperature increases noise/variability.
 
 ## Dev Notes
@@ -74,7 +74,7 @@ so that the prototype can produce realistic local observations for demonstration
 
 - Simulate one compressor only.
 - Simulate three sensors only: temperature, pressure, RPM.
-- Add `compressor_power` as the operational context driver.
+- Add a hidden operating-state driver such as `compressor_load_pct` or `driver_speed_pct`.
 - Temperature-driven noise must influence all three simulated sensor outputs.
 - The behavior model should remain understandable and deterministic enough for testing, even if light randomness is used.
 - If randomness is used, provide a controllable seed or deterministic mode so later tests and demonstrations stay reproducible.
@@ -107,7 +107,7 @@ so that the prototype can produce realistic local observations for demonstration
 - Add focused simulation tests only.
 - Validate:
   - three sensor outputs exist
-  - `compressor_power` changes expected output direction
+  - hidden operating-state changes expected output direction
   - temperature-driven noise raises variability
   - scenario-control hooks remain upstream-only
 - Do not write tests for MQTT, consensus, SCADA, persistence, or LSTM in this story.
@@ -140,7 +140,7 @@ GPT-5 Codex
 - Story 1.2 context generated with updated terminology for edge-local replicated state.
 - MQTT explicitly constrained to passive relay infrastructure outside the trust model.
 - Story kept intentionally simple, observable, and simulation-only.
-- Added a deterministic `CompressorSimulator` with one-compressor, three-sensor behavior driven by `compressor_power`.
+- Added a deterministic `CompressorSimulator` with one-compressor, three-sensor behavior driven by a hidden operating state.
 - Added explicit normal operating ranges and a reusable default simulation profile under `config/` and `sensor_simulation/`.
 - Added temperature-driven noise that increases variability for temperature, pressure, and RPM without introducing any downstream trust or messaging logic.
 - Added upstream-only simulation control hooks and inspectable snapshot metadata for later scenario-control stories.
