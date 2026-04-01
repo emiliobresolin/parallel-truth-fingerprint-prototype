@@ -15,7 +15,7 @@
     "deliver_tx_code": 0
   },
   "consensus_summary": {
-    "round_id": "round-20260401233523190488",
+    "round_id": "round-20260401234409781806",
     "total_participants": 3,
     "quorum_required": 2,
     "valid_participants_after_exclusions": 3,
@@ -26,7 +26,7 @@
     "has_consensused_valid_state": true
   },
   "committed_round_state": {
-    "round_id": "round-20260401233523190488",
+    "round_id": "round-20260401234409781806",
     "window_started_at": "2026-03-26T10:00:00+00:00",
     "window_ended_at": "2026-03-26T10:01:00+00:00",
     "participating_edges": [
@@ -67,10 +67,10 @@
     "commit_height": 11
   },
   "consensus_log": {
-    "compact": "round-20260401233523190488: status=success participants=3 excluded=0 exclusions[none]",
-    "detailed": "round=round-20260401233523190488\nstatus=success\nparticipants=edge-1, edge-2, edge-3\nconsensused_valid_state=present [pressure=6.0, rpm=3200.0, temperature=80.0]",
+    "compact": "round-20260401234409781806: status=success participants=3 excluded=0 exclusions[none]",
+    "detailed": "round=round-20260401234409781806\nstatus=success\nparticipants=edge-1, edge-2, edge-3\nconsensused_valid_state=present [pressure=6.0, rpm=3200.0, temperature=80.0]",
     "structured": {
-      "round_id": "round-20260401233523190488",
+      "round_id": "round-20260401234409781806",
       "window_started_at": "2026-03-26T10:00:00+00:00",
       "window_ended_at": "2026-03-26T10:01:00+00:00",
       "participating_edges": [
@@ -122,7 +122,7 @@
         "edge_id": "edge-1",
         "sensor_name": "temperature",
         "acquisition_count": 1,
-        "last_payload_timestamp": "2026-04-01T23:35:23.190488+00:00",
+        "last_payload_timestamp": "2026-04-01T23:44:09.781806+00:00",
         "published_observation_count": 1,
         "peer_observation_count": 2
       },
@@ -187,7 +187,7 @@
           "stage": "local_edge_acquisition",
           "edge_id": "edge-1",
           "sensor_name": "temperature",
-          "payload_timestamp": "2026-04-01T23:35:23.190488+00:00",
+          "payload_timestamp": "2026-04-01T23:44:09.781806+00:00",
           "pv_value": 78.949,
           "sv_present": true
         },
@@ -208,14 +208,14 @@
           "stage": "mqtt_publication",
           "edge_id": "edge-1",
           "topic": "edges/observations",
-          "payload_timestamp": "2026-04-01T23:35:23.190488+00:00"
+          "payload_timestamp": "2026-04-01T23:44:09.781806+00:00"
         },
         {
           "stage": "mqtt_consumption",
           "edge_id": "edge-1",
           "publisher_id": "edge-2",
           "source_tag": "PIT-101",
-          "payload_timestamp": "2026-04-01T23:35:23.190553+00:00"
+          "payload_timestamp": "2026-04-01T23:44:09.781870+00:00"
         },
         {
           "stage": "edge_local_replicated_state",
@@ -236,7 +236,7 @@
           "edge_id": "edge-1",
           "publisher_id": "edge-3",
           "source_tag": "RIT-101",
-          "payload_timestamp": "2026-04-01T23:35:23.190581+00:00"
+          "payload_timestamp": "2026-04-01T23:44:09.781899+00:00"
         },
         {
           "stage": "edge_local_replicated_state",
@@ -262,7 +262,7 @@
         "edge_id": "edge-2",
         "sensor_name": "pressure",
         "acquisition_count": 1,
-        "last_payload_timestamp": "2026-04-01T23:35:23.190553+00:00",
+        "last_payload_timestamp": "2026-04-01T23:44:09.781870+00:00",
         "published_observation_count": 1,
         "peer_observation_count": 2
       },
@@ -283,7 +283,7 @@
           "edge_id": "edge-2",
           "publisher_id": "edge-1",
           "source_tag": "TIT-101",
-          "payload_timestamp": "2026-04-01T23:35:23.190488+00:00"
+          "payload_timestamp": "2026-04-01T23:44:09.781806+00:00"
         },
         {
           "stage": "edge_local_replicated_state",
@@ -347,7 +347,7 @@
           "stage": "local_edge_acquisition",
           "edge_id": "edge-2",
           "sensor_name": "pressure",
-          "payload_timestamp": "2026-04-01T23:35:23.190553+00:00",
+          "payload_timestamp": "2026-04-01T23:44:09.781870+00:00",
           "pv_value": 6.049,
           "sv_present": true
         },
@@ -369,14 +369,14 @@
           "stage": "mqtt_publication",
           "edge_id": "edge-2",
           "topic": "edges/observations",
-          "payload_timestamp": "2026-04-01T23:35:23.190553+00:00"
+          "payload_timestamp": "2026-04-01T23:44:09.781870+00:00"
         },
         {
           "stage": "mqtt_consumption",
           "edge_id": "edge-2",
           "publisher_id": "edge-3",
           "source_tag": "RIT-101",
-          "payload_timestamp": "2026-04-01T23:35:23.190581+00:00"
+          "payload_timestamp": "2026-04-01T23:44:09.781899+00:00"
         },
         {
           "stage": "edge_local_replicated_state",
@@ -402,7 +402,7 @@
         "edge_id": "edge-3",
         "sensor_name": "rpm",
         "acquisition_count": 1,
-        "last_payload_timestamp": "2026-04-01T23:35:23.190581+00:00",
+        "last_payload_timestamp": "2026-04-01T23:44:09.781899+00:00",
         "published_observation_count": 1,
         "peer_observation_count": 2
       },
@@ -423,7 +423,7 @@
           "edge_id": "edge-3",
           "publisher_id": "edge-1",
           "source_tag": "TIT-101",
-          "payload_timestamp": "2026-04-01T23:35:23.190488+00:00"
+          "payload_timestamp": "2026-04-01T23:44:09.781806+00:00"
         },
         {
           "stage": "edge_local_replicated_state",
@@ -443,7 +443,7 @@
           "edge_id": "edge-3",
           "publisher_id": "edge-2",
           "source_tag": "PIT-101",
-          "payload_timestamp": "2026-04-01T23:35:23.190553+00:00"
+          "payload_timestamp": "2026-04-01T23:44:09.781870+00:00"
         },
         {
           "stage": "edge_local_replicated_state",
@@ -502,7 +502,7 @@
           "stage": "local_edge_acquisition",
           "edge_id": "edge-3",
           "sensor_name": "rpm",
-          "payload_timestamp": "2026-04-01T23:35:23.190581+00:00",
+          "payload_timestamp": "2026-04-01T23:44:09.781899+00:00",
           "pv_value": 3222.331,
           "sv_present": false
         },
@@ -525,7 +525,7 @@
           "stage": "mqtt_publication",
           "edge_id": "edge-3",
           "topic": "edges/observations",
-          "payload_timestamp": "2026-04-01T23:35:23.190581+00:00"
+          "payload_timestamp": "2026-04-01T23:44:09.781899+00:00"
         }
       ]
     }
