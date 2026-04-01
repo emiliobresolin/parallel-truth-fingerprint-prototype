@@ -35,7 +35,7 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 ### Requirements Overview
 
 **Functional Requirements:**
-The PRD defines a compact but strict capability set centered on one compressor, three sensors, and three logically independent edges. Architecturally, the functional requirements establish a pipeline in which local sensor acquisition occurs at the edge, observations are exchanged through MQTT, each edge reconstructs its own local replicated compressor-state view from self-observation plus peer observations, Byzantine-style validation determines the valid system state, SCADA comparison operates only on the consensused state, valid data is persisted to local object storage, and the LSTM stage performs fingerprint training and inference downstream of validation.
+The PRD defines a compact but strict capability set centered on one compressor, three sensors, and three logically independent edges. Architecturally, the functional requirements establish a pipeline in which local sensor acquisition occurs first at the edge through pre-PLC physical acquisition semantics, using a simulated transmitter-side observation and HART-inspired collection logic; only after this local acquisition are edge observations exchanged through MQTT. Each edge then reconstructs its local replicated compressor-state view from self-observation plus peer observations. Each edge reconstructs its own local replicated compressor-state view from self-observation plus peer observations, Byzantine-style validation determines the valid system state, SCADA comparison operates only on the consensused state, valid data is persisted to local object storage, and the LSTM stage performs fingerprint training and inference downstream of validation.
 
 The requirements also establish explicit observability obligations for the consensus process. The architecture must support identification of participating and excluded edges, reasons for exclusion, round-level trust ranking, explicit failed-consensus signaling, structured consensus logs, and alerts for failed consensus.
 
@@ -591,7 +591,7 @@ parallel-truth-fingerprint-prototype/
 ├── compose.local.yml
 ├── docs/
 │   └── input/
-│       ├── ..._DEFINI��O_DO_PROBLEMA.txt
+│       ├── ..._DEFINI��O_DO_PROBLEMA.txt
 │       ├── ..._OBJECTIVOS.txt
 │       ├── ..._ARQUITETURA_PROPOSTA.txt
 │       └── Arquitetura Baseada em Fonte de Verdade Paralela para Geração de Fingerprint Físico-Operacional em Sistemas Industriais Legados - Emilio Bresolin.pdf

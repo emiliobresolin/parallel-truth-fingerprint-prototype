@@ -1,0 +1,290 @@
+"""Fake OPC UA logical SCADA service for the local prototype."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+import importlib.util
+
+from parallel_truth_fingerprint.contracts.consensused_valid_state import (
+    ConsensusedValidState,
+)
+from parallel_truth_fingerprint.contracts.scada_state import (
+    ScadaSensorState,
+    ScadaState,
+)
+
+SUPPORTED_SCADA_SENSORS = ("temperature", "pressure", "rpm")
+SCADA_SENSOR_UNITS = {
+    "temperature": "degC",
+    "pressure": "bar",
+    "rpm": "rpm",
+}
+SUPPORTED_OVERRIDE_MODES = {"match", "offset", "freeze", "replay"}
+
+
+@dataclass(frozen=True)
+class ScadaSensorOverride:
+    """Additive logical-side divergence controls for one sensor."""
+
+    mode: str = "match"
+    offset: float = 0.0
+    fixed_value: float | None = None
+    replay_round_id: str | None = None
+
+
+class FakeOpcUaScadaService:
+    """Expose the logical SCADA-side view through a local OPC UA server.
+
+    The service stays deliberately small:
+    - it consumes the consensused valid state
+    - it projects a logical supervisory state
+    - it exposes temperature, pressure, and rpm over OPC UA
+    - it supports additive match/offset/freeze/replay supervisory overrides
+    """
+
+    def __init__(
+        self,
+        *,
+        endpoint_url: str = "opc.tcp://127.0.0.1:4841/ptf/scada/server/",
+        namespace_uri: str = "urn:parallel-truth-fingerprint:scada",
+        compressor_id: str = "compressor-1",
+    ) -> None:
+        self.endpoint_url = endpoint_url
+        self.namespace_uri = namespace_uri
+        self.compressor_id = compressor_id
+        self._server = None
+        self._namespace_index: int | None = None
+        self._sensor_nodes: dict[str, object] = {}
+        self._current_state: ScadaState | None = None
+        self._history: list[ScadaState] = []
+        self._frozen_values: dict[str, float] = {}
+        self._overrides = {
+            sensor_name: ScadaSensorOverride() for sensor_name in SUPPORTED_SCADA_SENSORS
+        }
+
+    @property
+    def namespace_index(self) -> int | None:
+        """Return the namespace index used by the running OPC UA server."""
+
+        return self._namespace_index
+
+    def current_state(self) -> ScadaState | None:
+        """Return the latest logical SCADA state."""
+
+        return self._current_state
+
+    def history(self) -> tuple[ScadaState, ...]:
+        """Return previously projected logical SCADA states."""
+
+        return tuple(self._history)
+
+    def set_sensor_override(
+        self,
+        sensor_name: str,
+        *,
+        mode: str = "match",
+        offset: float = 0.0,
+        fixed_value: float | None = None,
+        replay_round_id: str | None = None,
+    ) -> None:
+        """Configure one additive logical-side divergence mode for a sensor."""
+
+        self._validate_sensor_name(sensor_name)
+        if mode not in SUPPORTED_OVERRIDE_MODES:
+            raise ValueError(
+                f"Unsupported SCADA override mode '{mode}'. "
+                f"Expected one of {sorted(SUPPORTED_OVERRIDE_MODES)}."
+            )
+
+        override = ScadaSensorOverride(
+            mode=mode,
+            offset=offset,
+            fixed_value=None if fixed_value is None else round(float(fixed_value), 3),
+            replay_round_id=replay_round_id,
+        )
+        self._overrides[sensor_name] = override
+        if mode != "freeze":
+            self._frozen_values.pop(sensor_name, None)
+        elif override.fixed_value is not None:
+            self._frozen_values[sensor_name] = override.fixed_value
+
+    def clear_sensor_override(self, sensor_name: str) -> None:
+        """Reset one sensor to normal matching behavior."""
+
+        self._validate_sensor_name(sensor_name)
+        self._overrides[sensor_name] = ScadaSensorOverride()
+        self._frozen_values.pop(sensor_name, None)
+
+    def clear_overrides(self) -> None:
+        """Reset all sensors to normal matching behavior."""
+
+        for sensor_name in SUPPORTED_SCADA_SENSORS:
+            self._overrides[sensor_name] = ScadaSensorOverride()
+        self._frozen_values.clear()
+
+    def update_from_consensused_state(
+        self,
+        valid_state: ConsensusedValidState,
+    ) -> ScadaState:
+        """Project logical supervisory values from the current valid state."""
+
+        logical_state = self.project_state(valid_state)
+        self._current_state = logical_state
+        self._history.append(logical_state)
+        return logical_state
+
+    def project_state(self, valid_state: ConsensusedValidState) -> ScadaState:
+        """Build one logical SCADA state without writing it to the OPC UA server."""
+
+        missing = set(SUPPORTED_SCADA_SENSORS).difference(valid_state.sensor_values)
+        if missing:
+            raise ValueError(
+                "ConsensusedValidState is missing SCADA sensor values for: "
+                f"{sorted(missing)}"
+            )
+
+        sensor_values: dict[str, ScadaSensorState] = {}
+        for sensor_name in SUPPORTED_SCADA_SENSORS:
+            base_value = round(float(valid_state.sensor_values[sensor_name]), 3)
+            override = self._overrides[sensor_name]
+            projected_value = self._apply_override(
+                sensor_name,
+                base_value=base_value,
+                override=override,
+            )
+            sensor_values[sensor_name] = ScadaSensorState(
+                value=projected_value,
+                unit=SCADA_SENSOR_UNITS[sensor_name],
+                mode=override.mode,
+            )
+
+        return ScadaState(
+            compressor_id=self.compressor_id,
+            source_round_id=valid_state.round_identity.round_id,
+            timestamp=valid_state.round_identity.window_ended_at.isoformat(),
+            sensor_values=sensor_values,
+        )
+
+    async def start(self) -> None:
+        """Start the local OPC UA server for the fake SCADA layer."""
+
+        if self._server is not None:
+            return
+
+        self._require_asyncua()
+        from asyncua import Server
+
+        server = Server()
+        await server.init()
+        server.set_endpoint(self.endpoint_url)
+        server.set_server_name("Parallel Truth Fingerprint Fake SCADA")
+        namespace_index = await server.register_namespace(self.namespace_uri)
+        compressor_node = await server.nodes.objects.add_object(
+            namespace_index,
+            self.compressor_id,
+        )
+
+        sensor_nodes: dict[str, object] = {}
+        for sensor_name in SUPPORTED_SCADA_SENSORS:
+            node = await compressor_node.add_variable(namespace_index, sensor_name, 0.0)
+            await node.set_writable()
+            sensor_nodes[sensor_name] = node
+
+        self._server = server
+        self._namespace_index = namespace_index
+        self._sensor_nodes = sensor_nodes
+        await self._server.start()
+
+        if self._current_state is not None:
+            await self._write_state_to_server(self._current_state)
+
+    async def stop(self) -> None:
+        """Stop the local OPC UA server if it is running."""
+
+        if self._server is None:
+            return
+        await self._server.stop()
+        self._server = None
+        self._namespace_index = None
+        self._sensor_nodes = {}
+
+    async def publish_consensused_state(
+        self,
+        valid_state: ConsensusedValidState,
+    ) -> ScadaState:
+        """Project and publish one logical SCADA state."""
+
+        logical_state = self.update_from_consensused_state(valid_state)
+        if self._server is not None:
+            await self._write_state_to_server(logical_state)
+        return logical_state
+
+    async def read_live_values(self) -> dict[str, float]:
+        """Read the currently exposed OPC UA variable values from the running server."""
+
+        if self._server is None:
+            raise RuntimeError("OPC UA server must be running before reading live values.")
+        return {
+            sensor_name: await self._sensor_nodes[sensor_name].read_value()
+            for sensor_name in SUPPORTED_SCADA_SENSORS
+        }
+
+    async def _write_state_to_server(self, logical_state: ScadaState) -> None:
+        for sensor_name, sensor_state in logical_state.sensor_values.items():
+            await self._sensor_nodes[sensor_name].write_value(sensor_state.value)
+
+    def _apply_override(
+        self,
+        sensor_name: str,
+        *,
+        base_value: float,
+        override: ScadaSensorOverride,
+    ) -> float:
+        if override.mode == "match":
+            return base_value
+        if override.mode == "offset":
+            return round(base_value + override.offset, 3)
+        if override.mode == "freeze":
+            if sensor_name in self._frozen_values:
+                return self._frozen_values[sensor_name]
+            frozen_value = base_value if override.fixed_value is None else override.fixed_value
+            self._frozen_values[sensor_name] = round(float(frozen_value), 3)
+            return self._frozen_values[sensor_name]
+        if override.mode == "replay":
+            replay_value = self._resolve_replay_value(
+                sensor_name,
+                replay_round_id=override.replay_round_id,
+            )
+            return base_value if replay_value is None else replay_value
+        raise ValueError(f"Unexpected SCADA override mode: {override.mode}")
+
+    def _resolve_replay_value(
+        self,
+        sensor_name: str,
+        *,
+        replay_round_id: str | None,
+    ) -> float | None:
+        if not self._history:
+            return None
+
+        if replay_round_id is not None:
+            for logical_state in self._history:
+                if logical_state.source_round_id == replay_round_id:
+                    return logical_state.sensor_values[sensor_name].value
+            return None
+
+        return self._history[-1].sensor_values[sensor_name].value
+
+    def _validate_sensor_name(self, sensor_name: str) -> None:
+        if sensor_name not in SUPPORTED_SCADA_SENSORS:
+            raise ValueError(
+                f"Unsupported SCADA sensor '{sensor_name}'. "
+                f"Expected one of {list(SUPPORTED_SCADA_SENSORS)}."
+            )
+
+    def _require_asyncua(self) -> None:
+        if importlib.util.find_spec("asyncua") is None:
+            raise RuntimeError(
+                "Fake OPC UA SCADA service requires the 'asyncua' package. "
+                "Install project dependencies before starting Story 3.1 runtime tests."
+            )

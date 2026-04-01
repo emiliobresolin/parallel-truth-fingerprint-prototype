@@ -25,6 +25,14 @@ from parallel_truth_fingerprint.contracts.exclusion_decision import ExclusionDec
 from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReason
 from parallel_truth_fingerprint.contracts.raw_hart_payload import RawHartPayload
 from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
+from parallel_truth_fingerprint.contracts.scada_comparison import (
+    ScadaComparisonResult,
+    SensorScadaComparison,
+)
+from parallel_truth_fingerprint.contracts.scada_state import (
+    ScadaSensorState,
+    ScadaState,
+)
 from parallel_truth_fingerprint.contracts.trust_evidence import (
     PairwiseDistanceEvidence,
     PerEdgeTrustEvidence,
@@ -50,6 +58,10 @@ __all__ = [
     "PerEdgeTrustEvidence",
     "RawHartPayload",
     "RoundIdentity",
+    "ScadaComparisonResult",
+    "ScadaSensorState",
+    "SensorScadaComparison",
+    "ScadaState",
     "SensorDeviationEvidence",
     "TrustRankEntry",
     "TrustRanking",
