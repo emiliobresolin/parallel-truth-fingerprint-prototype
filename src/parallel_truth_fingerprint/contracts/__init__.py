@@ -25,6 +25,9 @@ from parallel_truth_fingerprint.contracts.exclusion_decision import ExclusionDec
 from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReason
 from parallel_truth_fingerprint.contracts.raw_hart_payload import RawHartPayload
 from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
+from parallel_truth_fingerprint.contracts.persistence_record import (
+    ValidConsensusArtifactRecord,
+)
 from parallel_truth_fingerprint.contracts.scada_alert import ScadaAlert, ScadaAlertType
 from parallel_truth_fingerprint.contracts.scada_comparison import (
     ScadaComparisonResult,
@@ -61,6 +64,7 @@ __all__ = [
     "ExclusionDecision",
     "ExclusionReason",
     "PairwiseDistanceEvidence",
+    "ValidConsensusArtifactRecord",
     "PerEdgeTrustEvidence",
     "RawHartPayload",
     "RoundIdentity",
