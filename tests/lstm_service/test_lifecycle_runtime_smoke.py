@@ -145,6 +145,21 @@ class RuntimeLifecycleSmokeTests(unittest.TestCase):
             )
             return {
                 "cycle_index": cycle_index,
+                "simulator_snapshot": {
+                    "compressor_id": "compressor-1",
+                    "operating_state_pct": 65.0,
+                    "sensors": {
+                        "temperature": float(
+                            audit_package.consensused_valid_state.sensor_values["temperature"]
+                        ),
+                        "pressure": float(
+                            audit_package.consensused_valid_state.sensor_values["pressure"]
+                        ),
+                        "rpm": float(
+                            audit_package.consensused_valid_state.sensor_values["rpm"]
+                        ),
+                    },
+                },
                 "node_status": {
                     "node_info": {"version": "runtime-smoke"},
                     "sync_info": {"latest_block_height": str(cycle_index)},
@@ -176,8 +191,34 @@ class RuntimeLifecycleSmokeTests(unittest.TestCase):
                     "record": persistence_record.to_dict(),
                 },
                 "fault_edges": (),
+                "scenario_control_stage": mock.Mock(
+                    to_dict=mock.Mock(
+                        return_value={
+                            "configured_scenario": "normal",
+                            "active_scenario": "normal",
+                            "training_eligible": True,
+                        }
+                    ),
+                    fault_mode="none",
+                ),
+                "scada_replay_stage": mock.Mock(
+                    to_dict=mock.Mock(
+                        return_value={
+                            "active": False,
+                            "mode": "match",
+                            "start_cycle": 0,
+                            "replay_source_round_id": None,
+                        }
+                    ),
+                    mode="match",
+                    active=False,
+                    start_cycle=0,
+                    replay_source_round_id=None,
+                ),
                 "fingerprint_stage": fingerprint_stage,
                 "fingerprint_inference_results": inference_results,
+                "replay_behavior_result": None,
+                "replay_inference_results": (),
                 "edges": (),
             }
 

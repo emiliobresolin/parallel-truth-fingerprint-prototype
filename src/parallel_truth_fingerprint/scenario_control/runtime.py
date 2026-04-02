@@ -6,6 +6,14 @@ from dataclasses import dataclass, replace
 
 
 NORMAL_SCENARIO = "normal"
+SUPPORTED_DEMO_SCENARIOS = (
+    "normal",
+    "scada_replay",
+    "scada_freeze",
+    "scada_divergence",
+    "single_edge_exclusion",
+    "quorum_loss",
+)
 SCENARIO_OUTPUTS_NORMAL = (
     "consensus_alert",
     "persistence_stage",
@@ -20,6 +28,10 @@ SCENARIO_OUTPUTS_EDGE = (
     "consensus_alert",
     "persistence_stage",
     "fingerprint_lifecycle",
+)
+SCENARIO_OUTPUTS_SCADA_DIVERGENCE = (
+    "scada_divergence_alert",
+    "fingerprint_inference",
 )
 SCENARIO_OUTPUTS_QUORUM = (
     "consensus_alert",
@@ -129,6 +141,21 @@ def resolve_runtime_scenario_control_stage(
             expected_output_channels=SCENARIO_OUTPUTS_SCADA,
         )
 
+    if configured_scenario == "scada_divergence":
+        return RuntimeScenarioControlStage(
+            configured_scenario=configured_scenario,
+            active_scenario=configured_scenario,
+            start_cycle=start_cycle,
+            active=True,
+            fault_mode="none",
+            scada_mode="offset",
+            scenario_label="scada_divergence",
+            training_label="non_normal",
+            training_eligible=False,
+            training_eligibility_reason="scada_divergence",
+            expected_output_channels=SCENARIO_OUTPUTS_SCADA_DIVERGENCE,
+        )
+
     if configured_scenario == "single_edge_exclusion":
         return RuntimeScenarioControlStage(
             configured_scenario=configured_scenario,
@@ -189,6 +216,8 @@ def _resolve_configured_scenario(config) -> tuple[str, int]:
         return "scada_replay", getattr(config, "demo_scada_start_cycle", 1)
     if scada_mode == "freeze":
         return "scada_freeze", getattr(config, "demo_scada_start_cycle", 1)
+    if scada_mode == "offset":
+        return "scada_divergence", getattr(config, "demo_scada_start_cycle", 1)
     if fault_mode != "none":
         return fault_mode, 1
     return NORMAL_SCENARIO, 1

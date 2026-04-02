@@ -91,6 +91,33 @@ class RuntimeScenarioControlTests(unittest.TestCase):
         self.assertEqual(stage.scada_mode, "freeze")
         self.assertFalse(stage.training_eligible)
 
+    def test_explicit_scada_divergence_scenario_uses_offset_mode(self) -> None:
+        config = RuntimeDemoConfig(
+            mqtt_transport="passive",
+            demo_scenario_name="scada_divergence",
+            demo_scenario_start_cycle=2,
+        )
+
+        stage = resolve_runtime_scenario_control_stage(config=config, cycle_index=2)
+        cycle_config = apply_runtime_scenario_control(
+            config=config,
+            scenario_stage=stage,
+        )
+
+        self.assertTrue(stage.active)
+        self.assertEqual(stage.active_scenario, "scada_divergence")
+        self.assertEqual(stage.scada_mode, "offset")
+        self.assertFalse(stage.training_eligible)
+        self.assertEqual(
+            stage.expected_output_channels,
+            (
+                "scada_divergence_alert",
+                "fingerprint_inference",
+            ),
+        )
+        self.assertEqual(cycle_config.demo_scada_mode, "offset")
+        self.assertEqual(cycle_config.demo_scada_start_cycle, 2)
+
     def test_legacy_conflicting_scenarios_are_rejected(self) -> None:
         config = RuntimeDemoConfig(
             mqtt_transport="passive",

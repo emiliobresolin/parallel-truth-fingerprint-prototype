@@ -27,7 +27,7 @@ DEFAULT_REPLAY_THRESHOLD_STDDEV_MULTIPLIER = 0.0
 
 @dataclass(frozen=True)
 class ScadaReplayRuntimeStage:
-    """Structured SCADA replay/freeze runtime state for one cycle."""
+    """Structured SCADA logical-side runtime state for one cycle."""
 
     active: bool
     mode: str
@@ -70,6 +70,12 @@ def configure_scada_replay_runtime_stage(
                 mode="replay",
                 replay_round_id=replay_source_round_id,
             )
+        elif mode == "offset":
+            scada_service.set_sensor_override(
+                sensor_name,
+                mode="offset",
+                offset=_resolve_scada_offset(sensor_name, config),
+            )
 
     return ScadaReplayRuntimeStage(
         active=True,
@@ -92,7 +98,7 @@ def run_scada_replay_behavior_detection(
 ) -> tuple[ReplayBehaviorResult | None, tuple]:
     """Run replay/freeze detection through the existing fingerprint path."""
 
-    if not replay_stage.active:
+    if not replay_stage.active or replay_stage.mode not in {"replay", "freeze"}:
         return None, ()
 
     model_metadata_object_key = latest_model_metadata_key(artifact_store)
@@ -240,3 +246,14 @@ def _resolve_replay_source_artifact(
                 return artifact
 
     return chronological_history[0]
+
+
+def _resolve_scada_offset(sensor_name: str, config) -> float:
+    """Return a simple demo-safe SCADA offset for divergence scenarios."""
+
+    base_offset = float(getattr(config, "demo_scada_offset_value", 6.0))
+    if sensor_name == "temperature":
+        return round(base_offset, 3)
+    if sensor_name == "pressure":
+        return round(base_offset / 10.0, 3)
+    return round(base_offset * 50.0, 3)

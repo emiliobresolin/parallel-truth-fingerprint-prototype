@@ -19,10 +19,13 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             "DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES"
         )
         previous_sequence_length = os.environ.get("DEMO_FINGERPRINT_SEQUENCE_LENGTH")
+        previous_dashboard_host = os.environ.get("DEMO_DASHBOARD_HOST")
+        previous_dashboard_port = os.environ.get("DEMO_DASHBOARD_PORT")
         previous_scenario_name = os.environ.get("DEMO_SCENARIO")
         previous_scenario_start_cycle = os.environ.get("DEMO_SCENARIO_START_CYCLE")
         previous_scada_mode = os.environ.get("DEMO_SCADA_MODE")
         previous_scada_start_cycle = os.environ.get("DEMO_SCADA_START_CYCLE")
+        previous_scada_offset = os.environ.get("DEMO_SCADA_OFFSET_VALUE")
         previous_minio_endpoint = os.environ.get("MINIO_ENDPOINT")
         previous_minio_access_key = os.environ.get("MINIO_ACCESS_KEY")
         previous_minio_secret_key = os.environ.get("MINIO_SECRET_KEY")
@@ -39,10 +42,13 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             os.environ["DEMO_MAX_CYCLES"] = "4"
             os.environ["DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES"] = "12"
             os.environ["DEMO_FINGERPRINT_SEQUENCE_LENGTH"] = "3"
+            os.environ["DEMO_DASHBOARD_HOST"] = "0.0.0.0"
+            os.environ["DEMO_DASHBOARD_PORT"] = "9099"
             os.environ["DEMO_SCENARIO"] = "scada_replay"
             os.environ["DEMO_SCENARIO_START_CYCLE"] = "8"
             os.environ["DEMO_SCADA_MODE"] = "replay"
             os.environ["DEMO_SCADA_START_CYCLE"] = "7"
+            os.environ["DEMO_SCADA_OFFSET_VALUE"] = "8.5"
             os.environ["MINIO_ENDPOINT"] = "127.0.0.1:9000"
             os.environ["MINIO_ACCESS_KEY"] = "demo-user"
             os.environ["MINIO_SECRET_KEY"] = "demo-secret"
@@ -61,10 +67,13 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             self.assertEqual(config.demo_max_cycles, 4)
             self.assertEqual(config.demo_train_after_eligible_cycles, 12)
             self.assertEqual(config.demo_fingerprint_sequence_length, 3)
+            self.assertEqual(config.demo_dashboard_host, "0.0.0.0")
+            self.assertEqual(config.demo_dashboard_port, 9099)
             self.assertEqual(config.demo_scenario_name, "scada_replay")
             self.assertEqual(config.demo_scenario_start_cycle, 8)
             self.assertEqual(config.demo_scada_mode, "replay")
             self.assertEqual(config.demo_scada_start_cycle, 7)
+            self.assertEqual(config.demo_scada_offset_value, 8.5)
             self.assertEqual(config.minio_endpoint, "127.0.0.1:9000")
             self.assertEqual(config.minio_access_key, "demo-user")
             self.assertEqual(config.minio_secret_key, "demo-secret")
@@ -110,6 +119,14 @@ class RuntimeDemoConfigTest(unittest.TestCase):
                 os.environ.pop("DEMO_FINGERPRINT_SEQUENCE_LENGTH", None)
             else:
                 os.environ["DEMO_FINGERPRINT_SEQUENCE_LENGTH"] = previous_sequence_length
+            if previous_dashboard_host is None:
+                os.environ.pop("DEMO_DASHBOARD_HOST", None)
+            else:
+                os.environ["DEMO_DASHBOARD_HOST"] = previous_dashboard_host
+            if previous_dashboard_port is None:
+                os.environ.pop("DEMO_DASHBOARD_PORT", None)
+            else:
+                os.environ["DEMO_DASHBOARD_PORT"] = previous_dashboard_port
             if previous_scenario_name is None:
                 os.environ.pop("DEMO_SCENARIO", None)
             else:
@@ -126,6 +143,10 @@ class RuntimeDemoConfigTest(unittest.TestCase):
                 os.environ.pop("DEMO_SCADA_START_CYCLE", None)
             else:
                 os.environ["DEMO_SCADA_START_CYCLE"] = previous_scada_start_cycle
+            if previous_scada_offset is None:
+                os.environ.pop("DEMO_SCADA_OFFSET_VALUE", None)
+            else:
+                os.environ["DEMO_SCADA_OFFSET_VALUE"] = previous_scada_offset
             if previous_minio_endpoint is None:
                 os.environ.pop("MINIO_ENDPOINT", None)
             else:
@@ -708,6 +729,7 @@ class DemoFormattingTest(unittest.TestCase):
             demo_max_cycles=2,
         )
         base_cycle_result = {
+            "simulator_snapshot": None,
             "node_status": {},
             "commit_receipt": object(),
             "committed_round": {},
@@ -801,6 +823,7 @@ class DemoFormattingTest(unittest.TestCase):
         )
         cycle_result = {
             "cycle_index": 1,
+            "simulator_snapshot": None,
             "node_status": {},
             "commit_receipt": object(),
             "committed_round": {},

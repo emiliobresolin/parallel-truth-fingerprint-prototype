@@ -1,22 +1,28 @@
-"""Real runtime smoke validation for Epic 4 Story 4.5."""
+"""Real runtime smoke validation for Story 4.6."""
 
 from __future__ import annotations
 
 from dataclasses import replace
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import importlib.util
 import json
 import os
 from pathlib import Path
 import socket
+import time
 import unittest
 from unittest import mock
+from urllib import request
 
 from parallel_truth_fingerprint.config.runtime import RuntimeDemoConfig
 from parallel_truth_fingerprint.consensus import (
     build_consensus_alert,
     build_round_log,
     build_round_summary,
+)
+from parallel_truth_fingerprint.dashboard import (
+    LocalOperatorDashboardController,
+    LocalOperatorDashboardServer,
 )
 from parallel_truth_fingerprint.lstm_service import (
     configure_scada_replay_runtime_stage,
@@ -33,8 +39,8 @@ from scripts import run_local_demo
 from tests.persistence.test_service import build_valid_audit_package
 
 
-def _real_scenario_control_smoke_enabled() -> bool:
-    return os.getenv("RUN_REAL_SCENARIO_CONTROL_SMOKE") == "1"
+def _real_dashboard_smoke_enabled() -> bool:
+    return os.getenv("RUN_REAL_DASHBOARD_SMOKE") == "1"
 
 
 def _dependencies_available() -> bool:
@@ -52,6 +58,29 @@ def _minio_available(host: str = "127.0.0.1", port: int = 9000) -> bool:
             return True
     except OSError:
         return False
+
+
+def _json_request(
+    *,
+    method: str,
+    url: str,
+    payload: dict[str, object] | None = None,
+) -> dict[str, object]:
+    data = None if payload is None else json.dumps(payload).encode("utf-8")
+    headers = {"Content-Type": "application/json"} if payload is not None else {}
+    req = request.Request(url, data=data, headers=headers, method=method)
+    with request.urlopen(req, timeout=5) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def _wait_for(predicate, *, timeout_seconds: float = 10.0) -> dict[str, object]:
+    deadline = time.time() + timeout_seconds
+    while time.time() < deadline:
+        state = predicate()
+        if state is not None:
+            return state
+        time.sleep(0.05)
+    raise AssertionError("Timed out waiting for dashboard runtime condition.")
 
 
 class _FakeReceipt:
@@ -96,25 +125,39 @@ def build_variable_audit_package(
 
 
 @unittest.skipUnless(
-    _real_scenario_control_smoke_enabled(),
-    "Set RUN_REAL_SCENARIO_CONTROL_SMOKE=1 to run the Story 4.5 smoke test.",
+    _real_dashboard_smoke_enabled(),
+    "Set RUN_REAL_DASHBOARD_SMOKE=1 to run the Story 4.6 smoke test.",
 )
 @unittest.skipUnless(
     _dependencies_available(),
-    "Required runtime dependencies for Story 4.5 are not installed.",
+    "Required runtime dependencies for Story 4.6 are not installed.",
 )
 @unittest.skipUnless(
     _minio_available(),
     "Local MinIO is not reachable on 127.0.0.1:9000.",
 )
-class RuntimeScenarioControlSmokeTests(unittest.TestCase):
-    def test_real_runtime_scenario_control_activates_replay_without_pipeline_bypass(
-        self,
-    ) -> None:
+class DashboardControlSurfaceRuntimeSmokeTests(unittest.TestCase):
+    def test_dashboard_controls_real_runtime_lifecycle_end_to_end(self) -> None:
         run_suffix = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
-        bucket_name = f"scenario-control-smoke-{run_suffix}"
-        log_relative_path = f"logs/scenario-control-smoke-{run_suffix}.json"
+        bucket_name = f"dashboard-smoke-{run_suffix}"
+        log_relative_path = f"logs/dashboard-smoke-{run_suffix}.json"
         log_path = run_local_demo.PROJECT_ROOT / log_relative_path
+        config = RuntimeDemoConfig(
+            mqtt_transport="passive",
+            minio_endpoint="localhost:9000",
+            minio_access_key="minioadmin",
+            minio_secret_key="minioadmin",
+            minio_bucket=bucket_name,
+            demo_cycle_interval_seconds=0.05,
+            demo_max_cycles=0,
+            demo_train_after_eligible_cycles=3,
+            demo_fingerprint_sequence_length=2,
+            demo_dashboard_host="127.0.0.1",
+            demo_dashboard_port=0,
+            demo_log_path=log_relative_path,
+        )
+        controller = LocalOperatorDashboardController(config)
+        server = LocalOperatorDashboardServer(controller, host="127.0.0.1", port=0)
         store = MinioArtifactStore(
             MinioStoreConfig(
                 endpoint="localhost:9000",
@@ -124,31 +167,8 @@ class RuntimeScenarioControlSmokeTests(unittest.TestCase):
                 secure=False,
             )
         )
-        config = RuntimeDemoConfig(
-            mqtt_transport="passive",
-            minio_endpoint="localhost:9000",
-            minio_access_key="minioadmin",
-            minio_secret_key="minioadmin",
-            minio_bucket=bucket_name,
-            demo_cycle_interval_seconds=0.05,
-            demo_max_cycles=4,
-            demo_train_after_eligible_cycles=3,
-            demo_fingerprint_sequence_length=2,
-            demo_scenario_name="scada_replay",
-            demo_scenario_start_cycle=4,
-            demo_log_path=log_relative_path,
-        )
-        scada_service = FakeOpcUaScadaService(compressor_id="compressor-1")
-        os.environ.pop("KERAS_BACKEND", None)
-        cycle_values = (
-            (10.0, 1.0, 1000.0),
-            (20.0, 2.0, 2000.0),
-            (30.0, 3.0, 3000.0),
-            (40.0, 4.0, 4000.0),
-        )
 
-        def cycle_executor(*, cycle_index: int, **kwargs) -> dict[str, object]:
-            round_id = f"round-scenario-control-{run_suffix}-{cycle_index:03d}"
+        def cycle_executor(*, cycle_index: int, config, artifact_store, scada_service, **kwargs):
             scenario_control_stage = resolve_runtime_scenario_control_stage(
                 config=config,
                 cycle_index=cycle_index,
@@ -157,7 +177,11 @@ class RuntimeScenarioControlSmokeTests(unittest.TestCase):
                 config=config,
                 scenario_stage=scenario_control_stage,
             )
-            temperature, pressure, rpm = cycle_values[cycle_index - 1]
+            power = float(cycle_config.demo_power)
+            temperature = round(38.0 + (power * 0.52) + cycle_index, 3)
+            pressure = round(1.4 + (power * 0.055) + (cycle_index * 0.05), 3)
+            rpm = round(850.0 + (power * 28.0) + (cycle_index * 12.0), 3)
+            round_id = f"round-dashboard-{run_suffix}-{cycle_index:03d}"
             audit_package = build_variable_audit_package(
                 round_id=round_id,
                 temperature=temperature,
@@ -177,7 +201,7 @@ class RuntimeScenarioControlSmokeTests(unittest.TestCase):
                 persistence_stage,
             ) = run_local_demo.run_scada_comparison_and_persistence(
                 consensus_audit=audit_package,
-                artifact_store=store,
+                artifact_store=artifact_store,
                 scada_service=scada_service,
                 fault_mode=cycle_config.demo_fault_mode,
                 scenario_control_stage=scenario_control_stage,
@@ -186,7 +210,7 @@ class RuntimeScenarioControlSmokeTests(unittest.TestCase):
             fingerprint_stage, fingerprint_inference_results = (
                 execute_deferred_fingerprint_lifecycle(
                     cycle_index=cycle_index,
-                    artifact_store=store,
+                    artifact_store=artifact_store,
                     sequence_length=config.demo_fingerprint_sequence_length,
                     train_after_eligible_cycles=config.demo_train_after_eligible_cycles,
                 )
@@ -198,7 +222,7 @@ class RuntimeScenarioControlSmokeTests(unittest.TestCase):
                     scada_state=scada_state,
                     comparison_output=comparison_output,
                     replay_stage=scada_replay_stage,
-                    artifact_store=store,
+                    artifact_store=artifact_store,
                     sequence_length=config.demo_fingerprint_sequence_length,
                 )
                 if scada_state is not None and comparison_output is not None
@@ -208,15 +232,15 @@ class RuntimeScenarioControlSmokeTests(unittest.TestCase):
                 "cycle_index": cycle_index,
                 "simulator_snapshot": {
                     "compressor_id": "compressor-1",
-                    "operating_state_pct": float(cycle_config.demo_power),
+                    "operating_state_pct": power,
                     "sensors": {
-                        "temperature": float(temperature),
-                        "pressure": float(pressure),
-                        "rpm": float(rpm),
+                        "temperature": temperature,
+                        "pressure": pressure,
+                        "rpm": rpm,
                     },
                 },
                 "node_status": {
-                    "node_info": {"version": "scenario-control-smoke"},
+                    "node_info": {"version": "dashboard-smoke"},
                     "sync_info": {"latest_block_height": str(cycle_index)},
                 },
                 "commit_receipt": _FakeReceipt(cycle_index, round_id),
@@ -242,89 +266,147 @@ class RuntimeScenarioControlSmokeTests(unittest.TestCase):
                 "edges": (),
             }
 
+        def read_state() -> dict[str, object]:
+            return _json_request(method="GET", url=f"{server.base_url}/api/state")
+
+        def wait_for_high_power_state() -> dict[str, object] | None:
+            state = read_state()
+            if state["runtime"]["current_cycle"] < 2:
+                return None
+            operating_state_pct = float(
+                state["monitoring"]
+                .get("compressor_state", {})
+                .get("operating_state_pct", 0.0)
+            )
+            return state if operating_state_pct >= 80.0 else None
+
+        def wait_for_low_power_state() -> dict[str, object] | None:
+            state = read_state()
+            if state["runtime"]["current_cycle"] < 3:
+                return None
+            operating_state_pct = float(
+                state["monitoring"]
+                .get("compressor_state", {})
+                .get("operating_state_pct", 100.0)
+            )
+            return state if operating_state_pct <= 20.0 else None
+
+        def wait_for_replay_state() -> dict[str, object] | None:
+            state = read_state()
+            if state["runtime"]["current_cycle"] < 4:
+                return None
+            if state["monitoring"]["active_scenario"] != "scada_replay":
+                return None
+            return state if state["channels"]["replay_behavior"] is not None else None
+
+        def wait_for_stopped_state() -> dict[str, object] | None:
+            state = read_state()
+            return state if state["runtime"]["ui_status"] == "stopped" else None
+
         try:
+            server.start_in_background()
             with mock.patch.object(
                 run_local_demo,
                 "execute_demo_cycle",
                 side_effect=cycle_executor,
             ):
                 with mock.patch.object(run_local_demo, "print_cycle_report"):
-                    payload = run_local_demo.run_autonomous_demo_loop(
-                        config=config,
-                        simulator=object(),
-                        edges=(),
-                        cometbft_client=object(),
-                        artifact_store=store,
-                        scada_service=scada_service,
-                        sleep_fn=lambda _: None,
-                        monotonic_fn=mock.Mock(
-                            side_effect=(0.0, 0.01, 1.0, 1.01, 2.0, 2.01, 3.0, 3.01)
-                        ),
+                    power_state = _json_request(
+                        method="POST",
+                        url=f"{server.base_url}/api/control/power",
+                        payload={"power": 80.0},
+                    )
+                    self.assertEqual(
+                        power_state["controls"]["configured_power_pct"],
+                        80.0,
                     )
 
-            self.assertEqual(payload["runtime"]["status"], "completed")
-            self.assertEqual(payload["runtime"]["completed_cycles"], 4)
+                    started = _json_request(
+                        method="POST",
+                        url=f"{server.base_url}/api/runtime/start",
+                        payload={},
+                    )
+                    self.assertIn(started["runtime"]["ui_status"], {"starting", "running"})
+
+                    high_power_state = _wait_for(wait_for_high_power_state)
+                    self.assertEqual(
+                        high_power_state["controls"]["configured_power_pct"],
+                        80.0,
+                    )
+
+                    reduced_power = _json_request(
+                        method="POST",
+                        url=f"{server.base_url}/api/control/power",
+                        payload={"power": 20.0},
+                    )
+                    self.assertEqual(
+                        reduced_power["operator_feedback"]["actions"][0]["action"],
+                        "set_power",
+                    )
+
+                    low_power_state = _wait_for(wait_for_low_power_state)
+                    self.assertEqual(
+                        low_power_state["controls"]["configured_power_pct"],
+                        20.0,
+                    )
+
+                    scenario_state = _json_request(
+                        method="POST",
+                        url=f"{server.base_url}/api/control/scenario",
+                        payload={"scenario": "scada_replay"},
+                    )
+                    self.assertEqual(
+                        scenario_state["controls"]["configured_scenario"],
+                        "scada_replay",
+                    )
+
+                    replay_state = _wait_for(wait_for_replay_state)
+                    self.assertEqual(
+                        replay_state["channels"]["replay_behavior"]["output_channel"],
+                        "scada_replay_behavior",
+                    )
+                    self.assertEqual(
+                        replay_state["monitoring"]["lifecycle"]["training_events"],
+                        ["reused"],
+                    )
+
+                    stopped = _json_request(
+                        method="POST",
+                        url=f"{server.base_url}/api/runtime/stop",
+                        payload={},
+                    )
+                    self.assertIn(stopped["runtime"]["ui_status"], {"stopping", "stopped"})
+                    final_state = _wait_for(wait_for_stopped_state)
+
+            self.assertEqual(final_state["runtime"]["ui_status"], "stopped")
             self.assertEqual(
-                payload["cycle_history"][0]["scenario_control"]["configured_scenario"],
-                "scada_replay",
-            )
-            self.assertEqual(
-                payload["cycle_history"][0]["scenario_control"]["active_scenario"],
-                "normal",
-            )
-            self.assertTrue(
-                payload["cycle_history"][0]["scenario_control"]["training_eligible"]
-            )
-            self.assertEqual(
-                payload["cycle_history"][3]["scenario_control"]["active_scenario"],
-                "scada_replay",
-            )
-            self.assertFalse(
-                payload["cycle_history"][3]["scenario_control"]["training_eligible"]
-            )
-            self.assertEqual(
-                payload["cycle_history"][3]["replay_behavior"]["output_channel"],
-                "scada_replay_behavior",
-            )
-            self.assertEqual(
-                payload["latest_cycle"]["scenario_control"]["expected_output_channels"],
-                [
-                    "scada_divergence_alert",
-                    "replay_behavior",
-                    "fingerprint_inference",
-                ],
-            )
-            self.assertEqual(
-                payload["latest_cycle"]["fingerprint_lifecycle"]["training_events"],
-                ["reused"],
-            )
-            self.assertEqual(
-                payload["latest_cycle"]["replay_behavior"]["classification"],
-                "anomalous",
+                final_state["limitations"]["source_dataset_validation_level"],
+                "runtime_valid_only",
             )
 
             valid_artifact_keys = store.list_json_objects(prefix="valid-consensus-artifacts/")
             dataset_manifest_keys = store.list_json_objects(prefix="fingerprint-datasets/")
             model_metadata_keys = store.list_json_objects(prefix="fingerprint-models/")
-            self.assertEqual(len(valid_artifact_keys), 4)
+            self.assertGreaterEqual(len(valid_artifact_keys), 4)
+            self.assertGreaterEqual(len(dataset_manifest_keys), 2)
             self.assertEqual(len(model_metadata_keys), 1)
-            self.assertEqual(len(dataset_manifest_keys), 2)
 
             saved_log = json.loads(log_path.read_text(encoding="utf-8"))
-            self.assertEqual(saved_log["runtime"]["status"], "completed")
+            self.assertEqual(saved_log["runtime"]["status"], "stopped_operator")
             self.assertEqual(
                 saved_log["latest_cycle"]["scenario_control"]["active_scenario"],
                 "scada_replay",
             )
             self.assertEqual(
-                saved_log["latest_cycle"]["scenario_control"]["training_eligible"],
-                False,
+                saved_log["latest_cycle"]["fingerprint_lifecycle"]["training_events"],
+                ["reused"],
             )
             self.assertEqual(
-                saved_log["latest_cycle"]["replay_behavior"]["output_channel"],
-                "scada_replay_behavior",
+                saved_log["latest_cycle"]["simulator_snapshot"]["operating_state_pct"],
+                20.0,
             )
         finally:
+            server.stop()
             log_path.unlink(missing_ok=True)
 
 

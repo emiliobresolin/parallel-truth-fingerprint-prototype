@@ -24,12 +24,15 @@ class RuntimeDemoConfig:
     demo_train_after_eligible_cycles: int = 10
     demo_fingerprint_sequence_length: int = 2
     demo_power: float = 65.0
+    demo_dashboard_host: str = "127.0.0.1"
+    demo_dashboard_port: int = 8088
     demo_scenario_name: str = ""
     demo_scenario_start_cycle: int = 1
     demo_fault_mode: str = "none"
     demo_faulty_edges: tuple[str, ...] = ()
     demo_scada_mode: str = "match"
     demo_scada_start_cycle: int = 0
+    demo_scada_offset_value: float = 6.0
     demo_log_path: str = "logs/run_local_demo.log"
 
 
@@ -63,11 +66,14 @@ def load_runtime_demo_config() -> RuntimeDemoConfig:
             os.getenv("DEMO_FINGERPRINT_SEQUENCE_LENGTH", "2")
         ),
         demo_power=float(os.getenv("DEMO_POWER", "65.0")),
+        demo_dashboard_host=os.getenv("DEMO_DASHBOARD_HOST", "127.0.0.1"),
+        demo_dashboard_port=int(os.getenv("DEMO_DASHBOARD_PORT", "8088")),
         demo_scenario_name=os.getenv("DEMO_SCENARIO", "").strip(),
         demo_scenario_start_cycle=int(os.getenv("DEMO_SCENARIO_START_CYCLE", "1")),
         demo_fault_mode=os.getenv("DEMO_FAULT_MODE", "none"),
         demo_faulty_edges=faulty_edges,
         demo_scada_mode=os.getenv("DEMO_SCADA_MODE", "match"),
         demo_scada_start_cycle=int(os.getenv("DEMO_SCADA_START_CYCLE", "0")),
+        demo_scada_offset_value=float(os.getenv("DEMO_SCADA_OFFSET_VALUE", "6.0")),
         demo_log_path=os.getenv("DEMO_LOG_PATH", "logs/run_local_demo.log"),
     )

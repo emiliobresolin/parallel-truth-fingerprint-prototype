@@ -50,6 +50,11 @@ Epic 4 has now started in the current code through:
   - explicit normal / replay-freeze / edge-fault scenario selection
   - scenario activation without pipeline bypass
   - scenario labels, training eligibility, and expected reactive outputs exposed in logs
+- final local SCADA-inspired operator dashboard and control surface:
+  - runtime start/stop from the local UI
+  - scenario activation from the local UI through the approved runtime path
+  - compressor power control from the local UI through the real simulator/runtime flow
+  - monitoring of runtime, artifacts, lifecycle, and replay/anomaly outputs without collapsing output channels
 
 The current Epic 4 state is intentionally asymmetric:
 
@@ -58,8 +63,9 @@ The current Epic 4 state is intentionally asymmetric:
 - Story 4.3A is implemented and runtime-validated for the continuous autonomous lifecycle
 - Story 4.4 is implemented and runtime-validated for replay-oriented anomaly behavior
 - Story 4.5 is implemented and runtime-validated for scenario-control without pipeline bypass
+- Story 4.6 is implemented and runtime-validated for the local operator dashboard and control surface
 - the default adequacy floor is still not met by the small smoke dataset used for runtime proof
-- Story 4.2, Story 4.3, Story 4.3A, Story 4.4, and Story 4.5 therefore remain runtime-valid only, not meaningful-fingerprint-valid
+- Story 4.2, Story 4.3, Story 4.3A, Story 4.4, Story 4.5, and Story 4.6 therefore remain runtime-valid only, not meaningful-fingerprint-valid
 
 The planning artifacts now treat the split PEP files in `docs/input/` as the research source of truth. They also distinguish explicitly between:
 
@@ -80,9 +86,10 @@ This mixed process/container model is a local setup decision only. It is not a p
 
 ## Planned Next Layers
 
-These layers are approved in planning but are not yet implemented in the current code:
+Epic 4 is now implemented end-to-end at local prototype scope.
 
-- final lightweight SCADA-inspired demo UI, implemented only after the backend/runtime/services are stable
+- No additional Epic 4 layers remain unimplemented in the current code.
+- The main remaining limitation is dataset adequacy, not missing Epic 4 runtime/UI plumbing.
 
 ## Runtime/Demo Setup
 
@@ -145,14 +152,17 @@ The defaults are already present in [.env.example](./.env.example):
 - `DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES=10`
 - `DEMO_FINGERPRINT_SEQUENCE_LENGTH=2`
 - `DEMO_POWER=65.0`
+- `DEMO_DASHBOARD_HOST=127.0.0.1`
+- `DEMO_DASHBOARD_PORT=8088`
 - `DEMO_SCENARIO=`
 - `DEMO_SCENARIO_START_CYCLE=1`
 - `DEMO_FAULT_MODE=none`
 - `DEMO_FAULTY_EDGES=`
 - `DEMO_SCADA_MODE=match`
 - `DEMO_SCADA_START_CYCLE=0`
+- `DEMO_SCADA_OFFSET_VALUE=6.0`
 
-### 5. Run the local demo
+### 5. Run the local demo runtime directly
 
 ```powershell
 $env:PYTHONPATH='src'
@@ -182,7 +192,23 @@ This will:
 
 Stop the runtime with `Ctrl+C` when you want to end the demo.
 
-### 6. Stop the consensus stack
+### 6. Run the local operator dashboard
+
+```powershell
+$env:PYTHONPATH='src'
+.\venv\Scripts\python scripts\run_local_dashboard.py
+```
+
+The dashboard is the Story 4.6 local operator surface for the real prototype flow.
+
+From the UI you can:
+
+- start and stop the autonomous runtime
+- trigger supported demo scenarios through the approved runtime path
+- change compressor power through the real simulator/runtime flow
+- monitor cycle cadence, artifacts, lifecycle state, replay behavior, and channel separation
+
+### 7. Stop the consensus stack
 
 ```powershell
 .\scripts\stop_consensus_stack.ps1
@@ -201,11 +227,14 @@ Switch mode through `MQTT_TRANSPORT`.
 
 The local demo can activate deterministic prototype scenarios without changing the CometBFT-backed live path or bypassing the approved runtime boundaries.
 
+These controls are now available both through environment variables and through the Story 4.6 local operator dashboard.
+
 The simplest explicit control is:
 
 - `DEMO_SCENARIO=normal`
 - `DEMO_SCENARIO=scada_replay`
 - `DEMO_SCENARIO=scada_freeze`
+- `DEMO_SCENARIO=scada_divergence`
 - `DEMO_SCENARIO=single_edge_exclusion`
 - `DEMO_SCENARIO=quorum_loss`
 - `DEMO_SCENARIO_START_CYCLE=<cycle index>`
@@ -237,9 +266,11 @@ Optional target edges can be supplied with `DEMO_FAULTY_EDGES`.
 For SCADA replay/freeze through legacy controls:
 
 - `DEMO_SCADA_MODE=match`
+- `DEMO_SCADA_MODE=offset`
 - `DEMO_SCADA_MODE=replay`
 - `DEMO_SCADA_MODE=freeze`
 - `DEMO_SCADA_START_CYCLE=<cycle index>`
+- `DEMO_SCADA_OFFSET_VALUE=<base offset>`
 
 Examples:
 

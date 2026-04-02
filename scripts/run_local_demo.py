@@ -175,6 +175,7 @@ def build_detailed_log_payload(
     *,
     cycle_index: int,
     config,
+    simulator_snapshot: dict[str, object] | None,
     node_status,
     commit_receipt,
     committed_round,
@@ -218,6 +219,7 @@ def build_detailed_log_payload(
             "current_cycle": cycle_index,
             "cadence_stage": cadence_stage,
         },
+        "simulator_snapshot": simulator_snapshot,
         "scenario_control": scenario_control_stage.to_dict(),
         "scada_runtime_scenario": scada_replay_stage.to_dict(),
         "fingerprint_lifecycle": fingerprint_stage.to_dict(),
@@ -306,6 +308,7 @@ def build_runtime_log_payload(
             "current_cycle": 0 if not cycle_history else cycle_history[-1]["cycle_index"],
             "cycle_interval_seconds": config.demo_cycle_interval_seconds,
             "max_cycles": config.demo_max_cycles,
+            "configured_power_pct": config.demo_power,
             "train_after_eligible_cycles": config.demo_train_after_eligible_cycles,
             "fingerprint_sequence_length": config.demo_fingerprint_sequence_length,
             "model_status": latest_fingerprint_stage.get("model_status"),
@@ -400,6 +403,29 @@ def format_cadence_stage_compact(stage: dict[str, object]) -> str:
         f"elapsed_seconds={stage['elapsed_seconds']} "
         f"next_sleep_seconds={stage['next_sleep_seconds']}"
     )
+
+
+def sleep_until_next_cycle(
+    *,
+    total_seconds: float,
+    sleep_fn=time.sleep,
+    stop_requested_fn=None,
+    poll_interval_seconds: float = 0.1,
+) -> bool:
+    """Sleep in small slices so the runtime can stop promptly from the UI."""
+
+    remaining_seconds = max(total_seconds, 0.0)
+    if stop_requested_fn is None:
+        if remaining_seconds > 0.0:
+            sleep_fn(remaining_seconds)
+        return False
+    while remaining_seconds > 0.0:
+        if stop_requested_fn is not None and stop_requested_fn():
+            return True
+        next_slice = min(remaining_seconds, poll_interval_seconds)
+        sleep_fn(next_slice)
+        remaining_seconds = max(remaining_seconds - next_slice, 0.0)
+    return stop_requested_fn is not None and stop_requested_fn()
 
 
 def format_scenario_control_compact(stage: RuntimeScenarioControlStage) -> str:
@@ -675,6 +701,46 @@ def build_demo_artifact_store(config) -> MinioArtifactStore:
     )
 
 
+def build_demo_runtime_components(config) -> dict[str, object]:
+    """Build the local runtime components for CLI or dashboard control."""
+
+    simulator = CompressorSimulator(seed=101)
+    edges = [
+        TemperatureEdgeService(),
+        PressureEdgeService(),
+        RpmEdgeService(),
+    ]
+    transports = []
+    if config.mqtt_transport == "passive":
+        shared_transport = create_transport(
+            config.mqtt_transport,
+            host=config.mqtt_broker_host,
+            port=config.mqtt_broker_port,
+        )
+        transports = [shared_transport, shared_transport, shared_transport]
+    else:
+        transports = [
+            create_transport(
+                config.mqtt_transport,
+                host=config.mqtt_broker_host,
+                port=config.mqtt_broker_port,
+            )
+            for _ in edges
+        ]
+
+    for edge, transport in zip(edges, transports, strict=True):
+        edge.attach_transport(transport, topic=config.mqtt_topic)
+    time.sleep(0.5)
+
+    return {
+        "simulator": simulator,
+        "edges": edges,
+        "cometbft_client": CometBftRpcClient(config.cometbft_rpc_url),
+        "artifact_store": build_demo_artifact_store(config),
+        "scada_service": FakeOpcUaScadaService(compressor_id="compressor-1"),
+    }
+
+
 def build_lifecycle_error_stage(
     *,
     cycle_index: int,
@@ -721,8 +787,10 @@ def execute_demo_cycle(
         scenario_stage=scenario_control_stage,
     )
 
-    for step in range(config.demo_steps):
-        snapshot = simulator.step(compressor_power=config.demo_power + step)
+    latest_snapshot = None
+    for _ in range(config.demo_steps):
+        snapshot = simulator.step(compressor_power=config.demo_power)
+        latest_snapshot = snapshot
         for edge in edges:
             payload = edge.acquire(snapshot=snapshot)
             edge.publish_local_observation(payload, topic=config.mqtt_topic)
@@ -803,6 +871,9 @@ def execute_demo_cycle(
 
     return {
         "cycle_index": cycle_index,
+        "simulator_snapshot": None
+        if latest_snapshot is None
+        else latest_snapshot.to_dict(),
         "node_status": node_status,
         "commit_receipt": commit_receipt,
         "committed_round": committed_round,
@@ -864,6 +935,14 @@ def print_cycle_report(
     print("Compact view:")
     for edge in cycle_result["edges"]:
         print(f"- {format_edge_summary(edge)}")
+    if cycle_result["simulator_snapshot"] is not None:
+        compressor_state = cycle_result["simulator_snapshot"]
+        print(
+            "- "
+            f"compressor={compressor_state['compressor_id']} "
+            f"power_pct={compressor_state['operating_state_pct']} "
+            f"sensors={compressor_state['sensors']}"
+        )
 
     node_status = cycle_result["node_status"]
     commit_receipt = cycle_result["commit_receipt"]
@@ -912,6 +991,9 @@ def run_autonomous_demo_loop(
     scada_service,
     sleep_fn=time.sleep,
     monotonic_fn=time.monotonic,
+    config_provider=None,
+    stop_requested_fn=None,
+    cycle_observer=None,
 ) -> dict[str, object]:
     """Run the Story 4.3A autonomous runtime loop until manual stop or max cycles."""
 
@@ -921,12 +1003,35 @@ def run_autonomous_demo_loop(
     cycle_index = 0
 
     try:
-        while config.demo_max_cycles <= 0 or cycle_index < config.demo_max_cycles:
+        while True:
+            current_config = config_provider() if config_provider is not None else config
+            if stop_requested_fn is not None and stop_requested_fn():
+                runtime_payload = build_runtime_log_payload(
+                    config=current_config,
+                    runtime_status="stopped_operator",
+                    cycle_history=cycle_history,
+                    latest_cycle_payload=latest_cycle_payload,
+                )
+                write_detailed_log(log_path, runtime_payload)
+                if cycle_observer is not None:
+                    cycle_observer(runtime_payload)
+                return runtime_payload
+            if current_config.demo_max_cycles > 0 and cycle_index >= current_config.demo_max_cycles:
+                runtime_payload = build_runtime_log_payload(
+                    config=current_config,
+                    runtime_status="completed",
+                    cycle_history=cycle_history,
+                    latest_cycle_payload=latest_cycle_payload,
+                )
+                if cycle_observer is not None:
+                    cycle_observer(runtime_payload)
+                return runtime_payload
+
             cycle_index += 1
             cycle_started_at = monotonic_fn()
             cycle_result = execute_demo_cycle(
                 cycle_index=cycle_index,
-                config=config,
+                config=current_config,
                 simulator=simulator,
                 edges=edges,
                 cometbft_client=cometbft_client,
@@ -936,23 +1041,25 @@ def run_autonomous_demo_loop(
             )
             elapsed_seconds = max(monotonic_fn() - cycle_started_at, 0.0)
             will_continue = (
-                config.demo_max_cycles <= 0 or cycle_index < config.demo_max_cycles
+                current_config.demo_max_cycles <= 0
+                or cycle_index < current_config.demo_max_cycles
             )
             next_sleep_seconds = (
-                max(config.demo_cycle_interval_seconds - elapsed_seconds, 0.0)
+                max(current_config.demo_cycle_interval_seconds - elapsed_seconds, 0.0)
                 if will_continue
                 else 0.0
             )
             cadence_stage = build_cadence_stage(
                 cycle_index=cycle_index,
-                configured_interval_seconds=config.demo_cycle_interval_seconds,
+                configured_interval_seconds=current_config.demo_cycle_interval_seconds,
                 elapsed_seconds=elapsed_seconds,
                 next_sleep_seconds=next_sleep_seconds,
                 will_continue=will_continue,
             )
             latest_cycle_payload = build_detailed_log_payload(
                 cycle_index=cycle_index,
-                config=config,
+                config=current_config,
+                simulator_snapshot=cycle_result["simulator_snapshot"],
                 node_status=cycle_result["node_status"],
                 commit_receipt=cycle_result["commit_receipt"],
                 committed_round=cycle_result["committed_round"],
@@ -983,21 +1090,37 @@ def run_autonomous_demo_loop(
                 )
             )
             runtime_payload = build_runtime_log_payload(
-                config=config,
+                config=current_config,
                 runtime_status="active" if will_continue else "completed",
                 cycle_history=cycle_history,
                 latest_cycle_payload=latest_cycle_payload,
             )
             detailed_log_path = write_detailed_log(log_path, runtime_payload)
+            if cycle_observer is not None:
+                cycle_observer(runtime_payload)
             print_cycle_report(
                 cycle_result=cycle_result,
                 cadence_stage=cadence_stage,
-                config=config,
+                config=current_config,
                 detailed_log_path=detailed_log_path,
             )
             if not will_continue:
                 return runtime_payload
-            sleep_fn(next_sleep_seconds)
+            if sleep_until_next_cycle(
+                total_seconds=next_sleep_seconds,
+                sleep_fn=sleep_fn,
+                stop_requested_fn=stop_requested_fn,
+            ):
+                runtime_payload = build_runtime_log_payload(
+                    config=current_config,
+                    runtime_status="stopped_operator",
+                    cycle_history=cycle_history,
+                    latest_cycle_payload=latest_cycle_payload,
+                )
+                write_detailed_log(log_path, runtime_payload)
+                if cycle_observer is not None:
+                    cycle_observer(runtime_payload)
+                return runtime_payload
     except KeyboardInterrupt:
         runtime_payload = build_runtime_log_payload(
             config=config,
@@ -1006,49 +1129,22 @@ def run_autonomous_demo_loop(
             latest_cycle_payload=latest_cycle_payload,
         )
         write_detailed_log(log_path, runtime_payload)
+        if cycle_observer is not None:
+            cycle_observer(runtime_payload)
         print("\nRuntime stopped manually.")
         return runtime_payload
 
 
 def main() -> None:
     config = load_runtime_demo_config()
-    simulator = CompressorSimulator(seed=101)
-    edges = [
-        TemperatureEdgeService(),
-        PressureEdgeService(),
-        RpmEdgeService(),
-    ]
-    transports = []
-    if config.mqtt_transport == "passive":
-        shared_transport = create_transport(
-            config.mqtt_transport,
-            host=config.mqtt_broker_host,
-            port=config.mqtt_broker_port,
-        )
-        transports = [shared_transport, shared_transport, shared_transport]
-    else:
-        transports = [
-            create_transport(
-                config.mqtt_transport,
-                host=config.mqtt_broker_host,
-                port=config.mqtt_broker_port,
-            )
-            for _ in edges
-        ]
-
-    for edge, transport in zip(edges, transports, strict=True):
-        edge.attach_transport(transport, topic=config.mqtt_topic)
-    time.sleep(0.5)
-    cometbft_client = CometBftRpcClient(config.cometbft_rpc_url)
-    artifact_store = build_demo_artifact_store(config)
-    scada_service = FakeOpcUaScadaService(compressor_id="compressor-1")
+    components = build_demo_runtime_components(config)
     run_autonomous_demo_loop(
         config=config,
-        simulator=simulator,
-        edges=edges,
-        cometbft_client=cometbft_client,
-        artifact_store=artifact_store,
-        scada_service=scada_service,
+        simulator=components["simulator"],
+        edges=components["edges"],
+        cometbft_client=components["cometbft_client"],
+        artifact_store=components["artifact_store"],
+        scada_service=components["scada_service"],
     )
 
 
