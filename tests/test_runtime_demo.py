@@ -19,6 +19,8 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             "DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES"
         )
         previous_sequence_length = os.environ.get("DEMO_FINGERPRINT_SEQUENCE_LENGTH")
+        previous_scenario_name = os.environ.get("DEMO_SCENARIO")
+        previous_scenario_start_cycle = os.environ.get("DEMO_SCENARIO_START_CYCLE")
         previous_scada_mode = os.environ.get("DEMO_SCADA_MODE")
         previous_scada_start_cycle = os.environ.get("DEMO_SCADA_START_CYCLE")
         previous_minio_endpoint = os.environ.get("MINIO_ENDPOINT")
@@ -37,6 +39,8 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             os.environ["DEMO_MAX_CYCLES"] = "4"
             os.environ["DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES"] = "12"
             os.environ["DEMO_FINGERPRINT_SEQUENCE_LENGTH"] = "3"
+            os.environ["DEMO_SCENARIO"] = "scada_replay"
+            os.environ["DEMO_SCENARIO_START_CYCLE"] = "8"
             os.environ["DEMO_SCADA_MODE"] = "replay"
             os.environ["DEMO_SCADA_START_CYCLE"] = "7"
             os.environ["MINIO_ENDPOINT"] = "127.0.0.1:9000"
@@ -57,6 +61,8 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             self.assertEqual(config.demo_max_cycles, 4)
             self.assertEqual(config.demo_train_after_eligible_cycles, 12)
             self.assertEqual(config.demo_fingerprint_sequence_length, 3)
+            self.assertEqual(config.demo_scenario_name, "scada_replay")
+            self.assertEqual(config.demo_scenario_start_cycle, 8)
             self.assertEqual(config.demo_scada_mode, "replay")
             self.assertEqual(config.demo_scada_start_cycle, 7)
             self.assertEqual(config.minio_endpoint, "127.0.0.1:9000")
@@ -104,6 +110,14 @@ class RuntimeDemoConfigTest(unittest.TestCase):
                 os.environ.pop("DEMO_FINGERPRINT_SEQUENCE_LENGTH", None)
             else:
                 os.environ["DEMO_FINGERPRINT_SEQUENCE_LENGTH"] = previous_sequence_length
+            if previous_scenario_name is None:
+                os.environ.pop("DEMO_SCENARIO", None)
+            else:
+                os.environ["DEMO_SCENARIO"] = previous_scenario_name
+            if previous_scenario_start_cycle is None:
+                os.environ.pop("DEMO_SCENARIO_START_CYCLE", None)
+            else:
+                os.environ["DEMO_SCENARIO_START_CYCLE"] = previous_scenario_start_cycle
             if previous_scada_mode is None:
                 os.environ.pop("DEMO_SCADA_MODE", None)
             else:
@@ -554,15 +568,35 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertEqual(replay_context["scenario_label"], "scada_replay")
         self.assertEqual(replay_context["training_label"], "non_normal")
         self.assertFalse(replay_context["training_eligible"])
+        scenario_stage = type(
+            "ScenarioStage",
+            (),
+            {
+                "scenario_label": "faulty_edge_exclusion",
+                "training_label": "non_normal",
+                "training_eligible": False,
+                "training_eligibility_reason": "faulty_edge_exclusion",
+            },
+        )()
+        scenario_context = build_dataset_context(
+            fault_mode="single_edge_exclusion",
+            comparison_output=comparison_output,
+            scenario_control_stage=scenario_stage,
+        )
+        self.assertEqual(scenario_context["scenario_label"], "faulty_edge_exclusion")
+        self.assertEqual(scenario_context["training_label"], "non_normal")
+        self.assertFalse(scenario_context["training_eligible"])
 
     def test_format_cadence_and_fingerprint_lifecycle_outputs(self) -> None:
         from parallel_truth_fingerprint.lstm_service import FingerprintLifecycleStage
         from parallel_truth_fingerprint.lstm_service import ScadaReplayRuntimeStage
+        from parallel_truth_fingerprint.scenario_control import RuntimeScenarioControlStage
         from scripts.run_local_demo import (
             build_cadence_stage,
             format_cadence_stage_compact,
             format_fingerprint_lifecycle_compact,
             format_replay_behavior_compact,
+            format_scenario_control_compact,
             format_scada_runtime_scenario_compact,
         )
         from parallel_truth_fingerprint.contracts.fingerprint_inference import (
@@ -600,6 +634,31 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIn("training=reused", lifecycle_text)
         self.assertIn("eligible_history=3/10", lifecycle_text)
         self.assertIn("validation_level=runtime_valid_only", lifecycle_text)
+        scenario_stage = RuntimeScenarioControlStage(
+            configured_scenario="scada_replay",
+            active_scenario="scada_replay",
+            start_cycle=4,
+            active=True,
+            fault_mode="none",
+            scada_mode="replay",
+            scenario_label="scada_replay",
+            training_label="non_normal",
+            training_eligible=False,
+            training_eligibility_reason="scada_replay",
+            expected_output_channels=(
+                "scada_divergence_alert",
+                "replay_behavior",
+                "fingerprint_inference",
+            ),
+        )
+        scenario_text = format_scenario_control_compact(scenario_stage)
+        self.assertIn("configured=scada_replay", scenario_text)
+        self.assertIn("current=scada_replay", scenario_text)
+        self.assertIn("training_eligible=false", scenario_text)
+        self.assertIn(
+            "expected_outputs=scada_divergence_alert,replay_behavior,fingerprint_inference",
+            scenario_text,
+        )
         replay_stage = ScadaReplayRuntimeStage(
             active=True,
             mode="replay",
@@ -660,6 +719,7 @@ class DemoFormattingTest(unittest.TestCase):
             "comparison_output": None,
             "scada_alert": None,
             "persistence_stage": {},
+            "scenario_control_stage": mock.Mock(to_dict=mock.Mock(return_value={})),
             "scada_replay_stage": mock.Mock(to_dict=mock.Mock(return_value={})),
             "fingerprint_stage": object(),
             "fingerprint_inference_results": (),
@@ -752,6 +812,7 @@ class DemoFormattingTest(unittest.TestCase):
             "comparison_output": None,
             "scada_alert": None,
             "persistence_stage": {},
+            "scenario_control_stage": mock.Mock(to_dict=mock.Mock(return_value={})),
             "scada_replay_stage": mock.Mock(to_dict=mock.Mock(return_value={})),
             "fingerprint_stage": object(),
             "fingerprint_inference_results": (),

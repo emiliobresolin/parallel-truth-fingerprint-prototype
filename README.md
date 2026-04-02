@@ -43,14 +43,23 @@ Epic 4 has now started in the current code through:
   - continuous valid-artifact accumulation in MinIO
   - deferred one-time fingerprint training after an explicit eligible-history threshold
   - saved-model reuse for later-cycle inference without retraining every cycle
+- replay-oriented anomaly behavior through the existing fingerprint path:
+  - SCADA replay/freeze routed through the approved runtime path
+  - replay output kept distinct from SCADA divergence and consensus status
+- simple scenario-control for the live demo runtime:
+  - explicit normal / replay-freeze / edge-fault scenario selection
+  - scenario activation without pipeline bypass
+  - scenario labels, training eligibility, and expected reactive outputs exposed in logs
 
 The current Epic 4 state is intentionally asymmetric:
 
 - Story 4.2A is implemented and runtime-validated for persisted dataset artifacts
 - Story 4.2 has now been revalidated against the persisted dataset artifact path introduced by Story 4.2A
 - Story 4.3A is implemented and runtime-validated for the continuous autonomous lifecycle
+- Story 4.4 is implemented and runtime-validated for replay-oriented anomaly behavior
+- Story 4.5 is implemented and runtime-validated for scenario-control without pipeline bypass
 - the default adequacy floor is still not met by the small smoke dataset used for runtime proof
-- Story 4.2, Story 4.3, and Story 4.3A therefore remain runtime-valid only, not meaningful-fingerprint-valid
+- Story 4.2, Story 4.3, Story 4.3A, Story 4.4, and Story 4.5 therefore remain runtime-valid only, not meaningful-fingerprint-valid
 
 The planning artifacts now treat the split PEP files in `docs/input/` as the research source of truth. They also distinguish explicitly between:
 
@@ -73,7 +82,6 @@ This mixed process/container model is a local setup decision only. It is not a p
 
 These layers are approved in planning but are not yet implemented in the current code:
 
-- replay-oriented anomaly validation on top of the new inference layer
 - final lightweight SCADA-inspired demo UI, implemented only after the backend/runtime/services are stable
 
 ## Runtime/Demo Setup
@@ -137,8 +145,12 @@ The defaults are already present in [.env.example](./.env.example):
 - `DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES=10`
 - `DEMO_FINGERPRINT_SEQUENCE_LENGTH=2`
 - `DEMO_POWER=65.0`
+- `DEMO_SCENARIO=`
+- `DEMO_SCENARIO_START_CYCLE=1`
 - `DEMO_FAULT_MODE=none`
 - `DEMO_FAULTY_EDGES=`
+- `DEMO_SCADA_MODE=match`
+- `DEMO_SCADA_START_CYCLE=0`
 
 ### 5. Run the local demo
 
@@ -165,6 +177,8 @@ This will:
 - defer fingerprint training until the configured eligible-history threshold is reached
 - reuse the saved fingerprint model for later-cycle inference without retraining every cycle
 - keep writing continuous runtime logs that expose cycle, cadence, artifact, and model status
+- apply the selected demo scenario through the approved runtime path without bypassing persistence, dataset, training, or inference boundaries
+- log the active scenario, scenario start cycle, training eligibility, and expected reactive output channels per cycle
 
 Stop the runtime with `Ctrl+C` when you want to end the demo.
 
@@ -183,9 +197,34 @@ Two MQTT transport modes are supported behind the same edge communication bounda
 
 Switch mode through `MQTT_TRANSPORT`.
 
-## Demo Fault Injection
+## Demo Scenario Control
 
-The local demo can inject deterministic inconsistent-edge scenarios without changing the CometBFT-backed live path.
+The local demo can activate deterministic prototype scenarios without changing the CometBFT-backed live path or bypassing the approved runtime boundaries.
+
+The simplest explicit control is:
+
+- `DEMO_SCENARIO=normal`
+- `DEMO_SCENARIO=scada_replay`
+- `DEMO_SCENARIO=scada_freeze`
+- `DEMO_SCENARIO=single_edge_exclusion`
+- `DEMO_SCENARIO=quorum_loss`
+- `DEMO_SCENARIO_START_CYCLE=<cycle index>`
+
+Examples:
+
+```powershell
+$env:DEMO_SCENARIO='scada_replay'
+$env:DEMO_SCENARIO_START_CYCLE='4'
+.\venv\Scripts\python scripts\run_local_demo.py
+```
+
+```powershell
+$env:DEMO_SCENARIO='single_edge_exclusion'
+$env:DEMO_SCENARIO_START_CYCLE='2'
+.\venv\Scripts\python scripts\run_local_demo.py
+```
+
+Legacy lower-level controls are still supported and map into the same runtime path:
 
 - `DEMO_FAULT_MODE=none`
   normal behavior
@@ -195,6 +234,12 @@ The local demo can inject deterministic inconsistent-edge scenarios without chan
   inject two faulty edges so quorum is lost and the committed result returns `failed_consensus`
 
 Optional target edges can be supplied with `DEMO_FAULTY_EDGES`.
+For SCADA replay/freeze through legacy controls:
+
+- `DEMO_SCADA_MODE=match`
+- `DEMO_SCADA_MODE=replay`
+- `DEMO_SCADA_MODE=freeze`
+- `DEMO_SCADA_START_CYCLE=<cycle index>`
 
 Examples:
 
