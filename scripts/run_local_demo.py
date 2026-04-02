@@ -42,7 +42,10 @@ from parallel_truth_fingerprint.edge_nodes.edge_2.service import PressureEdgeSer
 from parallel_truth_fingerprint.edge_nodes.edge_3.service import RpmEdgeService
 from parallel_truth_fingerprint.lstm_service import (
     FingerprintLifecycleStage,
+    ScadaReplayRuntimeStage,
+    configure_scada_replay_runtime_stage,
     execute_deferred_fingerprint_lifecycle,
+    run_scada_replay_behavior_detection,
 )
 from parallel_truth_fingerprint.persistence import (
     MinioArtifactStore,
@@ -181,6 +184,9 @@ def build_detailed_log_payload(
     cadence_stage: dict[str, object],
     fingerprint_stage: FingerprintLifecycleStage,
     fingerprint_inference_results,
+    scada_replay_stage: ScadaReplayRuntimeStage,
+    replay_behavior_result,
+    replay_inference_results,
     edges,
     fault_edges: tuple[str, ...],
 ) -> dict:
@@ -197,14 +203,23 @@ def build_detailed_log_payload(
             "cycle_interval_seconds": config.demo_cycle_interval_seconds,
             "train_after_eligible_cycles": config.demo_train_after_eligible_cycles,
             "fingerprint_sequence_length": config.demo_fingerprint_sequence_length,
+            "scada_mode": config.demo_scada_mode,
+            "scada_start_cycle": config.demo_scada_start_cycle,
         },
         "runtime_cycle": {
             "current_cycle": cycle_index,
             "cadence_stage": cadence_stage,
         },
+        "scada_runtime_scenario": scada_replay_stage.to_dict(),
         "fingerprint_lifecycle": fingerprint_stage.to_dict(),
         "fingerprint_inference_results": [
             result.to_dict() for result in fingerprint_inference_results
+        ],
+        "replay_behavior": None
+        if replay_behavior_result is None
+        else replay_behavior_result.to_dict(),
+        "replay_inference_results": [
+            result.to_dict() for result in replay_inference_results
         ],
         "cometbft": {
             "node_version": node_status["node_info"]["version"],
@@ -418,6 +433,32 @@ def format_inference_results_compact(fingerprint_inference_results) -> str:
     )
 
 
+def format_scada_runtime_scenario_compact(stage: ScadaReplayRuntimeStage) -> str:
+    """Render one compact SCADA replay/freeze scenario line for demo output."""
+
+    return (
+        f"scada_runtime=active={str(stage.active).lower()} "
+        f"mode={stage.mode} "
+        f"start_cycle={stage.start_cycle} "
+        f"replay_source_round_id={stage.replay_source_round_id or 'none'}"
+    )
+
+
+def format_replay_behavior_compact(replay_behavior_result) -> str:
+    """Render one compact replay-behavior line for demo output."""
+
+    if replay_behavior_result is None:
+        return "replay_behavior=none"
+    return (
+        f"replay_behavior=completed "
+        f"mode={replay_behavior_result.scenario_mode} "
+        f"classification={replay_behavior_result.classification.value} "
+        f"score={round(replay_behavior_result.anomaly_score, 6)} "
+        f"threshold={round(replay_behavior_result.classification_threshold, 6)} "
+        f"replay_source_round_id={replay_behavior_result.replay_source_round_id or 'none'}"
+    )
+
+
 def build_minio_runtime_metadata(artifact_store) -> dict[str, object]:
     """Return normalized MinIO metadata for terminal and JSON log visibility."""
 
@@ -438,9 +479,17 @@ def build_dataset_context(
     *,
     fault_mode: str,
     comparison_output,
+    scada_replay_stage: ScadaReplayRuntimeStage | None = None,
 ) -> dict[str, object]:
     """Return explicit dataset eligibility metadata for persisted artifacts."""
 
+    if scada_replay_stage is not None and scada_replay_stage.active:
+        return {
+            "scenario_label": f"scada_{scada_replay_stage.mode}",
+            "training_label": "non_normal",
+            "training_eligible": False,
+            "training_eligibility_reason": f"scada_{scada_replay_stage.mode}",
+        }
     if comparison_output.divergent_sensors:
         return {
             "scenario_label": "scada_divergence",
@@ -474,7 +523,9 @@ def run_scada_comparison_and_persistence(
     *,
     consensus_audit,
     artifact_store,
+    scada_service=None,
     fault_mode: str = "none",
+    scada_replay_stage: ScadaReplayRuntimeStage | None = None,
 ) -> tuple[object | None, dict[str, object], object | None, object | None, dict[str, object]]:
     """Run the Story 3 comparison/persistence path for demo observability."""
 
@@ -495,8 +546,10 @@ def run_scada_comparison_and_persistence(
             },
         )
 
-    scada_service = FakeOpcUaScadaService(compressor_id="compressor-1")
-    scada_state = scada_service.project_state(valid_state)
+    resolved_scada_service = (
+        scada_service if scada_service is not None else FakeOpcUaScadaService(compressor_id="compressor-1")
+    )
+    scada_state = resolved_scada_service.update_from_consensused_state(valid_state)
     comparison_result = compare_consensused_to_scada(
         valid_state=valid_state,
         scada_state=scada_state,
@@ -513,6 +566,7 @@ def run_scada_comparison_and_persistence(
         dataset_context = build_dataset_context(
             fault_mode=fault_mode,
             comparison_output=comparison_output,
+            scada_replay_stage=scada_replay_stage,
         )
         persistence_record = persist_valid_consensus_artifact(
             audit_package=consensus_audit,
@@ -605,6 +659,7 @@ def execute_demo_cycle(
     edges,
     cometbft_client,
     artifact_store,
+    scada_service,
     sleep_fn=time.sleep,
 ) -> dict[str, object]:
     """Execute one full prototype cycle for the live demo runtime."""
@@ -630,11 +685,18 @@ def execute_demo_cycle(
     consensus_summary = build_round_summary(consensus_audit)
     consensus_log = build_round_log(consensus_audit)
     consensus_alert = build_consensus_alert(consensus_audit, consensus_log)
+    scada_replay_stage = configure_scada_replay_runtime_stage(
+        scada_service=scada_service,
+        config=config,
+        cycle_index=cycle_index,
+    )
     scada_state, comparison_stage, comparison_output, scada_alert, persistence_stage = (
         run_scada_comparison_and_persistence(
             consensus_audit=consensus_audit,
             artifact_store=artifact_store,
+            scada_service=scada_service,
             fault_mode=config.demo_fault_mode,
+            scada_replay_stage=scada_replay_stage,
         )
     )
     fault_edges = resolve_faulty_edges(config, consensus_round_input.participating_edges)
@@ -656,6 +718,28 @@ def execute_demo_cycle(
         )
         fingerprint_inference_results = ()
 
+    try:
+        replay_behavior_result, replay_inference_results = (
+            run_scada_replay_behavior_detection(
+                current_round_id=consensus_summary.round_id,
+                consensus_final_status=consensus_summary.final_consensus_status.value,
+                scada_state=scada_state,
+                comparison_output=comparison_output,
+                replay_stage=scada_replay_stage,
+                artifact_store=artifact_store,
+                sequence_length=config.demo_fingerprint_sequence_length,
+            )
+            if scada_state is not None and comparison_output is not None
+            else (None, ())
+        )
+    except Exception as exc:
+        replay_behavior_result = None
+        replay_inference_results = ()
+        comparison_stage = {
+            **comparison_stage,
+            "replay_behavior_error": str(exc),
+        }
+
     return {
         "cycle_index": cycle_index,
         "node_status": node_status,
@@ -670,8 +754,11 @@ def execute_demo_cycle(
         "scada_alert": scada_alert,
         "persistence_stage": persistence_stage,
         "fault_edges": fault_edges,
+        "scada_replay_stage": scada_replay_stage,
         "fingerprint_stage": fingerprint_stage,
         "fingerprint_inference_results": fingerprint_inference_results,
+        "replay_behavior_result": replay_behavior_result,
+        "replay_inference_results": replay_inference_results,
         "edges": edges,
     }
 
@@ -693,7 +780,11 @@ def build_cycle_history_entry(
         "persistence_status": persistence_stage["status"],
         "artifact_key": persistence_stage.get("artifact_key"),
         "cadence_stage": cadence_stage,
+        "scada_runtime_scenario": cycle_result["scada_replay_stage"].to_dict(),
         "fingerprint_lifecycle": fingerprint_stage.to_dict(),
+        "replay_behavior": None
+        if cycle_result["replay_behavior_result"] is None
+        else cycle_result["replay_behavior_result"].to_dict(),
     }
 
 
@@ -733,6 +824,7 @@ def print_cycle_report(
     print(f"- {format_round_log_compact(cycle_result['consensus_log'])}")
     print(f"- {format_consensus_alert_compact(cycle_result['consensus_alert'])}")
     print(f"- {format_cadence_stage_compact(cadence_stage)}")
+    print(f"- {format_scada_runtime_scenario_compact(cycle_result['scada_replay_stage'])}")
     print(f"- {format_comparison_stage_compact(cycle_result['comparison_stage'])}")
     print(f"- {format_scada_alert_compact(cycle_result['scada_alert'])}")
     print(f"- {format_persistence_stage_compact(cycle_result['persistence_stage'])}")
@@ -742,6 +834,7 @@ def print_cycle_report(
     print(
         f"- {format_inference_results_compact(cycle_result['fingerprint_inference_results'])}"
     )
+    print(f"- {format_replay_behavior_compact(cycle_result['replay_behavior_result'])}")
     print(f"- detailed_log={detailed_log_path}")
 
 
@@ -752,6 +845,7 @@ def run_autonomous_demo_loop(
     edges,
     cometbft_client,
     artifact_store,
+    scada_service,
     sleep_fn=time.sleep,
     monotonic_fn=time.monotonic,
 ) -> dict[str, object]:
@@ -773,6 +867,7 @@ def run_autonomous_demo_loop(
                 edges=edges,
                 cometbft_client=cometbft_client,
                 artifact_store=artifact_store,
+                scada_service=scada_service,
                 sleep_fn=sleep_fn,
             )
             elapsed_seconds = max(monotonic_fn() - cycle_started_at, 0.0)
@@ -810,6 +905,9 @@ def run_autonomous_demo_loop(
                 fingerprint_inference_results=cycle_result[
                     "fingerprint_inference_results"
                 ],
+                scada_replay_stage=cycle_result["scada_replay_stage"],
+                replay_behavior_result=cycle_result["replay_behavior_result"],
+                replay_inference_results=cycle_result["replay_inference_results"],
                 edges=cycle_result["edges"],
                 fault_edges=cycle_result["fault_edges"],
             )
@@ -878,12 +976,14 @@ def main() -> None:
     time.sleep(0.5)
     cometbft_client = CometBftRpcClient(config.cometbft_rpc_url)
     artifact_store = build_demo_artifact_store(config)
+    scada_service = FakeOpcUaScadaService(compressor_id="compressor-1")
     run_autonomous_demo_loop(
         config=config,
         simulator=simulator,
         edges=edges,
         cometbft_client=cometbft_client,
         artifact_store=artifact_store,
+        scada_service=scada_service,
     )
 
 

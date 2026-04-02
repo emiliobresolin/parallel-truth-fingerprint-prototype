@@ -35,6 +35,7 @@ from parallel_truth_fingerprint.contracts.fingerprint_inference import (
     FingerprintInferenceResult,
 )
 from parallel_truth_fingerprint.contracts.raw_hart_payload import RawHartPayload
+from parallel_truth_fingerprint.contracts.replay_behavior import ReplayBehaviorResult
 from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
 from parallel_truth_fingerprint.contracts.persistence_record import (
     ValidConsensusArtifactRecord,
@@ -86,6 +87,7 @@ __all__ = [
     "ValidConsensusArtifactRecord",
     "PerEdgeTrustEvidence",
     "RawHartPayload",
+    "ReplayBehaviorResult",
     "RoundIdentity",
     "ScadaAlert",
     "ScadaAlertType",

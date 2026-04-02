@@ -19,6 +19,8 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             "DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES"
         )
         previous_sequence_length = os.environ.get("DEMO_FINGERPRINT_SEQUENCE_LENGTH")
+        previous_scada_mode = os.environ.get("DEMO_SCADA_MODE")
+        previous_scada_start_cycle = os.environ.get("DEMO_SCADA_START_CYCLE")
         previous_minio_endpoint = os.environ.get("MINIO_ENDPOINT")
         previous_minio_access_key = os.environ.get("MINIO_ACCESS_KEY")
         previous_minio_secret_key = os.environ.get("MINIO_SECRET_KEY")
@@ -35,6 +37,8 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             os.environ["DEMO_MAX_CYCLES"] = "4"
             os.environ["DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES"] = "12"
             os.environ["DEMO_FINGERPRINT_SEQUENCE_LENGTH"] = "3"
+            os.environ["DEMO_SCADA_MODE"] = "replay"
+            os.environ["DEMO_SCADA_START_CYCLE"] = "7"
             os.environ["MINIO_ENDPOINT"] = "127.0.0.1:9000"
             os.environ["MINIO_ACCESS_KEY"] = "demo-user"
             os.environ["MINIO_SECRET_KEY"] = "demo-secret"
@@ -53,6 +57,8 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             self.assertEqual(config.demo_max_cycles, 4)
             self.assertEqual(config.demo_train_after_eligible_cycles, 12)
             self.assertEqual(config.demo_fingerprint_sequence_length, 3)
+            self.assertEqual(config.demo_scada_mode, "replay")
+            self.assertEqual(config.demo_scada_start_cycle, 7)
             self.assertEqual(config.minio_endpoint, "127.0.0.1:9000")
             self.assertEqual(config.minio_access_key, "demo-user")
             self.assertEqual(config.minio_secret_key, "demo-secret")
@@ -98,6 +104,14 @@ class RuntimeDemoConfigTest(unittest.TestCase):
                 os.environ.pop("DEMO_FINGERPRINT_SEQUENCE_LENGTH", None)
             else:
                 os.environ["DEMO_FINGERPRINT_SEQUENCE_LENGTH"] = previous_sequence_length
+            if previous_scada_mode is None:
+                os.environ.pop("DEMO_SCADA_MODE", None)
+            else:
+                os.environ["DEMO_SCADA_MODE"] = previous_scada_mode
+            if previous_scada_start_cycle is None:
+                os.environ.pop("DEMO_SCADA_START_CYCLE", None)
+            else:
+                os.environ["DEMO_SCADA_START_CYCLE"] = previous_scada_start_cycle
             if previous_minio_endpoint is None:
                 os.environ.pop("MINIO_ENDPOINT", None)
             else:
@@ -527,14 +541,34 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertEqual(dataset_context["scenario_label"], "normal")
         self.assertEqual(dataset_context["training_label"], "normal")
         self.assertTrue(dataset_context["training_eligible"])
+        replay_stage = type(
+            "ReplayStage",
+            (),
+            {"active": True, "mode": "replay"},
+        )()
+        replay_context = build_dataset_context(
+            fault_mode="none",
+            comparison_output=comparison_output,
+            scada_replay_stage=replay_stage,
+        )
+        self.assertEqual(replay_context["scenario_label"], "scada_replay")
+        self.assertEqual(replay_context["training_label"], "non_normal")
+        self.assertFalse(replay_context["training_eligible"])
 
     def test_format_cadence_and_fingerprint_lifecycle_outputs(self) -> None:
         from parallel_truth_fingerprint.lstm_service import FingerprintLifecycleStage
+        from parallel_truth_fingerprint.lstm_service import ScadaReplayRuntimeStage
         from scripts.run_local_demo import (
             build_cadence_stage,
             format_cadence_stage_compact,
             format_fingerprint_lifecycle_compact,
+            format_replay_behavior_compact,
+            format_scada_runtime_scenario_compact,
         )
+        from parallel_truth_fingerprint.contracts.fingerprint_inference import (
+            FingerprintInferenceClassification,
+        )
+        from parallel_truth_fingerprint.contracts.replay_behavior import ReplayBehaviorResult
 
         cadence_stage = build_cadence_stage(
             cycle_index=3,
@@ -566,6 +600,42 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIn("training=reused", lifecycle_text)
         self.assertIn("eligible_history=3/10", lifecycle_text)
         self.assertIn("validation_level=runtime_valid_only", lifecycle_text)
+        replay_stage = ScadaReplayRuntimeStage(
+            active=True,
+            mode="replay",
+            start_cycle=4,
+            replay_source_round_id="round-001",
+        )
+        replay_result = ReplayBehaviorResult(
+            output_channel="scada_replay_behavior",
+            scenario_mode="replay",
+            current_round_id="round-004",
+            scada_source_round_id="round-004",
+            replay_source_round_id="round-001",
+            model_id="model-001",
+            source_dataset_id="training-dataset::round-001::round-003::seq-2",
+            inference_dataset_id="replay-dataset::round-004::replay::round-001::seq-2",
+            source_dataset_validation_level="runtime_valid_only",
+            limitation_note="runtime-valid only",
+            window_id="replay-window::round-004::round-001",
+            artifact_keys=(
+                "valid-consensus-artifacts/round-003.json",
+                "valid-consensus-artifacts/round-001.json",
+            ),
+            anomaly_score=0.25,
+            classification_threshold=0.05,
+            classification=FingerprintInferenceClassification.ANOMALOUS,
+            scada_divergent_sensors=("temperature",),
+            consensus_final_status="success",
+        )
+        self.assertIn(
+            "mode=replay",
+            format_scada_runtime_scenario_compact(replay_stage),
+        )
+        replay_text = format_replay_behavior_compact(replay_result)
+        self.assertIn("replay_behavior=completed", replay_text)
+        self.assertIn("classification=anomalous", replay_text)
+        self.assertIn("replay_source_round_id=round-001", replay_text)
 
     def test_run_autonomous_demo_loop_executes_multiple_cycles_and_respects_cadence(
         self,
@@ -590,8 +660,11 @@ class DemoFormattingTest(unittest.TestCase):
             "comparison_output": None,
             "scada_alert": None,
             "persistence_stage": {},
+            "scada_replay_stage": mock.Mock(to_dict=mock.Mock(return_value={})),
             "fingerprint_stage": object(),
             "fingerprint_inference_results": (),
+            "replay_behavior_result": None,
+            "replay_inference_results": (),
             "edges": (),
             "fault_edges": (),
         }
@@ -641,6 +714,7 @@ class DemoFormattingTest(unittest.TestCase):
                                 edges=(),
                                 cometbft_client=object(),
                                 artifact_store=object(),
+                                scada_service=object(),
                                 sleep_fn=sleep_mock,
                                 monotonic_fn=mock.Mock(
                                     side_effect=(0.0, 0.25, 5.0, 5.5)
@@ -678,8 +752,11 @@ class DemoFormattingTest(unittest.TestCase):
             "comparison_output": None,
             "scada_alert": None,
             "persistence_stage": {},
+            "scada_replay_stage": mock.Mock(to_dict=mock.Mock(return_value={})),
             "fingerprint_stage": object(),
             "fingerprint_inference_results": (),
+            "replay_behavior_result": None,
+            "replay_inference_results": (),
             "edges": (),
             "fault_edges": (),
         }
@@ -722,6 +799,7 @@ class DemoFormattingTest(unittest.TestCase):
                                 edges=(),
                                 cometbft_client=object(),
                                 artifact_store=object(),
+                                scada_service=object(),
                                 sleep_fn=mock.Mock(side_effect=KeyboardInterrupt),
                                 monotonic_fn=mock.Mock(side_effect=(0.0, 0.2)),
                             )

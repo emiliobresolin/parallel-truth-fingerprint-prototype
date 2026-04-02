@@ -26,6 +26,8 @@ class RuntimeDemoConfig:
     demo_power: float = 65.0
     demo_fault_mode: str = "none"
     demo_faulty_edges: tuple[str, ...] = ()
+    demo_scada_mode: str = "match"
+    demo_scada_start_cycle: int = 0
     demo_log_path: str = "logs/run_local_demo.log"
 
 
@@ -61,5 +63,7 @@ def load_runtime_demo_config() -> RuntimeDemoConfig:
         demo_power=float(os.getenv("DEMO_POWER", "65.0")),
         demo_fault_mode=os.getenv("DEMO_FAULT_MODE", "none"),
         demo_faulty_edges=faulty_edges,
+        demo_scada_mode=os.getenv("DEMO_SCADA_MODE", "match"),
+        demo_scada_start_cycle=int(os.getenv("DEMO_SCADA_START_CYCLE", "0")),
         demo_log_path=os.getenv("DEMO_LOG_PATH", "logs/run_local_demo.log"),
     )
