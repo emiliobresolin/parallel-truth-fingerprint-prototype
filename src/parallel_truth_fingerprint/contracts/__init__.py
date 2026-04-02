@@ -30,6 +30,10 @@ from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReaso
 from parallel_truth_fingerprint.contracts.fingerprint_model import (
     FingerprintModelArtifact,
 )
+from parallel_truth_fingerprint.contracts.fingerprint_inference import (
+    FingerprintInferenceClassification,
+    FingerprintInferenceResult,
+)
 from parallel_truth_fingerprint.contracts.raw_hart_payload import RawHartPayload
 from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
 from parallel_truth_fingerprint.contracts.persistence_record import (
@@ -76,6 +80,8 @@ __all__ = [
     "ExclusionDecision",
     "ExclusionReason",
     "FingerprintModelArtifact",
+    "FingerprintInferenceClassification",
+    "FingerprintInferenceResult",
     "PairwiseDistanceEvidence",
     "ValidConsensusArtifactRecord",
     "PerEdgeTrustEvidence",

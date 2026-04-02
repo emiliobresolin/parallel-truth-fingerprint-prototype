@@ -34,15 +34,17 @@ Epic 4 has now started in the current code through:
   - `meaningful fingerprint-valid`
 - local LSTM fingerprint training revalidated against the persisted dataset artifact path
 - MinIO-backed model save linked back to the persisted dataset id
+- LSTM inference outputs with:
+  - anomaly score
+  - normal/anomalous classification
+  - an explicit runtime-valid-only limitation note when the adequacy floor is not met
 
 The current Epic 4 state is intentionally asymmetric:
 
 - Story 4.2A is implemented and runtime-validated for persisted dataset artifacts
 - Story 4.2 has now been revalidated against the persisted dataset artifact path introduced by Story 4.2A
 - the default adequacy floor is still not met by the small smoke dataset used for runtime proof
-- Story 4.2 therefore remains runtime-valid only, not meaningful-fingerprint-valid
-
-Fingerprint inference and anomaly scoring remain intentionally pending.
+- Story 4.2 and Story 4.3 therefore remain runtime-valid only, not meaningful-fingerprint-valid
 
 The planning artifacts now treat the split PEP files in `docs/input/` as the research source of truth. They also distinguish explicitly between:
 
@@ -65,7 +67,7 @@ This mixed process/container model is a local setup decision only. It is not a p
 
 These layers are approved in planning but are not yet implemented in the current code:
 
-- local LSTM inference and anomaly scoring on top of the new dataset-building and training layers
+- replay-oriented anomaly validation on top of the new inference layer
 - final lightweight SCADA-inspired demo UI, implemented only after the backend/runtime/services are stable
 
 ## Runtime/Demo Setup
