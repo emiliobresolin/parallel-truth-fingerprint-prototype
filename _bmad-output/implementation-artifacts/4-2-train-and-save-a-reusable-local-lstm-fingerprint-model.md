@@ -7,13 +7,14 @@ Status: review
 ## Story
 
 As a researcher,
-I want the system to train and save an LSTM fingerprint model from validated normal data,
-so that the prototype can reuse the model for later inference during demonstrations.
+I want the system to train and save an LSTM fingerprint model from the approved normal-only dataset path,
+so that the prototype can validate the real local training path now and later support a more meaningful temporal fingerprint claim once dataset adequacy is satisfied.
 
 ## Scope Notes
 
 - This story is limited to local LSTM model training and model-artifact persistence.
-- It must consume only the Story 4.1 training windows and dataset manifest.
+- The current implementation reached runtime-valid training against the Story 4.1 in-memory dataset outputs.
+- Final closure after the Epic 4 correction requires revalidation against the persisted dataset artifact path introduced by Story 4.2A.
 - It must use the approved Epic 4 ML stack decision:
   - `keras`
   - `torch` backend
@@ -30,16 +31,28 @@ so that the prototype can reuse the model for later inference during demonstrati
 2. Given the approved local execution scope, when the training flow runs, then it remains a simple local component and does not require distributed ML infrastructure or a separate deployed ML platform.
 3. Given a successful training run, when the model is saved, then the system persists the `.keras` model artifact plus structured training metadata for reuse.
 4. Given the current prototype storage boundary, when the model is saved, then it is written to the MinIO-backed object-store path under a dedicated model prefix rather than a second unrelated storage solution.
-5. Given focused validation, when Story 4.2 tests are run, then they prove:
+5. Given the corrected Epic 4 dataset boundary, when Story 4.2 is fully validated, then the trainer consumes the persisted dataset artifact path introduced by Story 4.2A rather than relying only on in-memory dataset objects.
+6. Given the distinction between runtime validation and fingerprint meaningfulness, when Story 4.2 validation is recorded, then the story explicitly distinguishes:
+   - runtime-valid training
+   - meaningful fingerprint-valid training
+   and it does not claim academically strong fingerprint readiness if the dataset adequacy gate has not yet been satisfied.
+7. Given focused validation, when Story 4.2 tests are run, then they prove:
    - real LSTM model construction through the approved Keras API surface
    - torch-backend enforcement
    - deterministic model/metadata object naming
    - MinIO-backed model persistence
    - rejection of empty or schema-inconsistent training input
+8. Given the project testing rule, when Story 4.2 is closed, then the story record explicitly includes:
+   - what was tested
+   - exact commands executed
+   - test results
+   - real runtime behavior validated
+   - remaining limitations
 
 ## Dependencies
 
-- Story 4.1 training windows and dataset manifest
+- Story 4.1 training windows and dataset manifest for current runtime-valid implementation
+- Story 4.2A persisted dataset artifact path for final revalidation and closure
 - Existing MinIO-backed artifact store
 
 ## Tasks / Subtasks
@@ -63,6 +76,11 @@ so that the prototype can reuse the model for later inference during demonstrati
 - This story makes that decision executable in code.
 - The implementation uses an LSTM autoencoder so Story 4.3 can later derive anomaly score from reconstruction error without redesigning the model.
 - Model artifacts are stored in the existing MinIO bucket under `fingerprint-models/`.
+- Story 4.2 may be considered closed as runtime-valid once the real local training and MinIO-backed model persistence path is proven.
+- Story 4.2 may not be treated as meaningfully fingerprint-valid until:
+  - Story 4.2A has persisted the dataset artifact
+  - the trainer has been revalidated against that persisted dataset path
+  - the normal-history adequacy gate has been evaluated explicitly
 - The model metadata must capture:
   - model id
   - backend

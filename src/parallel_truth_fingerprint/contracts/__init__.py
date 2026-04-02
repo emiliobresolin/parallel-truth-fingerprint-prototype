@@ -18,6 +18,10 @@ from parallel_truth_fingerprint.contracts.consensus_status import ConsensusStatu
 from parallel_truth_fingerprint.contracts.consensused_valid_state import (
     ConsensusedValidState,
 )
+from parallel_truth_fingerprint.contracts.dataset_artifact import (
+    DatasetAdequacyAssessment,
+    PersistedTrainingDatasetArtifact,
+)
 from parallel_truth_fingerprint.contracts.edge_local_replicated_state import (
     EdgeLocalReplicatedStateContract,
 )
@@ -66,6 +70,7 @@ __all__ = [
     "ConsensusRoundSummary",
     "ConsensusStatus",
     "ConsensusedValidState",
+    "DatasetAdequacyAssessment",
     "EdgeLocalReplicatedStateContract",
     "ExcludedEdgeSummary",
     "ExclusionDecision",
@@ -86,6 +91,7 @@ __all__ = [
     "SensorScadaComparisonOutput",
     "ScadaState",
     "SensorDeviationEvidence",
+    "PersistedTrainingDatasetArtifact",
     "TrustRankEntry",
     "TrustRanking",
     "TrainingDatasetManifest",

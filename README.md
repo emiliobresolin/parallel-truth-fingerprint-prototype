@@ -26,8 +26,19 @@ Epic 4 has now started in the current code through:
 
 - MinIO-backed loading of validated persisted artifacts
 - normal-only temporal window generation for future fingerprint training
-- dataset-manifest generation for auditability and traceability
+- persisted dataset artifacts under `fingerprint-datasets/`:
+  - inspectable manifest JSON
+  - reusable `.npz` windows archive
+- explicit dataset adequacy evaluation that distinguishes:
+  - `runtime-valid only`
+  - `meaningful fingerprint-valid`
 - local LSTM fingerprint training and MinIO-backed model save
+
+The current Epic 4 state is intentionally asymmetric:
+
+- Story 4.2A is implemented and runtime-validated for persisted dataset artifacts
+- the default adequacy floor is not met by the small smoke dataset used for runtime proof
+- Story 4.2 therefore remains runtime-valid only until it is revalidated against the persisted dataset artifact path introduced by Story 4.2A
 
 Fingerprint inference and anomaly scoring remain intentionally pending.
 

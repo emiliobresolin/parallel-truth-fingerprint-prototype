@@ -8,7 +8,7 @@ Status: review
 
 As a researcher,
 I want training-ready temporal windows built only from validated persisted artifacts,
-so that the fingerprint learns physical-operational behavior from the real trusted prototype pipeline.
+so that the fingerprint path learns from the real trusted prototype pipeline using deterministic, reviewable dataset-building logic.
 
 ## Scope Notes
 
@@ -17,6 +17,18 @@ so that the fingerprint learns physical-operational behavior from the real trust
 - One persisted valid artifact corresponds to one timestep in the temporal dataset builder.
 - The dataset builder must select only normal eligible records for training.
 - The core fingerprint input must stay tied to the current validated payload-driven prototype output.
+- This story owns:
+  - validated artifact selection
+  - normal-only eligibility filtering
+  - deterministic chronological ordering
+  - feature extraction
+  - fixed-length window generation
+  - in-memory dataset manifest generation
+- This story does not own:
+  - persisted dataset artifact generation
+  - adequacy evaluation
+  - MinIO dataset packaging under `fingerprint-datasets/`
+  Those responsibilities belong to Story 4.2A.
 - This story must not add:
   - LSTM training
   - inference
@@ -30,13 +42,20 @@ so that the fingerprint learns physical-operational behavior from the real trust
 2. Given the current payload-driven architecture, when fingerprint features are extracted, then the dataset builder derives them from the validated structured payload snapshot already stored in the persisted artifact, including per-sensor `PV.value`, `loop_current_ma`, `pv_percent_range`, `physics_metrics`, and transmitter diagnostics when present.
 3. Given the approved modeling boundary, when dataset features are selected, then consensus metadata, trust ranking, exclusions, trust evidence, and SCADA divergence context are retained for traceability and eligibility but are not treated as the core fingerprint feature vector unless explicitly re-approved later.
 4. Given the normal-only training rule, when candidate records are filtered for training, then only scenario-labeled normal validated artifacts are accepted and replay, faulty-edge, SCADA-divergence, failed-consensus, or otherwise non-normal runs are excluded from the training set.
-5. Given the temporal nature of the fingerprint objective, when the builder emits training data, then it produces deterministic fixed-length chronological windows and a dataset manifest that records the selected artifacts, feature schema, sequence length, and eligibility decisions.
+5. Given the temporal nature of the fingerprint objective, when the builder emits training data, then it produces deterministic fixed-length chronological windows and an in-memory dataset manifest that records the selected artifacts, feature schema, sequence length, and eligibility decisions.
 6. Given focused validation, when Story 4.1 tests are run, then they prove:
    - MinIO-backed valid artifact loading
    - normal-only eligibility filtering
+   - deterministic chronological ordering
    - deterministic feature extraction from the structured payload snapshot
    - fixed-length window generation
    - manifest traceability
+7. Given the project testing rule, when Story 4.1 is closed, then the story record explicitly includes:
+   - what was tested
+   - exact commands executed
+   - test results
+   - real runtime behavior validated
+   - remaining limitations
 
 ## Dependencies
 
@@ -60,7 +79,7 @@ so that the fingerprint learns physical-operational behavior from the real trust
   - [x] Keep traceability metadata separate from the core feature vector.
 - [x] Implement fixed-length chronological window generation plus manifest output. (AC: 5, 6)
   - [x] Emit deterministic temporal windows.
-  - [x] Persist or expose a dataset manifest for auditability.
+  - [x] Expose an in-memory dataset manifest for auditability.
 - [x] Add focused Story 4.1 tests and preserve regression stability. (AC: 6)
 
 ## Technical Notes
@@ -84,6 +103,7 @@ so that the fingerprint learns physical-operational behavior from the real trust
   - scenario labels or dataset manifest labels
 - One persisted valid artifact equals one timestep. Fixed-length windows should be built chronologically from that sequence of timesteps.
 - Keep the implementation local, simple, and reviewable. Do not introduce external training infrastructure or a second storage path.
+- Story 4.1 may expose dataset windows and a manifest in memory for immediate downstream use, but the persisted dataset artifact and adequacy gate belong to Story 4.2A.
 
 ## Real vs Simulated Boundary
 

@@ -143,8 +143,8 @@ Prototype implementation note: the real consensus implementation in this prototy
 The researcher can compare the consensused physical-side state against the logical SCADA state, receive per-sensor divergence alerts based on configurable tolerance, and persist only the valid structured consensus artifact to local storage.
 **FRs covered:** FR15, FR16, FR17, FR18
 
-### Epic 4: Fingerprint Training, Replay Detection, and Controlled Demonstration Scenarios
-The researcher can train a reusable LSTM fingerprint from validated normal data, generate anomaly outputs for replay-oriented temporal inconsistency, and execute controlled demonstration scenarios without bypassing the normal pipeline, with the final lightweight demo UI added only after the backend/runtime/services are complete.
+### Epic 4: Fingerprint Dataset Preparation, LSTM Training, Replay Detection, and Controlled Demonstration Scenarios
+The researcher can transform validated persisted artifacts into an inspectable temporal dataset, train a reusable LSTM fingerprint from validated normal data, generate anomaly outputs for replay-oriented temporal inconsistency, and execute controlled demonstration scenarios without bypassing the normal pipeline, with the final lightweight demo UI added only after the backend/runtime/services are complete.
 **FRs covered:** FR19, FR20, FR21, FR22, FR23
 
 ## Epic 1: Reproducible Local Edge Observation Foundation
@@ -499,15 +499,32 @@ So that the system remains explainable and auditable during demonstration.
 **Then** the blocked flow is logged explicitly
 **And** the output makes clear that the pipeline stopped for trust-boundary reasons rather than silent failure.
 
-## Epic 4: Fingerprint Training, Replay Detection, and Controlled Demonstration Scenarios
+## Epic 4: Fingerprint Dataset Preparation, LSTM Training, Replay Detection, and Controlled Demonstration Scenarios
 
-The researcher can train a reusable LSTM fingerprint from validated normal data, generate anomaly outputs for replay-oriented temporal inconsistency, and execute controlled demonstration scenarios without bypassing the normal pipeline.
+The researcher can transform validated persisted artifacts into an inspectable temporal dataset, train a reusable LSTM fingerprint from validated normal data, generate anomaly outputs for replay-oriented temporal inconsistency, and execute controlled demonstration scenarios without bypassing the normal pipeline.
 
-### Story 4.1: Build Training Sequences From Full Valid Persisted Payload Artifacts
+Implementation note: Epic 4 has two explicit validation levels that must remain visible in story wording and story closeout.
+- Runtime-valid: the dataset path, training path, persistence path, and model save/load path execute successfully with the approved local stack.
+- Meaningful fingerprint-valid: the dataset is persisted as an inspectable artifact and the normal-history base is large enough to support an academically honest temporal fingerprint claim.
+
+Dataset note: the only approved Epic 4 input source remains validated persisted `ValidConsensusArtifactRecord` objects from MinIO. No raw observations, edge-local replicated state, failed-consensus outputs, or non-normal scenario runs may enter the fingerprint training path.
+
+Dataset artifact note: the temporal dataset must become a real persisted and inspectable prototype artifact under the existing MinIO boundary. The preferred local representation is:
+- `fingerprint-datasets/<dataset_id>.manifest.json`
+- `fingerprint-datasets/<dataset_id>.windows.npz`
+
+Testing rule: every Epic 4 development story is incomplete unless it records:
+1. what was tested
+2. exact commands executed
+3. test results
+4. what real runtime behavior was validated
+5. what limitations still remain
+
+### Story 4.1: Build Normal-Only Training Windows From Validated Persisted Artifacts
 
 As a researcher,
-I want the LSTM training dataset built from the full structured persisted payload artifacts,
-So that the fingerprint models physical-operational behavior rather than isolated values.
+I want training-ready temporal windows built only from validated persisted artifacts,
+So that the fingerprint path learns from the real trusted prototype pipeline using deterministic, reviewable dataset-building logic.
 
 **Acceptance Criteria:**
 
@@ -526,11 +543,55 @@ So that the fingerprint models physical-operational behavior rather than isolate
 **Then** they use a simple fixed-length sequence window aligned with the collection cadence
 **And** the sequence length remains sufficient for demonstration without introducing unnecessary complexity.
 
+**Given** the current story-responsibility boundary
+**When** Story 4.1 completes
+**Then** it owns validated artifact selection, chronological ordering, feature extraction, and fixed-length window generation
+**And** it may emit in-memory manifest and window objects for immediate use
+**But** it does not own persisted dataset artifact generation or adequacy evaluation, which belong to Story 4.2A.
+
+### Story 4.2A: Persist Inspectable Training Dataset Artifacts and Establish Normal-History Adequacy
+
+As a researcher,
+I want the normal-only temporal dataset to be persisted as an inspectable MinIO artifact and evaluated against an explicit adequacy gate,
+So that the fingerprint path is reproducible, auditable, reusable, and academically honest before inference work begins.
+
+**Acceptance Criteria:**
+
+**Given** the in-memory dataset output from Story 4.1
+**When** Story 4.2A executes
+**Then** it persists a real dataset artifact to MinIO rather than leaving the dataset only in memory.
+
+**Given** the approved storage boundary
+**When** the dataset artifact is written
+**Then** it uses the existing MinIO path under a dedicated dataset prefix
+**And** the preferred representation is:
+- `fingerprint-datasets/<dataset_id>.manifest.json`
+- `fingerprint-datasets/<dataset_id>.windows.npz`
+
+**Given** the need for transparency and reproducibility
+**When** the dataset manifest is persisted
+**Then** it records at least dataset id, creation timestamp, source bucket and prefix, chronological ordering rule, sequence length, stride, overlap behavior, feature schema, selected artifact keys, skipped artifact keys and reasons, eligible artifact count, generated window count, tensor shape, and dataset purpose.
+
+**Given** the need for temporal reuse
+**When** the windows artifact is persisted
+**Then** it stores the generated temporal windows in a reusable form
+**And** it preserves the mapping between windows and their artifact keys, round ids, and timestamps.
+
+**Given** the academic-strength requirement
+**When** dataset adequacy is evaluated
+**Then** the system distinguishes between runtime-valid dataset generation and meaningful fingerprint-valid dataset adequacy
+**And** it records the current adequacy status explicitly.
+
+**Given** the prototype-default adequacy floor
+**When** adequacy is evaluated
+**Then** the default floor is at least 30 eligible normal persisted artifacts and 20 generated windows
+**And** the result is recorded explicitly in the dataset manifest or directly associated metadata.
+
 ### Story 4.2: Train and Save a Reusable Local LSTM Fingerprint Model
 
 As a researcher,
-I want the system to train and save an LSTM fingerprint model from validated normal data,
-So that the prototype can reuse the model for later inference during demonstrations.
+I want the system to train and save an LSTM fingerprint model from the approved normal-only dataset path,
+So that the prototype can validate the real local training path now and later support a more meaningful temporal fingerprint claim once dataset adequacy is satisfied.
 
 **Acceptance Criteria:**
 
@@ -543,6 +604,19 @@ So that the prototype can reuse the model for later inference during demonstrati
 **When** the training flow is implemented
 **Then** it remains a simple local component within the prototype pipeline
 **And** it does not require separate deployment, separate containerization, or distributed ML infrastructure.
+
+**Given** the corrected Epic 4 dataset boundary
+**When** Story 4.2 is fully validated
+**Then** the trainer consumes the persisted dataset artifact path introduced by Story 4.2A rather than relying only on in-memory dataset objects.
+
+**Given** the distinction between runtime validation and fingerprint meaningfulness
+**When** Story 4.2 validation is recorded
+**Then** the story explicitly distinguishes runtime-valid training from meaningful fingerprint-valid training
+**And** it does not claim academically strong fingerprint readiness if the dataset adequacy gate has not yet been satisfied.
+
+### Epic 4 Sequencing Note
+
+Story 4.3 remains blocked until Story 4.2A is complete and Story 4.2 has been revalidated against the persisted dataset artifact path. Runtime-valid model training alone is not sufficient to open inference if the dataset artifact and normal-history adequacy gate are still missing.
 
 ### Story 4.3: Implement Fingerprint Inference With Anomaly Score and Classification
 
