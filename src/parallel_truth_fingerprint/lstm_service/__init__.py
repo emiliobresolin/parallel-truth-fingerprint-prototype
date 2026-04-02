@@ -13,6 +13,11 @@ from parallel_truth_fingerprint.lstm_service.dataset_artifacts import (
 from parallel_truth_fingerprint.lstm_service.inference import (
     run_lstm_fingerprint_inference_from_persisted_dataset,
 )
+from parallel_truth_fingerprint.lstm_service.lifecycle import (
+    FingerprintLifecycleStage,
+    execute_deferred_fingerprint_lifecycle,
+    latest_model_metadata_key,
+)
 from parallel_truth_fingerprint.lstm_service.trainer import (
     build_lstm_autoencoder,
     train_and_save_lstm_fingerprint,
@@ -25,7 +30,10 @@ __all__ = [
     "evaluate_training_eligibility",
     "evaluate_training_dataset_adequacy",
     "extract_feature_vector",
+    "execute_deferred_fingerprint_lifecycle",
+    "FingerprintLifecycleStage",
     "load_persisted_training_dataset_artifacts",
+    "latest_model_metadata_key",
     "persist_training_dataset_artifacts",
     "run_lstm_fingerprint_inference_from_persisted_dataset",
     "train_and_save_lstm_fingerprint",

@@ -40,6 +40,10 @@ from parallel_truth_fingerprint.edge_nodes.common.mqtt_io import create_transpor
 from parallel_truth_fingerprint.edge_nodes.edge_1.service import TemperatureEdgeService
 from parallel_truth_fingerprint.edge_nodes.edge_2.service import PressureEdgeService
 from parallel_truth_fingerprint.edge_nodes.edge_3.service import RpmEdgeService
+from parallel_truth_fingerprint.lstm_service import (
+    FingerprintLifecycleStage,
+    execute_deferred_fingerprint_lifecycle,
+)
 from parallel_truth_fingerprint.persistence import (
     MinioArtifactStore,
     MinioStoreConfig,
@@ -161,6 +165,7 @@ def inject_faults(round_input: ConsensusRoundInput, config) -> ConsensusRoundInp
 
 def build_detailed_log_payload(
     *,
+    cycle_index: int,
     config,
     node_status,
     commit_receipt,
@@ -173,19 +178,34 @@ def build_detailed_log_payload(
     comparison_output,
     scada_alert,
     persistence_stage,
+    cadence_stage: dict[str, object],
+    fingerprint_stage: FingerprintLifecycleStage,
+    fingerprint_inference_results,
     edges,
     fault_edges: tuple[str, ...],
 ) -> dict:
-    """Build the full deterministic development log payload."""
+    """Build the full deterministic development log payload for one cycle."""
 
     return {
         "demo": {
+            "cycle_index": cycle_index,
             "mqtt_transport": config.mqtt_transport,
             "mqtt_topic": config.mqtt_topic,
             "fault_mode": config.demo_fault_mode,
             "faulty_edges": list(fault_edges),
             "log_path": config.demo_log_path,
+            "cycle_interval_seconds": config.demo_cycle_interval_seconds,
+            "train_after_eligible_cycles": config.demo_train_after_eligible_cycles,
+            "fingerprint_sequence_length": config.demo_fingerprint_sequence_length,
         },
+        "runtime_cycle": {
+            "current_cycle": cycle_index,
+            "cadence_stage": cadence_stage,
+        },
+        "fingerprint_lifecycle": fingerprint_stage.to_dict(),
+        "fingerprint_inference_results": [
+            result.to_dict() for result in fingerprint_inference_results
+        ],
         "cometbft": {
             "node_version": node_status["node_info"]["version"],
             "latest_block_height": node_status["sync_info"]["latest_block_height"],
@@ -241,6 +261,44 @@ def write_detailed_log(log_path: Path, payload: dict) -> Path:
     return log_path
 
 
+def build_runtime_log_payload(
+    *,
+    config,
+    runtime_status: str,
+    cycle_history: list[dict[str, object]],
+    latest_cycle_payload: dict[str, object] | None,
+) -> dict[str, object]:
+    """Build the continuous-runtime log envelope for the live demo."""
+
+    latest_fingerprint_stage = (
+        {}
+        if latest_cycle_payload is None
+        else latest_cycle_payload.get("fingerprint_lifecycle", {})
+    )
+    return {
+        "runtime": {
+            "status": runtime_status,
+            "completed_cycles": len(cycle_history),
+            "current_cycle": 0 if not cycle_history else cycle_history[-1]["cycle_index"],
+            "cycle_interval_seconds": config.demo_cycle_interval_seconds,
+            "max_cycles": config.demo_max_cycles,
+            "train_after_eligible_cycles": config.demo_train_after_eligible_cycles,
+            "fingerprint_sequence_length": config.demo_fingerprint_sequence_length,
+            "model_status": latest_fingerprint_stage.get("model_status"),
+            "training_events": latest_fingerprint_stage.get("training_events", []),
+            "latest_valid_artifact_count": latest_fingerprint_stage.get(
+                "valid_artifact_count"
+            ),
+            "latest_eligible_history_count": latest_fingerprint_stage.get(
+                "eligible_history_count"
+            ),
+            "latest_window_count": latest_fingerprint_stage.get("window_count"),
+        },
+        "cycle_history": cycle_history,
+        "latest_cycle": latest_cycle_payload,
+    }
+
+
 def format_comparison_stage_compact(stage: dict[str, object]) -> str:
     """Render one compact comparison-stage line for demo output."""
 
@@ -278,6 +336,85 @@ def format_persistence_stage_compact(stage: dict[str, object]) -> str:
         f"bucket={stage['bucket']} "
         f"artifact_key={stage['artifact_key']} "
         f"artifact_uri={stage['artifact_uri']}"
+    )
+
+
+def build_cadence_stage(
+    *,
+    cycle_index: int,
+    configured_interval_seconds: float,
+    elapsed_seconds: float,
+    next_sleep_seconds: float,
+    will_continue: bool,
+) -> dict[str, object]:
+    """Return structured cadence metadata for one runtime cycle."""
+
+    status = "sleeping_until_next_cycle" if will_continue else "cycle_complete"
+    if will_continue and next_sleep_seconds == 0.0:
+        status = "continuing_without_sleep"
+    return {
+        "cycle_index": cycle_index,
+        "status": status,
+        "configured_interval_seconds": round(configured_interval_seconds, 3),
+        "elapsed_seconds": round(elapsed_seconds, 3),
+        "next_sleep_seconds": round(next_sleep_seconds, 3),
+        "will_continue": will_continue,
+    }
+
+
+def format_cadence_stage_compact(stage: dict[str, object]) -> str:
+    """Render one compact cadence line for demo output."""
+
+    return (
+        f"cycle={stage['cycle_index']} "
+        f"cadence={stage['status']} "
+        f"interval_seconds={stage['configured_interval_seconds']} "
+        f"elapsed_seconds={stage['elapsed_seconds']} "
+        f"next_sleep_seconds={stage['next_sleep_seconds']}"
+    )
+
+
+def format_fingerprint_lifecycle_compact(stage: FingerprintLifecycleStage) -> str:
+    """Render one compact fingerprint-lifecycle line for demo output."""
+
+    training_state = "+".join(stage.training_events)
+    latest_artifact = stage.latest_valid_artifact_key or "none"
+    parts = [
+        f"fingerprint=model_status={stage.model_status}",
+        f"training={training_state}",
+        f"inference={stage.inference_status}",
+        f"valid_artifacts={stage.valid_artifact_count}",
+        (
+            f"eligible_history={stage.eligible_history_count}/"
+            f"{stage.eligible_history_threshold}"
+        ),
+        f"windows={stage.window_count}",
+        f"latest_artifact={latest_artifact}",
+    ]
+    if stage.dataset_manifest_object_key is not None:
+        parts.append(f"dataset_manifest={stage.dataset_manifest_object_key}")
+    if stage.model_metadata_object_key is not None:
+        parts.append(f"model_metadata={stage.model_metadata_object_key}")
+    if stage.source_dataset_validation_level is not None:
+        parts.append(
+            f"validation_level={stage.source_dataset_validation_level}"
+        )
+    return " ".join(parts)
+
+
+def format_inference_results_compact(fingerprint_inference_results) -> str:
+    """Render one compact inference line for demo output."""
+
+    if not fingerprint_inference_results:
+        return "fingerprint_inference=none"
+    first_result = fingerprint_inference_results[0]
+    return (
+        f"fingerprint_inference=completed "
+        f"results={len(fingerprint_inference_results)} "
+        f"classification={first_result.classification.value} "
+        f"score={round(first_result.anomaly_score, 6)} "
+        f"threshold={round(first_result.classification_threshold, 6)} "
+        f"validation_level={first_result.source_dataset_validation_level}"
     )
 
 
@@ -436,6 +573,280 @@ def build_demo_artifact_store(config) -> MinioArtifactStore:
     )
 
 
+def build_lifecycle_error_stage(
+    *,
+    cycle_index: int,
+    config,
+    artifact_key: str | None,
+    error: Exception,
+) -> FingerprintLifecycleStage:
+    """Return a conservative lifecycle stage when lifecycle orchestration fails."""
+
+    return FingerprintLifecycleStage(
+        cycle_index=cycle_index,
+        valid_artifact_count=0,
+        eligible_history_count=0,
+        eligible_history_threshold=config.demo_train_after_eligible_cycles,
+        window_count=0,
+        latest_valid_artifact_key=artifact_key,
+        model_status="error",
+        training_events=("deferred",),
+        inference_status=f"error:{error}",
+        inference_result_count=0,
+        limitation_note=str(error),
+    )
+
+
+def execute_demo_cycle(
+    *,
+    cycle_index: int,
+    config,
+    simulator,
+    edges,
+    cometbft_client,
+    artifact_store,
+    sleep_fn=time.sleep,
+) -> dict[str, object]:
+    """Execute one full prototype cycle for the live demo runtime."""
+
+    for step in range(config.demo_steps):
+        snapshot = simulator.step(compressor_power=config.demo_power + step)
+        for edge in edges:
+            payload = edge.acquire(snapshot=snapshot)
+            edge.publish_local_observation(payload, topic=config.mqtt_topic)
+        sleep_fn(0.2)
+
+    sleep_fn(1.0)
+
+    consensus_round_input = build_consensus_round_input(edges)
+    consensus_round_input = inject_faults(consensus_round_input, config)
+    node_status = cometbft_client.status()
+    commit_receipt = cometbft_client.broadcast_round(consensus_round_input)
+    committed_round = cometbft_client.query_committed_round(commit_receipt.round_id)
+    consensus_audit = committed_round_to_audit_package(
+        consensus_round_input,
+        committed_round,
+    )
+    consensus_summary = build_round_summary(consensus_audit)
+    consensus_log = build_round_log(consensus_audit)
+    consensus_alert = build_consensus_alert(consensus_audit, consensus_log)
+    scada_state, comparison_stage, comparison_output, scada_alert, persistence_stage = (
+        run_scada_comparison_and_persistence(
+            consensus_audit=consensus_audit,
+            artifact_store=artifact_store,
+            fault_mode=config.demo_fault_mode,
+        )
+    )
+    fault_edges = resolve_faulty_edges(config, consensus_round_input.participating_edges)
+    try:
+        fingerprint_stage, fingerprint_inference_results = (
+            execute_deferred_fingerprint_lifecycle(
+                cycle_index=cycle_index,
+                artifact_store=artifact_store,
+                sequence_length=config.demo_fingerprint_sequence_length,
+                train_after_eligible_cycles=config.demo_train_after_eligible_cycles,
+            )
+        )
+    except Exception as exc:
+        fingerprint_stage = build_lifecycle_error_stage(
+            cycle_index=cycle_index,
+            config=config,
+            artifact_key=persistence_stage.get("artifact_key"),
+            error=exc,
+        )
+        fingerprint_inference_results = ()
+
+    return {
+        "cycle_index": cycle_index,
+        "node_status": node_status,
+        "commit_receipt": commit_receipt,
+        "committed_round": committed_round,
+        "consensus_summary": consensus_summary,
+        "consensus_log": consensus_log,
+        "consensus_alert": consensus_alert,
+        "scada_state": scada_state,
+        "comparison_stage": comparison_stage,
+        "comparison_output": comparison_output,
+        "scada_alert": scada_alert,
+        "persistence_stage": persistence_stage,
+        "fault_edges": fault_edges,
+        "fingerprint_stage": fingerprint_stage,
+        "fingerprint_inference_results": fingerprint_inference_results,
+        "edges": edges,
+    }
+
+
+def build_cycle_history_entry(
+    *,
+    cycle_result: dict[str, object],
+    cadence_stage: dict[str, object],
+) -> dict[str, object]:
+    """Return one compact cycle-history entry for the runtime log."""
+
+    consensus_summary = cycle_result["consensus_summary"]
+    persistence_stage = cycle_result["persistence_stage"]
+    fingerprint_stage = cycle_result["fingerprint_stage"]
+    return {
+        "cycle_index": cycle_result["cycle_index"],
+        "round_id": consensus_summary.round_id,
+        "final_consensus_status": consensus_summary.final_consensus_status.value,
+        "persistence_status": persistence_stage["status"],
+        "artifact_key": persistence_stage.get("artifact_key"),
+        "cadence_stage": cadence_stage,
+        "fingerprint_lifecycle": fingerprint_stage.to_dict(),
+    }
+
+
+def print_cycle_report(
+    *,
+    cycle_result: dict[str, object],
+    cadence_stage: dict[str, object],
+    config,
+    detailed_log_path: Path,
+) -> None:
+    """Print one compact cycle report for the live terminal output."""
+
+    print(f"=== Local Demo Cycle {cycle_result['cycle_index']} ===")
+    print("Compact view:")
+    for edge in cycle_result["edges"]:
+        print(f"- {format_edge_summary(edge)}")
+
+    node_status = cycle_result["node_status"]
+    commit_receipt = cycle_result["commit_receipt"]
+    print("\nConsensus summary:")
+    print(
+        f"- source=cometbft "
+        f"node_version={node_status['node_info']['version']} "
+        f"latest_block_height={node_status['sync_info']['latest_block_height']}"
+    )
+    print(
+        f"- committed_height={commit_receipt.height} "
+        f"tx_hash={commit_receipt.tx_hash} "
+        f"check_tx_code={commit_receipt.check_tx_code} "
+        f"deliver_tx_code={commit_receipt.deliver_tx_code}"
+    )
+    print(
+        f"- fault_mode={config.demo_fault_mode} "
+        f"faulty_edges={list(cycle_result['fault_edges'])}"
+    )
+    print(f"- {format_round_summary(cycle_result['consensus_summary'])}")
+    print(f"- {format_round_log_compact(cycle_result['consensus_log'])}")
+    print(f"- {format_consensus_alert_compact(cycle_result['consensus_alert'])}")
+    print(f"- {format_cadence_stage_compact(cadence_stage)}")
+    print(f"- {format_comparison_stage_compact(cycle_result['comparison_stage'])}")
+    print(f"- {format_scada_alert_compact(cycle_result['scada_alert'])}")
+    print(f"- {format_persistence_stage_compact(cycle_result['persistence_stage'])}")
+    print(
+        f"- {format_fingerprint_lifecycle_compact(cycle_result['fingerprint_stage'])}"
+    )
+    print(
+        f"- {format_inference_results_compact(cycle_result['fingerprint_inference_results'])}"
+    )
+    print(f"- detailed_log={detailed_log_path}")
+
+
+def run_autonomous_demo_loop(
+    *,
+    config,
+    simulator,
+    edges,
+    cometbft_client,
+    artifact_store,
+    sleep_fn=time.sleep,
+    monotonic_fn=time.monotonic,
+) -> dict[str, object]:
+    """Run the Story 4.3A autonomous runtime loop until manual stop or max cycles."""
+
+    cycle_history: list[dict[str, object]] = []
+    latest_cycle_payload: dict[str, object] | None = None
+    log_path = default_demo_log_path(config.demo_log_path)
+    cycle_index = 0
+
+    try:
+        while config.demo_max_cycles <= 0 or cycle_index < config.demo_max_cycles:
+            cycle_index += 1
+            cycle_started_at = monotonic_fn()
+            cycle_result = execute_demo_cycle(
+                cycle_index=cycle_index,
+                config=config,
+                simulator=simulator,
+                edges=edges,
+                cometbft_client=cometbft_client,
+                artifact_store=artifact_store,
+                sleep_fn=sleep_fn,
+            )
+            elapsed_seconds = max(monotonic_fn() - cycle_started_at, 0.0)
+            will_continue = (
+                config.demo_max_cycles <= 0 or cycle_index < config.demo_max_cycles
+            )
+            next_sleep_seconds = (
+                max(config.demo_cycle_interval_seconds - elapsed_seconds, 0.0)
+                if will_continue
+                else 0.0
+            )
+            cadence_stage = build_cadence_stage(
+                cycle_index=cycle_index,
+                configured_interval_seconds=config.demo_cycle_interval_seconds,
+                elapsed_seconds=elapsed_seconds,
+                next_sleep_seconds=next_sleep_seconds,
+                will_continue=will_continue,
+            )
+            latest_cycle_payload = build_detailed_log_payload(
+                cycle_index=cycle_index,
+                config=config,
+                node_status=cycle_result["node_status"],
+                commit_receipt=cycle_result["commit_receipt"],
+                committed_round=cycle_result["committed_round"],
+                consensus_summary=cycle_result["consensus_summary"],
+                consensus_log=cycle_result["consensus_log"],
+                consensus_alert=cycle_result["consensus_alert"],
+                scada_state=cycle_result["scada_state"],
+                comparison_stage=cycle_result["comparison_stage"],
+                comparison_output=cycle_result["comparison_output"],
+                scada_alert=cycle_result["scada_alert"],
+                persistence_stage=cycle_result["persistence_stage"],
+                cadence_stage=cadence_stage,
+                fingerprint_stage=cycle_result["fingerprint_stage"],
+                fingerprint_inference_results=cycle_result[
+                    "fingerprint_inference_results"
+                ],
+                edges=cycle_result["edges"],
+                fault_edges=cycle_result["fault_edges"],
+            )
+            cycle_history.append(
+                build_cycle_history_entry(
+                    cycle_result=cycle_result,
+                    cadence_stage=cadence_stage,
+                )
+            )
+            runtime_payload = build_runtime_log_payload(
+                config=config,
+                runtime_status="active" if will_continue else "completed",
+                cycle_history=cycle_history,
+                latest_cycle_payload=latest_cycle_payload,
+            )
+            detailed_log_path = write_detailed_log(log_path, runtime_payload)
+            print_cycle_report(
+                cycle_result=cycle_result,
+                cadence_stage=cadence_stage,
+                config=config,
+                detailed_log_path=detailed_log_path,
+            )
+            if not will_continue:
+                return runtime_payload
+            sleep_fn(next_sleep_seconds)
+    except KeyboardInterrupt:
+        runtime_payload = build_runtime_log_payload(
+            config=config,
+            runtime_status="stopped_manually",
+            cycle_history=cycle_history,
+            latest_cycle_payload=latest_cycle_payload,
+        )
+        write_detailed_log(log_path, runtime_payload)
+        print("\nRuntime stopped manually.")
+        return runtime_payload
+
+
 def main() -> None:
     config = load_runtime_demo_config()
     simulator = CompressorSimulator(seed=101)
@@ -465,87 +876,15 @@ def main() -> None:
     for edge, transport in zip(edges, transports, strict=True):
         edge.attach_transport(transport, topic=config.mqtt_topic)
     time.sleep(0.5)
-
-    for step in range(config.demo_steps):
-        snapshot = simulator.step(compressor_power=config.demo_power + step)
-        for edge in edges:
-            payload = edge.acquire(snapshot=snapshot)
-            edge.publish_local_observation(payload, topic=config.mqtt_topic)
-        time.sleep(0.2)
-
-    time.sleep(1.0)
-
-    print("=== Local Demo Summary ===")
-    print("Compact view:")
-    for edge in edges:
-        print(f"- {format_edge_summary(edge)}")
-
-    consensus_round_input = build_consensus_round_input(edges)
-    consensus_round_input = inject_faults(consensus_round_input, config)
     cometbft_client = CometBftRpcClient(config.cometbft_rpc_url)
-    node_status = cometbft_client.status()
-    commit_receipt = cometbft_client.broadcast_round(consensus_round_input)
-    committed_round = cometbft_client.query_committed_round(commit_receipt.round_id)
-    consensus_audit = committed_round_to_audit_package(
-        consensus_round_input,
-        committed_round,
-    )
-    consensus_summary = build_round_summary(consensus_audit)
-    consensus_log = build_round_log(consensus_audit)
-    consensus_alert = build_consensus_alert(consensus_audit, consensus_log)
     artifact_store = build_demo_artifact_store(config)
-    scada_state, comparison_stage, comparison_output, scada_alert, persistence_stage = (
-        run_scada_comparison_and_persistence(
-            consensus_audit=consensus_audit,
-            artifact_store=artifact_store,
-            fault_mode=config.demo_fault_mode,
-        )
-    )
-    fault_edges = resolve_faulty_edges(config, consensus_round_input.participating_edges)
-    detailed_log_payload = build_detailed_log_payload(
+    run_autonomous_demo_loop(
         config=config,
-        node_status=node_status,
-        commit_receipt=commit_receipt,
-        committed_round=committed_round,
-        consensus_summary=consensus_summary,
-        consensus_log=consensus_log,
-        consensus_alert=consensus_alert,
-        scada_state=scada_state,
-        comparison_stage=comparison_stage,
-        comparison_output=comparison_output,
-        scada_alert=scada_alert,
-        persistence_stage=persistence_stage,
+        simulator=simulator,
         edges=edges,
-        fault_edges=fault_edges,
+        cometbft_client=cometbft_client,
+        artifact_store=artifact_store,
     )
-    detailed_log_path = write_detailed_log(
-        default_demo_log_path(config.demo_log_path),
-        detailed_log_payload,
-    )
-
-    print("\nConsensus summary:")
-    print(
-        f"- source=cometbft "
-        f"node_version={node_status['node_info']['version']} "
-        f"latest_block_height={node_status['sync_info']['latest_block_height']}"
-    )
-    print(
-        f"- committed_height={commit_receipt.height} "
-        f"tx_hash={commit_receipt.tx_hash} "
-        f"check_tx_code={commit_receipt.check_tx_code} "
-        f"deliver_tx_code={commit_receipt.deliver_tx_code}"
-    )
-    print(
-        f"- fault_mode={config.demo_fault_mode} "
-        f"faulty_edges={list(fault_edges)}"
-    )
-    print(f"- {format_round_summary(consensus_summary)}")
-    print(f"- {format_round_log_compact(consensus_log)}")
-    print(f"- {format_consensus_alert_compact(consensus_alert)}")
-    print(f"- {format_comparison_stage_compact(comparison_stage)}")
-    print(f"- {format_scada_alert_compact(scada_alert)}")
-    print(f"- {format_persistence_stage_compact(persistence_stage)}")
-    print(f"- detailed_log={detailed_log_path}")
 
 
 if __name__ == "__main__":

@@ -13,6 +13,12 @@ class RuntimeDemoConfigTest(unittest.TestCase):
         previous_fault_mode = os.environ.get("DEMO_FAULT_MODE")
         previous_faulty_edges = os.environ.get("DEMO_FAULTY_EDGES")
         previous_rpc = os.environ.get("COMETBFT_RPC_URL")
+        previous_cycle_interval = os.environ.get("DEMO_CYCLE_INTERVAL_SECONDS")
+        previous_max_cycles = os.environ.get("DEMO_MAX_CYCLES")
+        previous_train_after_cycles = os.environ.get(
+            "DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES"
+        )
+        previous_sequence_length = os.environ.get("DEMO_FINGERPRINT_SEQUENCE_LENGTH")
         previous_minio_endpoint = os.environ.get("MINIO_ENDPOINT")
         previous_minio_access_key = os.environ.get("MINIO_ACCESS_KEY")
         previous_minio_secret_key = os.environ.get("MINIO_SECRET_KEY")
@@ -25,6 +31,10 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             os.environ["DEMO_FAULT_MODE"] = "single_edge_exclusion"
             os.environ["DEMO_FAULTY_EDGES"] = "edge-3"
             os.environ["COMETBFT_RPC_URL"] = "http://127.0.0.1:26657"
+            os.environ["DEMO_CYCLE_INTERVAL_SECONDS"] = "75"
+            os.environ["DEMO_MAX_CYCLES"] = "4"
+            os.environ["DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES"] = "12"
+            os.environ["DEMO_FINGERPRINT_SEQUENCE_LENGTH"] = "3"
             os.environ["MINIO_ENDPOINT"] = "127.0.0.1:9000"
             os.environ["MINIO_ACCESS_KEY"] = "demo-user"
             os.environ["MINIO_SECRET_KEY"] = "demo-secret"
@@ -39,6 +49,10 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             self.assertEqual(config.demo_fault_mode, "single_edge_exclusion")
             self.assertEqual(config.demo_faulty_edges, ("edge-3",))
             self.assertEqual(config.cometbft_rpc_url, "http://127.0.0.1:26657")
+            self.assertEqual(config.demo_cycle_interval_seconds, 75.0)
+            self.assertEqual(config.demo_max_cycles, 4)
+            self.assertEqual(config.demo_train_after_eligible_cycles, 12)
+            self.assertEqual(config.demo_fingerprint_sequence_length, 3)
             self.assertEqual(config.minio_endpoint, "127.0.0.1:9000")
             self.assertEqual(config.minio_access_key, "demo-user")
             self.assertEqual(config.minio_secret_key, "demo-secret")
@@ -66,6 +80,24 @@ class RuntimeDemoConfigTest(unittest.TestCase):
                 os.environ.pop("COMETBFT_RPC_URL", None)
             else:
                 os.environ["COMETBFT_RPC_URL"] = previous_rpc
+            if previous_cycle_interval is None:
+                os.environ.pop("DEMO_CYCLE_INTERVAL_SECONDS", None)
+            else:
+                os.environ["DEMO_CYCLE_INTERVAL_SECONDS"] = previous_cycle_interval
+            if previous_max_cycles is None:
+                os.environ.pop("DEMO_MAX_CYCLES", None)
+            else:
+                os.environ["DEMO_MAX_CYCLES"] = previous_max_cycles
+            if previous_train_after_cycles is None:
+                os.environ.pop("DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES", None)
+            else:
+                os.environ["DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES"] = (
+                    previous_train_after_cycles
+                )
+            if previous_sequence_length is None:
+                os.environ.pop("DEMO_FINGERPRINT_SEQUENCE_LENGTH", None)
+            else:
+                os.environ["DEMO_FINGERPRINT_SEQUENCE_LENGTH"] = previous_sequence_length
             if previous_minio_endpoint is None:
                 os.environ.pop("MINIO_ENDPOINT", None)
             else:
@@ -496,6 +528,208 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertEqual(dataset_context["training_label"], "normal")
         self.assertTrue(dataset_context["training_eligible"])
 
+    def test_format_cadence_and_fingerprint_lifecycle_outputs(self) -> None:
+        from parallel_truth_fingerprint.lstm_service import FingerprintLifecycleStage
+        from scripts.run_local_demo import (
+            build_cadence_stage,
+            format_cadence_stage_compact,
+            format_fingerprint_lifecycle_compact,
+        )
+
+        cadence_stage = build_cadence_stage(
+            cycle_index=3,
+            configured_interval_seconds=60.0,
+            elapsed_seconds=2.5,
+            next_sleep_seconds=57.5,
+            will_continue=True,
+        )
+        fingerprint_stage = FingerprintLifecycleStage(
+            cycle_index=3,
+            valid_artifact_count=3,
+            eligible_history_count=3,
+            eligible_history_threshold=10,
+            window_count=2,
+            latest_valid_artifact_key="valid-consensus-artifacts/round-3.json",
+            model_status="model_available",
+            training_events=("reused",),
+            inference_status="completed",
+            inference_result_count=2,
+            dataset_manifest_object_key="fingerprint-datasets/runtime.manifest.json",
+            model_metadata_object_key="fingerprint-models/runtime.json",
+            source_dataset_validation_level="runtime_valid_only",
+        )
+
+        self.assertIn("cycle=3", format_cadence_stage_compact(cadence_stage))
+        self.assertIn("interval_seconds=60.0", format_cadence_stage_compact(cadence_stage))
+        lifecycle_text = format_fingerprint_lifecycle_compact(fingerprint_stage)
+        self.assertIn("model_status=model_available", lifecycle_text)
+        self.assertIn("training=reused", lifecycle_text)
+        self.assertIn("eligible_history=3/10", lifecycle_text)
+        self.assertIn("validation_level=runtime_valid_only", lifecycle_text)
+
+    def test_run_autonomous_demo_loop_executes_multiple_cycles_and_respects_cadence(
+        self,
+    ) -> None:
+        from parallel_truth_fingerprint.config.runtime import RuntimeDemoConfig
+        from scripts import run_local_demo
+
+        config = RuntimeDemoConfig(
+            mqtt_transport="passive",
+            demo_cycle_interval_seconds=5.0,
+            demo_max_cycles=2,
+        )
+        base_cycle_result = {
+            "node_status": {},
+            "commit_receipt": object(),
+            "committed_round": {},
+            "consensus_summary": object(),
+            "consensus_log": object(),
+            "consensus_alert": None,
+            "scada_state": None,
+            "comparison_stage": {},
+            "comparison_output": None,
+            "scada_alert": None,
+            "persistence_stage": {},
+            "fingerprint_stage": object(),
+            "fingerprint_inference_results": (),
+            "edges": (),
+            "fault_edges": (),
+        }
+        cycle_results = (
+            {"cycle_index": 1, **base_cycle_result},
+            {"cycle_index": 2, **base_cycle_result},
+        )
+        sleep_mock = mock.Mock()
+
+        with mock.patch.object(
+            run_local_demo,
+            "execute_demo_cycle",
+            side_effect=cycle_results,
+        ) as execute_cycle:
+            with mock.patch.object(
+                run_local_demo,
+                "build_detailed_log_payload",
+                side_effect=lambda **kwargs: {
+                    "fingerprint_lifecycle": {
+                        "model_status": "no_model_yet",
+                        "training_events": ["deferred"],
+                        "valid_artifact_count": kwargs["cycle_index"],
+                        "eligible_history_count": kwargs["cycle_index"],
+                        "window_count": 0,
+                    }
+                },
+            ) as build_payload:
+                with mock.patch.object(
+                    run_local_demo,
+                    "build_cycle_history_entry",
+                    side_effect=lambda **kwargs: {
+                        "cycle_index": kwargs["cycle_result"]["cycle_index"]
+                    },
+                ) as build_history:
+                    with mock.patch.object(
+                        run_local_demo,
+                        "write_detailed_log",
+                        return_value=run_local_demo.PROJECT_ROOT / "logs" / "loop.log",
+                    ) as write_log:
+                        with mock.patch.object(
+                            run_local_demo,
+                            "print_cycle_report",
+                        ) as print_report:
+                            payload = run_local_demo.run_autonomous_demo_loop(
+                                config=config,
+                                simulator=object(),
+                                edges=(),
+                                cometbft_client=object(),
+                                artifact_store=object(),
+                                sleep_fn=sleep_mock,
+                                monotonic_fn=mock.Mock(
+                                    side_effect=(0.0, 0.25, 5.0, 5.5)
+                                ),
+                            )
+
+        self.assertEqual(execute_cycle.call_count, 2)
+        self.assertEqual(build_payload.call_count, 2)
+        self.assertEqual(build_history.call_count, 2)
+        self.assertEqual(write_log.call_count, 2)
+        self.assertEqual(print_report.call_count, 2)
+        sleep_mock.assert_called_once_with(4.75)
+        self.assertEqual(payload["runtime"]["status"], "completed")
+        self.assertEqual(payload["runtime"]["completed_cycles"], 2)
+
+    def test_run_autonomous_demo_loop_marks_manual_stop_when_interrupted(self) -> None:
+        from parallel_truth_fingerprint.config.runtime import RuntimeDemoConfig
+        from scripts import run_local_demo
+
+        config = RuntimeDemoConfig(
+            mqtt_transport="passive",
+            demo_cycle_interval_seconds=5.0,
+            demo_max_cycles=0,
+        )
+        cycle_result = {
+            "cycle_index": 1,
+            "node_status": {},
+            "commit_receipt": object(),
+            "committed_round": {},
+            "consensus_summary": object(),
+            "consensus_log": object(),
+            "consensus_alert": None,
+            "scada_state": None,
+            "comparison_stage": {},
+            "comparison_output": None,
+            "scada_alert": None,
+            "persistence_stage": {},
+            "fingerprint_stage": object(),
+            "fingerprint_inference_results": (),
+            "edges": (),
+            "fault_edges": (),
+        }
+
+        with mock.patch.object(
+            run_local_demo,
+            "execute_demo_cycle",
+            return_value=cycle_result,
+        ):
+            with mock.patch.object(
+                run_local_demo,
+                "build_detailed_log_payload",
+                return_value={
+                    "fingerprint_lifecycle": {
+                        "model_status": "no_model_yet",
+                        "training_events": ["deferred"],
+                        "valid_artifact_count": 1,
+                        "eligible_history_count": 1,
+                        "window_count": 0,
+                    }
+                },
+            ):
+                with mock.patch.object(
+                    run_local_demo,
+                    "build_cycle_history_entry",
+                    return_value={"cycle_index": 1},
+                ):
+                    with mock.patch.object(
+                        run_local_demo,
+                        "write_detailed_log",
+                        return_value=run_local_demo.PROJECT_ROOT / "logs" / "loop.log",
+                    ) as write_log:
+                        with mock.patch.object(
+                            run_local_demo,
+                            "print_cycle_report",
+                        ):
+                            payload = run_local_demo.run_autonomous_demo_loop(
+                                config=config,
+                                simulator=object(),
+                                edges=(),
+                                cometbft_client=object(),
+                                artifact_store=object(),
+                                sleep_fn=mock.Mock(side_effect=KeyboardInterrupt),
+                                monotonic_fn=mock.Mock(side_effect=(0.0, 0.2)),
+                            )
+
+        self.assertEqual(payload["runtime"]["status"], "stopped_manually")
+        self.assertEqual(payload["runtime"]["completed_cycles"], 1)
+        self.assertEqual(write_log.call_count, 2)
+
     def test_build_minio_runtime_metadata_splits_endpoint_and_secure_mode(self) -> None:
         from parallel_truth_fingerprint.persistence import MinioArtifactStore, MinioStoreConfig
         from scripts.run_local_demo import build_minio_runtime_metadata
@@ -873,6 +1107,7 @@ class DemoConsensusPathTest(unittest.TestCase):
             minio_secret_key="minioadmin",
             minio_bucket="valid-consensus-artifacts",
             demo_steps=1,
+            demo_max_cycles=1,
             demo_power=65.0,
             demo_fault_mode="none",
         )
@@ -897,13 +1132,14 @@ class DemoConsensusPathTest(unittest.TestCase):
                     "build_demo_artifact_store",
                     return_value=artifact_store,
                 ):
-                    with mock.patch.object(
-                        run_local_demo,
-                        "write_detailed_log",
-                        return_value=run_local_demo.PROJECT_ROOT / "logs" / "test-runtime-demo.log",
-                    ):
-                        with mock.patch("sys.stdout"):
-                            run_local_demo.main()
+                    with mock.patch("time.sleep", return_value=None):
+                        with mock.patch.object(
+                            run_local_demo,
+                            "write_detailed_log",
+                            return_value=run_local_demo.PROJECT_ROOT / "logs" / "test-runtime-demo.log",
+                        ):
+                            with mock.patch("sys.stdout"):
+                                run_local_demo.main()
 
         self.assertTrue(fake_client.objects)
 

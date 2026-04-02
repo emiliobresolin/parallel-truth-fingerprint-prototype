@@ -19,6 +19,10 @@ class RuntimeDemoConfig:
     minio_bucket: str = "valid-consensus-artifacts"
     minio_secure: bool = False
     demo_steps: int = 3
+    demo_cycle_interval_seconds: float = 60.0
+    demo_max_cycles: int = 0
+    demo_train_after_eligible_cycles: int = 10
+    demo_fingerprint_sequence_length: int = 2
     demo_power: float = 65.0
     demo_fault_mode: str = "none"
     demo_faulty_edges: tuple[str, ...] = ()
@@ -46,6 +50,14 @@ def load_runtime_demo_config() -> RuntimeDemoConfig:
         minio_secure=os.getenv("MINIO_SECURE", "false").strip().lower()
         in {"1", "true", "yes", "on"},
         demo_steps=int(os.getenv("DEMO_STEPS", "3")),
+        demo_cycle_interval_seconds=float(os.getenv("DEMO_CYCLE_INTERVAL_SECONDS", "60")),
+        demo_max_cycles=int(os.getenv("DEMO_MAX_CYCLES", "0")),
+        demo_train_after_eligible_cycles=int(
+            os.getenv("DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES", "10")
+        ),
+        demo_fingerprint_sequence_length=int(
+            os.getenv("DEMO_FINGERPRINT_SEQUENCE_LENGTH", "2")
+        ),
         demo_power=float(os.getenv("DEMO_POWER", "65.0")),
         demo_fault_mode=os.getenv("DEMO_FAULT_MODE", "none"),
         demo_faulty_edges=faulty_edges,

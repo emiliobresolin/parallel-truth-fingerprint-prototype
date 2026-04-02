@@ -38,13 +38,19 @@ Epic 4 has now started in the current code through:
   - anomaly score
   - normal/anomalous classification
   - an explicit runtime-valid-only limitation note when the adequacy floor is not met
+- continuous autonomous runtime orchestration for the local demo:
+  - recurring cycle cadence
+  - continuous valid-artifact accumulation in MinIO
+  - deferred one-time fingerprint training after an explicit eligible-history threshold
+  - saved-model reuse for later-cycle inference without retraining every cycle
 
 The current Epic 4 state is intentionally asymmetric:
 
 - Story 4.2A is implemented and runtime-validated for persisted dataset artifacts
 - Story 4.2 has now been revalidated against the persisted dataset artifact path introduced by Story 4.2A
+- Story 4.3A is implemented and runtime-validated for the continuous autonomous lifecycle
 - the default adequacy floor is still not met by the small smoke dataset used for runtime proof
-- Story 4.2 and Story 4.3 therefore remain runtime-valid only, not meaningful-fingerprint-valid
+- Story 4.2, Story 4.3, and Story 4.3A therefore remain runtime-valid only, not meaningful-fingerprint-valid
 
 The planning artifacts now treat the split PEP files in `docs/input/` as the research source of truth. They also distinguish explicitly between:
 
@@ -59,7 +65,7 @@ The prototype remains fully local.
 - Edge nodes and core orchestration run as local Python processes.
 - MQTT and MinIO infrastructure run as local containerized services.
 - The live consensus demo runs against a local 3-validator CometBFT network with a Go ABCI application.
-- The LSTM service may also run as a local containerized service later if that improves reproducibility.
+- The LSTM lifecycle remains inside the same local Python runtime and reuses the existing MinIO boundary.
 
 This mixed process/container model is a local setup decision only. It is not a production deployment model.
 
@@ -126,6 +132,10 @@ The defaults are already present in [.env.example](./.env.example):
 - `MINIO_BUCKET=valid-consensus-artifacts`
 - `MINIO_SECURE=false`
 - `DEMO_STEPS=3`
+- `DEMO_CYCLE_INTERVAL_SECONDS=60`
+- `DEMO_MAX_CYCLES=0`
+- `DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES=10`
+- `DEMO_FINGERPRINT_SEQUENCE_LENGTH=2`
 - `DEMO_POWER=65.0`
 - `DEMO_FAULT_MODE=none`
 - `DEMO_FAULTY_EDGES=`
@@ -141,6 +151,8 @@ This will:
 
 - create the three logical edge services
 - connect them through the selected MQTT transport
+- keep running until you manually stop it
+- execute the full pipeline on a recurring cadence
 - publish local edge observations
 - consume peer observations
 - reconstruct one edge-local replicated shared view per edge
@@ -149,7 +161,12 @@ This will:
 - build summary/log/alert output from that committed state only
 - project the logical SCADA-side state and run the SCADA comparison path
 - persist only valid structured artifacts to local MinIO
-- print runtime state, replicated state, commit metadata, comparison visibility, persistence visibility, and observation-flow events
+- accumulate valid-history artifacts over time for later dataset-building and training
+- defer fingerprint training until the configured eligible-history threshold is reached
+- reuse the saved fingerprint model for later-cycle inference without retraining every cycle
+- keep writing continuous runtime logs that expose cycle, cadence, artifact, and model status
+
+Stop the runtime with `Ctrl+C` when you want to end the demo.
 
 ### 6. Stop the consensus stack
 
