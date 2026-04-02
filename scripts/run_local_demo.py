@@ -297,10 +297,47 @@ def build_minio_runtime_metadata(artifact_store) -> dict[str, object]:
     }
 
 
+def build_dataset_context(
+    *,
+    fault_mode: str,
+    comparison_output,
+) -> dict[str, object]:
+    """Return explicit dataset eligibility metadata for persisted artifacts."""
+
+    if comparison_output.divergent_sensors:
+        return {
+            "scenario_label": "scada_divergence",
+            "training_label": "non_normal",
+            "training_eligible": False,
+            "training_eligibility_reason": "scada_divergence",
+        }
+    if fault_mode == "none":
+        return {
+            "scenario_label": "normal",
+            "training_label": "normal",
+            "training_eligible": True,
+            "training_eligibility_reason": "normal_validated_run",
+        }
+    if fault_mode == "single_edge_exclusion":
+        return {
+            "scenario_label": "faulty_edge_exclusion",
+            "training_label": "non_normal",
+            "training_eligible": False,
+            "training_eligibility_reason": "faulty_edge_exclusion",
+        }
+    return {
+        "scenario_label": fault_mode,
+        "training_label": "non_normal",
+        "training_eligible": False,
+        "training_eligibility_reason": f"scenario:{fault_mode}",
+    }
+
+
 def run_scada_comparison_and_persistence(
     *,
     consensus_audit,
     artifact_store,
+    fault_mode: str = "none",
 ) -> tuple[object | None, dict[str, object], object | None, object | None, dict[str, object]]:
     """Run the Story 3 comparison/persistence path for demo observability."""
 
@@ -336,11 +373,16 @@ def run_scada_comparison_and_persistence(
     }
 
     try:
+        dataset_context = build_dataset_context(
+            fault_mode=fault_mode,
+            comparison_output=comparison_output,
+        )
         persistence_record = persist_valid_consensus_artifact(
             audit_package=consensus_audit,
             scada_state=scada_state,
             scada_comparison_output=comparison_output,
             scada_alert=scada_alert,
+            dataset_context=dataset_context,
             artifact_store=artifact_store,
         )
         persistence_stage = {
@@ -456,6 +498,7 @@ def main() -> None:
         run_scada_comparison_and_persistence(
             consensus_audit=consensus_audit,
             artifact_store=artifact_store,
+            fault_mode=config.demo_fault_mode,
         )
     )
     fault_edges = resolve_faulty_edges(config, consensus_round_input.participating_edges)

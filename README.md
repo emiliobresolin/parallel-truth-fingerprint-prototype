@@ -22,7 +22,13 @@ The consensus pillar now uses a real CometBFT-backed path for the live demo. Epi
 - distinct SCADA divergence output and alerting
 - valid-artifact persistence to local MinIO object storage only
 
-The LSTM stage remains intentionally out of scope in the current code.
+Epic 4 has now started in the current code through:
+
+- MinIO-backed loading of validated persisted artifacts
+- normal-only temporal window generation for future fingerprint training
+- dataset-manifest generation for auditability and traceability
+
+Actual LSTM model training and inference remain intentionally pending.
 
 The planning artifacts now treat the split PEP files in `docs/input/` as the research source of truth. They also distinguish explicitly between:
 
@@ -45,7 +51,7 @@ This mixed process/container model is a local setup decision only. It is not a p
 
 These layers are approved in planning but are not yet implemented in the current code:
 
-- local LSTM training and inference
+- local LSTM training and inference on top of the new dataset-building layer
 - final lightweight SCADA-inspired demo UI, implemented only after the backend/runtime/services are stable
 
 ## Runtime/Demo Setup

@@ -48,6 +48,40 @@ class MinioArtifactStore:
         )
         return object_name
 
+    def list_json_objects(self, prefix: str = "") -> tuple[str, ...]:
+        """List JSON object keys under the configured bucket and prefix."""
+
+        client = self._ensure_client()
+        if not client.bucket_exists(self.config.bucket):
+            return ()
+
+        object_names = [
+            item.object_name
+            for item in client.list_objects(
+                self.config.bucket,
+                prefix=prefix,
+                recursive=True,
+            )
+            if item.object_name.endswith(".json")
+        ]
+        return tuple(sorted(object_names))
+
+    def load_json(self, object_name: str) -> dict[str, object]:
+        """Load one JSON payload from the configured bucket."""
+
+        client = self._ensure_client()
+        response = client.get_object(self.config.bucket, object_name)
+        try:
+            payload = response.read().decode("utf-8")
+        finally:
+            close = getattr(response, "close", None)
+            if callable(close):
+                close()
+            release_conn = getattr(response, "release_conn", None)
+            if callable(release_conn):
+                release_conn()
+        return json.loads(payload)
+
     def _ensure_client(self):
         if self._client is not None:
             return self._client

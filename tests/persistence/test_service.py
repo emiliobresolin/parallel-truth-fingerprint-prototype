@@ -63,6 +63,45 @@ class FakeMinioClient:
     ) -> None:
         self.objects[(bucket_name, object_name)] = data.read(length)
 
+    def list_objects(
+        self,
+        bucket_name: str,
+        *,
+        prefix: str = "",
+        recursive: bool = False,
+    ):
+        for (current_bucket, object_name), payload in sorted(self.objects.items()):
+            if current_bucket != bucket_name:
+                continue
+            if not object_name.startswith(prefix):
+                continue
+            yield type(
+                "MinioObject",
+                (),
+                {
+                    "object_name": object_name,
+                    "size": len(payload),
+                },
+            )()
+
+    def get_object(self, bucket_name: str, object_name: str):
+        payload = self.objects[(bucket_name, object_name)]
+
+        class FakeResponse:
+            def __init__(self, data: bytes) -> None:
+                self._data = data
+
+            def read(self) -> bytes:
+                return self._data
+
+            def close(self) -> None:
+                return None
+
+            def release_conn(self) -> None:
+                return None
+
+        return FakeResponse(payload)
+
 
 def build_round_identity(round_id: str = "round-400") -> RoundIdentity:
     ended_at = datetime(2026, 4, 1, 15, 0, 0, tzinfo=timezone.utc)
@@ -296,6 +335,12 @@ class ValidArtifactPersistenceTests(unittest.TestCase):
             audit_package=audit_package,
             scada_state=scada_state,
             scada_comparison_output=comparison_output,
+            dataset_context={
+                "scenario_label": "normal",
+                "training_label": "normal",
+                "training_eligible": True,
+                "training_eligibility_reason": "normal_validated_run",
+            },
             artifact_store=store,
             persisted_at=datetime(2026, 4, 1, 15, 1, 0, tzinfo=timezone.utc),
         )
@@ -310,6 +355,7 @@ class ValidArtifactPersistenceTests(unittest.TestCase):
         self.assertIn('"round_identity"', saved)
         self.assertIn('"consensus_context"', saved)
         self.assertIn('"validated_state"', saved)
+        self.assertIn('"dataset_context"', saved)
         self.assertIn('"scada_context"', saved)
         self.assertIn('"diagnostics"', saved)
         persisted = record.to_dict()
@@ -317,6 +363,11 @@ class ValidArtifactPersistenceTests(unittest.TestCase):
             persisted["artifact_identity"]["artifact_type"],
             "valid_consensus_artifact",
         )
+        self.assertEqual(
+            persisted["dataset_context"]["scenario_label"],
+            "normal",
+        )
+        self.assertTrue(persisted["dataset_context"]["training_eligible"])
         self.assertEqual(persisted["artifact_identity"]["artifact_version"], "2.0")
         self.assertEqual(
             persisted["consensus_context"]["final_consensus_status"],

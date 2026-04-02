@@ -48,6 +48,10 @@ from parallel_truth_fingerprint.contracts.trust_evidence import (
     SensorDeviationEvidence,
 )
 from parallel_truth_fingerprint.contracts.trust_ranking import TrustRankEntry, TrustRanking
+from parallel_truth_fingerprint.contracts.training_dataset import (
+    TrainingDatasetManifest,
+    TrainingWindow,
+)
 
 __all__ = [
     "ConsensusAuditPackage",
@@ -80,4 +84,6 @@ __all__ = [
     "SensorDeviationEvidence",
     "TrustRankEntry",
     "TrustRanking",
+    "TrainingDatasetManifest",
+    "TrainingWindow",
 ]

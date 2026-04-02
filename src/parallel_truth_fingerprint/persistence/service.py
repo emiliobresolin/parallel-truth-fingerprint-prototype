@@ -34,6 +34,7 @@ def persist_valid_consensus_artifact(
     scada_state: ScadaState,
     scada_comparison_output: ScadaComparisonOutput,
     scada_alert: ScadaAlert | None = None,
+    dataset_context: dict[str, object] | None = None,
     artifact_store,
     persisted_at: datetime | None = None,
 ) -> ValidConsensusArtifactRecord:
@@ -55,6 +56,7 @@ def persist_valid_consensus_artifact(
     artifact_key = f"valid-consensus-artifacts/{valid_state.round_identity.round_id}.json"
     round_identity = _serialize_round_identity(valid_state.round_identity)
     payload_snapshot = _build_validated_payload_snapshot(audit_package)
+    dataset_context = dataset_context or _default_dataset_context()
 
     record = ValidConsensusArtifactRecord(
         artifact_key=artifact_key,
@@ -120,6 +122,7 @@ def persist_valid_consensus_artifact(
             "sensor_values": dict(valid_state.sensor_values),
             "structured_payload_snapshot": payload_snapshot,
         },
+        dataset_context=dict(dataset_context),
         scada_context={
             "scada_state": scada_state.to_dict(),
             "comparison_output": scada_comparison_output.to_dict(),
@@ -135,6 +138,15 @@ def persist_valid_consensus_artifact(
     )
     artifact_store.save_json(artifact_key, record.to_dict())
     return record
+
+
+def _default_dataset_context() -> dict[str, object]:
+    return {
+        "scenario_label": "unspecified",
+        "training_label": "non_normal",
+        "training_eligible": False,
+        "training_eligibility_reason": "missing_dataset_context",
+    }
 
 
 def _serialize_round_identity(round_identity) -> dict[str, object]:

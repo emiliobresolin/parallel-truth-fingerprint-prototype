@@ -399,6 +399,7 @@ class DemoFormattingTest(unittest.TestCase):
 
     def test_format_comparison_and_persistence_stage_outputs(self) -> None:
         from scripts.run_local_demo import (
+            build_dataset_context,
             format_comparison_stage_compact,
             format_persistence_stage_compact,
         )
@@ -486,6 +487,14 @@ class DemoFormattingTest(unittest.TestCase):
                 "reason=MinIO unavailable"
             ),
         )
+        comparison_output = type("ComparisonOutput", (), {"divergent_sensors": ()})()
+        dataset_context = build_dataset_context(
+            fault_mode="none",
+            comparison_output=comparison_output,
+        )
+        self.assertEqual(dataset_context["scenario_label"], "normal")
+        self.assertEqual(dataset_context["training_label"], "normal")
+        self.assertTrue(dataset_context["training_eligible"])
 
     def test_build_minio_runtime_metadata_splits_endpoint_and_secure_mode(self) -> None:
         from parallel_truth_fingerprint.persistence import MinioArtifactStore, MinioStoreConfig
@@ -657,10 +666,18 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIn("artifact_identity", persistence_stage["record"])
         self.assertIn("consensus_context", persistence_stage["record"])
         self.assertIn("validated_state", persistence_stage["record"])
+        self.assertIn("dataset_context", persistence_stage["record"])
         self.assertIn("scada_context", persistence_stage["record"])
         self.assertIn(
             "structured_payload_snapshot",
             persistence_stage["record"]["validated_state"],
+        )
+        self.assertEqual(
+            persistence_stage["record"]["dataset_context"]["scenario_label"],
+            "normal",
+        )
+        self.assertTrue(
+            persistence_stage["record"]["dataset_context"]["training_eligible"]
         )
         self.assertIn(
             ("valid-consensus-artifacts", persistence_stage["artifact_key"]),

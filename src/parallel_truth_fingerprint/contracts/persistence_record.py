@@ -15,6 +15,7 @@ class ValidConsensusArtifactRecord:
     round_identity: dict[str, object]
     consensus_context: dict[str, object]
     validated_state: dict[str, object]
+    dataset_context: dict[str, object]
     scada_context: dict[str, object]
     diagnostics: dict[str, object]
 
@@ -28,6 +29,7 @@ class ValidConsensusArtifactRecord:
             "round_identity": self.round_identity,
             "consensus_context": self.consensus_context,
             "validated_state": self.validated_state,
+            "dataset_context": self.dataset_context,
             "scada_context": self.scada_context,
             "diagnostics": self.diagnostics,
         }
