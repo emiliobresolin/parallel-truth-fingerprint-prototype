@@ -18,6 +18,7 @@ class RuntimeDemoConfig:
     demo_fault_mode: str = "none"
     demo_faulty_edges: tuple[str, ...] = ()
     demo_log_path: str = "logs/run_local_demo.log"
+    demo_artifact_root: str = "artifacts"
 
 
 def load_runtime_demo_config() -> RuntimeDemoConfig:
@@ -39,4 +40,5 @@ def load_runtime_demo_config() -> RuntimeDemoConfig:
         demo_fault_mode=os.getenv("DEMO_FAULT_MODE", "none"),
         demo_faulty_edges=faulty_edges,
         demo_log_path=os.getenv("DEMO_LOG_PATH", "logs/run_local_demo.log"),
+        demo_artifact_root=os.getenv("DEMO_ARTIFACT_ROOT", "artifacts"),
     )

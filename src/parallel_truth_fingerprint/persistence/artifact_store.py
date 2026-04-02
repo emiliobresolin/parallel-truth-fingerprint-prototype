@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import importlib.util
 import io
 import json
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -65,3 +66,23 @@ class MinioArtifactStore:
             secure=self.config.secure,
         )
         return self._client
+
+
+class FileArtifactStore:
+    """Small local file-backed artifact writer for demo-friendly persistence."""
+
+    def __init__(self, root_path: Path) -> None:
+        self.root_path = Path(root_path)
+
+    def save_json(self, object_name: str, payload: dict[str, object]) -> str:
+        """Persist one JSON payload under the configured local root."""
+
+        target_path = self.resolve_path(object_name)
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        target_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        return object_name
+
+    def resolve_path(self, object_name: str) -> Path:
+        """Resolve one logical object key to a local file path."""
+
+        return self.root_path / Path(object_name)

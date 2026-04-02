@@ -14,6 +14,7 @@ class RuntimeDemoConfigTest(unittest.TestCase):
         previous_faulty_edges = os.environ.get("DEMO_FAULTY_EDGES")
         previous_rpc = os.environ.get("COMETBFT_RPC_URL")
         previous_log_path = os.environ.get("DEMO_LOG_PATH")
+        previous_artifact_root = os.environ.get("DEMO_ARTIFACT_ROOT")
         try:
             os.environ["MQTT_TRANSPORT"] = "passive"
             os.environ["DEMO_STEPS"] = "5"
@@ -21,6 +22,7 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             os.environ["DEMO_FAULTY_EDGES"] = "edge-3"
             os.environ["COMETBFT_RPC_URL"] = "http://127.0.0.1:26657"
             os.environ["DEMO_LOG_PATH"] = "logs/custom-demo.log"
+            os.environ["DEMO_ARTIFACT_ROOT"] = "artifacts/custom"
 
             config = load_runtime_demo_config()
 
@@ -30,6 +32,7 @@ class RuntimeDemoConfigTest(unittest.TestCase):
             self.assertEqual(config.demo_faulty_edges, ("edge-3",))
             self.assertEqual(config.cometbft_rpc_url, "http://127.0.0.1:26657")
             self.assertEqual(config.demo_log_path, "logs/custom-demo.log")
+            self.assertEqual(config.demo_artifact_root, "artifacts/custom")
         finally:
             if previous_transport is None:
                 os.environ.pop("MQTT_TRANSPORT", None)
@@ -55,6 +58,10 @@ class RuntimeDemoConfigTest(unittest.TestCase):
                 os.environ.pop("DEMO_LOG_PATH", None)
             else:
                 os.environ["DEMO_LOG_PATH"] = previous_log_path
+            if previous_artifact_root is None:
+                os.environ.pop("DEMO_ARTIFACT_ROOT", None)
+            else:
+                os.environ["DEMO_ARTIFACT_ROOT"] = previous_artifact_root
 
 
 class AppTransportTest(unittest.TestCase):
@@ -116,13 +123,23 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIn("temperature=78.254", summary)
 
     def test_default_demo_log_path_resolves_relative_and_absolute_paths(self) -> None:
-        from scripts.run_local_demo import PROJECT_ROOT, default_demo_log_path
+        from scripts.run_local_demo import (
+            PROJECT_ROOT,
+            default_demo_artifact_root,
+            default_demo_log_path,
+        )
 
         relative = default_demo_log_path("logs/dev.log")
         absolute = default_demo_log_path(str(PROJECT_ROOT / "logs" / "abs.log"))
+        artifact_relative = default_demo_artifact_root("artifacts/dev")
+        artifact_absolute = default_demo_artifact_root(
+            str(PROJECT_ROOT / "artifacts" / "abs")
+        )
 
         self.assertEqual(relative, PROJECT_ROOT / "logs" / "dev.log")
         self.assertEqual(absolute, PROJECT_ROOT / "logs" / "abs.log")
+        self.assertEqual(artifact_relative, PROJECT_ROOT / "artifacts" / "dev")
+        self.assertEqual(artifact_absolute, PROJECT_ROOT / "artifacts" / "abs")
 
     def test_write_detailed_log_persists_json_payload(self) -> None:
         import json
@@ -339,6 +356,153 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIn("alert=consensus_failed", format_consensus_alert_compact(alert))
         self.assertIn("alert_type=consensus_failed", format_consensus_alert_detailed(alert))
 
+    def test_format_comparison_and_persistence_stage_outputs(self) -> None:
+        from scripts.run_local_demo import (
+            format_comparison_stage_compact,
+            format_persistence_stage_compact,
+        )
+
+        comparison_completed = {
+            "status": "completed",
+            "compact": "round-1: scada_source=round-1 outputs[temperature=match]",
+        }
+        comparison_blocked = {
+            "status": "blocked",
+            "reason": "no_consensused_valid_state",
+            "compact": None,
+        }
+        persistence_persisted = {
+            "status": "persisted",
+            "artifact_key": "valid-consensus-artifacts/round-1.json",
+            "artifact_path": "C:\\temp\\round-1.json",
+        }
+        persistence_blocked = {
+            "status": "blocked",
+            "reason": "no_consensused_valid_state",
+        }
+
+        self.assertIn(
+            "scada_source=round-1",
+            format_comparison_stage_compact(comparison_completed),
+        )
+        self.assertEqual(
+            format_comparison_stage_compact(comparison_blocked),
+            "comparison=blocked reason=no_consensused_valid_state",
+        )
+        self.assertIn(
+            "artifact_key=valid-consensus-artifacts/round-1.json",
+            format_persistence_stage_compact(persistence_persisted),
+        )
+        self.assertEqual(
+            format_persistence_stage_compact(persistence_blocked),
+            "persistence=blocked reason=no_consensused_valid_state",
+        )
+
+    def test_run_scada_comparison_and_persistence_blocks_without_valid_state(self) -> None:
+        from pathlib import Path
+        import shutil
+
+        from parallel_truth_fingerprint.contracts.consensus_audit_package import (
+            ConsensusAuditPackage,
+        )
+        from parallel_truth_fingerprint.contracts.consensus_result import ConsensusResult
+        from parallel_truth_fingerprint.contracts.consensus_round_input import (
+            ConsensusRoundInput,
+        )
+        from parallel_truth_fingerprint.contracts.consensus_status import ConsensusStatus
+        from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
+        from parallel_truth_fingerprint.contracts.trust_ranking import (
+            TrustRankEntry,
+            TrustRanking,
+        )
+        from scripts.run_local_demo import PROJECT_ROOT, run_scada_comparison_and_persistence
+        from datetime import datetime, timedelta, timezone
+
+        round_identity = RoundIdentity(
+            round_id="round-blocked",
+            window_started_at=datetime(2026, 4, 1, 16, 0, tzinfo=timezone.utc),
+            window_ended_at=datetime(2026, 4, 1, 16, 1, tzinfo=timezone.utc),
+        )
+        audit_package = ConsensusAuditPackage(
+            round_input=ConsensusRoundInput(
+                round_identity=round_identity,
+                participating_edges=("edge-1", "edge-2", "edge-3"),
+                replicated_states=(),
+            ),
+            trust_ranking=TrustRanking(
+                round_identity=round_identity,
+                participating_edges=("edge-1", "edge-2", "edge-3"),
+                entries=(
+                    TrustRankEntry(edge_id="edge-1", score=0.9),
+                    TrustRankEntry(edge_id="edge-2", score=0.2),
+                    TrustRankEntry(edge_id="edge-3", score=0.1),
+                ),
+            ),
+            exclusions=(),
+            trust_evidence=(),
+            final_status=ConsensusStatus.FAILED_CONSENSUS,
+            consensus_result=ConsensusResult(
+                round_identity=round_identity,
+                status=ConsensusStatus.FAILED_CONSENSUS,
+                participating_edges=("edge-1", "edge-2", "edge-3"),
+                trust_ranking=TrustRanking(
+                    round_identity=round_identity,
+                    participating_edges=("edge-1", "edge-2", "edge-3"),
+                    entries=(
+                        TrustRankEntry(edge_id="edge-1", score=0.9),
+                        TrustRankEntry(edge_id="edge-2", score=0.2),
+                        TrustRankEntry(edge_id="edge-3", score=0.1),
+                    ),
+                ),
+                exclusions=(),
+                consensused_valid_state=None,
+            ),
+            consensused_valid_state=None,
+        )
+        artifact_root = PROJECT_ROOT / "tests" / "_tmp_artifacts_blocked"
+        try:
+            scada_state, comparison_stage, comparison_output, scada_alert, persistence_stage = (
+                run_scada_comparison_and_persistence(
+                    consensus_audit=audit_package,
+                    artifact_root=artifact_root,
+                )
+            )
+            self.assertIsNone(scada_state)
+            self.assertIsNone(comparison_output)
+            self.assertIsNone(scada_alert)
+            self.assertEqual(comparison_stage["status"], "blocked")
+            self.assertEqual(persistence_stage["status"], "blocked")
+        finally:
+            if artifact_root.exists():
+                shutil.rmtree(artifact_root)
+
+    def test_run_scada_comparison_and_persistence_persists_local_artifact(self) -> None:
+        import shutil
+        from pathlib import Path
+
+        from tests.persistence.test_service import build_valid_audit_package
+        from scripts.run_local_demo import PROJECT_ROOT, run_scada_comparison_and_persistence
+
+        artifact_root = PROJECT_ROOT / "tests" / "_tmp_artifacts_success"
+        try:
+            audit_package = build_valid_audit_package()
+            scada_state, comparison_stage, comparison_output, scada_alert, persistence_stage = (
+                run_scada_comparison_and_persistence(
+                    consensus_audit=audit_package,
+                    artifact_root=artifact_root,
+                )
+            )
+
+            self.assertIsNotNone(scada_state)
+            self.assertIsNotNone(comparison_output)
+            self.assertEqual(comparison_stage["status"], "completed")
+            self.assertEqual(persistence_stage["status"], "persisted")
+            persisted_path = Path(persistence_stage["artifact_path"])
+            self.assertTrue(persisted_path.exists())
+        finally:
+            if artifact_root.exists():
+                shutil.rmtree(artifact_root)
+
 
 class DemoFaultInjectionTest(unittest.TestCase):
     def test_inject_faults_can_preserve_quorum_with_single_faulty_edge(self) -> None:
@@ -490,12 +654,21 @@ class DemoConsensusPathTest(unittest.TestCase):
             demo_steps=1,
             demo_power=65.0,
             demo_fault_mode="none",
+            demo_artifact_root="tests/_tmp_demo_artifacts",
         )
 
         with mock.patch.object(run_local_demo, "CometBftRpcClient", FakeClient):
             with mock.patch.object(run_local_demo, "load_runtime_demo_config", return_value=config):
                 with mock.patch("sys.stdout"):
-                    run_local_demo.main()
+                    try:
+                        run_local_demo.main()
+                    finally:
+                        from pathlib import Path
+                        import shutil
+
+                        artifact_root = run_local_demo.PROJECT_ROOT / "tests" / "_tmp_demo_artifacts"
+                        if artifact_root.exists():
+                            shutil.rmtree(artifact_root)
 
 
 if __name__ == "__main__":

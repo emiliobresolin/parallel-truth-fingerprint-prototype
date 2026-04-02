@@ -14,6 +14,14 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from parallel_truth_fingerprint.config.runtime import load_runtime_demo_config
+from parallel_truth_fingerprint.comparison import (
+    build_scada_comparison_output,
+    build_scada_divergence_alert,
+    compare_consensused_to_scada,
+    format_scada_alert_compact,
+    format_scada_alert_detailed,
+    format_scada_comparison_output_compact,
+)
 from parallel_truth_fingerprint.consensus import (
     build_consensus_alert,
     build_round_log,
@@ -31,6 +39,12 @@ from parallel_truth_fingerprint.edge_nodes.common.mqtt_io import create_transpor
 from parallel_truth_fingerprint.edge_nodes.edge_1.service import TemperatureEdgeService
 from parallel_truth_fingerprint.edge_nodes.edge_2.service import PressureEdgeService
 from parallel_truth_fingerprint.edge_nodes.edge_3.service import RpmEdgeService
+from parallel_truth_fingerprint.persistence import (
+    FileArtifactStore,
+    PersistenceBlockedError,
+    persist_valid_consensus_artifact,
+)
+from parallel_truth_fingerprint.scada import FakeOpcUaScadaService
 from parallel_truth_fingerprint.sensor_simulation.simulator import CompressorSimulator
 
 
@@ -38,6 +52,15 @@ def default_demo_log_path(log_path: str) -> Path:
     """Resolve the configured demo log path relative to the project root."""
 
     candidate = Path(log_path)
+    if candidate.is_absolute():
+        return candidate
+    return PROJECT_ROOT / candidate
+
+
+def default_demo_artifact_root(root_path: str) -> Path:
+    """Resolve the configured artifact root relative to the project root."""
+
+    candidate = Path(root_path)
     if candidate.is_absolute():
         return candidate
     return PROJECT_ROOT / candidate
@@ -152,6 +175,11 @@ def build_detailed_log_payload(
     consensus_summary,
     consensus_log,
     consensus_alert,
+    scada_state,
+    comparison_stage,
+    comparison_output,
+    scada_alert,
+    persistence_stage,
     edges,
     fault_edges: tuple[str, ...],
 ) -> dict:
@@ -185,6 +213,20 @@ def build_detailed_log_payload(
             "detailed": format_consensus_alert_detailed(consensus_alert),
             "structured": None if consensus_alert is None else consensus_alert.to_dict(),
         },
+        "scada_state": None if scada_state is None else scada_state.to_dict(),
+        "comparison_stage": comparison_stage,
+        "comparison_output": {
+            "compact": None
+            if comparison_output is None
+            else format_scada_comparison_output_compact(comparison_output),
+            "structured": None if comparison_output is None else comparison_output.to_dict(),
+        },
+        "scada_divergence_alert": {
+            "compact": format_scada_alert_compact(scada_alert),
+            "detailed": format_scada_alert_detailed(scada_alert),
+            "structured": None if scada_alert is None else scada_alert.to_dict(),
+        },
+        "persistence_stage": persistence_stage,
         "edges": [
             {
                 "edge_id": edge.runtime_state()["edge_id"],
@@ -204,6 +246,86 @@ def write_detailed_log(log_path: Path, payload: dict) -> Path:
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return log_path
+
+
+def format_comparison_stage_compact(stage: dict[str, object]) -> str:
+    """Render one compact comparison-stage line for demo output."""
+
+    if stage["status"] == "blocked":
+        return f"comparison=blocked reason={stage['reason']}"
+    return stage["compact"]
+
+
+def format_persistence_stage_compact(stage: dict[str, object]) -> str:
+    """Render one compact persistence-stage line for demo output."""
+
+    if stage["status"] == "blocked":
+        return f"persistence=blocked reason={stage['reason']}"
+    return (
+        f"persistence={stage['status']} "
+        f"artifact_key={stage['artifact_key']} "
+        f"artifact_path={stage['artifact_path']}"
+    )
+
+
+def run_scada_comparison_and_persistence(
+    *,
+    consensus_audit,
+    artifact_root: Path,
+) -> tuple[object | None, dict[str, object], object | None, object | None, dict[str, object]]:
+    """Run the Story 3 comparison/persistence path for demo observability."""
+
+    valid_state = consensus_audit.consensused_valid_state
+    if valid_state is None:
+        blocked_reason = "no_consensused_valid_state"
+        return (
+            None,
+            {"status": "blocked", "reason": blocked_reason, "compact": None},
+            None,
+            None,
+            {"status": "blocked", "reason": blocked_reason},
+        )
+
+    scada_service = FakeOpcUaScadaService(compressor_id="compressor-1")
+    scada_state = scada_service.project_state(valid_state)
+    comparison_result = compare_consensused_to_scada(
+        valid_state=valid_state,
+        scada_state=scada_state,
+    )
+    comparison_output = build_scada_comparison_output(comparison_result)
+    scada_alert = build_scada_divergence_alert(comparison_output)
+
+    comparison_stage = {
+        "status": "completed",
+        "compact": format_scada_comparison_output_compact(comparison_output),
+    }
+
+    artifact_store = FileArtifactStore(artifact_root)
+    try:
+        persistence_record = persist_valid_consensus_artifact(
+            audit_package=consensus_audit,
+            scada_comparison_output=comparison_output,
+            artifact_store=artifact_store,
+        )
+        persistence_stage = {
+            "status": "persisted",
+            "artifact_key": persistence_record.artifact_key,
+            "artifact_path": str(artifact_store.resolve_path(persistence_record.artifact_key)),
+            "record": persistence_record.to_dict(),
+        }
+    except PersistenceBlockedError as exc:
+        persistence_stage = {
+            "status": "blocked",
+            "reason": str(exc),
+        }
+
+    return (
+        scada_state,
+        comparison_stage,
+        comparison_output,
+        scada_alert,
+        persistence_stage,
+    )
 
 
 def main() -> None:
@@ -263,6 +385,12 @@ def main() -> None:
     consensus_summary = build_round_summary(consensus_audit)
     consensus_log = build_round_log(consensus_audit)
     consensus_alert = build_consensus_alert(consensus_audit, consensus_log)
+    scada_state, comparison_stage, comparison_output, scada_alert, persistence_stage = (
+        run_scada_comparison_and_persistence(
+            consensus_audit=consensus_audit,
+            artifact_root=default_demo_artifact_root(config.demo_artifact_root),
+        )
+    )
     fault_edges = resolve_faulty_edges(config, consensus_round_input.participating_edges)
     detailed_log_payload = build_detailed_log_payload(
         config=config,
@@ -272,6 +400,11 @@ def main() -> None:
         consensus_summary=consensus_summary,
         consensus_log=consensus_log,
         consensus_alert=consensus_alert,
+        scada_state=scada_state,
+        comparison_stage=comparison_stage,
+        comparison_output=comparison_output,
+        scada_alert=scada_alert,
+        persistence_stage=persistence_stage,
         edges=edges,
         fault_edges=fault_edges,
     )
@@ -299,6 +432,9 @@ def main() -> None:
     print(f"- {format_round_summary(consensus_summary)}")
     print(f"- {format_round_log_compact(consensus_log)}")
     print(f"- {format_consensus_alert_compact(consensus_alert)}")
+    print(f"- {format_comparison_stage_compact(comparison_stage)}")
+    print(f"- {format_scada_alert_compact(scada_alert)}")
+    print(f"- {format_persistence_stage_compact(persistence_stage)}")
     print(f"- detailed_log={detailed_log_path}")
 
 
