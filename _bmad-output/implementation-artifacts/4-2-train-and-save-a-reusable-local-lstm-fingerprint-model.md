@@ -13,8 +13,9 @@ so that the prototype can validate the real local training path now and later su
 ## Scope Notes
 
 - This story is limited to local LSTM model training and model-artifact persistence.
-- The current implementation reached runtime-valid training against the Story 4.1 in-memory dataset outputs.
-- Final closure after the Epic 4 correction requires revalidation against the persisted dataset artifact path introduced by Story 4.2A.
+- The original implementation reached runtime-valid training against the Story 4.1 in-memory dataset outputs.
+- This story has now been revalidated against the persisted dataset artifact path introduced by Story 4.2A.
+- Meaningful fingerprint-valid closure still depends on dataset adequacy, which remains below the approved floor in the current smoke corpus.
 - It must use the approved Epic 4 ML stack decision:
   - `keras`
   - `torch` backend
@@ -137,6 +138,74 @@ GPT-5 Codex
 - Implemented local Keras LSTM autoencoder training with torch-backend enforcement.
 - Added MinIO-backed model save plus metadata save.
 - Added focused Story 4.2 tests and preserved full regression stability.
+- Revalidated Story 4.2 against the persisted Story 4.2A dataset artifact path.
+- Added one trainer entrypoint that loads the persisted dataset manifest plus `.npz` windows artifact before training.
+- Updated the real runtime smoke test so the model is trained from the persisted dataset artifact path, not directly from in-memory windows.
+
+### What Was Tested
+
+- Focused Story 4.2 trainer tests
+- Persisted-dataset reload coverage through Story 4.2A dataset-artifact tests
+- Combined affected regression surface for trainer plus persistence boundary
+- Full regression suite
+- Real Keras plus torch plus MinIO smoke validation using the persisted dataset artifact path
+
+### Exact Commands Executed
+
+```powershell
+$env:PYTHONPATH='src'
+.\.venv\Scripts\python -m unittest tests.lstm_service.test_dataset_artifacts
+.\.venv\Scripts\python -m unittest tests.lstm_service.test_trainer
+.\.venv\Scripts\python -m unittest tests.lstm_service.test_dataset_builder
+.\.venv\Scripts\python -m unittest tests.persistence.test_service tests.lstm_service.test_dataset_artifacts tests.lstm_service.test_trainer
+.\.venv\Scripts\python -m unittest discover -s tests
+
+$env:RUN_REAL_ML_SMOKE='1'
+.\.venv\Scripts\python -m unittest tests.lstm_service.test_trainer_runtime_smoke
+
+@'
+from minio import Minio
+client = Minio('localhost:9000', access_key='minioadmin', secret_key='minioadmin', secure=False)
+buckets = sorted([bucket.name for bucket in client.list_buckets() if bucket.name.startswith('valid-consensus-artifacts-smoke-')])
+latest = buckets[-1]
+print('LATEST_BUCKET', latest)
+print('OBJECTS', sorted(obj.object_name for obj in client.list_objects(latest, recursive=True)))
+'@ | .\.venv\Scripts\python -
+```
+
+### Test Results
+
+- `tests.lstm_service.test_dataset_artifacts` -> `Ran 3 tests` -> `OK`
+- `tests.lstm_service.test_trainer` -> `Ran 5 tests` -> `OK`
+- `tests.lstm_service.test_dataset_builder` -> `Ran 4 tests` -> `OK`
+- `tests.persistence.test_service tests.lstm_service.test_dataset_artifacts tests.lstm_service.test_trainer` -> `Ran 11 tests` -> `OK`
+- `python -m unittest discover -s tests` -> `Ran 93 tests` -> `OK (skipped=2)`
+- `tests.lstm_service.test_trainer_runtime_smoke` -> `Ran 1 test` -> `OK`
+
+### Real Runtime Behavior Validated
+
+- The real Keras plus torch training path consumed the persisted Story 4.2A dataset artifact path.
+- The smoke bucket contained:
+  - 3 upstream valid round artifacts
+  - 2 persisted dataset artifacts under `fingerprint-datasets/`
+  - 2 model artifacts under `fingerprint-models/`
+- The saved model metadata pointed back to the persisted dataset id, not only to an in-memory dataset object.
+- The saved `.keras` model artifact loaded back successfully for prediction after training from the persisted dataset artifact path.
+- The real smoke run produced:
+  - `SOURCE_DATASET_ID = training-dataset::round-smoke-...::seq-2`
+  - `TRAINING_WINDOW_COUNT = 2`
+  - a valid MinIO `artifact_uri` for the model object
+
+### Remaining Limitations
+
+- Story 4.2 is now revalidated against the persisted dataset artifact path, but it remains only `runtime-valid`.
+- The current smoke corpus is still intentionally small:
+  - 3 eligible normal persisted artifacts
+  - 2 generated windows
+- The Story 4.2A adequacy floor is still not met:
+  - required 30 eligible normal persisted artifacts
+  - required 20 generated windows
+- Story 4.3 remains blocked until the sequencing rule is satisfied and the fingerprint path is moved beyond runtime-only validation.
 
 ### File List
 
@@ -146,6 +215,9 @@ GPT-5 Codex
 - `src/parallel_truth_fingerprint/contracts/fingerprint_model.py`
 - `src/parallel_truth_fingerprint/contracts/__init__.py`
 - `src/parallel_truth_fingerprint/lstm_service/__init__.py`
+- `src/parallel_truth_fingerprint/lstm_service/dataset_artifacts.py`
 - `src/parallel_truth_fingerprint/lstm_service/trainer.py`
 - `src/parallel_truth_fingerprint/persistence/artifact_store.py`
+- `tests/lstm_service/test_dataset_artifacts.py`
 - `tests/lstm_service/test_trainer.py`
+- `tests/lstm_service/test_trainer_runtime_smoke.py`

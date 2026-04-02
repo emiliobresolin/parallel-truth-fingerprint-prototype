@@ -13,6 +13,9 @@ import zipfile
 from parallel_truth_fingerprint.contracts.fingerprint_model import (
     FingerprintModelArtifact,
 )
+from parallel_truth_fingerprint.lstm_service.dataset_artifacts import (
+    load_persisted_training_dataset_artifacts,
+)
 
 
 DEFAULT_MODEL_PREFIX = "fingerprint-models/"
@@ -102,6 +105,34 @@ def train_and_save_lstm_fingerprint(
     )
     artifact_store.save_json(metadata_object_key, metadata.to_dict())
     return metadata
+
+
+def train_and_save_lstm_fingerprint_from_persisted_dataset(
+    *,
+    manifest_object_key: str,
+    artifact_store,
+    windows_object_key: str | None = None,
+    epochs: int = 12,
+    batch_size: int = 8,
+    latent_units: int = 16,
+    model_prefix: str = DEFAULT_MODEL_PREFIX,
+) -> FingerprintModelArtifact:
+    """Train Story 4.2 against the persisted Story 4.2A dataset artifact path."""
+
+    training_windows, dataset_manifest = load_persisted_training_dataset_artifacts(
+        manifest_object_key=manifest_object_key,
+        windows_object_key=windows_object_key,
+        artifact_store=artifact_store,
+    )
+    return train_and_save_lstm_fingerprint(
+        training_windows=training_windows,
+        dataset_manifest=dataset_manifest,
+        artifact_store=artifact_store,
+        epochs=epochs,
+        batch_size=batch_size,
+        latent_units=latent_units,
+        model_prefix=model_prefix,
+    )
 
 
 def build_lstm_autoencoder(

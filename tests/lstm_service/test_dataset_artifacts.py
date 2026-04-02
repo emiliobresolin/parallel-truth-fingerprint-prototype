@@ -9,6 +9,7 @@ import unittest
 from parallel_truth_fingerprint.lstm_service import (
     build_normal_training_windows,
     evaluate_training_dataset_adequacy,
+    load_persisted_training_dataset_artifacts,
     persist_training_dataset_artifacts,
 )
 from parallel_truth_fingerprint.persistence import MinioArtifactStore, MinioStoreConfig
@@ -102,6 +103,22 @@ class DatasetArtifactTests(unittest.TestCase):
             tuple(windows_archive["labels"]),
             ("normal", "normal"),
         )
+
+        loaded_windows, loaded_manifest = load_persisted_training_dataset_artifacts(
+            manifest_object_key=persisted_artifact.manifest_object_key,
+            artifact_store=store,
+        )
+        self.assertEqual(loaded_manifest.dataset_id, dataset_manifest.dataset_id)
+        self.assertEqual(len(loaded_windows), 2)
+        self.assertEqual(
+            loaded_windows[0].artifact_keys,
+            (
+                "valid-consensus-artifacts/round-501.json",
+                "valid-consensus-artifacts/round-502.json",
+                "valid-consensus-artifacts/round-503.json",
+            ),
+        )
+        self.assertEqual(len(loaded_windows[0].feature_matrix[0]), 27)
 
     def test_persisted_manifest_records_excluded_records_and_reasons(self) -> None:
         store = self.build_store()

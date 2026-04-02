@@ -12,7 +12,11 @@ from parallel_truth_fingerprint.contracts.training_dataset import (
     TrainingDatasetManifest,
     TrainingWindow,
 )
-from parallel_truth_fingerprint.lstm_service import train_and_save_lstm_fingerprint
+from parallel_truth_fingerprint.lstm_service import (
+    persist_training_dataset_artifacts,
+    train_and_save_lstm_fingerprint,
+    train_and_save_lstm_fingerprint_from_persisted_dataset,
+)
 from parallel_truth_fingerprint.persistence import MinioArtifactStore, MinioStoreConfig
 from tests.persistence.test_service import FakeMinioClient
 
@@ -220,6 +224,43 @@ class TrainerTests(unittest.TestCase):
         )
         self.assertEqual(saved_metadata["backend"], "torch")
         self.assertEqual(saved_metadata["model_format"], "keras")
+
+    def test_train_and_save_from_persisted_dataset_uses_story_4_2a_artifact_path(self) -> None:
+        store, fake_client = self.build_store()
+        persisted_dataset = persist_training_dataset_artifacts(
+            training_windows=build_training_windows(),
+            dataset_manifest=build_manifest(),
+            artifact_store=store,
+        )
+
+        with mock.patch(
+            "parallel_truth_fingerprint.lstm_service.trainer._load_keras_module",
+            return_value=_FakeKeras(),
+        ):
+            with mock.patch(
+                "parallel_truth_fingerprint.lstm_service.trainer._export_model_bytes",
+                return_value=b"fake-keras-model",
+            ):
+                metadata = train_and_save_lstm_fingerprint_from_persisted_dataset(
+                    manifest_object_key=persisted_dataset.manifest_object_key,
+                    artifact_store=store,
+                    epochs=2,
+                    batch_size=1,
+                    latent_units=4,
+                )
+
+        self.assertEqual(
+            metadata.source_dataset_id,
+            "training-dataset::round-1::round-3::seq-2",
+        )
+        self.assertEqual(metadata.training_window_count, 2)
+        saved_metadata = json.loads(
+            fake_client.objects[
+                ("valid-consensus-artifacts", metadata.metadata_object_key)
+            ].decode("utf-8")
+        )
+        self.assertEqual(saved_metadata["source_dataset_id"], metadata.source_dataset_id)
+        self.assertEqual(saved_metadata["training_window_count"], 2)
 
     def test_train_and_save_lstm_fingerprint_rejects_empty_windows(self) -> None:
         store, _ = self.build_store()

@@ -32,13 +32,15 @@ Epic 4 has now started in the current code through:
 - explicit dataset adequacy evaluation that distinguishes:
   - `runtime-valid only`
   - `meaningful fingerprint-valid`
-- local LSTM fingerprint training and MinIO-backed model save
+- local LSTM fingerprint training revalidated against the persisted dataset artifact path
+- MinIO-backed model save linked back to the persisted dataset id
 
 The current Epic 4 state is intentionally asymmetric:
 
 - Story 4.2A is implemented and runtime-validated for persisted dataset artifacts
-- the default adequacy floor is not met by the small smoke dataset used for runtime proof
-- Story 4.2 therefore remains runtime-valid only until it is revalidated against the persisted dataset artifact path introduced by Story 4.2A
+- Story 4.2 has now been revalidated against the persisted dataset artifact path introduced by Story 4.2A
+- the default adequacy floor is still not met by the small smoke dataset used for runtime proof
+- Story 4.2 therefore remains runtime-valid only, not meaningful-fingerprint-valid
 
 Fingerprint inference and anomaly scoring remain intentionally pending.
 

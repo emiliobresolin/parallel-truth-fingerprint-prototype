@@ -7,11 +7,13 @@ from parallel_truth_fingerprint.lstm_service.dataset_builder import (
 )
 from parallel_truth_fingerprint.lstm_service.dataset_artifacts import (
     evaluate_training_dataset_adequacy,
+    load_persisted_training_dataset_artifacts,
     persist_training_dataset_artifacts,
 )
 from parallel_truth_fingerprint.lstm_service.trainer import (
     build_lstm_autoencoder,
     train_and_save_lstm_fingerprint,
+    train_and_save_lstm_fingerprint_from_persisted_dataset,
 )
 
 __all__ = [
@@ -20,6 +22,8 @@ __all__ = [
     "evaluate_training_eligibility",
     "evaluate_training_dataset_adequacy",
     "extract_feature_vector",
+    "load_persisted_training_dataset_artifacts",
     "persist_training_dataset_artifacts",
     "train_and_save_lstm_fingerprint",
+    "train_and_save_lstm_fingerprint_from_persisted_dataset",
 ]

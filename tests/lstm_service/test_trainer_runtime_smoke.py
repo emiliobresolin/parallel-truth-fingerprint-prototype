@@ -17,7 +17,8 @@ from parallel_truth_fingerprint.comparison import (
 )
 from parallel_truth_fingerprint.lstm_service import (
     build_normal_training_windows,
-    train_and_save_lstm_fingerprint,
+    persist_training_dataset_artifacts,
+    train_and_save_lstm_fingerprint_from_persisted_dataset,
 )
 from parallel_truth_fingerprint.persistence import (
     MinioArtifactStore,
@@ -61,7 +62,7 @@ def _minio_available(host: str = "127.0.0.1", port: int = 9000) -> bool:
     "Local MinIO is not reachable on 127.0.0.1:9000.",
 )
 class RuntimeTrainerSmokeTests(unittest.TestCase):
-    def test_real_training_smoke_persists_model_and_metadata_to_minio(self) -> None:
+    def test_real_training_smoke_trains_from_persisted_dataset_artifact_path(self) -> None:
         run_suffix = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
         bucket_name = f"valid-consensus-artifacts-smoke-{run_suffix}"
         store = MinioArtifactStore(
@@ -113,9 +114,13 @@ class RuntimeTrainerSmokeTests(unittest.TestCase):
             sequence_length=2,
             prefix="valid-consensus-artifacts/",
         )
-        metadata = train_and_save_lstm_fingerprint(
+        persisted_dataset = persist_training_dataset_artifacts(
             training_windows=training_windows,
             dataset_manifest=dataset_manifest,
+            artifact_store=store,
+        )
+        metadata = train_and_save_lstm_fingerprint_from_persisted_dataset(
+            manifest_object_key=persisted_dataset.manifest_object_key,
             artifact_store=store,
             epochs=1,
             batch_size=1,
@@ -157,6 +162,10 @@ class RuntimeTrainerSmokeTests(unittest.TestCase):
         self.assertEqual(saved_metadata["batch_size"], 1)
         self.assertIn("artifact_uri", saved_metadata)
         self.assertIsInstance(saved_metadata["final_training_loss"], float)
+        self.assertEqual(
+            saved_metadata["source_dataset_id"],
+            dataset_manifest.dataset_id,
+        )
 
 
 if __name__ == "__main__":

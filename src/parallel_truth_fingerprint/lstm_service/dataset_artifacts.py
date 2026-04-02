@@ -10,6 +10,10 @@ from parallel_truth_fingerprint.contracts.dataset_artifact import (
     DatasetAdequacyAssessment,
     PersistedTrainingDatasetArtifact,
 )
+from parallel_truth_fingerprint.contracts.training_dataset import (
+    TrainingDatasetManifest,
+    TrainingWindow,
+)
 
 
 DATASET_PREFIX = "fingerprint-datasets/"
@@ -122,6 +126,68 @@ def persist_training_dataset_artifacts(
         content_type="application/octet-stream",
     )
     return persisted_artifact
+
+
+def load_persisted_training_dataset_artifacts(
+    *,
+    manifest_object_key: str,
+    artifact_store,
+    windows_object_key: str | None = None,
+) -> tuple[tuple[TrainingWindow, ...], TrainingDatasetManifest]:
+    """Load one persisted Story 4.2A dataset artifact back into training objects."""
+
+    numpy = _load_numpy()
+    manifest_payload = artifact_store.load_json(manifest_object_key)
+    resolved_windows_object_key = (
+        windows_object_key or manifest_payload["windows_object_key"]
+    )
+    windows_payload = artifact_store.load_bytes(resolved_windows_object_key)
+    windows_archive = numpy.load(io.BytesIO(windows_payload))
+
+    feature_schema = tuple(manifest_payload["feature_schema"])
+    feature_tensor = windows_archive["feature_tensor"]
+    if feature_tensor.ndim != 3:
+        raise ValueError("Persisted training dataset tensor must be rank-3.")
+    if feature_tensor.shape[2] != len(feature_schema):
+        raise ValueError(
+            "Persisted training dataset tensor does not match the declared feature schema."
+        )
+
+    window_ids = windows_archive["window_ids"].tolist()
+    artifact_key_rows = windows_archive["artifact_keys"].tolist()
+    round_id_rows = windows_archive["round_ids"].tolist()
+    timestamp_rows = windows_archive["timestamps"].tolist()
+    labels = windows_archive["labels"].tolist()
+
+    training_windows = tuple(
+        TrainingWindow(
+            window_id=str(window_ids[index]),
+            artifact_keys=tuple(str(value) for value in artifact_key_rows[index]),
+            round_ids=tuple(str(value) for value in round_id_rows[index]),
+            timestamps=tuple(str(value) for value in timestamp_rows[index]),
+            feature_schema=feature_schema,
+            feature_matrix=tuple(
+                tuple(float(value) for value in row)
+                for row in feature_tensor[index].tolist()
+            ),
+            label=str(labels[index]),
+        )
+        for index in range(len(window_ids))
+    )
+
+    dataset_manifest = TrainingDatasetManifest(
+        dataset_id=str(manifest_payload["dataset_id"]),
+        source_bucket=str(manifest_payload["source_bucket"]),
+        source_prefix=str(manifest_payload["source_prefix"]),
+        sequence_length=int(manifest_payload["sequence_length"]),
+        feature_schema=feature_schema,
+        selected_artifact_keys=tuple(manifest_payload["selected_artifact_keys"]),
+        skipped_artifacts=dict(manifest_payload["skipped_artifacts"]),
+        eligible_record_count=int(manifest_payload["eligible_artifact_count"]),
+        window_count=int(manifest_payload["window_count"]),
+        training_label=str(manifest_payload["training_label"]),
+    )
+    return training_windows, dataset_manifest
 
 
 def _serialize_training_windows_npz(
