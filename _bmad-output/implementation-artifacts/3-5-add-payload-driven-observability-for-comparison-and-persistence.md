@@ -34,7 +34,7 @@ so that the system remains explainable and auditable during demonstration.
    - comparison-stage logging
    - persistence-stage logging
    - blocked-stage visibility
-   - deterministic local artifact path visibility in the demo/log flow
+   - deterministic MinIO bucket, artifact key, and artifact URI visibility in the demo/log flow
 
 ## Tasks / Subtasks
 
@@ -47,7 +47,8 @@ so that the system remains explainable and auditable during demonstration.
 
 - Story 3.5 must stay additive and observability-focused.
 - It should reuse the existing Story 3.1 to Story 3.4 services rather than introducing a second runtime path.
-- It may use a demo-safe local file-backed store adapter to make persisted artifact visibility concrete without requiring Story 4 behavior.
+- It must keep MinIO as the real runtime persistence path.
+- Any file-backed helper must remain test-only or explicitly isolated as debug-only and must not become the effective prototype storage implementation.
 - It must not alter the comparison rule, persistence gate, or downstream LSTM scope.
 
 ## Dev Agent Record
@@ -67,7 +68,7 @@ GPT-5 Codex
 - Added explicit comparison-stage and persistence-stage sections to the runtime demo log payload.
 - Added compact terminal formatting for comparison and persistence stages.
 - Added explicit blocked-stage visibility when no consensused valid state exists.
-- Added a demo-safe local file-backed artifact store adapter to make persistence visibility concrete in the current local runtime path.
+- Restored MinIO as the real runtime persistence target in the demo path and exposed MinIO artifact visibility in the compact and detailed outputs.
 - Added focused runtime-demo tests and preserved full-suite stability.
 
 ### File List

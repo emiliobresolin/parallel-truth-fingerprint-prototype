@@ -79,7 +79,7 @@ def build_valid_audit_package(
     status: ConsensusStatus = ConsensusStatus.SUCCESS,
 ) -> ConsensusAuditPackage:
     round_identity = build_round_identity(round_id)
-    raw_observation = RawHartPayload(
+    temperature_observation = RawHartPayload(
         protocol="HART",
         gateway_id="GW-EDGE-01",
         timestamp="2026-04-01T15:00:00Z",
@@ -90,14 +90,95 @@ def build_valid_audit_package(
             device_type=33,
         ),
         process_data=ProcessData(
-            pv=ProcessVariable(value=72.5, unit="degC", unit_code=32),
-            sv=None,
+            pv=ProcessVariable(
+                value=72.5,
+                unit="degC",
+                unit_code=32,
+                description="Process_Temperature",
+            ),
+            sv=ProcessVariable(
+                value=54.1,
+                unit="degC",
+                unit_code=32,
+                description="Sensor_Body_Temperature",
+            ),
             loop_current_ma=14.2,
             pv_percent_range=65.1,
             physics_metrics=PhysicsMetrics(
                 noise_floor=0.2,
                 rate_of_change_dtdt=0.5,
                 local_stability_score=0.9,
+            ),
+        ),
+        diagnostics=Diagnostics(
+            device_status_hex="0x00",
+            field_device_malfunction=False,
+            loop_current_saturated=False,
+            cold_start=False,
+        ),
+    )
+    pressure_observation = RawHartPayload(
+        protocol="HART",
+        gateway_id="GW-EDGE-02",
+        timestamp="2026-04-01T15:00:00Z",
+        device_info=DeviceInfo(
+            tag="PIT-101",
+            long_tag="Pressure_Compressor_Discharge",
+            manufacturer_id=26,
+            device_type=35,
+        ),
+        process_data=ProcessData(
+            pv=ProcessVariable(
+                value=5.3,
+                unit="bar",
+                unit_code=7,
+                description="Process_Pressure",
+            ),
+            sv=ProcessVariable(
+                value=31.8,
+                unit="degC",
+                unit_code=32,
+                description="Transmitter_Module_Temperature",
+            ),
+            loop_current_ma=13.7,
+            pv_percent_range=52.6,
+            physics_metrics=PhysicsMetrics(
+                noise_floor=0.1,
+                rate_of_change_dtdt=0.12,
+                local_stability_score=0.96,
+            ),
+        ),
+        diagnostics=Diagnostics(
+            device_status_hex="0x00",
+            field_device_malfunction=False,
+            loop_current_saturated=False,
+            cold_start=False,
+        ),
+    )
+    rpm_observation = RawHartPayload(
+        protocol="HART",
+        gateway_id="GW-EDGE-03",
+        timestamp="2026-04-01T15:00:00Z",
+        device_info=DeviceInfo(
+            tag="RIT-101",
+            long_tag="Rotation_Compressor_Shaft",
+            manufacturer_id=26,
+            device_type=39,
+        ),
+        process_data=ProcessData(
+            pv=ProcessVariable(
+                value=3120.0,
+                unit="rpm",
+                unit_code=None,
+                description="Shaft_Speed",
+            ),
+            sv=None,
+            loop_current_ma=14.9,
+            pv_percent_range=64.0,
+            physics_metrics=PhysicsMetrics(
+                noise_floor=3.5,
+                rate_of_change_dtdt=15.4,
+                local_stability_score=0.93,
             ),
         ),
         diagnostics=Diagnostics(
@@ -115,7 +196,33 @@ def build_valid_audit_package(
                 round_identity=round_identity,
                 owner_edge_id="edge-1",
                 participating_edges=("edge-1", "edge-2", "edge-3"),
-                observations_by_sensor={"temperature": raw_observation},
+                observations_by_sensor={
+                    "temperature": temperature_observation,
+                    "pressure": pressure_observation,
+                    "rpm": rpm_observation,
+                },
+                is_validated=False,
+            ),
+            EdgeLocalReplicatedStateContract(
+                round_identity=round_identity,
+                owner_edge_id="edge-2",
+                participating_edges=("edge-1", "edge-2", "edge-3"),
+                observations_by_sensor={
+                    "temperature": temperature_observation,
+                    "pressure": pressure_observation,
+                    "rpm": rpm_observation,
+                },
+                is_validated=False,
+            ),
+            EdgeLocalReplicatedStateContract(
+                round_identity=round_identity,
+                owner_edge_id="edge-3",
+                participating_edges=("edge-1", "edge-2", "edge-3"),
+                observations_by_sensor={
+                    "temperature": temperature_observation,
+                    "pressure": pressure_observation,
+                    "rpm": rpm_observation,
+                },
                 is_validated=False,
             ),
         ),
@@ -133,7 +240,7 @@ def build_valid_audit_package(
     if status == ConsensusStatus.SUCCESS:
         valid_state = ConsensusedValidState(
             round_identity=round_identity,
-            source_edges=("edge-1", "edge-2"),
+            source_edges=("edge-1", "edge-2", "edge-3"),
             sensor_values={
                 "temperature": 72.5,
                 "pressure": 5.3,
@@ -187,6 +294,7 @@ class ValidArtifactPersistenceTests(unittest.TestCase):
 
         record = persist_valid_consensus_artifact(
             audit_package=audit_package,
+            scada_state=scada_state,
             scada_comparison_output=comparison_output,
             artifact_store=store,
             persisted_at=datetime(2026, 4, 1, 15, 1, 0, tzinfo=timezone.utc),
@@ -198,38 +306,82 @@ class ValidArtifactPersistenceTests(unittest.TestCase):
         )
         saved = client.objects[("valid-consensus-artifacts", record.artifact_key)].decode("utf-8")
         self.assertIn('"persisted_at": "2026-04-01T15:01:00+00:00"', saved)
-        self.assertIn('"consensus_state"', saved)
-        self.assertIn('"trust_scores"', saved)
-        self.assertIn('"excluded_edges"', saved)
-        self.assertIn('"scada_comparison_results"', saved)
+        self.assertIn('"artifact_identity"', saved)
+        self.assertIn('"round_identity"', saved)
+        self.assertIn('"consensus_context"', saved)
+        self.assertIn('"validated_state"', saved)
+        self.assertIn('"scada_context"', saved)
         self.assertIn('"diagnostics"', saved)
+        persisted = record.to_dict()
+        self.assertEqual(
+            persisted["artifact_identity"]["artifact_type"],
+            "valid_consensus_artifact",
+        )
+        self.assertEqual(persisted["artifact_identity"]["artifact_version"], "2.0")
+        self.assertEqual(
+            persisted["consensus_context"]["final_consensus_status"],
+            "success",
+        )
+        self.assertEqual(
+            persisted["consensus_context"]["participating_edges"],
+            ["edge-1", "edge-2", "edge-3"],
+        )
+        self.assertEqual(persisted["consensus_context"]["quorum_required"], 2)
+        self.assertIn("trust_ranking", persisted["consensus_context"])
+        self.assertIn("trust_evidence", persisted["consensus_context"])
+        self.assertEqual(
+            persisted["validated_state"]["structured_payload_snapshot"][
+                "selected_source_edge_id"
+            ],
+            "edge-1",
+        )
+        payloads = persisted["validated_state"]["structured_payload_snapshot"][
+            "payloads_by_sensor"
+        ]
+        self.assertEqual(
+            payloads["temperature"]["device_info"]["tag"],
+            "TIT-101",
+        )
+        self.assertEqual(
+            payloads["pressure"]["process_data"]["pv"]["description"],
+            "Process_Pressure",
+        )
+        self.assertEqual(
+            payloads["pressure"]["process_data"]["loop_current_ma"],
+            13.7,
+        )
+        self.assertEqual(
+            payloads["rpm"]["process_data"]["physics_metrics"]["local_stability_score"],
+            0.93,
+        )
+        self.assertEqual(
+            persisted["scada_context"]["scada_state"]["sensor_values"]["pressure"]["unit"],
+            "bar",
+        )
+        self.assertIn(
+            "sensor_outputs",
+            persisted["scada_context"]["comparison_output"],
+        )
+        self.assertIsNone(persisted["scada_context"]["divergence_alert"])
 
     def test_persistence_is_blocked_for_failed_consensus(self) -> None:
         audit_package = build_valid_audit_package(status=ConsensusStatus.FAILED_CONSENSUS)
+        shadow_state = ConsensusedValidState(
+            round_identity=build_round_identity("round-shadow"),
+            source_edges=("edge-1", "edge-2"),
+            sensor_values={
+                "temperature": 72.5,
+                "pressure": 5.3,
+                "rpm": 3120.0,
+            },
+        )
         comparison_output = build_scada_comparison_output(
             compare_consensused_to_scada(
-                valid_state=ConsensusedValidState(
-                    round_identity=build_round_identity("round-shadow"),
-                    source_edges=("edge-1", "edge-2"),
-                    sensor_values={
-                        "temperature": 72.5,
-                        "pressure": 5.3,
-                        "rpm": 3120.0,
-                    },
-                ),
-                scada_state=FakeOpcUaScadaService().project_state(
-                    ConsensusedValidState(
-                        round_identity=build_round_identity("round-shadow"),
-                        source_edges=("edge-1", "edge-2"),
-                        sensor_values={
-                            "temperature": 72.5,
-                            "pressure": 5.3,
-                            "rpm": 3120.0,
-                        },
-                    )
-                ),
+                valid_state=shadow_state,
+                scada_state=FakeOpcUaScadaService().project_state(shadow_state),
             )
         )
+        scada_state = FakeOpcUaScadaService().project_state(shadow_state)
         store = MinioArtifactStore(
             MinioStoreConfig(
                 endpoint="localhost:9000",
@@ -243,6 +395,7 @@ class ValidArtifactPersistenceTests(unittest.TestCase):
         with self.assertRaises(PersistenceBlockedError):
             persist_valid_consensus_artifact(
                 audit_package=audit_package,
+                scada_state=scada_state,
                 scada_comparison_output=comparison_output,
                 artifact_store=store,
             )

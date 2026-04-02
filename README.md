@@ -15,11 +15,18 @@ The repository now includes the upstream observation path for Epic 1:
 - edge-local replicated shared view reconstruction as explicit non-validated intermediate state
 - upstream observation-flow logging for demo visibility
 
-The consensus pillar now uses a real CometBFT-backed path for the live demo. SCADA comparison, persistence, and LSTM stages remain intentionally out of scope in the current code.
+The consensus pillar now uses a real CometBFT-backed path for the live demo. Epic 3 is also implemented in the current code through:
+
+- fake OPC UA SCADA-state projection using real OPC UA tooling
+- sensor-by-sensor SCADA comparison with configurable tolerance
+- distinct SCADA divergence output and alerting
+- valid-artifact persistence to local MinIO object storage only
+
+The LSTM stage remains intentionally out of scope in the current code.
 
 The planning artifacts now treat the split PEP files in `docs/input/` as the research source of truth. They also distinguish explicitly between:
 
-- real prototype components such as MQTT, CometBFT plus Go ABCI, and later fake OPC UA, MinIO, and local LSTM
+- real prototype components such as MQTT, CometBFT plus Go ABCI, fake OPC UA, and MinIO, with the local LSTM added later
 - simulated environment components such as sensors, compressor behavior, the SCADA environment itself, and the cloud environment
 - conceptual-only dissertation references such as BBD/FABA, Orion/Kafka-style cloud infrastructure, and production-grade SCADA/HMI scope
 
@@ -28,9 +35,9 @@ The planning artifacts now treat the split PEP files in `docs/input/` as the res
 The prototype remains fully local.
 
 - Edge nodes and core orchestration run as local Python processes.
-- MQTT infrastructure runs as a local containerized service.
+- MQTT and MinIO infrastructure run as local containerized services.
 - The live consensus demo runs against a local 3-validator CometBFT network with a Go ABCI application.
-- MinIO and the LSTM service may also run as local containerized services later if that improves reproducibility.
+- The LSTM service may also run as a local containerized service later if that improves reproducibility.
 
 This mixed process/container model is a local setup decision only. It is not a production deployment model.
 
@@ -38,8 +45,6 @@ This mixed process/container model is a local setup decision only. It is not a p
 
 These layers are approved in planning but are not yet implemented in the current code:
 
-- fake OPC UA SCADA service
-- local MinIO persistence of valid artifacts
 - local LSTM training and inference
 - final lightweight SCADA-inspired demo UI, implemented only after the backend/runtime/services are stable
 
@@ -57,10 +62,10 @@ Or, if you prefer to use the optional dependency group from `pyproject.toml`:
 uv sync --extra runtime-demo
 ```
 
-### 2. Start the local Mosquitto broker
+### 2. Start the local Mosquitto broker and MinIO
 
 ```powershell
-docker compose -f compose.local.yml up -d mqtt-broker
+docker compose -f compose.local.yml up -d mqtt-broker minio
 ```
 
 ### 3. Start the local CometBFT consensus stack
@@ -93,6 +98,11 @@ The defaults are already present in [.env.example](./.env.example):
 - `MQTT_BROKER_PORT=1883`
 - `MQTT_TOPIC=edges/observations`
 - `COMETBFT_RPC_URL=http://127.0.0.1:26657`
+- `MINIO_ENDPOINT=localhost:9000`
+- `MINIO_ACCESS_KEY=minioadmin`
+- `MINIO_SECRET_KEY=minioadmin`
+- `MINIO_BUCKET=valid-consensus-artifacts`
+- `MINIO_SECURE=false`
 - `DEMO_STEPS=3`
 - `DEMO_POWER=65.0`
 - `DEMO_FAULT_MODE=none`
@@ -115,7 +125,9 @@ This will:
 - submit the consensus round to CometBFT
 - query the committed round result back from CometBFT
 - build summary/log/alert output from that committed state only
-- print runtime state, replicated state, commit metadata, and observation-flow events
+- project the logical SCADA-side state and run the SCADA comparison path
+- persist only valid structured artifacts to local MinIO
+- print runtime state, replicated state, commit metadata, comparison visibility, persistence visibility, and observation-flow events
 
 ### 6. Stop the consensus stack
 

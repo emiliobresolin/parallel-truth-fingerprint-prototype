@@ -7,6 +7,7 @@ import sys
 import time
 from dataclasses import replace
 from pathlib import Path
+from urllib.parse import urlsplit
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SRC_PATH = PROJECT_ROOT / "src"
@@ -40,7 +41,8 @@ from parallel_truth_fingerprint.edge_nodes.edge_1.service import TemperatureEdge
 from parallel_truth_fingerprint.edge_nodes.edge_2.service import PressureEdgeService
 from parallel_truth_fingerprint.edge_nodes.edge_3.service import RpmEdgeService
 from parallel_truth_fingerprint.persistence import (
-    FileArtifactStore,
+    MinioArtifactStore,
+    MinioStoreConfig,
     PersistenceBlockedError,
     persist_valid_consensus_artifact,
 )
@@ -52,15 +54,6 @@ def default_demo_log_path(log_path: str) -> Path:
     """Resolve the configured demo log path relative to the project root."""
 
     candidate = Path(log_path)
-    if candidate.is_absolute():
-        return candidate
-    return PROJECT_ROOT / candidate
-
-
-def default_demo_artifact_root(root_path: str) -> Path:
-    """Resolve the configured artifact root relative to the project root."""
-
-    candidate = Path(root_path)
     if candidate.is_absolute():
         return candidate
     return PROJECT_ROOT / candidate
@@ -260,21 +253,58 @@ def format_persistence_stage_compact(stage: dict[str, object]) -> str:
     """Render one compact persistence-stage line for demo output."""
 
     if stage["status"] == "blocked":
-        return f"persistence=blocked reason={stage['reason']}"
+        return (
+            f"persistence=blocked "
+            f"backend={stage['backend']} "
+            f"endpoint={stage['endpoint']} "
+            f"secure={str(stage['secure']).lower()} "
+            f"bucket={stage['bucket']} "
+            f"reason={stage['reason']}"
+        )
+    if stage["status"] == "error":
+        return (
+            f"persistence=error "
+            f"backend={stage['backend']} "
+            f"endpoint={stage['endpoint']} "
+            f"secure={str(stage['secure']).lower()} "
+            f"bucket={stage['bucket']} "
+            f"reason={stage['reason']}"
+        )
     return (
         f"persistence={stage['status']} "
+        f"backend={stage['backend']} "
+        f"endpoint={stage['endpoint']} "
+        f"secure={str(stage['secure']).lower()} "
+        f"bucket={stage['bucket']} "
         f"artifact_key={stage['artifact_key']} "
-        f"artifact_path={stage['artifact_path']}"
+        f"artifact_uri={stage['artifact_uri']}"
     )
+
+
+def build_minio_runtime_metadata(artifact_store) -> dict[str, object]:
+    """Return normalized MinIO metadata for terminal and JSON log visibility."""
+
+    config = artifact_store.config
+    endpoint = config.endpoint
+    parsed = urlsplit(f"http://{endpoint}")
+    return {
+        "backend": "minio",
+        "endpoint": endpoint,
+        "host": parsed.hostname or endpoint,
+        "port": parsed.port,
+        "secure": getattr(config, "secure", False),
+        "bucket": config.bucket,
+    }
 
 
 def run_scada_comparison_and_persistence(
     *,
     consensus_audit,
-    artifact_root: Path,
+    artifact_store,
 ) -> tuple[object | None, dict[str, object], object | None, object | None, dict[str, object]]:
     """Run the Story 3 comparison/persistence path for demo observability."""
 
+    storage_metadata = build_minio_runtime_metadata(artifact_store)
     valid_state = consensus_audit.consensused_valid_state
     if valid_state is None:
         blocked_reason = "no_consensused_valid_state"
@@ -283,7 +313,12 @@ def run_scada_comparison_and_persistence(
             {"status": "blocked", "reason": blocked_reason, "compact": None},
             None,
             None,
-            {"status": "blocked", "reason": blocked_reason},
+            {
+                "status": "blocked",
+                **storage_metadata,
+                "reason": blocked_reason,
+                "write_confirmed": False,
+            },
         )
 
     scada_service = FakeOpcUaScadaService(compressor_id="compressor-1")
@@ -300,23 +335,40 @@ def run_scada_comparison_and_persistence(
         "compact": format_scada_comparison_output_compact(comparison_output),
     }
 
-    artifact_store = FileArtifactStore(artifact_root)
     try:
         persistence_record = persist_valid_consensus_artifact(
             audit_package=consensus_audit,
+            scada_state=scada_state,
             scada_comparison_output=comparison_output,
+            scada_alert=scada_alert,
             artifact_store=artifact_store,
         )
         persistence_stage = {
             "status": "persisted",
+            **storage_metadata,
             "artifact_key": persistence_record.artifact_key,
-            "artifact_path": str(artifact_store.resolve_path(persistence_record.artifact_key)),
+            "object_name": persistence_record.artifact_key,
+            "artifact_uri": (
+                f"minio://{artifact_store.config.bucket}/{persistence_record.artifact_key}"
+            ),
+            "storage_action": "put_object",
+            "content_type": "application/json",
+            "write_confirmed": True,
             "record": persistence_record.to_dict(),
         }
     except PersistenceBlockedError as exc:
         persistence_stage = {
             "status": "blocked",
+            **storage_metadata,
             "reason": str(exc),
+            "write_confirmed": False,
+        }
+    except Exception as exc:
+        persistence_stage = {
+            "status": "error",
+            **storage_metadata,
+            "reason": str(exc),
+            "write_confirmed": False,
         }
 
     return (
@@ -325,6 +377,20 @@ def run_scada_comparison_and_persistence(
         comparison_output,
         scada_alert,
         persistence_stage,
+    )
+
+
+def build_demo_artifact_store(config) -> MinioArtifactStore:
+    """Build the real runtime artifact store for the local demo path."""
+
+    return MinioArtifactStore(
+        MinioStoreConfig(
+            endpoint=config.minio_endpoint,
+            access_key=config.minio_access_key,
+            secret_key=config.minio_secret_key,
+            bucket=config.minio_bucket,
+            secure=config.minio_secure,
+        )
     )
 
 
@@ -385,10 +451,11 @@ def main() -> None:
     consensus_summary = build_round_summary(consensus_audit)
     consensus_log = build_round_log(consensus_audit)
     consensus_alert = build_consensus_alert(consensus_audit, consensus_log)
+    artifact_store = build_demo_artifact_store(config)
     scada_state, comparison_stage, comparison_output, scada_alert, persistence_stage = (
         run_scada_comparison_and_persistence(
             consensus_audit=consensus_audit,
-            artifact_root=default_demo_artifact_root(config.demo_artifact_root),
+            artifact_store=artifact_store,
         )
     )
     fault_edges = resolve_faulty_edges(config, consensus_round_input.participating_edges)

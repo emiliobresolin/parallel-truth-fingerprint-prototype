@@ -20,7 +20,7 @@ so that downstream training and audit evidence use only validated data.
   - failed consensus
   - missing `ConsensusedValidState`
   - any pre-consensus or non-validated intermediate state
-- The persistence target must follow the approved local object-storage direction and remain ready for local MinIO usage.
+- The persistence target is the real local MinIO-compatible object-storage boundary used by the prototype runtime path.
 - This story must not add:
   - new comparison logic
   - new alert logic
@@ -30,7 +30,7 @@ so that downstream training and audit evidence use only validated data.
 
 ## Acceptance Criteria
 
-1. Given a successful consensus outcome, when persistence executes, then the stored artifact includes at least timestamp, consensus_state based on the unified payload, trust_scores, excluded_edges, SCADA comparison results, and diagnostics.
+1. Given a successful consensus outcome, when persistence executes, then the stored artifact preserves a rich validated physical-operational record including artifact identity, round identity, consensus metadata, trust ranking, exclusions, trust evidence, structured validated payload snapshot by sensor, SCADA state and comparison context, and diagnostics.
 2. Given a successful valid state, when it is persisted, then the artifact is written only for valid consensused states.
 3. Given a failed consensus outcome, any edge-local replicated intermediate state, or other non-validated data, when persistence would otherwise execute, then the system blocks persistence of that data as valid artifact and invalid or pre-consensus data does not enter the training-ready storage path.
 4. Given the approved architecture direction, when Story 3.4 is implemented, then the persistence boundary remains compatible with local object storage and does not redesign upstream comparison or downstream LSTM scope.
@@ -38,14 +38,14 @@ so that downstream training and audit evidence use only validated data.
    - valid artifact persistence content
    - blocked persistence on invalid rounds
    - deterministic object naming and serialization
-   - object-store compatibility for later local MinIO runtime use
+   - object-store compatibility for the local MinIO runtime path
 
 ## Tasks / Subtasks
 
 - [x] Add a typed persisted-artifact contract. (AC: 1, 2, 5)
   - [x] Define the valid persisted artifact structure.
   - [x] Keep the artifact deterministic and serializable.
-- [x] Add an object-store adapter aligned to local MinIO usage. (AC: 4, 5)
+- [x] Add an object-store adapter aligned to the local MinIO runtime boundary. (AC: 4, 5)
   - [x] Implement a small store adapter for JSON artifact writes.
   - [x] Keep the runtime dependency narrow and local-object-store oriented.
 - [x] Implement the valid-state persistence service. (AC: 1, 2, 3, 4, 5)
@@ -65,8 +65,8 @@ so that downstream training and audit evidence use only validated data.
   - fake OPC UA SCADA state
   - Story 3.2 comparison
   - Story 3.3 structured outputs and divergence alert path
-- This story persists valid artifacts only. It does not redesign the pipeline.
-- Keep the persistence boundary object-store oriented and ready for local MinIO use.
+- This story persists rich validated artifacts only. It does not redesign the pipeline.
+- Keep the persistence boundary object-store oriented and implemented through local MinIO, and avoid flattening the validated payload into an audit-only summary.
 - Do not pull LSTM logic into this story.
 
 ## Dev Agent Record

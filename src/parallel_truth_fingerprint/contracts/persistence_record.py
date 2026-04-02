@@ -11,10 +11,11 @@ class ValidConsensusArtifactRecord:
 
     artifact_key: str
     persisted_at: str
-    consensus_state: dict[str, object]
-    trust_scores: tuple[dict[str, object], ...]
-    excluded_edges: tuple[dict[str, object], ...]
-    scada_comparison_results: dict[str, object]
+    artifact_identity: dict[str, object]
+    round_identity: dict[str, object]
+    consensus_context: dict[str, object]
+    validated_state: dict[str, object]
+    scada_context: dict[str, object]
     diagnostics: dict[str, object]
 
     def to_dict(self) -> dict[str, object]:
@@ -23,9 +24,10 @@ class ValidConsensusArtifactRecord:
         return {
             "artifact_key": self.artifact_key,
             "persisted_at": self.persisted_at,
-            "consensus_state": self.consensus_state,
-            "trust_scores": list(self.trust_scores),
-            "excluded_edges": list(self.excluded_edges),
-            "scada_comparison_results": self.scada_comparison_results,
+            "artifact_identity": self.artifact_identity,
+            "round_identity": self.round_identity,
+            "consensus_context": self.consensus_context,
+            "validated_state": self.validated_state,
+            "scada_context": self.scada_context,
             "diagnostics": self.diagnostics,
         }
