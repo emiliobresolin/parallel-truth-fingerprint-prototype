@@ -27,8 +27,9 @@ Epic 4 has now started in the current code through:
 - MinIO-backed loading of validated persisted artifacts
 - normal-only temporal window generation for future fingerprint training
 - dataset-manifest generation for auditability and traceability
+- local LSTM fingerprint training and MinIO-backed model save
 
-Actual LSTM model training and inference remain intentionally pending.
+Fingerprint inference and anomaly scoring remain intentionally pending.
 
 The planning artifacts now treat the split PEP files in `docs/input/` as the research source of truth. They also distinguish explicitly between:
 
@@ -51,7 +52,7 @@ This mixed process/container model is a local setup decision only. It is not a p
 
 These layers are approved in planning but are not yet implemented in the current code:
 
-- local LSTM training and inference on top of the new dataset-building layer
+- local LSTM inference and anomaly scoring on top of the new dataset-building and training layers
 - final lightweight SCADA-inspired demo UI, implemented only after the backend/runtime/services are stable
 
 ## Runtime/Demo Setup

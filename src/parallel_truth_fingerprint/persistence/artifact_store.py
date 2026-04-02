@@ -34,17 +34,31 @@ class MinioArtifactStore:
     def save_json(self, object_name: str, payload: dict[str, object]) -> str:
         """Persist one JSON payload and return the object key."""
 
+        return self.save_bytes(
+            object_name,
+            json.dumps(payload, indent=2).encode("utf-8"),
+            content_type="application/json",
+        )
+
+    def save_bytes(
+        self,
+        object_name: str,
+        payload: bytes,
+        *,
+        content_type: str = "application/octet-stream",
+    ) -> str:
+        """Persist one binary payload and return the object key."""
+
         client = self._ensure_client()
         if not client.bucket_exists(self.config.bucket):
             client.make_bucket(self.config.bucket)
 
-        encoded = json.dumps(payload, indent=2).encode("utf-8")
         client.put_object(
             self.config.bucket,
             object_name,
-            io.BytesIO(encoded),
-            length=len(encoded),
-            content_type="application/json",
+            io.BytesIO(payload),
+            length=len(payload),
+            content_type=content_type,
         )
         return object_name
 
@@ -69,10 +83,16 @@ class MinioArtifactStore:
     def load_json(self, object_name: str) -> dict[str, object]:
         """Load one JSON payload from the configured bucket."""
 
+        payload = self.load_bytes(object_name).decode("utf-8")
+        return json.loads(payload)
+
+    def load_bytes(self, object_name: str) -> bytes:
+        """Load one binary payload from the configured bucket."""
+
         client = self._ensure_client()
         response = client.get_object(self.config.bucket, object_name)
         try:
-            payload = response.read().decode("utf-8")
+            payload = response.read()
         finally:
             close = getattr(response, "close", None)
             if callable(close):
@@ -80,7 +100,7 @@ class MinioArtifactStore:
             release_conn = getattr(response, "release_conn", None)
             if callable(release_conn):
                 release_conn()
-        return json.loads(payload)
+        return payload
 
     def _ensure_client(self):
         if self._client is not None:

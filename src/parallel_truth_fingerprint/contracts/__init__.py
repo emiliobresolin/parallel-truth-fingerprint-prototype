@@ -23,6 +23,9 @@ from parallel_truth_fingerprint.contracts.edge_local_replicated_state import (
 )
 from parallel_truth_fingerprint.contracts.exclusion_decision import ExclusionDecision
 from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReason
+from parallel_truth_fingerprint.contracts.fingerprint_model import (
+    FingerprintModelArtifact,
+)
 from parallel_truth_fingerprint.contracts.raw_hart_payload import RawHartPayload
 from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
 from parallel_truth_fingerprint.contracts.persistence_record import (
@@ -67,6 +70,7 @@ __all__ = [
     "ExcludedEdgeSummary",
     "ExclusionDecision",
     "ExclusionReason",
+    "FingerprintModelArtifact",
     "PairwiseDistanceEvidence",
     "ValidConsensusArtifactRecord",
     "PerEdgeTrustEvidence",
