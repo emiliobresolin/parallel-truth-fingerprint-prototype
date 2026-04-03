@@ -376,15 +376,18 @@ class DashboardControlSurfaceRuntimeSmokeTests(unittest.TestCase):
                         replay_state["events"]["component_raw_logs"],
                     )
                     self.assertIn("pipeline", replay_state)
+                    pipeline_rows = {
+                        row["id"]: row for row in replay_state["pipeline"]["rows"]
+                    }
                     self.assertEqual(
-                        replay_state["pipeline"]["rows"][0]["nodes"][0]["title"],
+                        pipeline_rows["physical_origin"]["nodes"][0]["title"],
                         "Compressor",
                     )
                     self.assertEqual(
-                        replay_state["pipeline"]["rows"][0]["nodes"][0]["metrics"][0]["value"],
+                        pipeline_rows["physical_origin"]["nodes"][0]["metrics"][0]["value"],
                         "20.0%",
                     )
-                    temperature_sensor_node = replay_state["pipeline"]["rows"][0]["nodes"][1]
+                    temperature_sensor_node = pipeline_rows["physical_origin"]["nodes"][1]
                     self.assertEqual(temperature_sensor_node["title"], "Temperature Sensor")
                     self.assertEqual(
                         {metric["label"]: metric["value"] for metric in temperature_sensor_node["metrics"]},

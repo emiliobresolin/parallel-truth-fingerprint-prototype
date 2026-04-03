@@ -116,7 +116,9 @@ class FakeDashboardController:
                 "flow_summary": "Power -> sensors -> edges -> consensus -> SCADA comparison -> fingerprint",
                 "rows": [
                     {
-                        "id": "process",
+                        "id": "physical_origin",
+                        "label": "Physical origin and sensors",
+                        "summary": "The compressor and its sensors are the physical origin of the process values.",
                         "nodes": [
                             {
                                 "component_id": "compressor",
@@ -342,15 +344,15 @@ class DashboardControlSurfaceTests(unittest.TestCase):
         self.assertIn("Start Runtime", html)
         self.assertIn("Scenario Control", html)
         self.assertIn("Compressor Control", html)
-        self.assertIn("Transparent Operator Feedback", html)
         self.assertIn("Fingerprint Inference", html)
         self.assertIn("Operational Event Timeline", html)
-        self.assertIn("Component Log Explorer", html)
-        self.assertIn("Human-Readable Status", html)
+        self.assertIn("Component Evidence", html)
+        self.assertIn("Current Evidence Summary", html)
         self.assertIn("Fingerprint Readiness", html)
-        self.assertIn("What Changed Since Startup", html)
-        self.assertIn("Visual Operational Pipeline", html)
-        self.assertIn("Distinct Output Channels", html)
+        self.assertIn("Prototype Pipeline", html)
+        self.assertIn("Distinct output channels", html)
+        self.assertIn("Transparent Operator Feedback", html)
+        self.assertIn("Physical origin and sensors", html)
         self.assertIn("Demo Guidance", html)
         self.assertIn("guidance-panels", html)
         self.assertIn("component-log-details", html)

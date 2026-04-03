@@ -728,10 +728,33 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       font-size: 0.88rem;
       line-height: 1.5;
     }}
-    .metrics, .controls, .grid {{ display: grid; gap: 1rem; }}
+    .metrics, .controls, .secondary-grid {{ display: grid; gap: 1rem; }}
     .metrics {{ grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }}
     .controls {{ grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }}
-    .grid {{ grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); align-items: start; }}
+    .workspace {{
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1fr);
+      align-items: start;
+    }}
+    .summary-stack {{
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+    }}
+    .summary-card {{
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+    }}
+    .summary-section {{
+      display: grid;
+      gap: 0.75rem;
+    }}
+    .secondary-grid {{
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      align-items: start;
+    }}
     .metric {{
       background: var(--panel-2);
       border: 1px solid var(--line);
@@ -808,15 +831,44 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       gap: 0.45rem;
       font-size: 0.84rem;
     }}
-    .pipeline-panel {{ display: grid; gap: 1rem; }}
+    .pipeline-workspace {{
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+    }}
+    .section-header {{
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }}
     .pipeline-flow {{ color: var(--muted); font-size: 0.82rem; }}
-    .pipeline-row {{ display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }}
+    .pipeline-stage-stack {{ display: grid; gap: 1rem; }}
+    .pipeline-stage {{
+      display: grid;
+      gap: 0.85rem;
+      padding: 0.95rem;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.015);
+    }}
+    .pipeline-stage-header {{
+      display: grid;
+      gap: 0.3rem;
+    }}
+    .pipeline-stage-summary {{
+      color: var(--muted);
+      font-size: 0.83rem;
+      line-height: 1.45;
+    }}
+    .pipeline-row {{ display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }}
     .pipeline-label {{
       color: var(--muted);
       font-size: 0.78rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.05rem;
     }}
     .pipeline-card {{
       background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent), var(--panel-2);
@@ -825,7 +877,7 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       padding: 0.85rem;
       display: grid;
       gap: 0.55rem;
-      min-height: 8.5rem;
+      min-height: 7.6rem;
     }}
     .pipeline-card.process {{ border-color: rgba(70, 212, 181, 0.35); }}
     .pipeline-card.sensor {{ border-color: rgba(247, 189, 89, 0.35); }}
@@ -836,9 +888,8 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
     .pipeline-card.fingerprint {{ border-color: rgba(255, 210, 105, 0.28); }}
     .pipeline-card h3 {{
       margin: 0;
-      font-size: 0.92rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      font-size: 0.94rem;
+      letter-spacing: 0.03em;
     }}
     .pipeline-status {{
       font-size: 0.8rem;
@@ -929,12 +980,42 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       gap: 1rem;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }}
+    details.embedded-details {{
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.02);
+      overflow: hidden;
+    }}
+    details.embedded-details > summary {{
+      list-style: none;
+      cursor: pointer;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }}
+    details.embedded-details > summary::-webkit-details-marker {{ display: none; }}
+    details.embedded-details > summary::after {{
+      content: "Open";
+      color: var(--muted);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }}
+    details.embedded-details[open] > summary::after {{ content: "Hide"; }}
+    .embedded-body {{
+      padding: 0 1rem 1rem;
+      display: grid;
+      gap: 1rem;
+    }}
     .subpanel {{
       display: grid;
       gap: 0.6rem;
     }}
     @media (max-width: 1100px) {{
       .shell {{ width: min(100vw - 1rem, 1320px); }}
+      .workspace {{ grid-template-columns: 1fr; }}
     }}
   </style>
 </head>
@@ -983,94 +1064,110 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       </div>
     </section>
 
-    <section class="grid">
-      <div class="panel">
-        <h2>Visual Operational Pipeline</h2>
-        <div class="pipeline-panel">
-          <div class="pipeline-flow" id="pipeline-flow-summary"></div>
+    <section class="workspace">
+      <div class="panel pipeline-workspace">
+        <div class="section-header">
           <div>
-            <div class="pipeline-label">Physical Process</div>
-            <div class="pipeline-row process" id="pipeline-row-process"></div>
+            <h2>Prototype Pipeline</h2>
+            <div class="pipeline-flow" id="pipeline-flow-summary"></div>
           </div>
-          <div>
-            <div class="pipeline-label">Distributed Edges</div>
-            <div class="pipeline-row edges" id="pipeline-row-edges"></div>
-          </div>
-          <div>
-            <div class="pipeline-label">Consensus And Supervisory Interpretation</div>
-            <div class="pipeline-row decision" id="pipeline-row-decision"></div>
-          </div>
-          <div>
-            <div class="pipeline-label">Distinct Output Channels</div>
-            <div class="channel-strip" id="pipeline-channels"></div>
-          </div>
+          <div class="muted">Physical origin to behavioral interpretation</div>
         </div>
+        <div class="pipeline-stage-stack" id="pipeline-stage-stack"></div>
+        <details class="embedded-details" id="component-log-details">
+          <summary><span>Component Evidence</span></summary>
+          <div class="embedded-body">
+            <label>Component<select id="component-select">{component_option_markup}</select></label>
+            <div class="muted" id="raw-log-note"></div>
+            <div class="details-grid">
+              <div class="subpanel">
+                <div class="muted">Interpreted component events</div>
+                <div class="action-list" id="component-events"></div>
+              </div>
+              <div class="subpanel">
+                <div class="muted">Raw component log</div>
+                <div class="pre" id="component-raw-log"></div>
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
-      <div class="panel">
-        <h2>Human-Readable Status</h2>
-        <div class="action-list" id="translated-statuses"></div>
-      </div>
-      <div class="panel">
-        <h2>Fingerprint Readiness</h2>
-        <div class="muted" id="readiness-summary"></div>
-        <div class="details-grid" style="margin-top: 1rem;">
-          <div class="subpanel">
-            <div class="muted">Readiness gate</div>
-            <div class="action-list" id="readiness-gate"></div>
+
+      <div class="summary-stack">
+        <div class="panel summary-card">
+          <h2>Current Evidence Summary</h2>
+          <div class="summary-section">
+            <div class="muted">Current interpretation</div>
+            <div class="action-list" id="translated-statuses"></div>
           </div>
-          <div class="subpanel">
-            <div class="muted">Model provenance</div>
-            <div class="action-list" id="readiness-provenance"></div>
+          <div class="summary-section">
+            <div class="muted">Current run facts</div>
+            <div class="action-list" id="startup-facts"></div>
           </div>
-          <div class="subpanel">
-            <div class="muted">Training details</div>
-            <div class="action-list" id="readiness-training-details"></div>
-          </div>
-        </div>
-        <div style="margin-top: 1rem;">
-          <div class="muted" style="margin-bottom: 0.5rem;">Evidence by behavior</div>
-          <div class="guidance-grid" id="readiness-matrix"></div>
-        </div>
-        <div class="row" style="margin-top: 1rem; align-items: flex-start;">
-          <div style="flex: 1 1 16rem;">
-            <div class="muted" style="margin-bottom: 0.5rem;">Working now</div>
-            <ul class="bullet-list" id="readiness-working-now"></ul>
-          </div>
-          <div style="flex: 1 1 16rem;">
-            <div class="muted" style="margin-bottom: 0.5rem;">Evidence available</div>
-            <ul class="bullet-list" id="readiness-evidence-available"></ul>
-          </div>
-          <div style="flex: 1 1 16rem;">
-            <div class="muted" style="margin-bottom: 0.5rem;">Not proven yet</div>
-            <ul class="bullet-list" id="readiness-not-proven"></ul>
+          <div class="details-grid">
+            <div class="subpanel">
+              <div class="muted">Happened already</div>
+              <ul class="bullet-list" id="happened-already"></ul>
+            </div>
+            <div class="subpanel">
+              <div class="muted">Not happened yet</div>
+              <ul class="bullet-list" id="not-happened-yet"></ul>
+            </div>
+            <div class="subpanel">
+              <div class="muted">Expected next</div>
+              <ul class="bullet-list" id="expected-next"></ul>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="panel">
-        <h2>What Changed Since Startup</h2>
-        <div class="pre" id="startup-summary"></div>
-        <div class="row" style="margin-top: 1rem; align-items: flex-start;">
-          <div style="flex: 1 1 18rem;">
-            <div class="muted" style="margin-bottom: 0.5rem;">Happened already</div>
-            <ul class="bullet-list" id="happened-already"></ul>
+
+        <div class="panel summary-card">
+          <h2>Fingerprint Readiness</h2>
+          <div class="muted" id="readiness-summary"></div>
+          <div class="details-grid">
+            <div class="subpanel">
+              <div class="muted">Readiness gate</div>
+              <div class="action-list" id="readiness-gate"></div>
+            </div>
+            <div class="subpanel">
+              <div class="muted">Model provenance</div>
+              <div class="action-list" id="readiness-provenance"></div>
+            </div>
+            <div class="subpanel">
+              <div class="muted">Training details</div>
+              <div class="action-list" id="readiness-training-details"></div>
+            </div>
           </div>
-          <div style="flex: 1 1 18rem;">
-            <div class="muted" style="margin-bottom: 0.5rem;">Not happened yet</div>
-            <ul class="bullet-list" id="not-happened-yet"></ul>
+          <div class="details-grid">
+            <div class="subpanel">
+              <div class="muted">Working now</div>
+              <ul class="bullet-list" id="readiness-working-now"></ul>
+            </div>
+            <div class="subpanel">
+              <div class="muted">Evidence available</div>
+              <ul class="bullet-list" id="readiness-evidence-available"></ul>
+            </div>
+            <div class="subpanel">
+              <div class="muted">Not proven yet</div>
+              <ul class="bullet-list" id="readiness-not-proven"></ul>
+            </div>
           </div>
-          <div style="flex: 1 1 18rem;">
-            <div class="muted" style="margin-bottom: 0.5rem;">Expected next</div>
-            <ul class="bullet-list" id="expected-next"></ul>
-          </div>
+          <details class="embedded-details">
+            <summary><span>Evidence by Behavior</span></summary>
+            <div class="embedded-body">
+              <div class="guidance-grid" id="readiness-matrix"></div>
+            </div>
+          </details>
         </div>
       </div>
     </section>
 
-    <section class="grid">
-      <div class="panel">
-        <h2>Transparent Operator Feedback</h2>
-        <div class="action-list" id="operator-actions"></div>
-      </div>
+    <section class="secondary-grid">
+      <details class="panel">
+        <summary><h2>Transparent Operator Feedback</h2></summary>
+        <div class="details-body">
+          <div class="action-list" id="operator-actions"></div>
+        </div>
+      </details>
       <details class="panel">
         <summary><h2>Demo Guidance</h2></summary>
         <div class="details-body">
@@ -1083,23 +1180,6 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
         <div class="details-body">
           <div class="muted">Interpreted events derived from current runtime, cycle history, and operator actions.</div>
           <div class="action-list" id="global-events"></div>
-        </div>
-      </details>
-      <details class="panel" id="component-log-details">
-        <summary><h2>Component Log Explorer</h2></summary>
-        <div class="details-body">
-          <label>Component<select id="component-select">{component_option_markup}</select></label>
-          <div class="muted" id="raw-log-note"></div>
-          <div class="details-grid">
-            <div class="subpanel">
-              <div class="muted">Interpreted component events</div>
-              <div class="action-list" id="component-events"></div>
-            </div>
-            <div class="subpanel">
-              <div class="muted">Raw component log</div>
-              <div class="pre" id="component-raw-log"></div>
-            </div>
-          </div>
         </div>
       </details>
       <details class="panel">
@@ -1219,19 +1299,19 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
     function renderPipeline(pipelineView) {{
       document.getElementById("pipeline-flow-summary").textContent =
         pipelineView?.flow_summary ?? "No pipeline summary available yet.";
-      const rowMap = {{
-        process: document.getElementById("pipeline-row-process"),
-        edges: document.getElementById("pipeline-row-edges"),
-        decision: document.getElementById("pipeline-row-decision"),
-      }};
-      for (const root of Object.values(rowMap)) {{
-        root.innerHTML = "";
-      }}
+      const stageRoot = document.getElementById("pipeline-stage-stack");
+      stageRoot.innerHTML = "";
       for (const row of pipelineView?.rows ?? []) {{
-        const root = rowMap[row.id];
-        if (!root) {{
-          continue;
-        }}
+        const stage = document.createElement("section");
+        stage.className = "pipeline-stage";
+        const titleMarkup = `
+          <div class="pipeline-stage-header">
+            <div class="pipeline-label">${{row.label ?? "Pipeline stage"}}</div>
+            <div class="pipeline-stage-summary">${{row.summary ?? ""}}</div>
+          </div>
+        `;
+        const cards = document.createElement("div");
+        cards.className = `pipeline-row ${{row.id ?? ""}}`;
         for (const node of row.nodes ?? []) {{
           const card = document.createElement("div");
           card.className = `pipeline-card ${{node.kind ?? ""}}`;
@@ -1258,20 +1338,35 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
             document.getElementById("component-log-details").open = true;
             renderState(window.__dashboardState ?? initialState);
           }});
-          root.appendChild(card);
+          cards.appendChild(card);
         }}
+        stage.innerHTML = titleMarkup;
+        stage.appendChild(cards);
+        stageRoot.appendChild(stage);
       }}
-      const channelRoot = document.getElementById("pipeline-channels");
-      channelRoot.innerHTML = "";
-      for (const channel of pipelineView?.channel_separation ?? []) {{
-        const badge = document.createElement("div");
-        badge.className = "channel-badge";
-        badge.innerHTML = `
-          <strong>${{channel.label ?? "Channel"}}</strong>
-          <div class="muted">status=${{channel.status ?? "unknown"}}</div>
-          <div>${{channel.explanation ?? ""}}</div>
+      if ((pipelineView?.channel_separation ?? []).length) {{
+        const stage = document.createElement("section");
+        stage.className = "pipeline-stage";
+        stage.innerHTML = `
+          <div class="pipeline-stage-header">
+            <div class="pipeline-label">Distinct output channels</div>
+            <div class="pipeline-stage-summary">These channels remain separate so the operator can tell consensus, SCADA divergence, and replay behavior apart.</div>
+          </div>
         `;
-        channelRoot.appendChild(badge);
+        const channelRoot = document.createElement("div");
+        channelRoot.className = "channel-strip";
+        for (const channel of pipelineView?.channel_separation ?? []) {{
+          const badge = document.createElement("div");
+          badge.className = "channel-badge";
+          badge.innerHTML = `
+            <strong>${{channel.label ?? "Channel"}}</strong>
+            <div class="muted">status=${{channel.status ?? "unknown"}}</div>
+            <div>${{channel.explanation ?? ""}}</div>
+          `;
+          channelRoot.appendChild(badge);
+        }}
+        stage.appendChild(channelRoot);
+        stageRoot.appendChild(stage);
       }}
     }}
     function renderGuidance(guidanceView) {{
@@ -1410,21 +1505,36 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
     }}
     function renderStartupEvidence(evidenceView) {{
       const whatChanged = evidenceView?.what_changed_since_startup ?? {{}};
-      const summary = {{
-        runtime_start_time: whatChanged.runtime_start_time,
-        elapsed_runtime: whatChanged.elapsed_runtime,
-        current_cycle_count: whatChanged.current_cycle_count,
-        valid_artifact_growth: whatChanged.valid_artifact_count_growth?.summary,
-        has_training_happened: whatChanged.training?.has_training_happened,
-        first_training_reference: whatChanged.training?.first_training_reference,
-        current_model_usage: whatChanged.training?.current_model_usage,
-        current_model_identity: whatChanged.training?.current_model_identity,
-        has_fingerprint_been_created: whatChanged.questions_answered?.has_fingerprint_been_created,
-        what_changed_since_startup: whatChanged.questions_answered?.what_changed_since_startup,
-        what_evidence_exists_in_this_run: whatChanged.questions_answered?.what_evidence_exists_in_this_run,
-        what_is_expected_next: whatChanged.questions_answered?.what_is_expected_next,
-      }};
-      document.getElementById("startup-summary").textContent = formatJson(summary);
+      renderLabelValueList(
+        "startup-facts",
+        [
+          {{
+            label: "Runtime start",
+            value: whatChanged.runtime_start_time ?? "not_available",
+          }},
+          {{
+            label: "Elapsed runtime",
+            value: whatChanged.elapsed_runtime ?? "not_available",
+          }},
+          {{
+            label: "Current cycle",
+            value: whatChanged.current_cycle_count ?? "0",
+          }},
+          {{
+            label: "Artifact growth",
+            value: whatChanged.valid_artifact_count_growth?.summary ?? "not_available",
+          }},
+          {{
+            label: "Fingerprint created",
+            value: whatChanged.questions_answered?.has_fingerprint_been_created ?? "not_available",
+          }},
+          {{
+            label: "Current model usage",
+            value: whatChanged.training?.current_model_usage ?? "not_available",
+          }},
+        ],
+        "No current-run evidence is available yet."
+      );
       renderBulletList(
         "happened-already",
         whatChanged.happened_already ?? [],

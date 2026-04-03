@@ -132,8 +132,9 @@ def build_dashboard_pipeline_view(
         "flow_summary": "Power -> sensors -> edges -> consensus -> SCADA comparison -> fingerprint",
         "rows": [
             {
-                "id": "process",
-                "label": "Physical process",
+                "id": "physical_origin",
+                "label": "Physical origin and sensors",
+                "summary": "The compressor and its sensors are the physical origin of the process values.",
                 "nodes": [
                     nodes["compressor"],
                     nodes["temperature_sensor"],
@@ -143,18 +144,27 @@ def build_dashboard_pipeline_view(
             },
             {
                 "id": "edges",
-                "label": "Distributed edges",
+                "label": "Distributed edge acquisition",
+                "summary": "Each edge acquires, publishes, consumes peer observations, and reconstructs a local shared view.",
                 "nodes": [nodes["edge_1"], nodes["edge_2"], nodes["edge_3"]],
             },
             {
-                "id": "decision",
-                "label": "Consensus and supervisory interpretation",
-                "nodes": [
-                    nodes["consensus"],
-                    nodes["scada_source"],
-                    nodes["scada_comparison"],
-                    nodes["fingerprint_lifecycle"],
-                ],
+                "id": "consensus",
+                "label": "Trusted committed state",
+                "summary": "Consensus produces the committed shared truth used downstream.",
+                "nodes": [nodes["consensus"]],
+            },
+            {
+                "id": "scada",
+                "label": "Supervisory validation",
+                "summary": "SCADA source values are compared against the consensused state as a later supervisory check.",
+                "nodes": [nodes["scada_source"], nodes["scada_comparison"]],
+            },
+            {
+                "id": "fingerprint",
+                "label": "Behavioral interpretation",
+                "summary": "The fingerprint path interprets behavior and keeps replay-oriented output distinct from SCADA divergence.",
+                "nodes": [nodes["fingerprint_lifecycle"]],
             },
         ],
         "channel_separation": [

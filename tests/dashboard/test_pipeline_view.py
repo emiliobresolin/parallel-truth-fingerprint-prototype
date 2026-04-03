@@ -133,7 +133,7 @@ class DashboardPipelineViewTests(unittest.TestCase):
 
         self.assertEqual(
             [row["id"] for row in pipeline["rows"]],
-            ["process", "edges", "decision"],
+            ["physical_origin", "edges", "consensus", "scada", "fingerprint"],
         )
         titles = [
             node["title"]
@@ -158,19 +158,22 @@ class DashboardPipelineViewTests(unittest.TestCase):
             event_views=_sample_event_views(),
         )
 
-        decision_nodes = {
-            node["component_id"]: node for node in pipeline["rows"][2]["nodes"]
+        scada_nodes = {
+            node["component_id"]: node
+            for row in pipeline["rows"]
+            if row["id"] == "scada"
+            for node in row["nodes"]
         }
         self.assertEqual(
-            decision_nodes["scada_source"]["log_component_id"],
+            scada_nodes["scada_source"]["log_component_id"],
             "scada_comparison",
         )
         self.assertEqual(
-            decision_nodes["scada_source"]["metrics"][0]["value"],
+            scada_nodes["scada_source"]["metrics"][0]["value"],
             "88.0",
         )
         self.assertEqual(
-            decision_nodes["scada_comparison"]["metrics"][0]["value"],
+            scada_nodes["scada_comparison"]["metrics"][0]["value"],
             "temperature",
         )
         self.assertEqual(
@@ -185,7 +188,10 @@ class DashboardPipelineViewTests(unittest.TestCase):
         )
 
         process_nodes = {
-            node["component_id"]: node for node in pipeline["rows"][0]["nodes"]
+            node["component_id"]: node
+            for row in pipeline["rows"]
+            if row["id"] == "physical_origin"
+            for node in row["nodes"]
         }
         temperature_metrics = {
             metric["label"]: metric["value"]
@@ -195,13 +201,29 @@ class DashboardPipelineViewTests(unittest.TestCase):
         self.assertNotIn("SCADA", temperature_metrics)
         self.assertNotIn("Comparison", temperature_metrics)
 
-        edge_nodes = {node["component_id"]: node for node in pipeline["rows"][1]["nodes"]}
+        edge_nodes = {
+            node["component_id"]: node
+            for row in pipeline["rows"]
+            if row["id"] == "edges"
+            for node in row["nodes"]
+        }
         edge_metrics = {
             metric["label"]: metric["value"] for metric in edge_nodes["edge_1"]["metrics"]
         }
         self.assertEqual(edge_metrics["Published"], "3")
         self.assertEqual(edge_metrics["Peer-consumed"], "6")
         self.assertEqual(edge_metrics["Replicated"], "True")
+
+    def test_pipeline_view_preserves_explicit_downstream_stage_boundaries(self) -> None:
+        pipeline = build_dashboard_pipeline_view(
+            latest_runtime_payload=_sample_runtime_payload(),
+            event_views=_sample_event_views(),
+        )
+
+        stage_labels = {row["id"]: row["label"] for row in pipeline["rows"]}
+        self.assertEqual(stage_labels["consensus"], "Trusted committed state")
+        self.assertEqual(stage_labels["scada"], "Supervisory validation")
+        self.assertEqual(stage_labels["fingerprint"], "Behavioral interpretation")
 
 
 if __name__ == "__main__":
