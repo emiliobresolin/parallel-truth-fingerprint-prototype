@@ -2,33 +2,45 @@ services:
   abci-node0:
     build:
       context: ./abci/consensus_app
+    entrypoint:
+      - /bin/sh
+      - -c
     command:
-      - --home
-      - /state/node0
-      - --socket-addr
-      - tcp://0.0.0.0:26658
+      - >
+        rm -f /state/node0/state.json &&
+        exec /usr/local/bin/consensus_abci
+        --home /state/node0
+        --socket-addr tcp://0.0.0.0:26658
     volumes:
       - ./.cometbft/state/node0:/state/node0
 
   abci-node1:
     build:
       context: ./abci/consensus_app
+    entrypoint:
+      - /bin/sh
+      - -c
     command:
-      - --home
-      - /state/node1
-      - --socket-addr
-      - tcp://0.0.0.0:26658
+      - >
+        rm -f /state/node1/state.json &&
+        exec /usr/local/bin/consensus_abci
+        --home /state/node1
+        --socket-addr tcp://0.0.0.0:26658
     volumes:
       - ./.cometbft/state/node1:/state/node1
 
   abci-node2:
     build:
       context: ./abci/consensus_app
+    entrypoint:
+      - /bin/sh
+      - -c
     command:
-      - --home
-      - /state/node2
-      - --socket-addr
-      - tcp://0.0.0.0:26658
+      - >
+        rm -f /state/node2/state.json &&
+        exec /usr/local/bin/consensus_abci
+        --home /state/node2
+        --socket-addr tcp://0.0.0.0:26658
     volumes:
       - ./.cometbft/state/node2:/state/node2
 
@@ -36,10 +48,14 @@ services:
     image: cometbft/cometbft:latest
     depends_on:
       - abci-node0
+    entrypoint:
+      - /bin/sh
+      - -c
     command:
-      - node
-      - --home
-      - /cometbft
+      - >
+        cometbft unsafe-reset-all --home /cometbft &&
+        rm -f /cometbft/config/addrbook.json &&
+        exec cometbft node --home /cometbft
     volumes:
       - ./.cometbft/testnet/node0:/cometbft
     ports:
@@ -50,10 +66,14 @@ services:
     image: cometbft/cometbft:latest
     depends_on:
       - abci-node1
+    entrypoint:
+      - /bin/sh
+      - -c
     command:
-      - node
-      - --home
-      - /cometbft
+      - >
+        cometbft unsafe-reset-all --home /cometbft &&
+        rm -f /cometbft/config/addrbook.json &&
+        exec cometbft node --home /cometbft
     volumes:
       - ./.cometbft/testnet/node1:/cometbft
     ports:
@@ -64,10 +84,14 @@ services:
     image: cometbft/cometbft:latest
     depends_on:
       - abci-node2
+    entrypoint:
+      - /bin/sh
+      - -c
     command:
-      - node
-      - --home
-      - /cometbft
+      - >
+        cometbft unsafe-reset-all --home /cometbft &&
+        rm -f /cometbft/config/addrbook.json &&
+        exec cometbft node --home /cometbft
     volumes:
       - ./.cometbft/testnet/node2:/cometbft
     ports:

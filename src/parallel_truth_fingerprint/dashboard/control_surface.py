@@ -11,6 +11,19 @@ import json
 import threading
 
 from parallel_truth_fingerprint.config.ranges import DEFAULT_COMPRESSOR_PROFILE
+from parallel_truth_fingerprint.dashboard.evidence_view import (
+    build_dashboard_explainability_view,
+)
+from parallel_truth_fingerprint.dashboard.event_timeline import (
+    COMPONENT_DEFINITIONS,
+    build_dashboard_event_views,
+)
+from parallel_truth_fingerprint.dashboard.guidance_view import (
+    build_dashboard_guidance_view,
+)
+from parallel_truth_fingerprint.dashboard.pipeline_view import (
+    build_dashboard_pipeline_view,
+)
 from parallel_truth_fingerprint.scenario_control import (
     SUPPORTED_DEMO_SCENARIOS,
     resolve_runtime_scenario_control_stage,
@@ -46,6 +59,7 @@ class OperatorActionRecord:
     runtime_command: str
     configuration_change: dict[str, object]
     expected_output_channels: tuple[str, ...]
+    effect_scope: str
     note: str
 
     def to_dict(self) -> dict[str, object]:
@@ -56,6 +70,7 @@ class OperatorActionRecord:
             "runtime_command": self.runtime_command,
             "configuration_change": self.configuration_change,
             "expected_output_channels": list(self.expected_output_channels),
+            "effect_scope": self.effect_scope,
             "note": self.note,
         }
 
@@ -90,6 +105,7 @@ class LocalOperatorDashboardController:
                     runtime_command="start_runtime()",
                     configuration_change={},
                     expected_output_channels=("runtime_state",),
+                    effect_scope="no_change_already_running",
                     note="Runtime start ignored because the dashboard runtime is already running.",
                 )
                 return self.build_dashboard_state()
@@ -110,6 +126,7 @@ class LocalOperatorDashboardController:
                     "persistence_stage",
                     "fingerprint_lifecycle",
                 ),
+                effect_scope="runtime_command_started",
                 note="Dashboard requested the autonomous runtime to start from cycle 1.",
             )
             self._runtime_thread = threading.Thread(
@@ -138,6 +155,11 @@ class LocalOperatorDashboardController:
                 runtime_command="stop_runtime()",
                 configuration_change={"runtime_state": "stopped"},
                 expected_output_channels=("runtime_state",),
+                effect_scope=(
+                    "runtime_command_requested_stop"
+                    if self._runtime_thread is not None and self._runtime_thread.is_alive()
+                    else "no_change_already_stopped"
+                ),
                 note=note,
             )
             return self.build_dashboard_state()
@@ -153,7 +175,8 @@ class LocalOperatorDashboardController:
             )
 
         with self._lock:
-            applies_on_cycle = 1 if not self._is_runtime_active_locked() else self._current_cycle_locked() + 1
+            runtime_is_live = self._is_runtime_active_locked()
+            applies_on_cycle = 1 if not runtime_is_live else self._current_cycle_locked() + 1
             self._configured_scenario = normalized_name
             self._scenario_start_cycle = applies_on_cycle
             self._append_action(
@@ -168,9 +191,19 @@ class LocalOperatorDashboardController:
                     normalized_name,
                     applies_on_cycle,
                 ),
+                effect_scope=(
+                    "applies_next_cycle"
+                    if runtime_is_live
+                    else "configuration_only_until_next_start"
+                ),
                 note=(
-                    f"Dashboard configured scenario '{normalized_name}' "
-                    f"to activate on cycle {applies_on_cycle}."
+                    f"Dashboard configured scenario '{normalized_name}' to activate on cycle "
+                    f"{applies_on_cycle}. "
+                    + (
+                        "The runtime is live, so the change will affect the next eligible cycle."
+                        if runtime_is_live
+                        else "The runtime is stopped, so this only updates configured state until the next start."
+                    )
                 ),
             )
             return self.build_dashboard_state()
@@ -180,7 +213,8 @@ class LocalOperatorDashboardController:
 
         with self._lock:
             clamped_power = self._clamp_power(operating_level_pct)
-            applies_on_cycle = 1 if not self._is_runtime_active_locked() else self._current_cycle_locked() + 1
+            runtime_is_live = self._is_runtime_active_locked()
+            applies_on_cycle = 1 if not runtime_is_live else self._current_cycle_locked() + 1
             self._configured_power = clamped_power
             self._append_action(
                 action="set_power",
@@ -188,9 +222,19 @@ class LocalOperatorDashboardController:
                 runtime_command=f"set_power({clamped_power})",
                 configuration_change={"demo_power": clamped_power},
                 expected_output_channels=POWER_OUTPUT_CHANNELS,
+                effect_scope=(
+                    "applies_next_cycle"
+                    if runtime_is_live
+                    else "configuration_only_until_next_start"
+                ),
                 note=(
                     f"Dashboard configured compressor operating level to {clamped_power}% "
-                    f"starting on cycle {applies_on_cycle}."
+                    f"starting on cycle {applies_on_cycle}. "
+                    + (
+                        "The runtime is live, so the change will affect the next eligible cycle."
+                        if runtime_is_live
+                        else "The runtime is stopped, so this only updates configured state until the next start."
+                    )
                 ),
             )
             return self.build_dashboard_state()
@@ -199,12 +243,16 @@ class LocalOperatorDashboardController:
         """Return one inspectable dashboard state payload for the UI."""
 
         with self._lock:
+            generated_at = _utc_now()
             latest_payload = self._latest_runtime_payload or {}
             latest_cycle = latest_payload.get("latest_cycle") or {}
             runtime_info = latest_payload.get("runtime") or {}
             scenario_info = latest_payload.get("scenario_control") or {}
             fingerprint_lifecycle = latest_cycle.get("fingerprint_lifecycle") or {}
             simulator_snapshot = latest_cycle.get("simulator_snapshot") or {}
+            operator_actions = [
+                action.to_dict() for action in reversed(self._action_log)
+            ]
 
             validation_level = (
                 fingerprint_lifecycle.get("source_dataset_validation_level")
@@ -214,13 +262,34 @@ class LocalOperatorDashboardController:
                 fingerprint_lifecycle.get("limitation_note")
                 or "The fingerprint base is still runtime-valid only, not yet meaningful-fingerprint-valid, because the adequacy floor remains below target."
             )
+            event_views = build_dashboard_event_views(
+                generated_at=generated_at,
+                latest_runtime_payload=latest_payload,
+                operator_actions=operator_actions,
+            )
+            explainability = build_dashboard_explainability_view(
+                generated_at=generated_at,
+                latest_runtime_payload=latest_payload,
+                operator_actions=operator_actions,
+                limitation_note=limitation_note,
+            )
+            pipeline_view = build_dashboard_pipeline_view(
+                latest_runtime_payload=latest_payload,
+                event_views=event_views,
+            )
+            guidance_view = build_dashboard_guidance_view(
+                latest_runtime_payload=latest_payload,
+                explainability=explainability,
+                limitation_note=limitation_note,
+            )
 
             return {
-                "generated_at": _utc_now(),
+                "generated_at": generated_at,
                 "runtime": {
                     "ui_status": self._runtime_status,
                     "is_running": self._is_runtime_active_locked(),
                     "last_runtime_status": self._last_runtime_status,
+                    "status_note": self._runtime_status_note_locked(),
                     "current_cycle": runtime_info.get("current_cycle", 0),
                     "completed_cycles": runtime_info.get("completed_cycles", 0),
                     "cycle_interval_seconds": runtime_info.get(
@@ -237,9 +306,11 @@ class LocalOperatorDashboardController:
                     "configured_scenario": self._configured_scenario,
                     "scenario_start_cycle": self._scenario_start_cycle,
                     "configured_power_pct": self._configured_power,
+                    "apply_mode": self._control_apply_mode_locked(),
+                    "runtime_effect_note": self._control_runtime_note_locked(),
                 },
                 "operator_feedback": {
-                    "actions": [action.to_dict() for action in reversed(self._action_log)],
+                    "actions": operator_actions,
                 },
                 "monitoring": {
                     "active_scenario": (
@@ -278,6 +349,10 @@ class LocalOperatorDashboardController:
                     ),
                     "replay_behavior": latest_cycle.get("replay_behavior"),
                 },
+                "events": event_views,
+                "pipeline": pipeline_view,
+                "explainability": explainability,
+                "guidance": guidance_view,
                 "limitations": {
                     "source_dataset_validation_level": validation_level,
                     "note": limitation_note,
@@ -313,6 +388,7 @@ class LocalOperatorDashboardController:
                     runtime_command="runtime_error",
                     configuration_change={},
                     expected_output_channels=("runtime_state",),
+                    effect_scope="runtime_error",
                     note=f"Dashboard runtime failed: {exc}",
                 )
         finally:
@@ -369,6 +445,7 @@ class LocalOperatorDashboardController:
         runtime_command: str,
         configuration_change: dict[str, object],
         expected_output_channels: tuple[str, ...],
+        effect_scope: str,
         note: str,
     ) -> None:
         self._action_log.append(
@@ -379,6 +456,7 @@ class LocalOperatorDashboardController:
                 runtime_command=runtime_command,
                 configuration_change=configuration_change,
                 expected_output_channels=expected_output_channels,
+                effect_scope=effect_scope,
                 note=note,
             )
         )
@@ -390,6 +468,50 @@ class LocalOperatorDashboardController:
         if self._latest_runtime_payload is None:
             return 0
         return int(self._latest_runtime_payload.get("runtime", {}).get("current_cycle", 0))
+
+    def _runtime_status_note_locked(self) -> str:
+        if self._last_error:
+            return (
+                "The last runtime attempt failed before a live cycle completed. "
+                "Inspect the active failure message and fix the live path before trusting operator changes."
+            )
+        if self._runtime_status == "running":
+            return (
+                "The runtime is active. Watch cycle count and valid-artifact growth to confirm live continuity."
+            )
+        if self._runtime_status == "starting":
+            return (
+                "The runtime is starting. The first live cycle is still being established."
+            )
+        if self._runtime_status == "stopping":
+            return "The runtime is stopping at the next safe cycle boundary."
+        return (
+            "The runtime is stopped. Start it from the dashboard before expecting live cycle effects."
+        )
+
+    def _control_apply_mode_locked(self) -> str:
+        if self._runtime_status == "running":
+            return "next_cycle"
+        if self._runtime_status in {"starting", "stopping"}:
+            return "queued_until_runtime_stabilizes"
+        return "next_start"
+
+    def _control_runtime_note_locked(self) -> str:
+        apply_mode = self._control_apply_mode_locked()
+        if apply_mode == "next_cycle":
+            return (
+                "Scenario and power changes are applied to the next eligible live cycle. "
+                "They do not rewrite the current cycle retroactively."
+            )
+        if apply_mode == "queued_until_runtime_stabilizes":
+            return (
+                "The runtime is not in a stable running cycle yet. Control changes are queued and "
+                "will only take effect once live cycling continues."
+            )
+        return (
+            "The runtime is stopped. Control changes update configured state only and will not affect "
+            "live cycles until the next start."
+        )
 
     @staticmethod
     def _clamp_power(value: float) -> float:
@@ -517,6 +639,12 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
     """Return the local Story 4.6 dashboard page."""
 
     initial_state_json = json.dumps(initial_state)
+    component_option_markup = "\n".join(
+        (
+            f'<option value="{definition["id"]}">{definition["label"]}</option>'
+            for definition in COMPONENT_DEFINITIONS
+        )
+    )
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -537,13 +665,13 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
     * {{ box-sizing: border-box; }}
     body {{
       margin: 0;
-      font-family: "IBM Plex Mono", "Consolas", monospace;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       color: var(--text);
       background:
         radial-gradient(circle at top right, rgba(70,212,181,0.14), transparent 24rem),
         linear-gradient(160deg, #0c1014, var(--bg));
     }}
-    .shell {{ width: min(1440px, calc(100vw - 2rem)); margin: 1rem auto 2rem; display: grid; gap: 1rem; }}
+    .shell {{ width: min(1320px, calc(100vw - 1.5rem)); margin: 0.75rem auto 2rem; display: grid; gap: 1rem; }}
     .panel {{
       background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent), var(--panel);
       border: 1px solid var(--line);
@@ -559,10 +687,25 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       border-radius: 12px;
       padding: 0.8rem 1rem;
     }}
+    .status-banner {{
+      border-left: 4px solid var(--teal);
+      background: rgba(70,212,181,0.08);
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      font-size: 0.9rem;
+    }}
+    .error-banner {{
+      border-left: 4px solid #ff7d5c;
+      background: rgba(255,125,92,0.1);
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }}
     .metrics, .controls, .grid {{ display: grid; gap: 1rem; }}
     .metrics {{ grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }}
     .controls {{ grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }}
-    .grid {{ grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); align-items: start; }}
+    .grid {{ grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); align-items: start; }}
     .metric {{
       background: var(--panel-2);
       border: 1px solid var(--line);
@@ -587,6 +730,10 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       color: #071012;
       font-weight: 700;
     }}
+    button:disabled {{
+      cursor: not-allowed;
+      opacity: 0.45;
+    }}
     button.secondary {{ background: linear-gradient(135deg, var(--amber), #d46f3d); }}
     button.ghost {{ background: var(--panel-2); color: var(--text); }}
     .row {{ display: flex; flex-wrap: wrap; gap: 0.7rem; }}
@@ -600,6 +747,7 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       max-height: 24rem;
       overflow: auto;
       font-size: 0.8rem;
+      font-family: "IBM Plex Mono", "Consolas", monospace;
     }}
     .action-list {{ display: grid; gap: 0.7rem; }}
     .action {{
@@ -610,6 +758,158 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       font-size: 0.82rem;
     }}
     .action strong {{ color: var(--teal); }}
+    .event {{
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.8rem;
+      font-size: 0.82rem;
+    }}
+    .event strong {{ color: var(--teal); }}
+    .event small {{ display: block; color: var(--muted); margin-bottom: 0.35rem; }}
+    .status-card {{
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.8rem;
+      font-size: 0.82rem;
+    }}
+    .status-card strong {{ color: var(--teal); display: block; margin-bottom: 0.35rem; }}
+    .bullet-list {{
+      margin: 0;
+      padding-left: 1rem;
+      display: grid;
+      gap: 0.45rem;
+      font-size: 0.84rem;
+    }}
+    .pipeline-panel {{ display: grid; gap: 1rem; }}
+    .pipeline-flow {{ color: var(--muted); font-size: 0.82rem; }}
+    .pipeline-row {{ display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }}
+    .pipeline-label {{
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+    }}
+    .pipeline-card {{
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent), var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.85rem;
+      display: grid;
+      gap: 0.55rem;
+      min-height: 8.5rem;
+    }}
+    .pipeline-card.process {{ border-color: rgba(70, 212, 181, 0.35); }}
+    .pipeline-card.sensor {{ border-color: rgba(247, 189, 89, 0.35); }}
+    .pipeline-card.edge {{ border-color: rgba(42, 161, 192, 0.35); }}
+    .pipeline-card.consensus {{ border-color: rgba(70, 212, 181, 0.28); }}
+    .pipeline-card.scada {{ border-color: rgba(184, 150, 255, 0.28); }}
+    .pipeline-card.comparison {{ border-color: rgba(255, 125, 92, 0.28); }}
+    .pipeline-card.fingerprint {{ border-color: rgba(255, 210, 105, 0.28); }}
+    .pipeline-card h3 {{
+      margin: 0;
+      font-size: 0.92rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }}
+    .pipeline-status {{
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--text);
+      min-height: 3.3rem;
+    }}
+    .pipeline-metrics {{
+      display: grid;
+      gap: 0.4rem;
+      grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    }}
+    .pipeline-metric {{
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.5rem 0.6rem;
+      background: rgba(255,255,255,0.02);
+    }}
+    .pipeline-metric .metric-label {{
+      display: block;
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.2rem;
+    }}
+    .pipeline-metric .metric-value {{ font-size: 0.88rem; font-weight: 700; }}
+    .pipeline-card button {{
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--line);
+      padding: 0.55rem 0.7rem;
+    }}
+    .channel-strip {{
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }}
+    .channel-badge {{
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.75rem;
+      background: rgba(255,255,255,0.02);
+      font-size: 0.8rem;
+    }}
+    .channel-badge strong {{ display: block; color: var(--teal); margin-bottom: 0.3rem; }}
+    .channel-badge .muted {{ font-size: 0.76rem; }}
+    .guidance-grid {{ display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }}
+    .guidance-card {{
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.85rem;
+      display: grid;
+      gap: 0.55rem;
+      font-size: 0.82rem;
+    }}
+    .guidance-card strong {{ color: var(--teal); display: block; }}
+    details.panel {{
+      padding: 0;
+      overflow: hidden;
+    }}
+    details.panel > summary {{
+      list-style: none;
+      cursor: pointer;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }}
+    details.panel > summary::-webkit-details-marker {{ display: none; }}
+    details.panel > summary::after {{
+      content: "Open";
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }}
+    details.panel[open] > summary::after {{ content: "Hide"; }}
+    .details-body {{
+      padding: 0 1rem 1rem;
+      display: grid;
+      gap: 1rem;
+    }}
+    .details-grid {{
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }}
+    .subpanel {{
+      display: grid;
+      gap: 0.6rem;
+    }}
+    @media (max-width: 1100px) {{
+      .shell {{ width: min(100vw - 1rem, 1320px); }}
+    }}
   </style>
 </head>
 <body>
@@ -620,6 +920,8 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
         <div class="muted">Local SCADA-inspired operator dashboard and control surface for the real prototype flow.</div>
       </div>
       <div class="banner" id="limitation-banner"></div>
+      <div class="status-banner" id="runtime-note"></div>
+      <div class="error-banner" id="runtime-error" hidden></div>
       <div class="metrics">
         <div class="metric"><span class="label">Runtime</span><span class="value" id="runtime-status">unknown</span></div>
         <div class="metric"><span class="label">Current Cycle</span><span class="value" id="current-cycle">0</span></div>
@@ -644,12 +946,61 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
         <h2>Scenario Control</h2>
         <label>Scenario<select id="scenario-select"></select></label>
         <button id="apply-scenario" class="ghost">Apply Scenario</button>
+        <div class="muted" id="scenario-effect-note" style="margin-top: 0.75rem;"></div>
       </div>
       <div class="panel">
         <h2>Compressor Control</h2>
         <label>Operating Level (%)<input id="power-input" type="range" min="0" max="100" step="1"></label>
         <div class="muted">Current input: <span id="power-preview">0</span>%</div>
         <div class="row" style="margin-top: 0.75rem;"><button id="apply-power" class="ghost">Apply Power</button></div>
+        <div class="muted" id="power-effect-note" style="margin-top: 0.75rem;"></div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>Visual Operational Pipeline</h2>
+        <div class="pipeline-panel">
+          <div class="pipeline-flow" id="pipeline-flow-summary"></div>
+          <div>
+            <div class="pipeline-label">Physical Process</div>
+            <div class="pipeline-row process" id="pipeline-row-process"></div>
+          </div>
+          <div>
+            <div class="pipeline-label">Distributed Edges</div>
+            <div class="pipeline-row edges" id="pipeline-row-edges"></div>
+          </div>
+          <div>
+            <div class="pipeline-label">Consensus And Supervisory Interpretation</div>
+            <div class="pipeline-row decision" id="pipeline-row-decision"></div>
+          </div>
+          <div>
+            <div class="pipeline-label">Distinct Output Channels</div>
+            <div class="channel-strip" id="pipeline-channels"></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Human-Readable Status</h2>
+        <div class="action-list" id="translated-statuses"></div>
+      </div>
+      <div class="panel">
+        <h2>What Changed Since Startup</h2>
+        <div class="pre" id="startup-summary"></div>
+        <div class="row" style="margin-top: 1rem; align-items: flex-start;">
+          <div style="flex: 1 1 18rem;">
+            <div class="muted" style="margin-bottom: 0.5rem;">Happened already</div>
+            <ul class="bullet-list" id="happened-already"></ul>
+          </div>
+          <div style="flex: 1 1 18rem;">
+            <div class="muted" style="margin-bottom: 0.5rem;">Not happened yet</div>
+            <ul class="bullet-list" id="not-happened-yet"></ul>
+          </div>
+          <div style="flex: 1 1 18rem;">
+            <div class="muted" style="margin-bottom: 0.5rem;">Expected next</div>
+            <ul class="bullet-list" id="expected-next"></ul>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -658,25 +1009,67 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
         <h2>Transparent Operator Feedback</h2>
         <div class="action-list" id="operator-actions"></div>
       </div>
-      <div class="panel">
-        <h2>Process and Sensor State</h2>
-        <div class="pre" id="process-state"></div>
-      </div>
-      <div class="panel">
-        <h2>Edge and Consensus State</h2>
-        <div class="pre" id="edge-state"></div>
-      </div>
-      <div class="panel">
-        <h2>Cycle History</h2>
-        <div class="pre" id="cycle-history"></div>
-      </div>
-    </section>
-
-    <section class="grid">
-      <div class="panel"><h2>SCADA Divergence</h2><div class="pre" id="channel-scada"></div></div>
-      <div class="panel"><h2>Consensus Status</h2><div class="pre" id="channel-consensus"></div></div>
-      <div class="panel"><h2>Fingerprint Inference</h2><div class="pre" id="channel-fingerprint"></div></div>
-      <div class="panel"><h2>Replay Behavior</h2><div class="pre" id="channel-replay"></div></div>
+      <details class="panel">
+        <summary><h2>Demo Guidance</h2></summary>
+        <div class="details-body">
+          <div class="muted" id="guidance-note"></div>
+          <div class="guidance-grid" id="guidance-panels"></div>
+        </div>
+      </details>
+      <details class="panel">
+        <summary><h2>Operational Event Timeline</h2></summary>
+        <div class="details-body">
+          <div class="muted">Interpreted events derived from current runtime, cycle history, and operator actions.</div>
+          <div class="action-list" id="global-events"></div>
+        </div>
+      </details>
+      <details class="panel" id="component-log-details">
+        <summary><h2>Component Log Explorer</h2></summary>
+        <div class="details-body">
+          <label>Component<select id="component-select">{component_option_markup}</select></label>
+          <div class="muted" id="raw-log-note"></div>
+          <div class="details-grid">
+            <div class="subpanel">
+              <div class="muted">Interpreted component events</div>
+              <div class="action-list" id="component-events"></div>
+            </div>
+            <div class="subpanel">
+              <div class="muted">Raw component log</div>
+              <div class="pre" id="component-raw-log"></div>
+            </div>
+          </div>
+        </div>
+      </details>
+      <details class="panel">
+        <summary><h2>Technical Runtime State</h2></summary>
+        <div class="details-body">
+          <div class="details-grid">
+            <div class="subpanel">
+              <h2>Process and Sensor State</h2>
+              <div class="pre" id="process-state"></div>
+            </div>
+            <div class="subpanel">
+              <h2>Edge and Consensus State</h2>
+              <div class="pre" id="edge-state"></div>
+            </div>
+            <div class="subpanel">
+              <h2>Cycle History</h2>
+              <div class="pre" id="cycle-history"></div>
+            </div>
+          </div>
+        </div>
+      </details>
+      <details class="panel">
+        <summary><h2>Raw Channel Details</h2></summary>
+        <div class="details-body">
+          <div class="details-grid">
+            <div class="subpanel"><h2>SCADA Divergence</h2><div class="pre" id="channel-scada"></div></div>
+            <div class="subpanel"><h2>Consensus Status</h2><div class="pre" id="channel-consensus"></div></div>
+            <div class="subpanel"><h2>Fingerprint Inference</h2><div class="pre" id="channel-fingerprint"></div></div>
+            <div class="subpanel"><h2>Replay Behavior</h2><div class="pre" id="channel-replay"></div></div>
+          </div>
+        </div>
+      </details>
     </section>
   </div>
   <script>
@@ -692,6 +1085,176 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
     function formatJson(value) {{
       return JSON.stringify(value ?? {{}}, null, 2);
     }}
+    function renderBulletList(rootId, items, emptyText) {{
+      const root = document.getElementById(rootId);
+      root.innerHTML = "";
+      if (!items.length) {{
+        const li = document.createElement("li");
+        li.textContent = emptyText;
+        root.appendChild(li);
+        return;
+      }}
+      for (const item of items) {{
+        const li = document.createElement("li");
+        li.textContent = item;
+        root.appendChild(li);
+      }}
+    }}
+    function renderEvents(rootId, events, emptyText) {{
+      const root = document.getElementById(rootId);
+      root.innerHTML = "";
+      if (!events.length) {{
+        root.innerHTML = `<div class="muted">${{emptyText}}</div>`;
+        return;
+      }}
+      for (const event of events) {{
+        const div = document.createElement("div");
+        div.className = "event";
+        div.innerHTML = `
+          <small>${{event.runtime_reference ?? "runtime"}} | ${{event.recorded_at ?? "n/a"}}</small>
+          <div><strong>${{event.component_label ?? event.component ?? "component"}}</strong></div>
+          <div>${{event.message ?? "No interpreted event message available."}}</div>
+        `;
+        root.appendChild(div);
+      }}
+    }}
+    function renderTranslatedStatuses(translatedStatuses) {{
+      const root = document.getElementById("translated-statuses");
+      root.innerHTML = "";
+      const entries = Object.entries(translatedStatuses ?? {{}});
+      if (!entries.length) {{
+        root.innerHTML = '<div class="muted">No translated statuses available yet.</div>';
+        return;
+      }}
+      for (const [, status] of entries) {{
+        const div = document.createElement("div");
+        div.className = "status-card";
+        div.innerHTML = `
+          <strong>${{status.label ?? "Status"}}</strong>
+          <div class="muted">raw=${{status.raw_value ?? "unknown"}}</div>
+          <div>${{status.explanation ?? ""}}</div>
+        `;
+        root.appendChild(div);
+      }}
+    }}
+    function renderPipeline(pipelineView) {{
+      document.getElementById("pipeline-flow-summary").textContent =
+        pipelineView?.flow_summary ?? "No pipeline summary available yet.";
+      const rowMap = {{
+        process: document.getElementById("pipeline-row-process"),
+        edges: document.getElementById("pipeline-row-edges"),
+        decision: document.getElementById("pipeline-row-decision"),
+      }};
+      for (const root of Object.values(rowMap)) {{
+        root.innerHTML = "";
+      }}
+      for (const row of pipelineView?.rows ?? []) {{
+        const root = rowMap[row.id];
+        if (!root) {{
+          continue;
+        }}
+        for (const node of row.nodes ?? []) {{
+          const card = document.createElement("div");
+          card.className = `pipeline-card ${{node.kind ?? ""}}`;
+          const metricsMarkup = (node.metrics ?? [])
+            .map(
+              (metric) => `
+                <div class="pipeline-metric">
+                  <span class="metric-label">${{metric.label ?? "Metric"}}</span>
+                  <span class="metric-value">${{metric.value ?? "n/a"}}</span>
+                </div>
+              `
+            )
+            .join("");
+          card.innerHTML = `
+            <h3>${{node.title ?? "Component"}}</h3>
+            <div class="pipeline-status">${{node.status ?? "No live status available yet."}}</div>
+            <div class="pipeline-metrics">${{metricsMarkup}}</div>
+            <button type="button" data-component="${{node.log_component_id ?? node.component_id}}">Open logs</button>
+          `;
+          card.querySelector("button")?.addEventListener("click", (event) => {{
+            const componentId = event.currentTarget.dataset.component;
+            const componentSelect = document.getElementById("component-select");
+            componentSelect.value = componentId;
+            document.getElementById("component-log-details").open = true;
+            renderState(window.__dashboardState ?? initialState);
+          }});
+          root.appendChild(card);
+        }}
+      }}
+      const channelRoot = document.getElementById("pipeline-channels");
+      channelRoot.innerHTML = "";
+      for (const channel of pipelineView?.channel_separation ?? []) {{
+        const badge = document.createElement("div");
+        badge.className = "channel-badge";
+        badge.innerHTML = `
+          <strong>${{channel.label ?? "Channel"}}</strong>
+          <div class="muted">status=${{channel.status ?? "unknown"}}</div>
+          <div>${{channel.explanation ?? ""}}</div>
+        `;
+        channelRoot.appendChild(badge);
+      }}
+    }}
+    function renderGuidance(guidanceView) {{
+      document.getElementById("guidance-note").textContent =
+        guidanceView?.raw_evidence_note ?? "";
+      const root = document.getElementById("guidance-panels");
+      root.innerHTML = "";
+      for (const panel of guidanceView?.panels ?? []) {{
+        const card = document.createElement("div");
+        card.className = "guidance-card";
+        const bulletsMarkup = (panel.bullets ?? [])
+          .map((bullet) => `<li>${{bullet}}</li>`)
+          .join("");
+        card.innerHTML = `
+          <strong>${{panel.title ?? "Guidance"}}</strong>
+          <div>${{panel.summary ?? ""}}</div>
+          <ul class="bullet-list">${{bulletsMarkup}}</ul>
+        `;
+        root.appendChild(card);
+      }}
+      if (!(guidanceView?.panels ?? []).length) {{
+        root.innerHTML = '<div class="muted">No demo guidance is available yet.</div>';
+      }}
+    }}
+    function renderStartupEvidence(evidenceView) {{
+      const whatChanged = evidenceView?.what_changed_since_startup ?? {{}};
+      const summary = {{
+        runtime_start_time: whatChanged.runtime_start_time,
+        elapsed_runtime: whatChanged.elapsed_runtime,
+        current_cycle_count: whatChanged.current_cycle_count,
+        valid_artifact_growth: whatChanged.valid_artifact_count_growth?.summary,
+        has_training_happened: whatChanged.training?.has_training_happened,
+        first_training_reference: whatChanged.training?.first_training_reference,
+        current_model_usage: whatChanged.training?.current_model_usage,
+        current_model_identity: whatChanged.training?.current_model_identity,
+        has_fingerprint_been_created: whatChanged.questions_answered?.has_fingerprint_been_created,
+        what_changed_since_startup: whatChanged.questions_answered?.what_changed_since_startup,
+        what_evidence_exists_in_this_run: whatChanged.questions_answered?.what_evidence_exists_in_this_run,
+        what_is_expected_next: whatChanged.questions_answered?.what_is_expected_next,
+      }};
+      document.getElementById("startup-summary").textContent = formatJson(summary);
+      renderBulletList(
+        "happened-already",
+        whatChanged.happened_already ?? [],
+        "No completed evidence is available yet."
+      );
+      renderBulletList(
+        "not-happened-yet",
+        whatChanged.not_happened_yet ?? [],
+        "No pending milestones are currently listed."
+      );
+      const expectedItems = [];
+      if (whatChanged.expected_next?.summary) {{
+        expectedItems.push(whatChanged.expected_next.summary);
+      }}
+      document.getElementById("limitation-banner").textContent = whatChanged.limitation ?? "";
+      renderBulletList(
+        "expected-next",
+        expectedItems,
+        "No next-step prediction is available yet."
+      );
+    }}
     function renderActions(actions) {{
       const root = document.getElementById("operator-actions");
       root.innerHTML = "";
@@ -705,6 +1268,7 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
         div.innerHTML = `
           <div><strong>${{action.action}}</strong> <span class="muted">applied_at=${{action.applied_at}}</span></div>
           <div class="muted">cycle=${{action.applies_on_cycle}} command=${{action.runtime_command}}</div>
+          <div class="muted">effect_scope=${{action.effect_scope ?? "unknown"}}</div>
           <div class="muted">config=${{JSON.stringify(action.configuration_change)}}</div>
           <div class="muted">expected_outputs=${{action.expected_output_channels.join(", ")}}</div>
           <div>${{action.note}}</div>
@@ -718,6 +1282,10 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       const monitoring = state.monitoring ?? {{}};
       const lifecycle = monitoring.lifecycle ?? {{}};
       const channels = state.channels ?? {{}};
+      const events = state.events ?? {{}};
+      const pipeline = state.pipeline ?? {{}};
+      const explainability = state.explainability ?? {{}};
+      const guidance = state.guidance ?? {{}};
       document.getElementById("runtime-status").textContent = runtime.ui_status ?? "unknown";
       document.getElementById("current-cycle").textContent = runtime.current_cycle ?? 0;
       document.getElementById("cadence-seconds").textContent = `${{runtime.cycle_interval_seconds ?? 0}}s`;
@@ -727,6 +1295,36 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       document.getElementById("model-status").textContent = lifecycle.model_status ?? "unknown";
       document.getElementById("validation-level").textContent = state.limitations?.source_dataset_validation_level ?? "runtime_valid_only";
       document.getElementById("limitation-banner").textContent = state.limitations?.note ?? "";
+      document.getElementById("runtime-note").textContent = runtime.status_note ?? "";
+      const runtimeError = document.getElementById("runtime-error");
+      if (runtime.last_error) {{
+        runtimeError.hidden = false;
+        runtimeError.textContent = `Active failure: ${{runtime.last_error}}`;
+      }} else {{
+        runtimeError.hidden = true;
+        runtimeError.textContent = "";
+      }}
+      const applyMode = controls.apply_mode ?? "next_start";
+      document.getElementById("scenario-effect-note").textContent =
+        controls.runtime_effect_note ?? "";
+      document.getElementById("power-effect-note").textContent =
+        controls.runtime_effect_note ?? "";
+      document.getElementById("apply-scenario").textContent =
+        applyMode === "next_cycle"
+          ? "Apply Next Cycle"
+          : applyMode === "queued_until_runtime_stabilizes"
+            ? "Queue Scenario"
+            : "Save For Next Start";
+      document.getElementById("apply-power").textContent =
+        applyMode === "next_cycle"
+          ? "Apply Next Cycle"
+          : applyMode === "queued_until_runtime_stabilizes"
+            ? "Queue Power Change"
+            : "Save For Next Start";
+      document.getElementById("start-runtime").disabled =
+        runtime.ui_status === "starting" || runtime.ui_status === "running";
+      document.getElementById("stop-runtime").disabled =
+        runtime.ui_status === "stopped";
       const scenarioSelect = document.getElementById("scenario-select");
       if (!scenarioSelect.options.length) {{
         for (const scenario of controls.supported_scenarios ?? []) {{
@@ -740,7 +1338,38 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       const powerInput = document.getElementById("power-input");
       powerInput.value = String(controls.configured_power_pct ?? 0);
       document.getElementById("power-preview").textContent = powerInput.value;
+      const componentSelect = document.getElementById("component-select");
+      if (events.components?.length && !componentSelect.dataset.initialized) {{
+        componentSelect.innerHTML = "";
+        for (const component of events.components) {{
+          const option = document.createElement("option");
+          option.value = component.id;
+          option.textContent = component.label;
+          componentSelect.appendChild(option);
+        }}
+        componentSelect.dataset.initialized = "true";
+      }}
+      const selectedComponent = componentSelect.value || "compressor";
       renderActions(state.operator_feedback?.actions ?? []);
+      renderPipeline(pipeline);
+      renderTranslatedStatuses(explainability.translated_statuses ?? {{}});
+      renderGuidance(guidance);
+      renderStartupEvidence(explainability);
+      renderEvents(
+        "global-events",
+        events.global_timeline ?? [],
+        "No interpreted events available yet."
+      );
+      renderEvents(
+        "component-events",
+        events.component_timelines?.[selectedComponent] ?? [],
+        "No interpreted events available for this component yet."
+      );
+      document.getElementById("component-raw-log").textContent = formatJson(
+        events.component_raw_logs?.[selectedComponent] ?? {{}}
+      );
+      document.getElementById("raw-log-note").textContent =
+        events.raw_log_ground_truth_note ?? "";
       document.getElementById("process-state").textContent = formatJson({{
         compressor_state: monitoring.compressor_state,
         sensor_values: monitoring.sensor_values,
@@ -760,7 +1389,9 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
     }}
     async function refreshState() {{
       const response = await fetch("/api/state");
-      renderState(await response.json());
+      const state = await response.json();
+      window.__dashboardState = state;
+      renderState(state);
     }}
     document.getElementById("start-runtime").addEventListener("click", async () => {{ await postJson("/api/runtime/start"); await refreshState(); }});
     document.getElementById("stop-runtime").addEventListener("click", async () => {{ await postJson("/api/runtime/stop"); await refreshState(); }});
@@ -775,8 +1406,17 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
     document.getElementById("power-input").addEventListener("input", (event) => {{
       document.getElementById("power-preview").textContent = event.target.value;
     }});
+    document.getElementById("component-select").addEventListener("change", () => {{
+      renderState(window.__dashboardState ?? initialState);
+    }});
+    window.__dashboardState = initialState;
     renderState(initialState);
-    setInterval(refreshState, 2000);
+    setInterval(async () => {{
+      const response = await fetch("/api/state");
+      const state = await response.json();
+      window.__dashboardState = state;
+      renderState(state);
+    }}, 2000);
   </script>
 </body>
 </html>

@@ -292,3 +292,8 @@ print('TRAINING_WINDOW_COUNT', metadata['training_window_count'])
 - `tests/lstm_service/test_lifecycle.py`
 - `tests/lstm_service/test_lifecycle_runtime_smoke.py`
 - `tests/test_runtime_demo.py`
+
+## Stabilization Follow-up
+
+- Fixed the live local consensus startup path so stale CometBFT validator state no longer blocks cycle 1 from committing after stack restart.
+- Revalidated the real CLI runtime path with a 2-cycle smoke run through `scripts/run_local_demo.py`.

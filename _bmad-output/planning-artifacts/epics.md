@@ -709,3 +709,154 @@ So that I can observe the prototype behavior and trigger approved scenarios with
 **When** the UI is designed and implemented
 **Then** it is SCADA-inspired in layout style and operator feel only
 **And** it remains lightweight and demo-oriented rather than becoming a production-grade industrial HMI.
+
+## Mini-Epic 5: Demo Explainability, Operational Visualization, and Evidence-Guided Dashboard Refinement
+
+Mini-Epic 5 is a bounded demo-readiness layer on top of the implemented Epic 4 dashboard and runtime. It does not change the four research pillars, replace the existing runtime/control path, or introduce new services or storage boundaries.
+
+Scope boundary:
+
+- In scope:
+  - interpreted operational events derived from existing runtime/log/state outputs
+  - optional raw-log access alongside interpreted views
+  - component-scoped event/log inspection
+  - visual operational pipeline and live component state overlays
+  - human-readable status translation and startup-to-now evidence summaries
+  - demo-guidance panels derived from existing runtime, scenario, lifecycle, and evidence state
+- Out of scope:
+  - changes to the runtime/control architecture
+  - new backend services or persistence layers
+  - new ML logic or new anomaly engines
+  - enterprise-grade SCADA/HMI features
+  - fake backend behavior for demo polish
+
+Sequencing note:
+
+- The approved Epic 5 implementation order is:
+  - Story 5.1
+  - Story 5.3
+  - Story 5.2
+  - Story 5.4
+- This order is intentional: interpreted evidence and explainability are established before the visual pipeline and final demo-guidance layer.
+
+### Story 5.1: Add Interpreted Operational Event Timeline with Component-Scoped Raw Log Access
+
+As a researcher and demo operator,
+I want the dashboard to present interpreted operational events globally and by component while preserving raw logs as technical ground truth,
+So that I can explain the current runtime state without losing access to the underlying evidence.
+
+**Acceptance Criteria:**
+
+**Given** the existing runtime/log/state outputs
+**When** the dashboard is rendered
+**Then** it shows a global interpreted event timeline derived from current runtime, cycle-history, and operator-action state
+**And** it does not invent events that are not traceable to those existing sources.
+
+**Given** the component-scoped inspection requirement
+**When** the operator selects a dashboard component
+**Then** the dashboard shows interpreted events and raw logs for that same component
+**And** raw logs remain available as technical ground truth.
+
+**Given** the minimum supported component set
+**When** the component log explorer is used
+**Then** it supports:
+- compressor
+- temperature sensor
+- pressure sensor
+- rpm sensor
+- edge 1
+- edge 2
+- edge 3
+- consensus
+- SCADA comparison
+- fingerprint / LSTM lifecycle
+
+### Story 5.3: Add Human-Readable Status Translation and "What Changed Since Startup" Evidence View
+
+As a researcher and demo operator,
+I want the dashboard to translate technical runtime state into human-readable explanations and summarize what changed since startup,
+So that I can explain the current prototype run honestly during the live demo without decoding raw metadata on the fly.
+
+**Acceptance Criteria:**
+
+**Given** the current lifecycle, consensus, replay, and fingerprint outputs
+**When** the dashboard is rendered
+**Then** it translates technical labels into human-readable explanations
+**And** it keeps the runtime-valid-only limitation explicit.
+
+**Given** the startup-to-now evidence requirement
+**When** the dashboard is rendered
+**Then** it shows:
+- runtime start time
+- elapsed runtime
+- current cycle count
+- valid artifact growth
+- whether training has happened
+- when training first happened
+- whether the current model was reused or retrained
+- current model identity if available
+- what has happened already
+- what has not happened yet
+- what is expected next
+
+### Story 5.2: Add Visual Operational Pipeline and Live Component State Overlay
+
+As a researcher and demo operator,
+I want the dashboard to show the prototype as a visual operational pipeline with live interpreted state per component,
+So that a professor or evaluator can understand the real runtime flow without reading developer-oriented JSON blocks.
+
+**Acceptance Criteria:**
+
+**Given** the live dashboard state
+**When** the visual pipeline is rendered
+**Then** it shows:
+- compressor
+- temperature sensor
+- pressure sensor
+- rpm sensor
+- edge 1
+- edge 2
+- edge 3
+- consensus
+- SCADA-side system/computer view
+- SCADA comparison
+- fingerprint / LSTM stage
+
+**Given** the visual operational flow requirement
+**When** the operator changes compressor power and the runtime advances
+**Then** the visual pipeline shows the cause/effect path:
+- power -> sensors -> edges -> consensus -> SCADA comparison -> fingerprint
+**And** the values shown are derived from the real runtime state rather than UI-only effects.
+
+**Given** the Story 5.1 component evidence model
+**When** the operator interacts with a major pipeline box
+**Then** that box can expose or link to its component-scoped interpreted events and raw logs.
+
+### Story 5.4: Add Demo Guidance Panels for "What Is Happening", "What Should Happen", and "What Changed"
+
+As a researcher and demo operator,
+I want the dashboard to explain what the system is doing, what should happen, and what has changed in concise demo-oriented language,
+So that the prototype can support a live academic demonstration without requiring constant verbal decoding of internal state.
+
+**Acceptance Criteria:**
+
+**Given** the current runtime, scenario, lifecycle, and evidence state
+**When** the dashboard is rendered
+**Then** it includes concise guidance panels explaining:
+- what the system is doing
+- what should happen during normal operation
+- what should change during replay
+- what should change during SCADA divergence
+- what evidence indicates success or anomaly
+
+**Given** the run-progress requirement
+**When** the dashboard is rendered
+**Then** it explicitly communicates:
+- what has happened already
+- what has not happened yet
+- what is expected next
+
+**Given** the academic-honesty requirement
+**When** the guidance panels describe fingerprint behavior
+**Then** they do not overclaim ML strength or dataset adequacy
+**And** they preserve access to raw technical evidence.

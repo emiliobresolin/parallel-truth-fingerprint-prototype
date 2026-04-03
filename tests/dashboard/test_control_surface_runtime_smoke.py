@@ -365,6 +365,36 @@ class DashboardControlSurfaceRuntimeSmokeTests(unittest.TestCase):
                         replay_state["channels"]["replay_behavior"]["output_channel"],
                         "scada_replay_behavior",
                     )
+                    self.assertIn("events", replay_state)
+                    self.assertIn("global_timeline", replay_state["events"])
+                    self.assertIn(
+                        "compressor",
+                        replay_state["events"]["component_timelines"],
+                    )
+                    self.assertIn(
+                        "compressor",
+                        replay_state["events"]["component_raw_logs"],
+                    )
+                    self.assertIn("pipeline", replay_state)
+                    self.assertEqual(
+                        replay_state["pipeline"]["rows"][0]["nodes"][0]["title"],
+                        "Compressor",
+                    )
+                    self.assertEqual(
+                        replay_state["pipeline"]["rows"][0]["nodes"][0]["metrics"][0]["value"],
+                        "20.0%",
+                    )
+                    self.assertIn("explainability", replay_state)
+                    self.assertTrue(
+                        replay_state["explainability"]["translated_statuses"]
+                    )
+                    self.assertIn("guidance", replay_state)
+                    self.assertTrue(replay_state["guidance"]["panels"])
+                    self.assertTrue(
+                        replay_state["explainability"]["what_changed_since_startup"][
+                            "training"
+                        ]["has_training_happened"]
+                    )
                     self.assertEqual(
                         replay_state["monitoring"]["lifecycle"]["training_events"],
                         ["reused"],

@@ -348,3 +348,9 @@ print('REPLAY_WINDOW_COUNT', replay_manifest['window_count'])
 - `tests/scenario_control/test_runtime.py`
 - `tests/scenario_control/test_runtime_smoke.py`
 - `tests/test_runtime_demo.py`
+
+## Stabilization Follow-up
+
+- Fixed the real dashboard start path so the live runtime now completes cycles instead of stopping on the first CometBFT commit.
+- Surfaced runtime health and active failure state as primary dashboard information.
+- Clarified stopped-state control behavior so scenario/power changes are shown as configuration-only until the next start.
