@@ -4,6 +4,15 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from parallel_truth_fingerprint.dashboard.runtime_binding import (
+    extract_divergent_sensors,
+)
+from parallel_truth_fingerprint.lstm_service.dataset_artifacts import (
+    DATASET_PREFIX,
+    DEFAULT_MIN_ELIGIBLE_ARTIFACT_COUNT,
+    DEFAULT_MIN_WINDOW_COUNT,
+)
+
 
 RUNTIME_VALID_ONLY_EXPLANATION = (
     "The fingerprint pipeline is running correctly, but the current model is still "
@@ -17,6 +26,7 @@ def build_dashboard_explainability_view(
     latest_runtime_payload: dict[str, object] | None,
     operator_actions: list[dict[str, object]],
     limitation_note: str,
+    artifact_json_loader=None,
 ) -> dict[str, object]:
     """Build human-readable status translation and evidence summaries."""
 
@@ -28,6 +38,8 @@ def build_dashboard_explainability_view(
     consensus_summary = latest_cycle.get("consensus_summary") or {}
     replay_behavior = latest_cycle.get("replay_behavior") or {}
     fingerprint_results = latest_cycle.get("fingerprint_inference_results") or []
+    replay_inference_results = latest_cycle.get("replay_inference_results") or []
+    comparison_output = latest_cycle.get("comparison_output") or {}
     runtime_start_time = _find_runtime_start_time(operator_actions)
     elapsed_runtime = _compute_elapsed_runtime(
         runtime_start_time=runtime_start_time,
@@ -43,6 +55,23 @@ def build_dashboard_explainability_view(
     first_training_cycle = _first_training_cycle(cycle_history)
     latest_training_mode = _latest_training_mode(lifecycle)
     current_model_identity = _current_model_identity(lifecycle, cycle_history)
+    current_dataset_manifest_key = _current_dataset_manifest_key(lifecycle, cycle_history)
+    current_dataset_manifest = _load_json_artifact(
+        current_dataset_manifest_key,
+        artifact_json_loader=artifact_json_loader,
+    )
+    current_model_metadata = _load_json_artifact(
+        current_model_identity,
+        artifact_json_loader=artifact_json_loader,
+    )
+    source_dataset_manifest_key = _source_dataset_manifest_key(
+        lifecycle=lifecycle,
+        current_model_metadata=current_model_metadata,
+    )
+    source_dataset_manifest = _load_json_artifact(
+        source_dataset_manifest_key,
+        artifact_json_loader=artifact_json_loader,
+    )
     validation_level = str(
         lifecycle.get("source_dataset_validation_level") or "runtime_valid_only"
     )
@@ -73,6 +102,24 @@ def build_dashboard_explainability_view(
     expected_next = _build_expected_next(
         lifecycle=lifecycle,
         current_model_identity=current_model_identity,
+    )
+    fingerprint_readiness = _build_fingerprint_readiness(
+        lifecycle=lifecycle,
+        operator_actions=operator_actions,
+        fingerprint_results=fingerprint_results,
+        replay_behavior=replay_behavior,
+        replay_inference_results=replay_inference_results,
+        comparison_output=comparison_output,
+        source_dataset_manifest=source_dataset_manifest,
+        source_dataset_manifest_key=source_dataset_manifest_key,
+        current_dataset_manifest=current_dataset_manifest,
+        current_dataset_manifest_key=current_dataset_manifest_key,
+        current_model_metadata=current_model_metadata,
+        current_model_identity=current_model_identity,
+        latest_training_mode=latest_training_mode,
+        first_training_cycle=first_training_cycle,
+        limitation_note=limitation_note,
+        validation_level=validation_level,
     )
 
     return {
@@ -121,6 +168,7 @@ def build_dashboard_explainability_view(
             "expected_next": expected_next,
             "limitation": limitation_note,
         },
+        "fingerprint_readiness": fingerprint_readiness,
     }
 
 
@@ -489,3 +537,461 @@ def _evidence_answer(
         f"The run currently shows {latest_valid_artifact_count} valid persisted artifacts. "
         f"{model_text} {limitation_note}"
     )
+
+
+def _build_fingerprint_readiness(
+    *,
+    lifecycle: dict[str, object],
+    operator_actions: list[dict[str, object]],
+    fingerprint_results: list[dict[str, object]],
+    replay_behavior: dict[str, object],
+    replay_inference_results: list[dict[str, object]],
+    comparison_output: dict[str, object],
+    source_dataset_manifest: dict[str, object] | None,
+    source_dataset_manifest_key: str | None,
+    current_dataset_manifest: dict[str, object] | None,
+    current_dataset_manifest_key: str | None,
+    current_model_metadata: dict[str, object] | None,
+    current_model_identity: str | None,
+    latest_training_mode: str,
+    first_training_cycle: int | None,
+    limitation_note: str,
+    validation_level: str,
+) -> dict[str, object]:
+    adequacy_source = source_dataset_manifest or current_dataset_manifest or {}
+    adequacy_assessment = adequacy_source.get("adequacy_assessment") or {}
+    eligible_artifact_count = int(
+        adequacy_assessment.get("eligible_artifact_count")
+        or lifecycle.get("eligible_history_count")
+        or 0
+    )
+    window_count = int(
+        adequacy_assessment.get("window_count")
+        or adequacy_source.get("window_count")
+        or lifecycle.get("window_count")
+        or 0
+    )
+    minimum_eligible = int(
+        adequacy_assessment.get("minimum_eligible_artifact_count")
+        or DEFAULT_MIN_ELIGIBLE_ARTIFACT_COUNT
+    )
+    minimum_windows = int(
+        adequacy_assessment.get("minimum_window_count")
+        or DEFAULT_MIN_WINDOW_COUNT
+    )
+    threshold_origin = _threshold_origin(
+        fingerprint_results=fingerprint_results,
+        replay_inference_results=replay_inference_results,
+    )
+    classification_threshold = _classification_threshold(
+        fingerprint_results=fingerprint_results,
+        replay_behavior=replay_behavior,
+    )
+    readiness_state = _readiness_state(
+        validation_level=validation_level,
+        current_model_identity=current_model_identity,
+    )
+    provenance = {
+        "model_identity": current_model_identity or "not_available",
+        "model_id": _string_or_default(
+            (current_model_metadata or {}).get("model_id"),
+        ),
+        "source_dataset_id": _string_or_default(
+            (current_model_metadata or {}).get("source_dataset_id")
+            or (adequacy_source or {}).get("dataset_id"),
+        ),
+        "source_dataset_manifest_key": _string_or_default(source_dataset_manifest_key),
+        "current_dataset_manifest_key": _string_or_default(current_dataset_manifest_key),
+        "training_window_count": _string_or_default(
+            (current_model_metadata or {}).get("training_window_count"),
+        ),
+        "threshold_origin": _string_or_default(threshold_origin),
+        "classification_threshold": _string_or_default(classification_threshold),
+        "current_limitation": limitation_note,
+    }
+    training_details = {
+        "first_training_reference": _string_or_default(
+            None if first_training_cycle is None else f"cycle {first_training_cycle}"
+        ),
+        "current_model_usage": latest_training_mode,
+        "trained_at": _string_or_default(
+            (current_model_metadata or {}).get("created_at"),
+        ),
+        "epochs": _string_or_default((current_model_metadata or {}).get("epochs")),
+        "batch_size": _string_or_default(
+            (current_model_metadata or {}).get("batch_size"),
+        ),
+        "loss_name": _string_or_default(
+            (current_model_metadata or {}).get("loss_name"),
+        ),
+        "final_training_loss": _string_or_default(
+            (current_model_metadata or {}).get("final_training_loss"),
+        ),
+        "sequence_length": _string_or_default(
+            (current_model_metadata or {}).get("sequence_length"),
+        ),
+        "feature_schema": _feature_schema_text(
+            (current_model_metadata or {}).get("feature_schema"),
+        ),
+    }
+    working_now = _readiness_working_now(
+        current_model_identity=current_model_identity,
+        threshold_origin=threshold_origin,
+        fingerprint_results=fingerprint_results,
+        replay_behavior=replay_behavior,
+    )
+    evidence_available = _readiness_evidence_available(
+        provenance=provenance,
+        eligible_artifact_count=eligible_artifact_count,
+        minimum_eligible=minimum_eligible,
+        window_count=window_count,
+        minimum_windows=minimum_windows,
+    )
+    not_proven_yet = _readiness_not_proven_yet(
+        current_model_identity=current_model_identity,
+        validation_level=validation_level,
+        minimum_eligible=minimum_eligible,
+        minimum_windows=minimum_windows,
+    )
+    evidence_matrix = _build_evidence_matrix(
+        operator_actions=operator_actions,
+        fingerprint_results=fingerprint_results,
+        replay_behavior=replay_behavior,
+        comparison_output=comparison_output,
+        validation_level=validation_level,
+        threshold_origin=threshold_origin,
+        limitation_note=limitation_note,
+    )
+    return {
+        "summary": readiness_state["summary"],
+        "readiness_state": readiness_state,
+        "adequacy_gate": {
+            "validation_level": validation_level,
+            "label": readiness_state["label"],
+            "eligible_artifact_count": eligible_artifact_count,
+            "minimum_eligible_artifact_count": minimum_eligible,
+            "window_count": window_count,
+            "minimum_window_count": minimum_windows,
+            "adequacy_met": validation_level == "meaningful_fingerprint_valid",
+            "summary": (
+                f"Source dataset evidence: {eligible_artifact_count}/{minimum_eligible} eligible artifacts "
+                f"and {window_count}/{minimum_windows} temporal windows."
+            ),
+        },
+        "provenance": provenance,
+        "training_details": training_details,
+        "working_now": working_now,
+        "evidence_available": evidence_available,
+        "not_proven_yet": not_proven_yet,
+        "evidence_matrix": evidence_matrix,
+    }
+
+
+def _readiness_state(
+    *,
+    validation_level: str,
+    current_model_identity: str | None,
+) -> dict[str, str]:
+    if validation_level == "meaningful_fingerprint_valid":
+        return {
+            "raw_value": validation_level,
+            "label": "Fingerprint readiness target met",
+            "summary": (
+                "The saved fingerprint model is backed by a dataset that meets the agreed "
+                "adequacy floor."
+            ),
+            "explanation": (
+                "The current model and its source dataset satisfy the stronger adequacy gate "
+                "for a more defensible fingerprint claim."
+            ),
+        }
+    if current_model_identity:
+        return {
+            "raw_value": validation_level,
+            "label": "Runtime-valid only: fingerprint pipeline works, but readiness is still below target",
+            "summary": (
+                "A saved fingerprint model exists and the inference path is operating, but "
+                "the source dataset remains below the stronger adequacy floor."
+            ),
+            "explanation": RUNTIME_VALID_ONLY_EXPLANATION,
+        }
+    return {
+        "raw_value": validation_level,
+        "label": "Fingerprint training evidence is still being accumulated",
+        "summary": (
+            "The prototype is still gathering normal-history evidence before a reusable "
+            "fingerprint model can support the demo."
+        ),
+        "explanation": RUNTIME_VALID_ONLY_EXPLANATION,
+    }
+
+
+def _current_dataset_manifest_key(
+    lifecycle: dict[str, object],
+    cycle_history: list[dict[str, object]],
+) -> str | None:
+    manifest_key = lifecycle.get("dataset_manifest_object_key")
+    if manifest_key:
+        return str(manifest_key)
+    for cycle_entry in reversed(cycle_history):
+        candidate = (
+            (cycle_entry.get("fingerprint_lifecycle") or {}).get("dataset_manifest_object_key")
+        )
+        if candidate:
+            return str(candidate)
+    return None
+
+
+def _source_dataset_manifest_key(
+    *,
+    lifecycle: dict[str, object],
+    current_model_metadata: dict[str, object] | None,
+) -> str | None:
+    source_dataset_id = (current_model_metadata or {}).get("source_dataset_id")
+    if source_dataset_id:
+        return f"{DATASET_PREFIX}{source_dataset_id}.manifest.json"
+    manifest_key = lifecycle.get("dataset_manifest_object_key")
+    return None if manifest_key is None else str(manifest_key)
+
+
+def _load_json_artifact(
+    object_key: str | None,
+    *,
+    artifact_json_loader,
+) -> dict[str, object] | None:
+    if not object_key or artifact_json_loader is None:
+        return None
+    try:
+        payload = artifact_json_loader(str(object_key))
+    except Exception:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    return payload
+
+
+def _threshold_origin(
+    *,
+    fingerprint_results: list[dict[str, object]],
+    replay_inference_results: list[dict[str, object]],
+) -> str | None:
+    for result in list(fingerprint_results) + list(replay_inference_results):
+        threshold_origin = result.get("threshold_origin")
+        if threshold_origin:
+            return str(threshold_origin)
+    return None
+
+
+def _classification_threshold(
+    *,
+    fingerprint_results: list[dict[str, object]],
+    replay_behavior: dict[str, object],
+) -> float | None:
+    if fingerprint_results:
+        threshold = fingerprint_results[0].get("classification_threshold")
+        if threshold is not None:
+            return float(threshold)
+    threshold = replay_behavior.get("classification_threshold")
+    if threshold is not None:
+        return float(threshold)
+    return None
+
+
+def _feature_schema_text(feature_schema: object) -> str:
+    if not feature_schema:
+        return "not_available"
+    return ", ".join(str(item) for item in feature_schema)
+
+
+def _string_or_default(value: object) -> str:
+    if value in (None, "", [], (), {}):
+        return "not_available"
+    return str(value)
+
+
+def _readiness_working_now(
+    *,
+    current_model_identity: str | None,
+    threshold_origin: str | None,
+    fingerprint_results: list[dict[str, object]],
+    replay_behavior: dict[str, object],
+) -> list[str]:
+    items = []
+    if current_model_identity:
+        items.append("A saved fingerprint model is available for reuse in the current run.")
+    if threshold_origin:
+        items.append(f"The anomaly decision threshold is traced to {threshold_origin}.")
+    if fingerprint_results:
+        items.append(
+            "The generic fingerprint path is producing inference results for the current run."
+        )
+    if replay_behavior:
+        items.append(
+            "Replay or freeze behavior is being evaluated through the fingerprint path and kept separate from SCADA divergence."
+        )
+    return items or ["The run has not yet produced enough fingerprint evidence to show active readiness."]
+
+
+def _readiness_evidence_available(
+    *,
+    provenance: dict[str, str],
+    eligible_artifact_count: int,
+    minimum_eligible: int,
+    window_count: int,
+    minimum_windows: int,
+) -> list[str]:
+    items = [
+        (
+            "Adequacy evidence is available: "
+            f"{eligible_artifact_count}/{minimum_eligible} eligible artifacts and "
+            f"{window_count}/{minimum_windows} windows."
+        )
+    ]
+    if provenance["model_identity"] != "not_available":
+        items.append(f"Model metadata path: {provenance['model_identity']}.")
+    if provenance["source_dataset_id"] != "not_available":
+        items.append(f"Source training dataset: {provenance['source_dataset_id']}.")
+    if provenance["training_window_count"] != "not_available":
+        items.append(
+            f"Saved training window count: {provenance['training_window_count']}."
+        )
+    if provenance["threshold_origin"] != "not_available":
+        items.append(f"Threshold origin: {provenance['threshold_origin']}.")
+    return items
+
+
+def _readiness_not_proven_yet(
+    *,
+    current_model_identity: str | None,
+    validation_level: str,
+    minimum_eligible: int,
+    minimum_windows: int,
+) -> list[str]:
+    items = []
+    if current_model_identity is None:
+        items.append("A reusable fingerprint model has not been created yet.")
+    if validation_level != "meaningful_fingerprint_valid":
+        items.append(
+            "The current fingerprint base is still runtime-valid only and has not met the "
+            f"stronger adequacy floor of {minimum_eligible} eligible artifacts and {minimum_windows} windows."
+        )
+    items.append(
+        "The prototype can show anomaly evidence, but it does not yet prove academically strong generalization from the current dataset."
+    )
+    return items
+
+
+def _build_evidence_matrix(
+    *,
+    operator_actions: list[dict[str, object]],
+    fingerprint_results: list[dict[str, object]],
+    replay_behavior: dict[str, object],
+    comparison_output: dict[str, object],
+    validation_level: str,
+    threshold_origin: str | None,
+    limitation_note: str,
+) -> list[dict[str, object]]:
+    latest_fingerprint = fingerprint_results[0] if fingerprint_results else {}
+    power_actions = [
+        action
+        for action in operator_actions
+        if action.get("action") == "set_power"
+    ]
+    scenario_actions = [
+        action
+        for action in operator_actions
+        if action.get("action") == "set_scenario"
+    ]
+    divergent_sensors = extract_divergent_sensors(comparison_output)
+
+    normal_status = (
+        "Observed"
+        if fingerprint_results and not replay_behavior
+        else "Not observed yet"
+    )
+    power_status = "Observed in this run" if power_actions else "Not exercised yet"
+    replay_status = (
+        "Observed through fingerprint path"
+        if replay_behavior
+        else (
+            "Scenario configured but not currently observed"
+            if any(
+                (action.get("configuration_change") or {}).get("demo_scenario_name")
+                in {"scada_replay", "scada_freeze"}
+                for action in scenario_actions
+            )
+            else "Not exercised yet"
+        )
+    )
+    divergence_status = (
+        "Observed as a separate supervisory channel"
+        if divergent_sensors
+        else (
+            "Scenario configured but not currently divergent"
+            if any(
+                (action.get("configuration_change") or {}).get("demo_scenario_name")
+                == "scada_divergence"
+                for action in scenario_actions
+            )
+            else "Not exercised yet"
+        )
+    )
+    return [
+        {
+            "id": "normal_operation",
+            "label": "Normal operation",
+            "status": normal_status,
+            "summary": (
+                "The generic fingerprint path is evaluating normal-history windows from the current run."
+                if fingerprint_results
+                else "The run has not yet produced a generic fingerprint result for a normal-history window."
+            ),
+            "evidence": [
+                f"classification={latest_fingerprint.get('classification', 'not_available')}",
+                f"threshold_origin={threshold_origin or 'not_available'}",
+                f"validation_level={validation_level}",
+            ],
+        },
+        {
+            "id": "power_variation",
+            "label": "Compressor-power variation",
+            "status": power_status,
+            "summary": (
+                "Operator-applied power changes can now be compared against resulting sensor behavior and the fingerprint output."
+                if power_actions
+                else "No power change has been applied in this run yet."
+            ),
+            "evidence": [
+                f"power_changes={len(power_actions)}",
+                limitation_note,
+            ],
+        },
+        {
+            "id": "replay_or_freeze",
+            "label": "Replay / freeze behavior",
+            "status": replay_status,
+            "summary": (
+                "Replay or freeze behavior is being evaluated through the fingerprint path."
+                if replay_behavior
+                else "Replay or freeze behavior has not been observed in the current dashboard state."
+            ),
+            "evidence": [
+                f"classification={replay_behavior.get('classification', 'not_available')}",
+                f"scenario_mode={replay_behavior.get('scenario_mode', 'not_available')}",
+                f"anomaly_score={replay_behavior.get('anomaly_score', 'not_available')}",
+            ],
+        },
+        {
+            "id": "scada_divergence",
+            "label": "SCADA divergence",
+            "status": divergence_status,
+            "summary": (
+                "SCADA divergence remains a supervisory comparison channel, not a fingerprint channel."
+            ),
+            "evidence": [
+                "This channel is intentionally separate from replay detection.",
+                "divergent_sensors="
+                + (", ".join(divergent_sensors) if divergent_sensors else "none"),
+            ],
+        },
+    ]

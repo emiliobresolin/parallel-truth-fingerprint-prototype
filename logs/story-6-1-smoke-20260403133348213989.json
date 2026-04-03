@@ -1,0 +1,903 @@
+{
+  "runtime": {
+    "status": "stopped_operator",
+    "completed_cycles": 5,
+    "current_cycle": 5,
+    "cycle_interval_seconds": 0.05,
+    "max_cycles": 0,
+    "configured_power_pct": 65.0,
+    "train_after_eligible_cycles": 3,
+    "fingerprint_sequence_length": 2,
+    "model_status": "model_available",
+    "training_events": [
+      "reused"
+    ],
+    "latest_valid_artifact_count": 5,
+    "latest_eligible_history_count": 5,
+    "latest_window_count": 4
+  },
+  "scenario_control": {
+    "configured_scenario": "normal",
+    "scenario_start_cycle": 1
+  },
+  "cycle_history": [
+    {
+      "cycle_index": 1,
+      "round_id": "round-story-6-1-20260403133348213989-001",
+      "final_consensus_status": "success",
+      "persistence_status": "persisted",
+      "artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-001.json",
+      "cadence_stage": {
+        "cycle_index": 1,
+        "status": "continuing_without_sleep",
+        "configured_interval_seconds": 0.05,
+        "elapsed_seconds": 0.256,
+        "next_sleep_seconds": 0.0,
+        "will_continue": true
+      },
+      "scenario_control": {
+        "configured_scenario": "normal",
+        "active_scenario": "normal",
+        "start_cycle": 1,
+        "active": true,
+        "fault_mode": "none",
+        "scada_mode": "match",
+        "scenario_label": "normal",
+        "training_label": "normal",
+        "training_eligible": true,
+        "training_eligibility_reason": "normal_validated_run",
+        "expected_output_channels": [
+          "consensus_alert",
+          "persistence_stage",
+          "fingerprint_lifecycle"
+        ]
+      },
+      "scada_runtime_scenario": {
+        "active": false,
+        "mode": "match",
+        "start_cycle": 0,
+        "replay_source_round_id": null
+      },
+      "fingerprint_lifecycle": {
+        "cycle_index": 1,
+        "valid_artifact_count": 1,
+        "eligible_history_count": 1,
+        "eligible_history_threshold": 3,
+        "window_count": 0,
+        "latest_valid_artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-001.json",
+        "model_status": "no_model_yet",
+        "training_events": [
+          "deferred"
+        ],
+        "inference_status": "skipped_no_model",
+        "inference_result_count": 0,
+        "dataset_manifest_object_key": null,
+        "model_metadata_object_key": null,
+        "source_dataset_validation_level": null,
+        "limitation_note": "The fingerprint pipeline is running correctly on a runtime-valid but not yet meaningfully fingerprint-valid dataset because the current normal-history data still falls below the approved adequacy floor of 30 eligible artifacts and 20 generated windows."
+      },
+      "replay_behavior": null
+    },
+    {
+      "cycle_index": 2,
+      "round_id": "round-story-6-1-20260403133348213989-002",
+      "final_consensus_status": "success",
+      "persistence_status": "persisted",
+      "artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-002.json",
+      "cadence_stage": {
+        "cycle_index": 2,
+        "status": "continuing_without_sleep",
+        "configured_interval_seconds": 0.05,
+        "elapsed_seconds": 0.063,
+        "next_sleep_seconds": 0.0,
+        "will_continue": true
+      },
+      "scenario_control": {
+        "configured_scenario": "normal",
+        "active_scenario": "normal",
+        "start_cycle": 1,
+        "active": true,
+        "fault_mode": "none",
+        "scada_mode": "match",
+        "scenario_label": "normal",
+        "training_label": "normal",
+        "training_eligible": true,
+        "training_eligibility_reason": "normal_validated_run",
+        "expected_output_channels": [
+          "consensus_alert",
+          "persistence_stage",
+          "fingerprint_lifecycle"
+        ]
+      },
+      "scada_runtime_scenario": {
+        "active": false,
+        "mode": "match",
+        "start_cycle": 0,
+        "replay_source_round_id": null
+      },
+      "fingerprint_lifecycle": {
+        "cycle_index": 2,
+        "valid_artifact_count": 2,
+        "eligible_history_count": 2,
+        "eligible_history_threshold": 3,
+        "window_count": 1,
+        "latest_valid_artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-002.json",
+        "model_status": "no_model_yet",
+        "training_events": [
+          "deferred"
+        ],
+        "inference_status": "skipped_no_model",
+        "inference_result_count": 0,
+        "dataset_manifest_object_key": null,
+        "model_metadata_object_key": null,
+        "source_dataset_validation_level": null,
+        "limitation_note": "The fingerprint pipeline is running correctly on a runtime-valid but not yet meaningfully fingerprint-valid dataset because the current normal-history data still falls below the approved adequacy floor of 30 eligible artifacts and 20 generated windows."
+      },
+      "replay_behavior": null
+    },
+    {
+      "cycle_index": 3,
+      "round_id": "round-story-6-1-20260403133348213989-003",
+      "final_consensus_status": "success",
+      "persistence_status": "persisted",
+      "artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-003.json",
+      "cadence_stage": {
+        "cycle_index": 3,
+        "status": "continuing_without_sleep",
+        "configured_interval_seconds": 0.05,
+        "elapsed_seconds": 3.537,
+        "next_sleep_seconds": 0.0,
+        "will_continue": true
+      },
+      "scenario_control": {
+        "configured_scenario": "normal",
+        "active_scenario": "normal",
+        "start_cycle": 1,
+        "active": true,
+        "fault_mode": "none",
+        "scada_mode": "match",
+        "scenario_label": "normal",
+        "training_label": "normal",
+        "training_eligible": true,
+        "training_eligibility_reason": "normal_validated_run",
+        "expected_output_channels": [
+          "consensus_alert",
+          "persistence_stage",
+          "fingerprint_lifecycle"
+        ]
+      },
+      "scada_runtime_scenario": {
+        "active": false,
+        "mode": "match",
+        "start_cycle": 0,
+        "replay_source_round_id": null
+      },
+      "fingerprint_lifecycle": {
+        "cycle_index": 3,
+        "valid_artifact_count": 3,
+        "eligible_history_count": 3,
+        "eligible_history_threshold": 3,
+        "window_count": 2,
+        "latest_valid_artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-003.json",
+        "model_status": "model_available",
+        "training_events": [
+          "started",
+          "completed"
+        ],
+        "inference_status": "skipped_until_next_cycle",
+        "inference_result_count": 0,
+        "dataset_manifest_object_key": "fingerprint-datasets/training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-003::seq-2.manifest.json",
+        "model_metadata_object_key": "fingerprint-models/lstm-fingerprint-training-dataset-round-story-6-1-20260403133348213989-001-round-story-6-1-20260403133348213989-003-seq-2-20260403T133352472195+0000.json",
+        "source_dataset_validation_level": "runtime_valid_only",
+        "limitation_note": "The fingerprint pipeline is running correctly on a runtime-valid but not yet meaningfully fingerprint-valid dataset because the current normal-history data still falls below the approved adequacy floor of 30 eligible artifacts and 20 generated windows."
+      },
+      "replay_behavior": null
+    },
+    {
+      "cycle_index": 4,
+      "round_id": "round-story-6-1-20260403133348213989-004",
+      "final_consensus_status": "success",
+      "persistence_status": "persisted",
+      "artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-004.json",
+      "cadence_stage": {
+        "cycle_index": 4,
+        "status": "continuing_without_sleep",
+        "configured_interval_seconds": 0.05,
+        "elapsed_seconds": 0.262,
+        "next_sleep_seconds": 0.0,
+        "will_continue": true
+      },
+      "scenario_control": {
+        "configured_scenario": "normal",
+        "active_scenario": "normal",
+        "start_cycle": 1,
+        "active": true,
+        "fault_mode": "none",
+        "scada_mode": "match",
+        "scenario_label": "normal",
+        "training_label": "normal",
+        "training_eligible": true,
+        "training_eligibility_reason": "normal_validated_run",
+        "expected_output_channels": [
+          "consensus_alert",
+          "persistence_stage",
+          "fingerprint_lifecycle"
+        ]
+      },
+      "scada_runtime_scenario": {
+        "active": false,
+        "mode": "match",
+        "start_cycle": 0,
+        "replay_source_round_id": null
+      },
+      "fingerprint_lifecycle": {
+        "cycle_index": 4,
+        "valid_artifact_count": 4,
+        "eligible_history_count": 4,
+        "eligible_history_threshold": 3,
+        "window_count": 3,
+        "latest_valid_artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-004.json",
+        "model_status": "model_available",
+        "training_events": [
+          "reused"
+        ],
+        "inference_status": "completed",
+        "inference_result_count": 3,
+        "dataset_manifest_object_key": "fingerprint-datasets/training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-004::seq-2.manifest.json",
+        "model_metadata_object_key": "fingerprint-models/lstm-fingerprint-training-dataset-round-story-6-1-20260403133348213989-001-round-story-6-1-20260403133348213989-003-seq-2-20260403T133352472195+0000.json",
+        "source_dataset_validation_level": "runtime_valid_only",
+        "limitation_note": "The fingerprint pipeline is running correctly on a runtime-valid but not yet meaningfully fingerprint-valid dataset because the current normal-history data still falls below the approved adequacy floor of 30 eligible artifacts and 20 generated windows."
+      },
+      "replay_behavior": null
+    },
+    {
+      "cycle_index": 5,
+      "round_id": "round-story-6-1-20260403133348213989-005",
+      "final_consensus_status": "success",
+      "persistence_status": "persisted",
+      "artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-005.json",
+      "cadence_stage": {
+        "cycle_index": 5,
+        "status": "continuing_without_sleep",
+        "configured_interval_seconds": 0.05,
+        "elapsed_seconds": 0.235,
+        "next_sleep_seconds": 0.0,
+        "will_continue": true
+      },
+      "scenario_control": {
+        "configured_scenario": "normal",
+        "active_scenario": "normal",
+        "start_cycle": 1,
+        "active": true,
+        "fault_mode": "none",
+        "scada_mode": "match",
+        "scenario_label": "normal",
+        "training_label": "normal",
+        "training_eligible": true,
+        "training_eligibility_reason": "normal_validated_run",
+        "expected_output_channels": [
+          "consensus_alert",
+          "persistence_stage",
+          "fingerprint_lifecycle"
+        ]
+      },
+      "scada_runtime_scenario": {
+        "active": false,
+        "mode": "match",
+        "start_cycle": 0,
+        "replay_source_round_id": null
+      },
+      "fingerprint_lifecycle": {
+        "cycle_index": 5,
+        "valid_artifact_count": 5,
+        "eligible_history_count": 5,
+        "eligible_history_threshold": 3,
+        "window_count": 4,
+        "latest_valid_artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-005.json",
+        "model_status": "model_available",
+        "training_events": [
+          "reused"
+        ],
+        "inference_status": "completed",
+        "inference_result_count": 4,
+        "dataset_manifest_object_key": "fingerprint-datasets/training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-005::seq-2.manifest.json",
+        "model_metadata_object_key": "fingerprint-models/lstm-fingerprint-training-dataset-round-story-6-1-20260403133348213989-001-round-story-6-1-20260403133348213989-003-seq-2-20260403T133352472195+0000.json",
+        "source_dataset_validation_level": "runtime_valid_only",
+        "limitation_note": "The fingerprint pipeline is running correctly on a runtime-valid but not yet meaningfully fingerprint-valid dataset because the current normal-history data still falls below the approved adequacy floor of 30 eligible artifacts and 20 generated windows."
+      },
+      "replay_behavior": null
+    }
+  ],
+  "latest_cycle": {
+    "demo": {
+      "cycle_index": 5,
+      "mqtt_transport": "passive",
+      "mqtt_topic": "edges/observations",
+      "fault_mode": "none",
+      "faulty_edges": [],
+      "log_path": "logs/story-6-1-smoke-20260403133348213989.json",
+      "cycle_interval_seconds": 0.05,
+      "train_after_eligible_cycles": 3,
+      "fingerprint_sequence_length": 2,
+      "scenario_name": "normal",
+      "scenario_start_cycle": 1,
+      "scada_mode": "match",
+      "scada_start_cycle": 0
+    },
+    "runtime_cycle": {
+      "current_cycle": 5,
+      "cadence_stage": {
+        "cycle_index": 5,
+        "status": "continuing_without_sleep",
+        "configured_interval_seconds": 0.05,
+        "elapsed_seconds": 0.235,
+        "next_sleep_seconds": 0.0,
+        "will_continue": true
+      }
+    },
+    "simulator_snapshot": {
+      "compressor_id": "compressor-1",
+      "operating_state_pct": 65.0,
+      "sensors": {
+        "temperature": 76.8,
+        "pressure": 5.225,
+        "rpm": 2730.0
+      }
+    },
+    "scenario_control": {
+      "configured_scenario": "normal",
+      "active_scenario": "normal",
+      "start_cycle": 1,
+      "active": true,
+      "fault_mode": "none",
+      "scada_mode": "match",
+      "scenario_label": "normal",
+      "training_label": "normal",
+      "training_eligible": true,
+      "training_eligibility_reason": "normal_validated_run",
+      "expected_output_channels": [
+        "consensus_alert",
+        "persistence_stage",
+        "fingerprint_lifecycle"
+      ]
+    },
+    "scada_runtime_scenario": {
+      "active": false,
+      "mode": "match",
+      "start_cycle": 0,
+      "replay_source_round_id": null
+    },
+    "fingerprint_lifecycle": {
+      "cycle_index": 5,
+      "valid_artifact_count": 5,
+      "eligible_history_count": 5,
+      "eligible_history_threshold": 3,
+      "window_count": 4,
+      "latest_valid_artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-005.json",
+      "model_status": "model_available",
+      "training_events": [
+        "reused"
+      ],
+      "inference_status": "completed",
+      "inference_result_count": 4,
+      "dataset_manifest_object_key": "fingerprint-datasets/training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-005::seq-2.manifest.json",
+      "model_metadata_object_key": "fingerprint-models/lstm-fingerprint-training-dataset-round-story-6-1-20260403133348213989-001-round-story-6-1-20260403133348213989-003-seq-2-20260403T133352472195+0000.json",
+      "source_dataset_validation_level": "runtime_valid_only",
+      "limitation_note": "The fingerprint pipeline is running correctly on a runtime-valid but not yet meaningfully fingerprint-valid dataset because the current normal-history data still falls below the approved adequacy floor of 30 eligible artifacts and 20 generated windows."
+    },
+    "fingerprint_inference_results": [
+      {
+        "output_channel": "lstm_fingerprint",
+        "model_id": "lstm-fingerprint-training-dataset-round-story-6-1-20260403133348213989-001-round-story-6-1-20260403133348213989-003-seq-2-20260403T133352472195+0000",
+        "source_dataset_id": "training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-003::seq-2",
+        "inference_dataset_id": "training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-005::seq-2",
+        "source_dataset_validation_level": "runtime_valid_only",
+        "limitation_note": "The fingerprint pipeline is running correctly on a runtime-valid but not yet meaningfully fingerprint-valid dataset because the current normal-history data still falls below the approved adequacy floor of 30 eligible artifacts and 20 generated windows.",
+        "window_id": "window::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-002",
+        "artifact_keys": [
+          "valid-consensus-artifacts/round-story-6-1-20260403133348213989-001.json",
+          "valid-consensus-artifacts/round-story-6-1-20260403133348213989-002.json"
+        ],
+        "round_ids": [
+          "round-story-6-1-20260403133348213989-001",
+          "round-story-6-1-20260403133348213989-002"
+        ],
+        "timestamps": [
+          "2026-04-01T15:00:00+00:00",
+          "2026-04-01T15:00:00+00:00"
+        ],
+        "anomaly_score": 268249.15625,
+        "classification_threshold": 273049.46875,
+        "threshold_origin": "source_dataset_mean_plus_3std",
+        "classification": "normal"
+      },
+      {
+        "output_channel": "lstm_fingerprint",
+        "model_id": "lstm-fingerprint-training-dataset-round-story-6-1-20260403133348213989-001-round-story-6-1-20260403133348213989-003-seq-2-20260403T133352472195+0000",
+        "source_dataset_id": "training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-003::seq-2",
+        "inference_dataset_id": "training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-005::seq-2",
+        "source_dataset_validation_level": "runtime_valid_only",
+        "limitation_note": "The fingerprint pipeline is running correctly on a runtime-valid but not yet meaningfully fingerprint-valid dataset because the current normal-history data still falls below the approved adequacy floor of 30 eligible artifacts and 20 generated windows.",
+        "window_id": "window::round-story-6-1-20260403133348213989-002::round-story-6-1-20260403133348213989-003",
+        "artifact_keys": [
+          "valid-consensus-artifacts/round-story-6-1-20260403133348213989-002.json",
+          "valid-consensus-artifacts/round-story-6-1-20260403133348213989-003.json"
+        ],
+        "round_ids": [
+          "round-story-6-1-20260403133348213989-002",
+          "round-story-6-1-20260403133348213989-003"
+        ],
+        "timestamps": [
+          "2026-04-01T15:00:00+00:00",
+          "2026-04-01T15:00:00+00:00"
+        ],
+        "anomaly_score": 270649.3125,
+        "classification_threshold": 273049.46875,
+        "threshold_origin": "source_dataset_mean_plus_3std",
+        "classification": "normal"
+      },
+      {
+        "output_channel": "lstm_fingerprint",
+        "model_id": "lstm-fingerprint-training-dataset-round-story-6-1-20260403133348213989-001-round-story-6-1-20260403133348213989-003-seq-2-20260403T133352472195+0000",
+        "source_dataset_id": "training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-003::seq-2",
+        "inference_dataset_id": "training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-005::seq-2",
+        "source_dataset_validation_level": "runtime_valid_only",
+        "limitation_note": "The fingerprint pipeline is running correctly on a runtime-valid but not yet meaningfully fingerprint-valid dataset because the current normal-history data still falls below the approved adequacy floor of 30 eligible artifacts and 20 generated windows.",
+        "window_id": "window::round-story-6-1-20260403133348213989-003::round-story-6-1-20260403133348213989-004",
+        "artifact_keys": [
+          "valid-consensus-artifacts/round-story-6-1-20260403133348213989-003.json",
+          "valid-consensus-artifacts/round-story-6-1-20260403133348213989-004.json"
+        ],
+        "round_ids": [
+          "round-story-6-1-20260403133348213989-003",
+          "round-story-6-1-20260403133348213989-004"
+        ],
+        "timestamps": [
+          "2026-04-01T15:00:00+00:00",
+          "2026-04-01T15:00:00+00:00"
+        ],
+        "anomaly_score": 273060.25,
+        "classification_threshold": 273049.46875,
+        "threshold_origin": "source_dataset_mean_plus_3std",
+        "classification": "anomalous"
+      },
+      {
+        "output_channel": "lstm_fingerprint",
+        "model_id": "lstm-fingerprint-training-dataset-round-story-6-1-20260403133348213989-001-round-story-6-1-20260403133348213989-003-seq-2-20260403T133352472195+0000",
+        "source_dataset_id": "training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-003::seq-2",
+        "inference_dataset_id": "training-dataset::round-story-6-1-20260403133348213989-001::round-story-6-1-20260403133348213989-005::seq-2",
+        "source_dataset_validation_level": "runtime_valid_only",
+        "limitation_note": "The fingerprint pipeline is running correctly on a runtime-valid but not yet meaningfully fingerprint-valid dataset because the current normal-history data still falls below the approved adequacy floor of 30 eligible artifacts and 20 generated windows.",
+        "window_id": "window::round-story-6-1-20260403133348213989-004::round-story-6-1-20260403133348213989-005",
+        "artifact_keys": [
+          "valid-consensus-artifacts/round-story-6-1-20260403133348213989-004.json",
+          "valid-consensus-artifacts/round-story-6-1-20260403133348213989-005.json"
+        ],
+        "round_ids": [
+          "round-story-6-1-20260403133348213989-004",
+          "round-story-6-1-20260403133348213989-005"
+        ],
+        "timestamps": [
+          "2026-04-01T15:00:00+00:00",
+          "2026-04-01T15:00:00+00:00"
+        ],
+        "anomaly_score": 275481.84375,
+        "classification_threshold": 273049.46875,
+        "threshold_origin": "source_dataset_mean_plus_3std",
+        "classification": "anomalous"
+      }
+    ],
+    "replay_behavior": null,
+    "replay_inference_results": [],
+    "cometbft": {
+      "node_version": "story-6-1-smoke",
+      "latest_block_height": "5",
+      "committed_height": 5,
+      "tx_hash": "TX-005",
+      "check_tx_code": 0,
+      "deliver_tx_code": 0
+    },
+    "consensus_summary": {
+      "round_id": "round-story-6-1-20260403133348213989-005",
+      "total_participants": 3,
+      "quorum_required": 2,
+      "valid_participants_after_exclusions": 3,
+      "excluded_edge_ids": [],
+      "exclusion_reasons": [],
+      "excluded_edges": [],
+      "final_consensus_status": "success",
+      "has_consensused_valid_state": true
+    },
+    "committed_round_state": {
+      "round_id": "round-story-6-1-20260403133348213989-005",
+      "commit_height": 5
+    },
+    "consensus_log": {
+      "compact": "round-story-6-1-20260403133348213989-005: status=success participants=3 excluded=0 exclusions[none]",
+      "detailed": "round=round-story-6-1-20260403133348213989-005\nstatus=success\nparticipants=edge-1, edge-2, edge-3\nconsensused_valid_state=present [pressure=5.225, rpm=2730.0, temperature=76.8]",
+      "structured": {
+        "round_id": "round-story-6-1-20260403133348213989-005",
+        "window_started_at": "2026-04-01T14:59:00+00:00",
+        "window_ended_at": "2026-04-01T15:00:00+00:00",
+        "participating_edges": [
+          "edge-1",
+          "edge-2",
+          "edge-3"
+        ],
+        "trust_ranking": [
+          {
+            "edge_id": "edge-1",
+            "score": 0.95
+          },
+          {
+            "edge_id": "edge-2",
+            "score": 0.92
+          },
+          {
+            "edge_id": "edge-3",
+            "score": 0.41
+          }
+        ],
+        "exclusions": [],
+        "trust_evidence": [],
+        "final_status": "success",
+        "consensused_valid_state": {
+          "source_edges": [
+            "edge-1",
+            "edge-2",
+            "edge-3"
+          ],
+          "sensor_values": {
+            "temperature": 76.8,
+            "pressure": 5.225,
+            "rpm": 2730.0
+          }
+        }
+      }
+    },
+    "consensus_alert": {
+      "compact": "none",
+      "detailed": "consensus_alert=none",
+      "structured": null
+    },
+    "scada_state": {
+      "compressor_id": "compressor-1",
+      "source_round_id": "round-story-6-1-20260403133348213989-005",
+      "timestamp": "2026-04-01T15:00:00+00:00",
+      "sensor_values": {
+        "pressure": {
+          "value": 5.225,
+          "unit": "bar",
+          "mode": "match"
+        },
+        "rpm": {
+          "value": 2730.0,
+          "unit": "rpm",
+          "mode": "match"
+        },
+        "temperature": {
+          "value": 76.8,
+          "unit": "degC",
+          "mode": "match"
+        }
+      }
+    },
+    "comparison_stage": {
+      "status": "completed",
+      "compact": "round-story-6-1-20260403133348213989-005: scada_source=round-story-6-1-20260403133348213989-005 outputs[temperature=match(76.8->76.8,diff=0.0,tol=2.0), pressure=match(5.225->5.225,diff=0.0,tol=0.35), rpm=match(2730.0->2730.0,diff=0.0,tol=120.0)]"
+    },
+    "comparison_output": {
+      "compact": "round-story-6-1-20260403133348213989-005: scada_source=round-story-6-1-20260403133348213989-005 outputs[temperature=match(76.8->76.8,diff=0.0,tol=2.0), pressure=match(5.225->5.225,diff=0.0,tol=0.35), rpm=match(2730.0->2730.0,diff=0.0,tol=120.0)]",
+      "structured": {
+        "round_identity": {
+          "round_id": "round-story-6-1-20260403133348213989-005",
+          "window_started_at": "2026-04-01T14:59:00+00:00",
+          "window_ended_at": "2026-04-01T15:00:00+00:00"
+        },
+        "scada_source_round_id": "round-story-6-1-20260403133348213989-005",
+        "divergent_sensors": [],
+        "sensor_outputs": [
+          {
+            "sensor_name": "temperature",
+            "physical_value": 76.8,
+            "scada_value": 76.8,
+            "absolute_difference": 0.0,
+            "tolerance": 2.0,
+            "tolerance_evaluation": "within_tolerance",
+            "divergence_classification": "match"
+          },
+          {
+            "sensor_name": "pressure",
+            "physical_value": 5.225,
+            "scada_value": 5.225,
+            "absolute_difference": 0.0,
+            "tolerance": 0.35,
+            "tolerance_evaluation": "within_tolerance",
+            "divergence_classification": "match"
+          },
+          {
+            "sensor_name": "rpm",
+            "physical_value": 2730.0,
+            "scada_value": 2730.0,
+            "absolute_difference": 0.0,
+            "tolerance": 120.0,
+            "tolerance_evaluation": "within_tolerance",
+            "divergence_classification": "match"
+          }
+        ]
+      }
+    },
+    "scada_divergence_alert": {
+      "compact": "none",
+      "detailed": "scada_alert=none",
+      "structured": null
+    },
+    "persistence_stage": {
+      "status": "persisted",
+      "backend": "minio",
+      "endpoint": "localhost:9000",
+      "host": "localhost",
+      "port": 9000,
+      "secure": false,
+      "bucket": "story-6-1-smoke-20260403133348213989",
+      "artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-005.json",
+      "object_name": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-005.json",
+      "artifact_uri": "minio://story-6-1-smoke-20260403133348213989/valid-consensus-artifacts/round-story-6-1-20260403133348213989-005.json",
+      "storage_action": "put_object",
+      "content_type": "application/json",
+      "write_confirmed": true,
+      "record": {
+        "artifact_key": "valid-consensus-artifacts/round-story-6-1-20260403133348213989-005.json",
+        "persisted_at": "2026-04-03T13:33:52.864248+00:00",
+        "artifact_identity": {
+          "artifact_type": "valid_consensus_artifact",
+          "artifact_version": "2.0",
+          "record_id": "valid-consensus-artifact::valid-consensus-artifacts/round-story-6-1-20260403133348213989-005.json"
+        },
+        "round_identity": {
+          "round_id": "round-story-6-1-20260403133348213989-005",
+          "window_started_at": "2026-04-01T14:59:00+00:00",
+          "window_ended_at": "2026-04-01T15:00:00+00:00"
+        },
+        "consensus_context": {
+          "final_consensus_status": "success",
+          "participating_edges": [
+            "edge-1",
+            "edge-2",
+            "edge-3"
+          ],
+          "quorum_required": 2,
+          "source_edges": [
+            "edge-1",
+            "edge-2",
+            "edge-3"
+          ],
+          "trust_ranking": [
+            {
+              "edge_id": "edge-1",
+              "score": 0.95
+            },
+            {
+              "edge_id": "edge-2",
+              "score": 0.92
+            },
+            {
+              "edge_id": "edge-3",
+              "score": 0.41
+            }
+          ],
+          "exclusions": [],
+          "trust_evidence": []
+        },
+        "validated_state": {
+          "state_type": "consensused_valid_state",
+          "source_edges": [
+            "edge-1",
+            "edge-2",
+            "edge-3"
+          ],
+          "sensor_values": {
+            "temperature": 76.8,
+            "pressure": 5.225,
+            "rpm": 2730.0
+          },
+          "structured_payload_snapshot": {
+            "snapshot_type": "validated_source_view",
+            "selected_source_edge_id": "edge-1",
+            "payloads_by_sensor": {
+              "pressure": {
+                "protocol": "HART",
+                "gateway_id": "GW-EDGE-02",
+                "timestamp": "2026-04-01T15:00:00Z",
+                "device_info": {
+                  "tag": "PIT-101",
+                  "long_tag": "Pressure_Compressor_Discharge",
+                  "manufacturer_id": 26,
+                  "device_type": 35
+                },
+                "process_data": {
+                  "pv": {
+                    "value": 5.225,
+                    "unit": "bar",
+                    "unit_code": 7,
+                    "description": "Process_Pressure"
+                  },
+                  "sv": {
+                    "value": 31.8,
+                    "unit": "degC",
+                    "unit_code": 32,
+                    "description": "Transmitter_Module_Temperature"
+                  },
+                  "loop_current_ma": 13.7,
+                  "pv_percent_range": 52.6,
+                  "physics_metrics": {
+                    "noise_floor": 0.1,
+                    "rate_of_change_dtdt": 0.12,
+                    "local_stability_score": 0.96
+                  }
+                },
+                "diagnostics": {
+                  "device_status_hex": "0x00",
+                  "field_device_malfunction": false,
+                  "loop_current_saturated": false,
+                  "cold_start": false
+                }
+              },
+              "rpm": {
+                "protocol": "HART",
+                "gateway_id": "GW-EDGE-03",
+                "timestamp": "2026-04-01T15:00:00Z",
+                "device_info": {
+                  "tag": "RIT-101",
+                  "long_tag": "Rotation_Compressor_Shaft",
+                  "manufacturer_id": 26,
+                  "device_type": 39
+                },
+                "process_data": {
+                  "pv": {
+                    "value": 2730.0,
+                    "unit": "rpm",
+                    "unit_code": null,
+                    "description": "Shaft_Speed"
+                  },
+                  "loop_current_ma": 14.9,
+                  "pv_percent_range": 64.0,
+                  "physics_metrics": {
+                    "noise_floor": 3.5,
+                    "rate_of_change_dtdt": 15.4,
+                    "local_stability_score": 0.93
+                  }
+                },
+                "diagnostics": {
+                  "device_status_hex": "0x00",
+                  "field_device_malfunction": false,
+                  "loop_current_saturated": false,
+                  "cold_start": false
+                }
+              },
+              "temperature": {
+                "protocol": "HART",
+                "gateway_id": "GW-EDGE-01",
+                "timestamp": "2026-04-01T15:00:00Z",
+                "device_info": {
+                  "tag": "TIT-101",
+                  "long_tag": "Temperature_Compressor_Casing",
+                  "manufacturer_id": 26,
+                  "device_type": 33
+                },
+                "process_data": {
+                  "pv": {
+                    "value": 76.8,
+                    "unit": "degC",
+                    "unit_code": 32,
+                    "description": "Process_Temperature"
+                  },
+                  "sv": {
+                    "value": 54.1,
+                    "unit": "degC",
+                    "unit_code": 32,
+                    "description": "Sensor_Body_Temperature"
+                  },
+                  "loop_current_ma": 14.2,
+                  "pv_percent_range": 65.1,
+                  "physics_metrics": {
+                    "noise_floor": 0.2,
+                    "rate_of_change_dtdt": 0.5,
+                    "local_stability_score": 0.9
+                  }
+                },
+                "diagnostics": {
+                  "device_status_hex": "0x00",
+                  "field_device_malfunction": false,
+                  "loop_current_saturated": false,
+                  "cold_start": false
+                }
+              }
+            }
+          }
+        },
+        "dataset_context": {
+          "scenario_label": "normal",
+          "training_label": "normal",
+          "training_eligible": true,
+          "training_eligibility_reason": "normal_validated_run"
+        },
+        "scada_context": {
+          "scada_state": {
+            "compressor_id": "compressor-1",
+            "source_round_id": "round-story-6-1-20260403133348213989-005",
+            "timestamp": "2026-04-01T15:00:00+00:00",
+            "sensor_values": {
+              "pressure": {
+                "value": 5.225,
+                "unit": "bar",
+                "mode": "match"
+              },
+              "rpm": {
+                "value": 2730.0,
+                "unit": "rpm",
+                "mode": "match"
+              },
+              "temperature": {
+                "value": 76.8,
+                "unit": "degC",
+                "mode": "match"
+              }
+            }
+          },
+          "comparison_output": {
+            "round_identity": {
+              "round_id": "round-story-6-1-20260403133348213989-005",
+              "window_started_at": "2026-04-01T14:59:00+00:00",
+              "window_ended_at": "2026-04-01T15:00:00+00:00"
+            },
+            "scada_source_round_id": "round-story-6-1-20260403133348213989-005",
+            "divergent_sensors": [],
+            "sensor_outputs": [
+              {
+                "sensor_name": "temperature",
+                "physical_value": 76.8,
+                "scada_value": 76.8,
+                "absolute_difference": 0.0,
+                "tolerance": 2.0,
+                "tolerance_evaluation": "within_tolerance",
+                "divergence_classification": "match"
+              },
+              {
+                "sensor_name": "pressure",
+                "physical_value": 5.225,
+                "scada_value": 5.225,
+                "absolute_difference": 0.0,
+                "tolerance": 0.35,
+                "tolerance_evaluation": "within_tolerance",
+                "divergence_classification": "match"
+              },
+              {
+                "sensor_name": "rpm",
+                "physical_value": 2730.0,
+                "scada_value": 2730.0,
+                "absolute_difference": 0.0,
+                "tolerance": 120.0,
+                "tolerance_evaluation": "within_tolerance",
+                "divergence_classification": "match"
+              }
+            ]
+          },
+          "divergence_alert": null
+        },
+        "diagnostics": {
+          "final_consensus_status": "success",
+          "has_scada_divergence": false,
+          "divergent_sensors": [],
+          "participating_edges": [
+            "edge-1",
+            "edge-2",
+            "edge-3"
+          ],
+          "persisted_record_type": "valid_consensus_artifact"
+        }
+      }
+    },
+    "edges": []
+  }
+}

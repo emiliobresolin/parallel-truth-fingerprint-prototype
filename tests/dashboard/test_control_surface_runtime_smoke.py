@@ -394,6 +394,24 @@ class DashboardControlSurfaceRuntimeSmokeTests(unittest.TestCase):
                     self.assertTrue(
                         replay_state["explainability"]["translated_statuses"]
                     )
+                    readiness = replay_state["explainability"]["fingerprint_readiness"]
+                    self.assertEqual(
+                        readiness["provenance"]["model_identity"],
+                        replay_state["monitoring"]["lifecycle"]["model_metadata_object_key"],
+                    )
+                    self.assertEqual(
+                        readiness["provenance"]["training_window_count"],
+                        "2",
+                    )
+                    self.assertEqual(
+                        readiness["provenance"]["threshold_origin"],
+                        "source_dataset_mean_plus_3std",
+                    )
+                    self.assertIn(
+                        "runtime-valid only",
+                        readiness["readiness_state"]["label"].lower(),
+                    )
+                    self.assertTrue(readiness["evidence_matrix"])
                     self.assertIn("guidance", replay_state)
                     self.assertTrue(replay_state["guidance"]["panels"])
                     self.assertTrue(

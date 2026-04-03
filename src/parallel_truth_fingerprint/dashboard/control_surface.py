@@ -24,6 +24,7 @@ from parallel_truth_fingerprint.dashboard.guidance_view import (
 from parallel_truth_fingerprint.dashboard.pipeline_view import (
     build_dashboard_pipeline_view,
 )
+from parallel_truth_fingerprint.persistence import MinioArtifactStore, MinioStoreConfig
 from parallel_truth_fingerprint.scenario_control import (
     SUPPORTED_DEMO_SCENARIOS,
     resolve_runtime_scenario_control_stage,
@@ -93,6 +94,16 @@ class LocalOperatorDashboardController:
         self._configured_power = self._clamp_power(base_config.demo_power)
         self._last_error: str | None = None
         self._action_log: deque[OperatorActionRecord] = deque(maxlen=ACTION_LOG_LIMIT)
+        self._artifact_store = MinioArtifactStore(
+            MinioStoreConfig(
+                endpoint=base_config.minio_endpoint,
+                access_key=base_config.minio_access_key,
+                secret_key=base_config.minio_secret_key,
+                bucket=base_config.minio_bucket,
+                secure=base_config.minio_secure,
+            )
+        )
+        self._artifact_json_cache: dict[str, dict[str, object]] = {}
 
     def start_runtime(self) -> dict[str, object]:
         """Start the real autonomous runtime in the background."""
@@ -272,6 +283,7 @@ class LocalOperatorDashboardController:
                 latest_runtime_payload=latest_payload,
                 operator_actions=operator_actions,
                 limitation_note=limitation_note,
+                artifact_json_loader=self._load_dashboard_artifact_json,
             )
             pipeline_view = build_dashboard_pipeline_view(
                 latest_runtime_payload=latest_payload,
@@ -512,6 +524,20 @@ class LocalOperatorDashboardController:
             "The runtime is stopped. Control changes update configured state only and will not affect "
             "live cycles until the next start."
         )
+
+    def _load_dashboard_artifact_json(
+        self,
+        object_key: str,
+    ) -> dict[str, object] | None:
+        cached = self._artifact_json_cache.get(object_key)
+        if cached is not None:
+            return cached
+        try:
+            payload = self._artifact_store.load_json(object_key)
+        except Exception:
+            return None
+        self._artifact_json_cache[object_key] = payload
+        return payload
 
     @staticmethod
     def _clamp_power(value: float) -> float:
@@ -985,6 +1011,42 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
         <div class="action-list" id="translated-statuses"></div>
       </div>
       <div class="panel">
+        <h2>Fingerprint Readiness</h2>
+        <div class="muted" id="readiness-summary"></div>
+        <div class="details-grid" style="margin-top: 1rem;">
+          <div class="subpanel">
+            <div class="muted">Readiness gate</div>
+            <div class="action-list" id="readiness-gate"></div>
+          </div>
+          <div class="subpanel">
+            <div class="muted">Model provenance</div>
+            <div class="action-list" id="readiness-provenance"></div>
+          </div>
+          <div class="subpanel">
+            <div class="muted">Training details</div>
+            <div class="action-list" id="readiness-training-details"></div>
+          </div>
+        </div>
+        <div style="margin-top: 1rem;">
+          <div class="muted" style="margin-bottom: 0.5rem;">Evidence by behavior</div>
+          <div class="guidance-grid" id="readiness-matrix"></div>
+        </div>
+        <div class="row" style="margin-top: 1rem; align-items: flex-start;">
+          <div style="flex: 1 1 16rem;">
+            <div class="muted" style="margin-bottom: 0.5rem;">Working now</div>
+            <ul class="bullet-list" id="readiness-working-now"></ul>
+          </div>
+          <div style="flex: 1 1 16rem;">
+            <div class="muted" style="margin-bottom: 0.5rem;">Evidence available</div>
+            <ul class="bullet-list" id="readiness-evidence-available"></ul>
+          </div>
+          <div style="flex: 1 1 16rem;">
+            <div class="muted" style="margin-bottom: 0.5rem;">Not proven yet</div>
+            <ul class="bullet-list" id="readiness-not-proven"></ul>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
         <h2>What Changed Since Startup</h2>
         <div class="pre" id="startup-summary"></div>
         <div class="row" style="margin-top: 1rem; align-items: flex-start;">
@@ -1137,6 +1199,23 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
         root.appendChild(div);
       }}
     }}
+    function renderLabelValueList(rootId, items, emptyText) {{
+      const root = document.getElementById(rootId);
+      root.innerHTML = "";
+      if (!items.length) {{
+        root.innerHTML = `<div class="muted">${{emptyText}}</div>`;
+        return;
+      }}
+      for (const item of items) {{
+        const div = document.createElement("div");
+        div.className = "action";
+        div.innerHTML = `
+          <div><strong>${{item.label ?? "Field"}}</strong></div>
+          <div>${{item.value ?? "not_available"}}</div>
+        `;
+        root.appendChild(div);
+      }}
+    }}
     function renderPipeline(pipelineView) {{
       document.getElementById("pipeline-flow-summary").textContent =
         pipelineView?.flow_summary ?? "No pipeline summary available yet.";
@@ -1215,6 +1294,118 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       }}
       if (!(guidanceView?.panels ?? []).length) {{
         root.innerHTML = '<div class="muted">No demo guidance is available yet.</div>';
+      }}
+    }}
+    function renderFingerprintReadiness(readinessView) {{
+      document.getElementById("readiness-summary").textContent =
+        readinessView?.summary ?? "No fingerprint readiness evidence is available yet.";
+      renderLabelValueList(
+        "readiness-gate",
+        [
+          {{
+            label: "Readiness state",
+            value: readinessView?.readiness_state?.label ?? "not_available",
+          }},
+          {{
+            label: "Adequacy gate",
+            value: readinessView?.adequacy_gate?.summary ?? "not_available",
+          }},
+          {{
+            label: "Validation level",
+            value: readinessView?.adequacy_gate?.validation_level ?? "runtime_valid_only",
+          }},
+        ],
+        "No readiness gate is available yet."
+      );
+      renderLabelValueList(
+        "readiness-provenance",
+        [
+          {{
+            label: "Model identity",
+            value: readinessView?.provenance?.model_identity ?? "not_available",
+          }},
+          {{
+            label: "Model id",
+            value: readinessView?.provenance?.model_id ?? "not_available",
+          }},
+          {{
+            label: "Source dataset",
+            value: readinessView?.provenance?.source_dataset_id ?? "not_available",
+          }},
+          {{
+            label: "Training windows",
+            value: readinessView?.provenance?.training_window_count ?? "not_available",
+          }},
+          {{
+            label: "Threshold origin",
+            value: readinessView?.provenance?.threshold_origin ?? "not_available",
+          }},
+        ],
+        "No model provenance is available yet."
+      );
+      renderLabelValueList(
+        "readiness-training-details",
+        [
+          {{
+            label: "First training",
+            value: readinessView?.training_details?.first_training_reference ?? "not_available",
+          }},
+          {{
+            label: "Current model usage",
+            value: readinessView?.training_details?.current_model_usage ?? "not_available",
+          }},
+          {{
+            label: "Trained at",
+            value: readinessView?.training_details?.trained_at ?? "not_available",
+          }},
+          {{
+            label: "Epochs / batch",
+            value: `${{readinessView?.training_details?.epochs ?? "not_available"}} / ${{readinessView?.training_details?.batch_size ?? "not_available"}}`,
+          }},
+          {{
+            label: "Loss / final loss",
+            value: `${{readinessView?.training_details?.loss_name ?? "not_available"}} / ${{readinessView?.training_details?.final_training_loss ?? "not_available"}}`,
+          }},
+          {{
+            label: "Sequence / features",
+            value: `${{readinessView?.training_details?.sequence_length ?? "not_available"}} / ${{readinessView?.training_details?.feature_schema ?? "not_available"}}`,
+          }},
+        ],
+        "No training details are available yet."
+      );
+      renderBulletList(
+        "readiness-working-now",
+        readinessView?.working_now ?? [],
+        "No active readiness evidence is available yet."
+      );
+      renderBulletList(
+        "readiness-evidence-available",
+        readinessView?.evidence_available ?? [],
+        "No readiness evidence is available yet."
+      );
+      renderBulletList(
+        "readiness-not-proven",
+        readinessView?.not_proven_yet ?? [],
+        "No outstanding readiness limitations are listed."
+      );
+      const root = document.getElementById("readiness-matrix");
+      root.innerHTML = "";
+      for (const item of readinessView?.evidence_matrix ?? []) {{
+        const card = document.createElement("div");
+        card.className = "guidance-card";
+        const bulletsMarkup = (item.evidence ?? [])
+          .map((bullet) => `<li>${{bullet}}</li>`)
+          .join("");
+        card.innerHTML = `
+          <strong>${{item.label ?? "Evidence"}}</strong>
+          <div class="muted">status=${{item.status ?? "unknown"}}</div>
+          <div>${{item.summary ?? ""}}</div>
+          <ul class="bullet-list">${{bulletsMarkup}}</ul>
+        `;
+        root.appendChild(card);
+      }}
+      if (!(readinessView?.evidence_matrix ?? []).length) {{
+        root.innerHTML = '<div class="muted">No behavior evidence matrix is available yet.</div>';
       }}
     }}
     function renderStartupEvidence(evidenceView) {{
@@ -1353,6 +1544,7 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       renderActions(state.operator_feedback?.actions ?? []);
       renderPipeline(pipeline);
       renderTranslatedStatuses(explainability.translated_statuses ?? {{}});
+      renderFingerprintReadiness(explainability.fingerprint_readiness ?? {{}});
       renderGuidance(guidance);
       renderStartupEvidence(explainability);
       renderEvents(

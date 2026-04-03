@@ -102,7 +102,7 @@ class FakeDashboardController:
                             "component_label": "Temperature Sensor",
                             "recorded_at": "2026-04-02T00:00:00+00:00",
                             "runtime_reference": "cycle 1",
-                            "message": "Temperature Sensor reported 72.0 on cycle 1.",
+                            "message": "Temperature Sensor reported 72.0 degC on cycle 1.",
                         }
                     ],
                 },
@@ -151,6 +151,52 @@ class FakeDashboardController:
                         "label": "Runtime-valid only",
                         "explanation": "Training pipeline works but adequacy remains below target.",
                     },
+                },
+                "fingerprint_readiness": {
+                    "summary": "A saved fingerprint model exists, but the source dataset is still below the stronger adequacy floor.",
+                    "readiness_state": {
+                        "raw_value": "runtime_valid_only",
+                        "label": "Fingerprint pipeline works, but readiness is still below target",
+                    },
+                    "adequacy_gate": {
+                        "validation_level": "runtime_valid_only",
+                        "summary": "Source dataset evidence: 4/30 eligible artifacts and 2/20 temporal windows.",
+                    },
+                    "provenance": {
+                        "model_identity": "fingerprint-models/model-001.json",
+                        "model_id": "model-001",
+                        "source_dataset_id": "training-dataset::round-1::round-3::seq-2",
+                        "training_window_count": "2",
+                        "threshold_origin": "source_dataset_mean_plus_3std",
+                    },
+                    "training_details": {
+                        "first_training_reference": "cycle 1",
+                        "current_model_usage": "reused_existing_model",
+                        "trained_at": "2026-04-02T00:00:00+00:00",
+                        "epochs": "1",
+                        "batch_size": "1",
+                        "loss_name": "mse",
+                        "final_training_loss": "0.01",
+                        "sequence_length": "2",
+                        "feature_schema": "temperature.pv, pressure.pv, rpm.pv",
+                    },
+                    "working_now": [
+                        "A saved fingerprint model is available for reuse in the current run."
+                    ],
+                    "evidence_available": [
+                        "Threshold origin: source_dataset_mean_plus_3std."
+                    ],
+                    "not_proven_yet": [
+                        "The fingerprint base is still runtime-valid only."
+                    ],
+                    "evidence_matrix": [
+                        {
+                            "label": "Normal operation",
+                            "status": "Observed",
+                            "summary": "The generic fingerprint path is evaluating normal-history windows from the current run.",
+                            "evidence": ["classification=normal"],
+                        }
+                    ],
                 },
                 "what_changed_since_startup": {
                     "runtime_start_time": "2026-04-02T00:00:00+00:00",
@@ -301,6 +347,7 @@ class DashboardControlSurfaceTests(unittest.TestCase):
         self.assertIn("Operational Event Timeline", html)
         self.assertIn("Component Log Explorer", html)
         self.assertIn("Human-Readable Status", html)
+        self.assertIn("Fingerprint Readiness", html)
         self.assertIn("What Changed Since Startup", html)
         self.assertIn("Visual Operational Pipeline", html)
         self.assertIn("Distinct Output Channels", html)
@@ -370,6 +417,7 @@ class DashboardControlSurfaceTests(unittest.TestCase):
         self.assertIn("flow_summary", state["pipeline"])
         self.assertIn("explainability", state)
         self.assertIn("translated_statuses", state["explainability"])
+        self.assertIn("fingerprint_readiness", state["explainability"])
         self.assertIn("what_changed_since_startup", state["explainability"])
         self.assertIn("guidance", state)
         self.assertTrue(state["guidance"]["panels"])

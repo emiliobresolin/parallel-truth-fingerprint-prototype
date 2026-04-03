@@ -67,15 +67,25 @@ def _sample_runtime_payload() -> dict[str, object]:
                 "model_status": "model_available",
                 "training_events": ["reused"],
                 "inference_status": "completed",
+                "dataset_manifest_object_key": "fingerprint-datasets/training-dataset::round-1::round-4::seq-2.manifest.json",
                 "model_metadata_object_key": "fingerprint-models/model-003.json",
                 "source_dataset_validation_level": "runtime_valid_only",
             },
             "fingerprint_inference_results": [
                 {
+                    "model_id": "model-003",
+                    "source_dataset_id": "training-dataset::round-1::round-3::seq-2",
+                    "classification_threshold": 0.25,
+                    "threshold_origin": "source_dataset_mean_plus_3std",
                     "anomaly_score": 0.125,
                     "classification": "normal",
                 }
             ],
+            "comparison_output": {
+                "structured": {
+                    "divergent_sensors": ["temperature"],
+                }
+            },
             "replay_behavior": {
                 "anomaly_score": 0.875,
                 "classification": "anomalous",
@@ -83,6 +93,49 @@ def _sample_runtime_payload() -> dict[str, object]:
             },
         },
     }
+
+
+def _artifact_loader(object_key: str) -> dict[str, object] | None:
+    fixtures = {
+        "fingerprint-models/model-003.json": {
+            "model_id": "model-003",
+            "created_at": "2026-04-02T00:03:00+00:00",
+            "backend": "torch",
+            "model_format": "keras",
+            "model_type": "lstm_autoencoder",
+            "source_dataset_id": "training-dataset::round-1::round-3::seq-2",
+            "feature_schema": ["temperature.pv", "pressure.pv", "rpm.pv"],
+            "sequence_length": 2,
+            "training_window_count": 2,
+            "epochs": 1,
+            "batch_size": 1,
+            "loss_name": "mse",
+            "final_training_loss": 0.01,
+        },
+        "fingerprint-datasets/training-dataset::round-1::round-3::seq-2.manifest.json": {
+            "dataset_id": "training-dataset::round-1::round-3::seq-2",
+            "window_count": 2,
+            "adequacy_assessment": {
+                "validation_level": "runtime_valid_only",
+                "eligible_artifact_count": 3,
+                "window_count": 2,
+                "minimum_eligible_artifact_count": 30,
+                "minimum_window_count": 20,
+            },
+        },
+        "fingerprint-datasets/training-dataset::round-1::round-4::seq-2.manifest.json": {
+            "dataset_id": "training-dataset::round-1::round-4::seq-2",
+            "window_count": 3,
+            "adequacy_assessment": {
+                "validation_level": "runtime_valid_only",
+                "eligible_artifact_count": 4,
+                "window_count": 3,
+                "minimum_eligible_artifact_count": 30,
+                "minimum_window_count": 20,
+            },
+        },
+    }
+    return fixtures.get(object_key)
 
 
 class DashboardEvidenceViewTests(unittest.TestCase):
@@ -98,6 +151,7 @@ class DashboardEvidenceViewTests(unittest.TestCase):
                 }
             ],
             limitation_note="Runtime-valid only.",
+            artifact_json_loader=_artifact_loader,
         )
 
         translated = explainability["translated_statuses"]
@@ -153,6 +207,7 @@ class DashboardEvidenceViewTests(unittest.TestCase):
                 }
             ],
             limitation_note="Runtime-valid only.",
+            artifact_json_loader=_artifact_loader,
         )
 
         evidence = explainability["what_changed_since_startup"]
@@ -176,6 +231,93 @@ class DashboardEvidenceViewTests(unittest.TestCase):
         self.assertTrue(evidence["happened_already"])
         self.assertTrue(evidence["not_happened_yet"])
         self.assertIn("summary", evidence["expected_next"])
+
+    def test_fingerprint_readiness_derives_training_provenance_from_existing_artifacts(self) -> None:
+        explainability = build_dashboard_explainability_view(
+            generated_at="2026-04-02T00:05:00+00:00",
+            latest_runtime_payload=_sample_runtime_payload(),
+            operator_actions=[
+                {
+                    "action": "start_runtime",
+                    "applied_at": "2026-04-02T00:00:00+00:00",
+                    "effect_scope": "runtime_command_started",
+                },
+                {
+                    "action": "set_power",
+                    "applied_at": "2026-04-02T00:02:00+00:00",
+                    "effect_scope": "applies_next_cycle",
+                    "configuration_change": {"demo_power": 80.0},
+                },
+            ],
+            limitation_note="Runtime-valid only.",
+            artifact_json_loader=_artifact_loader,
+        )
+
+        readiness = explainability["fingerprint_readiness"]
+        self.assertEqual(
+            readiness["readiness_state"]["raw_value"],
+            "runtime_valid_only",
+        )
+        self.assertEqual(
+            readiness["adequacy_gate"]["eligible_artifact_count"],
+            3,
+        )
+        self.assertEqual(
+            readiness["provenance"]["model_id"],
+            "model-003",
+        )
+        self.assertEqual(
+            readiness["provenance"]["source_dataset_id"],
+            "training-dataset::round-1::round-3::seq-2",
+        )
+        self.assertEqual(
+            readiness["provenance"]["training_window_count"],
+            "2",
+        )
+        self.assertEqual(
+            readiness["provenance"]["threshold_origin"],
+            "source_dataset_mean_plus_3std",
+        )
+        self.assertEqual(
+            readiness["training_details"]["epochs"],
+            "1",
+        )
+        self.assertIn(
+            "temperature.pv, pressure.pv, rpm.pv",
+            readiness["training_details"]["feature_schema"],
+        )
+
+    def test_fingerprint_readiness_keeps_replay_and_scada_divergence_as_separate_evidence(self) -> None:
+        explainability = build_dashboard_explainability_view(
+            generated_at="2026-04-02T00:05:00+00:00",
+            latest_runtime_payload=_sample_runtime_payload(),
+            operator_actions=[
+                {
+                    "action": "set_scenario",
+                    "applied_at": "2026-04-02T00:04:00+00:00",
+                    "effect_scope": "applies_next_cycle",
+                    "configuration_change": {"demo_scenario_name": "scada_divergence"},
+                }
+            ],
+            limitation_note="Runtime-valid only.",
+            artifact_json_loader=_artifact_loader,
+        )
+
+        matrix = {
+            item["id"]: item for item in explainability["fingerprint_readiness"]["evidence_matrix"]
+        }
+        self.assertEqual(
+            matrix["replay_or_freeze"]["status"],
+            "Observed through fingerprint path",
+        )
+        self.assertEqual(
+            matrix["scada_divergence"]["status"],
+            "Observed as a separate supervisory channel",
+        )
+        self.assertIn(
+            "separate from replay detection",
+            " ".join(matrix["scada_divergence"]["evidence"]).lower(),
+        )
 
 
 if __name__ == "__main__":
