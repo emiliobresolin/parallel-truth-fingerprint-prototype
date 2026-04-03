@@ -860,3 +860,161 @@ So that the prototype can support a live academic demonstration without requirin
 **When** the guidance panels describe fingerprint behavior
 **Then** they do not overclaim ML strength or dataset adequacy
 **And** they preserve access to raw technical evidence.
+
+## Mini-Epic 6: Fingerprint Readiness and Architecture-Aligned Dashboard Correction
+
+Mini-Epic 6 is a bounded stabilization and demo-credibility layer on top of the implemented prototype. It preserves the five real pillars exactly as they already exist:
+
+- acquisition of sensor values
+- decentralization across edges
+- Byzantine consensus across edges
+- comparison between consensused data and SCADA data
+- LSTM-based fingerprint generation
+
+This mini-epic does not add a new research scope. It strengthens how the existing fingerprint is evidenced and how the existing dashboard reflects the real architecture and runtime state.
+
+Scope boundary:
+
+- In scope:
+  - fingerprint readiness evidence derived from existing dataset, model, inference, and runtime artifacts
+  - domain-correct user-facing naming for fingerprint and dashboard elements
+  - semantic correction of dashboard state mapping against the current runtime payload
+  - architecture-aligned grouping of sensors, edges, consensus, SCADA comparison, and fingerprint stages
+  - clearer dashboard hierarchy and standardized collapse behavior
+- Out of scope:
+  - new sensors, new edge roles, or changes to the five pillars
+  - new ML model families, new anomaly engines, or training-policy redesign
+  - new services, new persistence boundaries, or architecture changes
+  - fake UI-only behavior or enterprise-grade SCADA/HMI redesign
+
+Sequencing note:
+
+- The safest implementation order is:
+  - Story 6.2
+  - Story 6.1
+  - Story 6.3
+- This order is intentional:
+  - first correct dashboard truthfulness and state mapping
+  - then expose stronger fingerprint readiness evidence
+  - then reorganize the UI around the corrected architecture and evidence model
+
+### Story 6.1: Establish Fingerprint Readiness Evidence and Meaningful-Validity Gate
+
+As a researcher and demo operator,
+I want the prototype to present explicit fingerprint readiness evidence and a meaningful-validity gate derived from existing artifacts,
+So that the fingerprint can be explained honestly and more defensibly during an academic demonstration without changing the ML architecture.
+
+**Acceptance Criteria:**
+
+**Given** the existing persisted dataset, model metadata, lifecycle state, and inference outputs
+**When** fingerprint readiness is presented in the prototype
+**Then** it derives its readiness summary from those existing artifacts only
+**And** it does not add a new ML model or a new anomaly engine.
+
+**Given** the adequacy-driven readiness requirement
+**When** the fingerprint readiness state is evaluated
+**Then** it explicitly distinguishes between:
+- `runtime_valid_only`
+- `meaningful_fingerprint_valid`
+**And** it ties that distinction back to the approved adequacy floor of:
+- 30 eligible normal artifacts
+- 20 generated windows
+
+**Given** the model-provenance requirement
+**When** readiness evidence is shown
+**Then** it includes at minimum:
+- model identity
+- source dataset identity
+- training window count
+- threshold origin
+- current limitation statement
+
+**Given** the bounded evidence-matrix requirement
+**When** the fingerprint is explained for demo purposes
+**Then** the prototype can summarize evidence for at least:
+- normal operation
+- compressor-power variation
+- replay or freeze behavior
+- SCADA divergence as a separate non-fingerprint channel
+
+**Given** the operator-facing wording requirement
+**When** readiness and limitation text is shown in the UI or dashboard
+**Then** it uses domain language such as fingerprint model, training adequacy, replay detection, or anomaly evidence
+**And** it does not reference internal delivery labels such as Story 4.3, Story 4.4, or other BMAD story numbers.
+
+### Story 6.2: Correct Dashboard Semantic Mapping and Runtime-State Binding
+
+As a researcher and demo operator,
+I want the dashboard to reflect the real architecture and the real runtime payload correctly,
+So that the UI stops misrepresenting sensor, edge, SCADA-comparison, and fingerprint state during the demo.
+
+**Acceptance Criteria:**
+
+**Given** the pipeline architecture
+**When** sensor cards are rendered
+**Then** they show only sensor-layer concepts such as:
+- sensor identity
+- live physical value
+- unit
+- timestamp or live-status note
+**And** they do not show SCADA-comparison or replicated-edge concepts on the sensor layer.
+
+**Given** the edge-layer requirement
+**When** edge cards are rendered
+**Then** they show edge-layer concepts such as:
+- acquisition status
+- published observations
+- peer-consumed observations
+- replicated local view status
+**And** they read those values from the real edge runtime payload fields.
+
+**Given** the SCADA-comparison requirement
+**When** the dashboard renders comparison and divergence state
+**Then** it reads the structured comparison payload correctly from the current runtime state
+**And** comparison semantics appear in the SCADA-comparison stage rather than on the sensor cards.
+
+**Given** the current event and raw-log views
+**When** the operator inspects component-scoped evidence
+**Then** interpreted events, raw logs, and pipeline summaries are bound to the same underlying runtime state shape
+**And** displayed values match live runtime logs for a cycle under inspection.
+
+**Given** the operator-facing wording requirement
+**When** runtime state, limitation notes, and pipeline labels are shown
+**Then** they use architecture-correct domain names
+**And** they do not expose internal story references such as Story 4.6, Story 5.1, or similar implementation labels.
+
+### Story 6.3: Reorganize the Dashboard into Architecture-Aligned Pipeline Blocks
+
+As a researcher and demo operator,
+I want the dashboard to be reorganized into architecture-aligned blocks with consistent hierarchy and collapse behavior,
+So that the prototype becomes easier to read and explain on a normal laptop-sized screen during the demo.
+
+**Acceptance Criteria:**
+
+**Given** the corrected dashboard semantics
+**When** the dashboard layout is reorganized
+**Then** it groups all sensors into one block
+**And** it groups all edges into one block
+**And** it presents the downstream pipeline in clear later-stage sections for:
+- consensus
+- SCADA source and comparison
+- fingerprint and replay behavior
+
+**Given** the hierarchy requirement
+**When** the dashboard first loads
+**Then** the initial viewport emphasizes:
+- runtime health
+- operator controls
+- the current pipeline state
+- the current evidence summary
+**And** lower-priority technical sections do not dominate the first view.
+
+**Given** the raw-evidence requirement
+**When** the dashboard is reorganized
+**Then** raw logs, deep technical state, and channel details remain available
+**But** they are secondary to the main operator view and use standardized collapse or hide behavior.
+
+**Given** the user-facing naming requirement
+**When** grouped sections and labels are shown
+**Then** they use architecture and domain language that a professor or evaluator can understand directly
+**And** they do not rely on internal story numbering or implementation jargon.
