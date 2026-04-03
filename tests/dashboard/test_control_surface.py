@@ -308,6 +308,9 @@ class DashboardControlSurfaceTests(unittest.TestCase):
         self.assertIn("guidance-panels", html)
         self.assertIn("component-log-details", html)
         self.assertIn("Raw Channel Details", html)
+        self.assertNotIn("Story 4.", html)
+        self.assertNotIn("Story 5.", html)
+        self.assertNotIn("Story 6.", html)
 
     def test_runtime_start_and_stop_flow_works_through_http_control_path(self) -> None:
         state = _json_request(method="GET", url=f"{self.server.base_url}/api/state")

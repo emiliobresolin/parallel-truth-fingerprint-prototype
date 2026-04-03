@@ -1,6 +1,6 @@
 # Story 6.2: Correct Dashboard Semantic Mapping and Runtime-State Binding
 
-Status: drafted
+Status: review
 
 ## Story
 
@@ -92,12 +92,12 @@ so that the UI stops misrepresenting sensor, edge, SCADA-comparison, and fingerp
 
 ## Tasks / Subtasks
 
-- [ ] Correct dashboard extraction of SCADA-comparison fields from the current runtime payload shape. (AC: 3, 4, 5)
-- [ ] Correct edge-card binding to the actual runtime counter fields. (AC: 2, 5)
-- [ ] Remove downstream comparison semantics from the sensor layer and keep sensor cards architecture-correct. (AC: 1, 3)
-- [ ] Align component-scoped events/raw logs with the same corrected payload mapping. (AC: 4, 7)
-- [ ] Replace internal story-number wording in operator-facing labels and notes with domain language. (AC: 6)
-- [ ] Add focused tests and one real runtime validation pass. (AC: 8, 9)
+- [x] Correct dashboard extraction of SCADA-comparison fields from the current runtime payload shape. (AC: 3, 4, 5)
+- [x] Correct edge-card binding to the actual runtime counter fields. (AC: 2, 5)
+- [x] Remove downstream comparison semantics from the sensor layer and keep sensor cards architecture-correct. (AC: 1, 3)
+- [x] Align component-scoped events/raw logs with the same corrected payload mapping. (AC: 4, 7)
+- [x] Replace internal story-number wording in operator-facing labels and notes with domain language. (AC: 6)
+- [x] Add focused tests and one real runtime validation pass. (AC: 8, 9)
 
 ## Technical Notes
 
@@ -125,3 +125,133 @@ so that the UI stops misrepresenting sensor, edge, SCADA-comparison, and fingerp
 
 - This story does not change the prototype architecture.
 - It makes the dashboard trustworthy as an explanatory surface by ensuring that each layer shows the right concepts and the right values from the real runtime.
+
+## Dev Agent Record
+
+### Agent Model Used
+
+GPT-5 Codex
+
+### Debug Log References
+
+- Story 6.2 was implemented as a dashboard truthfulness and binding fix only.
+- No runtime/control architecture, consensus flow, persistence boundary, or ML logic was changed.
+- The main runtime-payload fix was normalizing wrapped `structured` comparison and divergence payloads so the pipeline and event views read the same data shape as the saved runtime logs.
+
+### Completion Notes List
+
+- Added `src/parallel_truth_fingerprint/dashboard/runtime_binding.py` as the shared dashboard payload-binding layer for wrapped runtime objects.
+- Corrected SCADA-comparison mapping so dashboard pipeline cards and component events read `comparison_output["structured"]` when the runtime payload is wrapped.
+- Corrected edge-card counters to use the real `peer_observation_count` runtime field instead of a non-existent `consumed_observation_count` field.
+- Corrected sensor cards so they now show only sensor-layer concepts:
+  - live physical value
+  - engineering unit
+  - sensor-layer interpreted status
+- Removed downstream SCADA-comparison semantics from sensor component events and raw sensor logs.
+- Kept SCADA divergence and comparison semantics in the SCADA-comparison stage where they belong.
+- Replaced operator-facing fingerprint limitation wording that exposed internal story numbers with domain language.
+- Implemented only Story 6.2.
+
+### What Was Tested
+
+- Focused dashboard pipeline-view tests
+- Focused interpreted-event and raw-log tests
+- Existing dashboard control-surface tests
+- Existing fingerprint inference tests for operator-facing limitation wording
+- Real dashboard smoke validation
+- Full regression suite
+- Real runtime-log parity check comparing dashboard-derived values with the saved live runtime log
+
+### Exact Commands Executed
+
+```powershell
+$env:PYTHONPATH='src'
+.\.venv\Scripts\python -m unittest tests.dashboard.test_pipeline_view tests.dashboard.test_event_timeline tests.dashboard.test_control_surface tests.lstm_service.test_inference
+```
+
+```powershell
+docker compose -f compose.local.yml up -d mqtt-broker minio
+```
+
+```powershell
+$env:PYTHONPATH='src'
+$env:RUN_REAL_DASHBOARD_SMOKE='1'
+.\.venv\Scripts\python -m unittest tests.dashboard.test_control_surface_runtime_smoke
+```
+
+```powershell
+$env:PYTHONPATH='src'
+.\.venv\Scripts\python -m unittest discover -s tests
+```
+
+```powershell
+$env:PYTHONPATH='src'
+@'
+import json
+from pathlib import Path
+from parallel_truth_fingerprint.dashboard.event_timeline import build_dashboard_event_views
+from parallel_truth_fingerprint.dashboard.pipeline_view import build_dashboard_pipeline_view
+
+payload = json.loads(Path("logs/run_local_demo.log").read_text(encoding="utf-8"))
+events = build_dashboard_event_views(
+    generated_at="2026-04-03T00:00:00+00:00",
+    latest_runtime_payload=payload,
+    operator_actions=[],
+)
+pipeline = build_dashboard_pipeline_view(
+    latest_runtime_payload=payload,
+    event_views=events,
+)
+process_nodes = {node["component_id"]: node for node in pipeline["rows"][0]["nodes"]}
+edge_nodes = {node["component_id"]: node for node in pipeline["rows"][1]["nodes"]}
+comparison_node = {node["component_id"]: node for node in pipeline["rows"][2]["nodes"]}["scada_comparison"]
+print("TEMP_SENSOR_METRICS", {metric["label"]: metric["value"] for metric in process_nodes["temperature_sensor"]["metrics"]})
+print("EDGE1_METRICS", {metric["label"]: metric["value"] for metric in edge_nodes["edge_1"]["metrics"]})
+print("SCADA_COMPARISON_METRICS", {metric["label"]: metric["value"] for metric in comparison_node["metrics"]})
+print("TEMP_EVENT", events["component_timelines"]["temperature_sensor"][0]["message"])
+print("SCADA_EVENT", events["component_timelines"]["scada_comparison"][0]["message"])
+print("TEMP_RAW_KEYS", sorted(events["component_raw_logs"]["temperature_sensor"].keys()))
+'@ | .\.venv\Scripts\python -
+```
+
+### Test Results
+
+- `tests.dashboard.test_pipeline_view tests.dashboard.test_event_timeline tests.dashboard.test_control_surface tests.lstm_service.test_inference` -> `Ran 16 tests` -> `OK`
+- `tests.dashboard.test_control_surface_runtime_smoke` -> `Ran 1 test` -> `OK`
+- `python -m unittest discover -s tests` -> `Ran 134 tests` -> `OK (skipped=7)`
+
+### Real Runtime Behavior Validated
+
+- The real dashboard smoke still passed after the Story 6.2 semantic-binding fixes.
+- A real saved runtime log from `logs/run_local_demo.log` now produces dashboard values that align with the runtime payload:
+  - `TEMP_SENSOR_METRICS {'Value': '76.912', 'Unit': 'degC'}`
+  - `EDGE1_METRICS {'Published': '81', 'Peer-consumed': '162', 'Replicated': 'True'}`
+  - `SCADA_COMPARISON_METRICS {'Divergent sensors': 'none', 'Source round': 'round-20260403123123312824'}`
+  - `TEMP_EVENT Temperature Sensor reported 76.912 degC on cycle 27.`
+  - `SCADA_EVENT SCADA comparison reports that all monitored sensors match the consensused state.`
+  - `TEMP_RAW_KEYS ['sensor_name', 'simulator_value', 'transmitter_observation']`
+- The dashboard now reflects the intended architecture more honestly:
+  - sensors = physical-origin values
+  - edges = publication and peer-consumption state
+  - SCADA comparison = later-stage comparison semantics
+
+### Remaining Limitations
+
+- Story 6.2 corrects dashboard truthfulness and payload binding; it does not yet perform the broader structural reorganization planned for Story 6.3.
+- The fingerprint base is still runtime-valid only, not yet meaningfully fingerprint-valid, because the adequacy floor remains below target.
+- Raw evidence is still the ground truth; the dashboard remains a derived interpretation layer on top of the runtime payload.
+
+### File List
+
+- `_bmad-output/implementation-artifacts/6-2-correct-dashboard-semantic-mapping-and-runtime-state-binding.md`
+- `src/parallel_truth_fingerprint/dashboard/event_timeline.py`
+- `src/parallel_truth_fingerprint/dashboard/pipeline_view.py`
+- `src/parallel_truth_fingerprint/dashboard/runtime_binding.py`
+- `src/parallel_truth_fingerprint/lstm_service/inference.py`
+- `tests/dashboard/test_control_surface.py`
+- `tests/dashboard/test_control_surface_runtime_smoke.py`
+- `tests/dashboard/test_event_timeline.py`
+- `tests/dashboard/test_pipeline_view.py`
+- `tests/lstm_service/test_inference.py`
+- `tests/lstm_service/test_inference_runtime_smoke.py`
+- `tests/lstm_service/test_replay_behavior_runtime_smoke.py`

@@ -19,9 +19,10 @@ INFERENCE_OUTPUT_CHANNEL = "lstm_fingerprint"
 DEFAULT_THRESHOLD_STDDEV_MULTIPLIER = 3.0
 DEFAULT_MINIMUM_ANOMALY_THRESHOLD = 1e-6
 RUNTIME_VALID_LIMITATION_NOTE = (
-    "Story 4.3 is running on a runtime-valid but not yet meaningful-fingerprint-valid "
-    "fingerprint base because the current normal-history dataset still falls below the "
-    "approved adequacy floor of 30 eligible artifacts and 20 generated windows."
+    "The fingerprint pipeline is running correctly on a runtime-valid but not yet "
+    "meaningfully fingerprint-valid dataset because the current normal-history data "
+    "still falls below the approved adequacy floor of 30 eligible artifacts and "
+    "20 generated windows."
 )
 INFERENCE_SCRATCH_ROOT = (
     Path(__file__).resolve().parents[3] / ".tmp" / "lstm_service_inference"

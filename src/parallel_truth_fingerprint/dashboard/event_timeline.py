@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from parallel_truth_fingerprint.dashboard.runtime_binding import (
+    extract_divergent_sensors,
+    extract_structured_comparison_output,
+)
+
 
 COMPONENT_DEFINITIONS = (
     {"id": "compressor", "label": "Compressor"},
@@ -155,10 +160,10 @@ def _build_component_raw_logs(*, latest_cycle: dict[str, object]) -> dict[str, o
                 "simulator_value": (simulator_snapshot.get("sensors") or {}).get(
                     sensor_name
                 ),
-                "scada_sensor_state": _find_scada_sensor_state(scada_state, sensor_name),
-                "comparison_sensor_output": _find_sensor_comparison_output(
-                    comparison_output,
-                    sensor_name,
+                "transmitter_observation": (
+                    (simulator_snapshot.get("transmitter_observations") or {}).get(
+                        sensor_name
+                    )
                 ),
             },
             component_id=component_id,
@@ -271,7 +276,13 @@ def _build_latest_cycle_component_events(
     runtime_reference = f"cycle {cycle_index}" if cycle_index else "latest runtime state"
     simulator_snapshot = latest_cycle.get("simulator_snapshot") or {}
     sensors = simulator_snapshot.get("sensors") or {}
+    transmitter_observations = simulator_snapshot.get("transmitter_observations") or {}
     edges = latest_cycle.get("edges") or []
+    comparison_output = latest_cycle.get("comparison_output") or {}
+    structured_comparison = extract_structured_comparison_output(comparison_output)
+    consensus_summary = latest_cycle.get("consensus_summary") or {}
+    fingerprint_lifecycle = latest_cycle.get("fingerprint_lifecycle") or {}
+    replay_behavior = latest_cycle.get("replay_behavior") or {}
 
     if simulator_snapshot:
         events.append(
@@ -290,22 +301,12 @@ def _build_latest_cycle_component_events(
         )
     for order, (component_id, sensor_name) in enumerate(SENSOR_COMPONENTS, start=1):
         sensor_value = sensors.get(sensor_name)
-        comparison = _find_sensor_comparison_output(
-            latest_cycle.get("comparison_output") or {},
-            sensor_name,
-        )
-        if sensor_value is None and comparison is None:
+        transmitter_observation = transmitter_observations.get(sensor_name) or {}
+        unit = ((transmitter_observation.get("pv") or {}).get("unit")) or ""
+        if sensor_value is None and not transmitter_observation:
             continue
-        if comparison is None:
-            message = (
-                f"{COMPONENT_LABELS[component_id]} reported {sensor_value} on {runtime_reference}."
-            )
-        else:
-            message = (
-                f"{COMPONENT_LABELS[component_id]} reported {sensor_value}; "
-                f"SCADA comparison classified it as "
-                f"{comparison.get('divergence_classification', 'unknown')}."
-            )
+        value_with_unit = _format_value_with_unit(sensor_value, unit)
+        message = f"{COMPONENT_LABELS[component_id]} reported {value_with_unit} on {runtime_reference}."
         events.append(
             _event(
                 component_id=component_id,
@@ -337,6 +338,56 @@ def _build_latest_cycle_component_events(
                 ),
                 source="latest_cycle",
                 sort_index=520 + order,
+            )
+        )
+    if consensus_summary:
+        events.append(
+            _event(
+                component_id="consensus",
+                cycle_index=cycle_index,
+                recorded_at=generated_at,
+                runtime_reference=runtime_reference,
+                message=(
+                    "Consensus "
+                    f"{consensus_summary.get('final_consensus_status', 'unknown')} "
+                    f"committed round {consensus_summary.get('round_id', 'unknown')}."
+                ),
+                source="latest_cycle",
+                sort_index=540,
+            )
+        )
+    if structured_comparison:
+        divergent_sensors = extract_divergent_sensors(comparison_output)
+        message = (
+            "SCADA comparison reports divergence on "
+            f"{', '.join(divergent_sensors)}."
+            if divergent_sensors
+            else "SCADA comparison reports that all monitored sensors match the consensused state."
+        )
+        events.append(
+            _event(
+                component_id="scada_comparison",
+                cycle_index=cycle_index,
+                recorded_at=generated_at,
+                runtime_reference=runtime_reference,
+                message=message,
+                source="latest_cycle",
+                sort_index=541,
+            )
+        )
+    if fingerprint_lifecycle:
+        events.append(
+            _event(
+                component_id="fingerprint_lifecycle",
+                cycle_index=cycle_index,
+                recorded_at=generated_at,
+                runtime_reference=runtime_reference,
+                message=_describe_latest_fingerprint_state(
+                    fingerprint_lifecycle=fingerprint_lifecycle,
+                    replay_behavior=replay_behavior,
+                ),
+                source="latest_cycle",
+                sort_index=542,
             )
         )
     return events
@@ -389,25 +440,6 @@ def _with_fallback(payload: dict[str, object], *, component_id: str) -> dict[str
         "status": "not_available",
         "note": f"No raw runtime data is available yet for {COMPONENT_LABELS[component_id]}.",
     }
-
-
-def _find_scada_sensor_state(
-    scada_state: dict[str, object],
-    sensor_name: str,
-) -> dict[str, object] | None:
-    sensor_values = scada_state.get("sensor_values") or {}
-    sensor_state = sensor_values.get(sensor_name)
-    return sensor_state if isinstance(sensor_state, dict) else None
-
-
-def _find_sensor_comparison_output(
-    comparison_output: dict[str, object],
-    sensor_name: str,
-) -> dict[str, object] | None:
-    for sensor_output in comparison_output.get("sensor_outputs") or []:
-        if sensor_output.get("sensor_name") == sensor_name:
-            return sensor_output
-    return None
 
 
 def _resolve_action_component(action: dict[str, object]) -> str:
@@ -475,3 +507,30 @@ def _describe_scada_history(
     if active_scenario in {"scada_replay", "scada_freeze"}:
         return f"SCADA comparison is preparing {active_scenario} behavior."
     return "SCADA comparison is monitoring the latest consensused state."
+
+
+def _describe_latest_fingerprint_state(
+    *,
+    fingerprint_lifecycle: dict[str, object],
+    replay_behavior: dict[str, object],
+) -> str:
+    model_status = fingerprint_lifecycle.get("model_status", "unknown")
+    inference_status = fingerprint_lifecycle.get("inference_status", "unknown")
+    training_events = ", ".join(fingerprint_lifecycle.get("training_events") or []) or "none"
+    if replay_behavior:
+        return (
+            "Fingerprint lifecycle "
+            f"model_status={model_status}, inference_status={inference_status}, "
+            f"training_events={training_events}, replay_classification="
+            f"{replay_behavior.get('classification', 'unknown')}."
+        )
+    return (
+        "Fingerprint lifecycle "
+        f"model_status={model_status}, inference_status={inference_status}, "
+        f"training_events={training_events}."
+    )
+
+
+def _format_value_with_unit(value: object, unit: str) -> str:
+    rendered_value = "n/a" if value is None else str(value)
+    return rendered_value if not unit else f"{rendered_value} {unit}"

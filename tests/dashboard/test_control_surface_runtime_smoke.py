@@ -384,6 +384,12 @@ class DashboardControlSurfaceRuntimeSmokeTests(unittest.TestCase):
                         replay_state["pipeline"]["rows"][0]["nodes"][0]["metrics"][0]["value"],
                         "20.0%",
                     )
+                    temperature_sensor_node = replay_state["pipeline"]["rows"][0]["nodes"][1]
+                    self.assertEqual(temperature_sensor_node["title"], "Temperature Sensor")
+                    self.assertEqual(
+                        {metric["label"]: metric["value"] for metric in temperature_sensor_node["metrics"]},
+                        {"Value": str(replay_state["monitoring"]["sensor_values"]["temperature"]), "Unit": "n/a"},
+                    )
                     self.assertIn("explainability", replay_state)
                     self.assertTrue(
                         replay_state["explainability"]["translated_statuses"]
@@ -413,6 +419,7 @@ class DashboardControlSurfaceRuntimeSmokeTests(unittest.TestCase):
                 final_state["limitations"]["source_dataset_validation_level"],
                 "runtime_valid_only",
             )
+            self.assertNotIn("Story ", final_state["limitations"]["note"])
 
             valid_artifact_keys = store.list_json_objects(prefix="valid-consensus-artifacts/")
             dataset_manifest_keys = store.list_json_objects(prefix="fingerprint-datasets/")

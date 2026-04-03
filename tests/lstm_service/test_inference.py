@@ -176,7 +176,8 @@ class InferenceTests(unittest.TestCase):
         self.assertTrue(all(result.source_dataset_validation_level == "runtime_valid_only" for result in results))
         self.assertTrue(all(result.anomaly_score >= 0.0 for result in results))
         self.assertTrue(all(result.classification_threshold > 0.0 for result in results))
-        self.assertIn("runtime-valid but not yet meaningful-fingerprint-valid", results[0].limitation_note)
+        self.assertIn("runtime-valid but not yet meaningfully fingerprint-valid", results[0].limitation_note)
+        self.assertNotIn("Story ", results[0].limitation_note)
 
     def test_inference_flags_anomalous_results_for_out_of_profile_dataset(self) -> None:
         store = self.build_store()

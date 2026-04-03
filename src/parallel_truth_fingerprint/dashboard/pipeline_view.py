@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 from parallel_truth_fingerprint.dashboard.event_timeline import COMPONENT_LABELS
+from parallel_truth_fingerprint.dashboard.runtime_binding import (
+    extract_divergent_sensors,
+    extract_structured_comparison_output,
+    extract_structured_divergence_alert,
+)
 
 
 def build_dashboard_pipeline_view(
@@ -19,7 +24,12 @@ def build_dashboard_pipeline_view(
     edges = latest_cycle.get("edges") or []
     consensus_summary = latest_cycle.get("consensus_summary") or {}
     scada_state = latest_cycle.get("scada_state") or {}
-    comparison_output = latest_cycle.get("comparison_output") or {}
+    comparison_output = extract_structured_comparison_output(
+        latest_cycle.get("comparison_output") or {}
+    )
+    divergence_alert = extract_structured_divergence_alert(
+        latest_cycle.get("scada_divergence_alert") or {}
+    )
     lifecycle = latest_cycle.get("fingerprint_lifecycle") or {}
     fingerprint_results = latest_cycle.get("fingerprint_inference_results") or []
     replay_behavior = latest_cycle.get("replay_behavior") or {}
@@ -97,8 +107,7 @@ def build_dashboard_pipeline_view(
             metrics=(
                 (
                     "Divergent sensors",
-                    ", ".join(comparison_output.get("divergent_sensors") or [])
-                    or "none",
+                    ", ".join(extract_divergent_sensors(comparison_output)) or "none",
                 ),
                 (
                     "Source round",
@@ -154,7 +163,10 @@ def build_dashboard_pipeline_view(
                 "label": "SCADA divergence",
                 "status": (
                     "active"
-                    if latest_cycle.get("scada_divergence_alert") is not None
+                    if _scada_divergence_is_active(
+                        divergence_alert=divergence_alert,
+                        comparison_output=comparison_output,
+                    )
                     else "clear"
                 ),
                 "explanation": "Direct SCADA-vs-consensus mismatch remains separate from replay/fingerprint behavior.",
@@ -182,28 +194,20 @@ def _sensor_node(
     event_views: dict[str, object],
 ) -> dict[str, object]:
     component_id = f"{sensor_name}_sensor"
-    comparison_output = latest_cycle.get("comparison_output") or {}
-    sensor_output = next(
-        (
-            output
-            for output in comparison_output.get("sensor_outputs") or []
-            if output.get("sensor_name") == sensor_name
-        ),
-        {},
-    )
-    scada_state = latest_cycle.get("scada_state") or {}
+    simulator_snapshot = latest_cycle.get("simulator_snapshot") or {}
+    sensor_values = simulator_snapshot.get("sensors") or {}
+    transmitter_observation = (
+        simulator_snapshot.get("transmitter_observations") or {}
+    ).get(sensor_name) or {}
+    unit = ((transmitter_observation.get("pv") or {}).get("unit")) or "n/a"
     return _node(
         component_id=component_id,
         title=COMPONENT_LABELS[component_id],
         kind="sensor",
         status=_latest_component_status(event_views, component_id),
         metrics=(
-            ("Process", _format_metric(sensor_output.get("physical_value"))),
-            ("SCADA", _format_metric(sensor_output.get("scada_value") or _find_scada_value(scada_state, sensor_name))),
-            (
-                "Comparison",
-                str(sensor_output.get("divergence_classification") or "not_available"),
-            ),
+            ("Value", _format_metric(sensor_values.get(sensor_name))),
+            ("Unit", unit),
         ),
     )
 
@@ -232,7 +236,7 @@ def _edge_node(
         status=_latest_component_status(event_views, component_id),
         metrics=(
             ("Published", str(runtime_state.get("published_observation_count") or 0)),
-            ("Consumed", str(runtime_state.get("consumed_observation_count") or 0)),
+            ("Peer-consumed", str(runtime_state.get("peer_observation_count") or 0)),
             ("Replicated", str(replicated_state.get("is_complete") or False)),
         ),
     )
@@ -297,3 +301,15 @@ def _format_metric(value: object) -> str:
     if value is None:
         return "n/a"
     return str(value)
+
+
+def _scada_divergence_is_active(
+    *,
+    divergence_alert: dict[str, object],
+    comparison_output: dict[str, object],
+) -> bool:
+    if extract_divergent_sensors(comparison_output):
+        return True
+    if divergence_alert.get("divergent_sensors"):
+        return True
+    return False

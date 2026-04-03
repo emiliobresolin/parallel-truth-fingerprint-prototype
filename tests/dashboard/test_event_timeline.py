@@ -58,6 +58,11 @@ def _sample_runtime_payload() -> dict[str, object]:
                     "pressure": 5.4,
                     "rpm": 3510.0,
                 },
+                "transmitter_observations": {
+                    "temperature": {"pv": {"value": 82.0, "unit": "degC"}},
+                    "pressure": {"pv": {"value": 5.4, "unit": "bar"}},
+                    "rpm": {"pv": {"value": 3510.0, "unit": "rpm"}},
+                },
             },
             "edges": [
                 {
@@ -65,6 +70,7 @@ def _sample_runtime_payload() -> dict[str, object]:
                     "runtime_state": {
                         "edge_id": "edge-1",
                         "published_observation_count": 3,
+                        "peer_observation_count": 6,
                     },
                     "replicated_state": {"is_complete": True},
                     "observation_flow": [],
@@ -74,6 +80,7 @@ def _sample_runtime_payload() -> dict[str, object]:
                     "runtime_state": {
                         "edge_id": "edge-2",
                         "published_observation_count": 3,
+                        "peer_observation_count": 6,
                     },
                     "replicated_state": {"is_complete": True},
                     "observation_flow": [],
@@ -83,6 +90,7 @@ def _sample_runtime_payload() -> dict[str, object]:
                     "runtime_state": {
                         "edge_id": "edge-3",
                         "published_observation_count": 3,
+                        "peer_observation_count": 6,
                     },
                     "replicated_state": {"is_complete": True},
                     "observation_flow": [],
@@ -110,27 +118,30 @@ def _sample_runtime_payload() -> dict[str, object]:
                 },
             },
             "comparison_output": {
-                "divergent_sensors": ["temperature"],
-                "sensor_outputs": [
-                    {
-                        "sensor_name": "temperature",
-                        "physical_value": 82.0,
-                        "scada_value": 88.0,
-                        "divergence_classification": "divergent",
-                    },
-                    {
-                        "sensor_name": "pressure",
-                        "physical_value": 5.4,
-                        "scada_value": 5.4,
-                        "divergence_classification": "match",
-                    },
-                    {
-                        "sensor_name": "rpm",
-                        "physical_value": 3510.0,
-                        "scada_value": 3510.0,
-                        "divergence_classification": "match",
-                    },
-                ],
+                "compact": "temperature diverged",
+                "structured": {
+                    "divergent_sensors": ["temperature"],
+                    "sensor_outputs": [
+                        {
+                            "sensor_name": "temperature",
+                            "physical_value": 82.0,
+                            "scada_value": 88.0,
+                            "divergence_classification": "divergent",
+                        },
+                        {
+                            "sensor_name": "pressure",
+                            "physical_value": 5.4,
+                            "scada_value": 5.4,
+                            "divergence_classification": "match",
+                        },
+                        {
+                            "sensor_name": "rpm",
+                            "physical_value": 3510.0,
+                            "scada_value": 3510.0,
+                            "divergence_classification": "match",
+                        },
+                    ],
+                },
             },
             "scada_divergence_alert": {
                 "structured": {
@@ -206,9 +217,9 @@ class DashboardEventTimelineTests(unittest.TestCase):
         )
         self.assertEqual(
             event_views["component_raw_logs"]["temperature_sensor"][
-                "comparison_sensor_output"
-            ]["divergence_classification"],
-            "divergent",
+                "transmitter_observation"
+            ]["pv"]["unit"],
+            "degC",
         )
         self.assertEqual(
             event_views["component_raw_logs"]["consensus"]["summary"][
@@ -221,6 +232,10 @@ class DashboardEventTimelineTests(unittest.TestCase):
                 "model_status"
             ],
             "model_available",
+        )
+        self.assertNotIn(
+            "comparison_sensor_output",
+            event_views["component_raw_logs"]["temperature_sensor"],
         )
 
     def test_operator_actions_are_reflected_in_interpreted_events(self) -> None:
@@ -258,6 +273,31 @@ class DashboardEventTimelineTests(unittest.TestCase):
         )
         self.assertTrue(
             any("Operator activated scenario scada_replay" in message for message in scada_messages)
+        )
+
+    def test_sensor_events_stay_on_sensor_layer_and_scada_comparison_owns_divergence_state(self) -> None:
+        event_views = build_dashboard_event_views(
+            generated_at="2026-04-02T00:00:00+00:00",
+            latest_runtime_payload=_sample_runtime_payload(),
+            operator_actions=[],
+        )
+
+        sensor_messages = [
+            event["message"]
+            for event in event_views["component_timelines"]["temperature_sensor"]
+        ]
+        scada_messages = [
+            event["message"]
+            for event in event_views["component_timelines"]["scada_comparison"]
+        ]
+        self.assertTrue(
+            any("Temperature Sensor reported 82.0 degC" in message for message in sensor_messages)
+        )
+        self.assertFalse(
+            any("SCADA comparison classified" in message for message in sensor_messages)
+        )
+        self.assertTrue(
+            any("SCADA comparison reports divergence on temperature." in message for message in scada_messages)
         )
 
 

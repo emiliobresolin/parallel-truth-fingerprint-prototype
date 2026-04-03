@@ -146,11 +146,12 @@ class RuntimeInferenceSmokeTests(unittest.TestCase):
         )
         self.assertTrue(
             all(
-                "runtime-valid but not yet meaningful-fingerprint-valid"
+                "runtime-valid but not yet meaningfully fingerprint-valid"
                 in result.limitation_note
                 for result in results
             )
         )
+        self.assertTrue(all("Story " not in result.limitation_note for result in results))
         self.assertTrue(all(result.classification.value == "normal" for result in results))
         self.assertTrue(all(result.anomaly_score >= 0.0 for result in results))
         self.assertTrue(all(result.classification_threshold > 0.0 for result in results))

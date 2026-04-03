@@ -211,9 +211,10 @@ class RuntimeReplayBehaviorSmokeTests(unittest.TestCase):
         self.assertTrue(replay_result.scada_divergent_sensors)
         self.assertEqual(replay_result.source_dataset_validation_level, "runtime_valid_only")
         self.assertIn(
-            "runtime-valid but not yet meaningful-fingerprint-valid",
+            "runtime-valid but not yet meaningfully fingerprint-valid",
             replay_result.limitation_note,
         )
+        self.assertNotIn("Story ", replay_result.limitation_note)
         self.assertTrue(replay_inference_results)
         self.assertEqual(replay_inference_results[0].output_channel, "lstm_fingerprint")
         self.assertEqual(replay_result.classification.value, "anomalous")
