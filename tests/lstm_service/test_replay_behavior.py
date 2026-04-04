@@ -9,6 +9,11 @@ from parallel_truth_fingerprint.contracts.fingerprint_inference import (
     FingerprintInferenceClassification,
     FingerprintInferenceResult,
 )
+from parallel_truth_fingerprint.contracts.scada_state import (
+    ScadaBehavioralSensorState,
+    ScadaSensorState,
+    ScadaState,
+)
 from parallel_truth_fingerprint.lstm_service import (
     REPLAY_OUTPUT_CHANNEL,
     ScadaReplayRuntimeStage,
@@ -50,6 +55,66 @@ class ReplayBehaviorTests(unittest.TestCase):
             ),
         )
 
+    def build_scada_state(
+        self,
+        *,
+        current_artifact: dict[str, object],
+        supervisory_artifact: dict[str, object] | None = None,
+        behavioral_source_artifact: dict[str, object] | None = None,
+        mode: str = "replay",
+    ) -> ScadaState:
+        supervisory_artifact = supervisory_artifact or current_artifact
+        behavioral_source_artifact = behavioral_source_artifact or supervisory_artifact
+        behavioral_payloads = (
+            behavioral_source_artifact["validated_state"]["structured_payload_snapshot"][
+                "payloads_by_sensor"
+            ]
+        )
+        supervisory_values = supervisory_artifact["validated_state"]["sensor_values"]
+        current_round = current_artifact["round_identity"]["round_id"]
+        behavioral_source_round = behavioral_source_artifact["round_identity"]["round_id"]
+        return ScadaState(
+            compressor_id="compressor-1",
+            source_round_id=current_round,
+            timestamp=current_artifact["round_identity"]["window_ended_at"],
+            sensor_values={
+                sensor_name: ScadaSensorState(
+                    value=float(supervisory_values[sensor_name]),
+                    unit=payload["process_data"]["pv"]["unit"],
+                    mode=mode,
+                )
+                for sensor_name, payload in sorted(behavioral_payloads.items())
+            },
+            behavioral_source_round_id=behavioral_source_round,
+            behavioral_sensor_values={
+                sensor_name: ScadaBehavioralSensorState(
+                    loop_current_ma=float(payload["process_data"]["loop_current_ma"]),
+                    pv_percent_range=float(payload["process_data"]["pv_percent_range"]),
+                    noise_floor=float(
+                        payload["process_data"]["physics_metrics"]["noise_floor"]
+                    ),
+                    rate_of_change_dtdt=float(
+                        payload["process_data"]["physics_metrics"]["rate_of_change_dtdt"]
+                    ),
+                    local_stability_score=float(
+                        payload["process_data"]["physics_metrics"][
+                            "local_stability_score"
+                        ]
+                    ),
+                    field_device_malfunction=bool(
+                        payload["diagnostics"]["field_device_malfunction"]
+                    ),
+                    loop_current_saturated=bool(
+                        payload["diagnostics"]["loop_current_saturated"]
+                    ),
+                    cold_start=bool(payload["diagnostics"]["cold_start"]),
+                    mode=mode,
+                    source_round_id=behavioral_source_round,
+                )
+                for sensor_name, payload in sorted(behavioral_payloads.items())
+            },
+        )
+
     def test_configure_scada_replay_runtime_stage_activates_after_start_cycle(self) -> None:
         scada_service = FakeOpcUaScadaService(compressor_id="compressor-1")
         scada_service.update_from_consensused_state(
@@ -84,7 +149,9 @@ class ReplayBehaviorTests(unittest.TestCase):
         self.assertEqual(active_stage.mode, "replay")
         self.assertEqual(active_stage.replay_source_round_id, "round-001")
 
-    def test_persist_scada_replay_inference_dataset_reuses_stale_history(self) -> None:
+    def test_persist_scada_replay_inference_dataset_uses_current_supervisory_values_with_stale_behavior(
+        self,
+    ) -> None:
         store = self.build_store()
         self.seed_persisted_artifacts(store)
         replay_stage = ScadaReplayRuntimeStage(
@@ -93,10 +160,19 @@ class ReplayBehaviorTests(unittest.TestCase):
             start_cycle=4,
             replay_source_round_id="round-501",
         )
+        current_artifact = store.load_json("valid-consensus-artifacts/round-504.json")
+        replay_source_artifact = store.load_json("valid-consensus-artifacts/round-501.json")
+        scada_state = self.build_scada_state(
+            current_artifact=current_artifact,
+            supervisory_artifact=current_artifact,
+            behavioral_source_artifact=replay_source_artifact,
+            mode="replay",
+        )
 
         persisted_dataset = persist_scada_replay_inference_dataset(
             artifact_store=store,
             current_round_id="round-504",
+            scada_state=scada_state,
             replay_stage=replay_stage,
             sequence_length=2,
         )
@@ -111,14 +187,16 @@ class ReplayBehaviorTests(unittest.TestCase):
             manifest.selected_artifact_keys,
             (
                 "valid-consensus-artifacts/round-503.json",
-                "valid-consensus-artifacts/round-501.json",
+                "scada-state::round-504::replay::round-501",
             ),
         )
         self.assertEqual(len(windows), 1)
         self.assertEqual(
             windows[0].round_ids,
-            ("round-503", "round-501"),
+            ("round-503", "round-504"),
         )
+        self.assertAlmostEqual(windows[0].feature_matrix[-1][0], 5.4, places=5)
+        self.assertAlmostEqual(windows[0].feature_matrix[-1][1], 13.2, places=5)
         manifest_payload = store.load_json(persisted_dataset.manifest_object_key)
         self.assertEqual(
             manifest_payload["adequacy_assessment"]["validation_level"],
@@ -135,10 +213,19 @@ class ReplayBehaviorTests(unittest.TestCase):
             mode="freeze",
             start_cycle=4,
         )
+        current_artifact = store.load_json("valid-consensus-artifacts/round-504.json")
+        previous_artifact = store.load_json("valid-consensus-artifacts/round-503.json")
+        scada_state = self.build_scada_state(
+            current_artifact=current_artifact,
+            supervisory_artifact=previous_artifact,
+            behavioral_source_artifact=previous_artifact,
+            mode="freeze",
+        )
 
         persisted_dataset = persist_scada_replay_inference_dataset(
             artifact_store=store,
             current_round_id="round-504",
+            scada_state=scada_state,
             replay_stage=freeze_stage,
             sequence_length=2,
         )
@@ -152,7 +239,7 @@ class ReplayBehaviorTests(unittest.TestCase):
             windows[0].artifact_keys,
             (
                 "valid-consensus-artifacts/round-503.json",
-                "valid-consensus-artifacts/round-503.json",
+                "scada-state::round-504::freeze::round-503",
             ),
         )
 
@@ -175,7 +262,14 @@ class ReplayBehaviorTests(unittest.TestCase):
             (),
             {"divergent_sensors": ("temperature", "pressure")},
         )()
-        scada_state = type("ScadaState", (), {"source_round_id": "round-504"})()
+        scada_state = type(
+            "ScadaState",
+            (),
+            {
+                "source_round_id": "round-504",
+                "behavioral_source_round_id": "round-501",
+            },
+        )()
         fake_persisted_dataset = type(
             "PersistedDataset",
             (),
@@ -235,6 +329,7 @@ class ReplayBehaviorTests(unittest.TestCase):
         self.assertEqual(replay_result.output_channel, REPLAY_OUTPUT_CHANNEL)
         self.assertEqual(replay_result.scenario_mode, "replay")
         self.assertEqual(replay_result.classification.value, "anomalous")
+        self.assertEqual(replay_result.replay_source_round_id, "round-501")
         self.assertEqual(
             replay_result.scada_divergent_sensors,
             ("temperature", "pressure"),

@@ -132,8 +132,10 @@ def _build_component_raw_logs(*, latest_cycle: dict[str, object]) -> dict[str, o
         "scada_comparison": _with_fallback(
             {
                 "scada_state": scada_state,
+                "comparison_stage": latest_cycle.get("comparison_stage"),
                 "comparison_output": comparison_output,
                 "divergence_alert": latest_cycle.get("scada_divergence_alert"),
+                "persistence_stage": latest_cycle.get("persistence_stage"),
                 "runtime_scenario": latest_cycle.get("scada_runtime_scenario"),
             },
             component_id="scada_comparison",
@@ -281,6 +283,7 @@ def _build_latest_cycle_component_events(
     comparison_output = latest_cycle.get("comparison_output") or {}
     structured_comparison = extract_structured_comparison_output(comparison_output)
     consensus_summary = latest_cycle.get("consensus_summary") or {}
+    comparison_stage = latest_cycle.get("comparison_stage") or {}
     fingerprint_lifecycle = latest_cycle.get("fingerprint_lifecycle") or {}
     replay_behavior = latest_cycle.get("replay_behavior") or {}
 
@@ -347,30 +350,22 @@ def _build_latest_cycle_component_events(
                 cycle_index=cycle_index,
                 recorded_at=generated_at,
                 runtime_reference=runtime_reference,
-                message=(
-                    "Consensus "
-                    f"{consensus_summary.get('final_consensus_status', 'unknown')} "
-                    f"committed round {consensus_summary.get('round_id', 'unknown')}."
-                ),
+                message=_describe_latest_consensus_state(consensus_summary),
                 source="latest_cycle",
                 sort_index=540,
             )
         )
-    if structured_comparison:
-        divergent_sensors = extract_divergent_sensors(comparison_output)
-        message = (
-            "SCADA comparison reports divergence on "
-            f"{', '.join(divergent_sensors)}."
-            if divergent_sensors
-            else "SCADA comparison reports that all monitored sensors match the consensused state."
-        )
+    if comparison_stage or structured_comparison:
         events.append(
             _event(
                 component_id="scada_comparison",
                 cycle_index=cycle_index,
                 recorded_at=generated_at,
                 runtime_reference=runtime_reference,
-                message=message,
+                message=_describe_latest_scada_state(
+                    comparison_stage=comparison_stage,
+                    comparison_output=comparison_output,
+                ),
                 source="latest_cycle",
                 sort_index=541,
             )
@@ -385,6 +380,7 @@ def _build_latest_cycle_component_events(
                 message=_describe_latest_fingerprint_state(
                     fingerprint_lifecycle=fingerprint_lifecycle,
                     replay_behavior=replay_behavior,
+                    comparison_stage=comparison_stage,
                 ),
                 source="latest_cycle",
                 sort_index=542,
@@ -482,11 +478,24 @@ def _describe_action(action: dict[str, object]) -> str:
 def _describe_fingerprint_history(fingerprint_lifecycle: dict[str, object]) -> str:
     training_events = list(fingerprint_lifecycle.get("training_events") or [])
     training_summary = ", ".join(training_events) if training_events else "none"
+    inference_status = fingerprint_lifecycle.get("inference_status", "unknown")
+    if str(inference_status).startswith("blocked:"):
+        reason = str(inference_status).split(":", 1)[1]
+        if reason == "no_quorum_reached":
+            return (
+                "Fingerprint evaluation was blocked because consensus did not reach "
+                "quorum and no trusted payload was forwarded."
+            )
+        if reason == "scada_divergence_detected":
+            return (
+                "Fingerprint evaluation was blocked because SCADA divergence stopped "
+                "the cycle after supervisory validation."
+            )
     return (
         "Fingerprint lifecycle "
         f"model_status={fingerprint_lifecycle.get('model_status', 'unknown')}, "
         f"training_events={training_summary}, "
-        f"inference_status={fingerprint_lifecycle.get('inference_status', 'unknown')}."
+        f"inference_status={inference_status}."
     )
 
 
@@ -498,7 +507,7 @@ def _describe_scada_history(
     active_scenario = scenario_control.get("active_scenario", "normal")
     if replay_behavior is not None:
         return (
-            "Replay behavior classified the latest SCADA-side state as "
+            "Replay behavior classified the richer SCADA-side behavioral state as "
             f"{replay_behavior.get('classification', 'unknown')} "
             f"under {replay_behavior.get('scenario_mode', 'unknown')} mode."
         )
@@ -513,22 +522,73 @@ def _describe_latest_fingerprint_state(
     *,
     fingerprint_lifecycle: dict[str, object],
     replay_behavior: dict[str, object],
+    comparison_stage: dict[str, object],
 ) -> str:
     model_status = fingerprint_lifecycle.get("model_status", "unknown")
     inference_status = fingerprint_lifecycle.get("inference_status", "unknown")
     training_events = ", ".join(fingerprint_lifecycle.get("training_events") or []) or "none"
+    if str(inference_status).startswith("blocked:"):
+        block_message = str(comparison_stage.get("operator_message") or "")
+        if block_message:
+            return block_message
+        return (
+            "Fingerprint evaluation was blocked for this cycle before the behavioral "
+            "interpretation stage could run."
+        )
     if replay_behavior:
         return (
             "Fingerprint lifecycle "
             f"model_status={model_status}, inference_status={inference_status}, "
             f"training_events={training_events}, replay_classification="
-            f"{replay_behavior.get('classification', 'unknown')}."
+            f"{replay_behavior.get('classification', 'unknown')} from richer SCADA-side behavior."
         )
     return (
         "Fingerprint lifecycle "
         f"model_status={model_status}, inference_status={inference_status}, "
         f"training_events={training_events}."
     )
+
+
+def _describe_latest_consensus_state(consensus_summary: dict[str, object]) -> str:
+    status = str(consensus_summary.get("final_consensus_status") or "unknown")
+    round_id = str(consensus_summary.get("round_id") or "unknown")
+    valid_participants = consensus_summary.get("valid_participants_after_exclusions")
+    quorum_required = consensus_summary.get("quorum_required")
+    has_valid_state = consensus_summary.get("has_consensused_valid_state")
+    if (
+        status == "failed_consensus"
+        and has_valid_state is False
+        and valid_participants is not None
+        and quorum_required is not None
+        and int(valid_participants) < int(quorum_required)
+    ):
+        return (
+            f"Consensus did not reach quorum on {round_id}: only {valid_participants} "
+            f"valid participants remained while {quorum_required} were required, so no trusted payload was forwarded."
+        )
+    if status == "success":
+        return f"Consensus succeeded and committed round {round_id}."
+    return f"Consensus {status} for round {round_id}."
+
+
+def _describe_latest_scada_state(
+    *,
+    comparison_stage: dict[str, object],
+    comparison_output: dict[str, object],
+) -> str:
+    if comparison_stage.get("status") == "blocked":
+        return str(
+            comparison_stage.get("operator_message")
+            or "SCADA comparison was blocked because no trusted payload was available."
+        )
+    divergent_sensors = extract_divergent_sensors(comparison_output)
+    if divergent_sensors:
+        return (
+            "SCADA comparison detected supervisory divergence on "
+            f"{', '.join(divergent_sensors)} and blocked the cycle before persistence "
+            "and fingerprint evaluation."
+        )
+    return "SCADA comparison reports that all monitored sensors match the consensused state."
 
 
 def _format_value_with_unit(value: object, unit: str) -> str:

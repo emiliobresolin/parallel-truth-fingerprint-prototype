@@ -107,19 +107,20 @@ def _sample_runtime_payload() -> dict[str, object]:
                     ],
                 },
             },
+            "comparison_stage": {
+                "status": "blocked_downstream",
+                "reason": "scada_divergence_detected",
+                "blocked_by_stage": "scada_comparison",
+                "downstream_permitted": False,
+                "operator_message": "SCADA divergence blocked the cycle.",
+            },
             "scada_divergence_alert": {"structured": {"divergent_sensors": ["temperature"]}},
             "fingerprint_lifecycle": {
                 "model_status": "model_available",
-                "inference_status": "completed",
+                "inference_status": "blocked:scada_divergence_detected",
             },
-            "fingerprint_inference_results": [
-                {"classification": "normal", "output_channel": "lstm_fingerprint"}
-            ],
-            "replay_behavior": {
-                "classification": "anomalous",
-                "output_channel": "scada_replay_behavior",
-                "scenario_mode": "replay",
-            },
+            "fingerprint_inference_results": [],
+            "replay_behavior": None,
         }
     }
 
@@ -178,8 +179,10 @@ class DashboardPipelineViewTests(unittest.TestCase):
         )
         self.assertEqual(
             pipeline["channel_separation"][0]["status"],
-            "active",
+            "blocked",
         )
+        self.assertEqual(scada_nodes["scada_comparison"]["metrics"][2]["value"], "blocked_on_divergence")
+        self.assertEqual(scada_nodes["scada_comparison"]["tone"], "blocked")
 
     def test_sensor_cards_only_show_sensor_layer_concepts_and_edge_cards_bind_real_counters(self) -> None:
         pipeline = build_dashboard_pipeline_view(
@@ -224,6 +227,9 @@ class DashboardPipelineViewTests(unittest.TestCase):
         self.assertEqual(stage_labels["consensus"], "Trusted committed state")
         self.assertEqual(stage_labels["scada"], "Supervisory validation")
         self.assertEqual(stage_labels["fingerprint"], "Behavioral interpretation")
+        fingerprint_node = pipeline["rows"][4]["nodes"][0]
+        self.assertEqual(fingerprint_node["metrics"][2]["value"], "blocked")
+        self.assertEqual(fingerprint_node["tone"], "blocked")
 
 
 if __name__ == "__main__":

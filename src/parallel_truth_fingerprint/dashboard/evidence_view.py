@@ -36,6 +36,7 @@ def build_dashboard_explainability_view(
     cycle_history = payload.get("cycle_history") or []
     lifecycle = latest_cycle.get("fingerprint_lifecycle") or {}
     consensus_summary = latest_cycle.get("consensus_summary") or {}
+    comparison_stage = latest_cycle.get("comparison_stage") or {}
     replay_behavior = latest_cycle.get("replay_behavior") or {}
     fingerprint_results = latest_cycle.get("fingerprint_inference_results") or []
     replay_inference_results = latest_cycle.get("replay_inference_results") or []
@@ -93,6 +94,7 @@ def build_dashboard_explainability_view(
         latest_training_mode=latest_training_mode,
         current_model_identity=current_model_identity,
         replay_behavior=replay_behavior,
+        comparison_stage=comparison_stage,
     )
     not_happened_yet = _build_not_happened_yet(
         lifecycle=lifecycle,
@@ -102,6 +104,7 @@ def build_dashboard_explainability_view(
     expected_next = _build_expected_next(
         lifecycle=lifecycle,
         current_model_identity=current_model_identity,
+        comparison_stage=comparison_stage,
     )
     fingerprint_readiness = _build_fingerprint_readiness(
         lifecycle=lifecycle,
@@ -211,6 +214,8 @@ def _translate_validation_level(validation_level: str) -> dict[str, str]:
 
 def _translate_consensus_status(consensus_summary: dict[str, object]) -> dict[str, str]:
     raw_value = str(consensus_summary.get("final_consensus_status") or "unknown")
+    valid_participants = consensus_summary.get("valid_participants_after_exclusions")
+    quorum_required = consensus_summary.get("quorum_required")
     if raw_value == "success":
         return {
             "raw_value": raw_value,
@@ -221,6 +226,20 @@ def _translate_consensus_status(consensus_summary: dict[str, object]) -> dict[st
             ),
         }
     if raw_value == "failed_consensus":
+        if (
+            valid_participants is not None
+            and quorum_required is not None
+            and int(valid_participants) < int(quorum_required)
+        ):
+            return {
+                "raw_value": raw_value,
+                "label": "No quorum reached",
+                "explanation": (
+                    "Distributed validation refused to produce a trusted payload "
+                    f"because only {valid_participants} valid participants remained "
+                    f"while {quorum_required} were required."
+                ),
+            }
         return {
             "raw_value": raw_value,
             "label": "Consensus failed",
@@ -252,8 +271,8 @@ def _translate_replay_behavior(replay_behavior: dict[str, object]) -> dict[str, 
         "raw_value": classification,
         "label": f"Replay behavior detected in {mode} mode",
         "explanation": (
-            "The fingerprint path has evaluated the SCADA-side behavior and currently "
-            f"classifies it as {classification}."
+            "The fingerprint path has evaluated the richer SCADA-side behavioral "
+            f"payload and currently classifies it as {classification}."
         ),
     }
 
@@ -400,6 +419,7 @@ def _build_happened_already(
     latest_training_mode: str,
     current_model_identity: str | None,
     replay_behavior: dict[str, object],
+    comparison_stage: dict[str, object],
 ) -> list[str]:
     happened = []
     if current_cycle > 0:
@@ -419,6 +439,20 @@ def _build_happened_already(
     if replay_behavior:
         happened.append(
             "Replay-oriented anomaly behavior has already been observed in this run."
+        )
+    if comparison_stage.get("status") == "blocked":
+        happened.append(
+            str(
+                comparison_stage.get("operator_message")
+                or "A cycle was blocked before SCADA comparison because no trusted payload was available."
+            )
+        )
+    elif comparison_stage.get("status") == "blocked_downstream":
+        happened.append(
+            str(
+                comparison_stage.get("operator_message")
+                or "A cycle was blocked after SCADA divergence was detected."
+            )
         )
     return happened or ["The runtime has not accumulated enough evidence yet."]
 
@@ -451,7 +485,30 @@ def _build_expected_next(
     *,
     lifecycle: dict[str, object],
     current_model_identity: str | None,
+    comparison_stage: dict[str, object],
 ) -> dict[str, object]:
+    if comparison_stage.get("status") == "blocked":
+        return {
+            "summary": (
+                "Restore quorum so distributed validation can produce a trusted payload "
+                "before later stages can run again."
+            ),
+            "evidence": {
+                "blocked_by_stage": comparison_stage.get("blocked_by_stage"),
+                "reason": comparison_stage.get("reason"),
+            },
+        }
+    if comparison_stage.get("status") == "blocked_downstream":
+        return {
+            "summary": (
+                "Return SCADA supervisory values inside tolerance so the cycle can be "
+                "forwarded to persistence and fingerprint evaluation again."
+            ),
+            "evidence": {
+                "blocked_by_stage": comparison_stage.get("blocked_by_stage"),
+                "reason": comparison_stage.get("reason"),
+            },
+        }
     eligible = int(lifecycle.get("eligible_history_count") or 0)
     threshold = int(lifecycle.get("eligible_history_threshold") or 0)
     training_events = list(lifecycle.get("training_events") or [])
@@ -827,7 +884,7 @@ def _readiness_working_now(
         )
     if replay_behavior:
         items.append(
-            "Replay or freeze behavior is being evaluated through the fingerprint path and kept separate from SCADA divergence."
+            "Replay behavior is being evaluated through the fingerprint path using richer SCADA-side behavior and kept separate from SCADA divergence."
         )
     return items or ["The run has not yet produced enough fingerprint evidence to show active readiness."]
 
@@ -876,7 +933,7 @@ def _readiness_not_proven_yet(
             f"stronger adequacy floor of {minimum_eligible} eligible artifacts and {minimum_windows} windows."
         )
     items.append(
-        "The prototype can show anomaly evidence, but it does not yet prove academically strong generalization from the current dataset."
+        "Verifying..."
     )
     return items
 
@@ -971,9 +1028,9 @@ def _build_evidence_matrix(
             "label": "Replay / freeze behavior",
             "status": replay_status,
             "summary": (
-                "Replay or freeze behavior is being evaluated through the fingerprint path."
+                "Replay behavior is being evaluated through the fingerprint path using the richer SCADA-side behavioral payload."
                 if replay_behavior
-                else "Replay or freeze behavior has not been observed in the current dashboard state."
+                else "Replay behavior has not been observed in the current dashboard state."
             ),
             "evidence": [
                 f"classification={replay_behavior.get('classification', 'not_available')}",

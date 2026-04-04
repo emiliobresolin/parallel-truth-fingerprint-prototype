@@ -20,8 +20,6 @@ from parallel_truth_fingerprint.consensus import (
 )
 from parallel_truth_fingerprint.lstm_service import (
     configure_scada_replay_runtime_stage,
-    execute_deferred_fingerprint_lifecycle,
-    run_scada_replay_behavior_detection,
 )
 from parallel_truth_fingerprint.persistence import MinioArtifactStore, MinioStoreConfig
 from parallel_truth_fingerprint.scada import FakeOpcUaScadaService
@@ -84,11 +82,37 @@ def build_variable_audit_package(
     for state in audit_package.round_input.replicated_states:
         for sensor_name, value in updated_values.items():
             payload = state.observations_by_sensor[sensor_name]
+            if sensor_name == "temperature":
+                loop_current_ma = round(10.0 + (value / 10.0), 3)
+                pv_percent_range = round(35.0 + value, 3)
+                noise_floor = round(0.15 + (value / 200.0), 6)
+                rate_of_change = round(value / 25.0, 6)
+                local_stability = round(max(0.55, 0.98 - (value / 120.0)), 6)
+            elif sensor_name == "pressure":
+                loop_current_ma = round(11.0 + (value * 1.5), 3)
+                pv_percent_range = round(40.0 + (value * 8.0), 3)
+                noise_floor = round(0.05 + (value / 20.0), 6)
+                rate_of_change = round(value / 3.0, 6)
+                local_stability = round(max(0.55, 0.99 - (value / 15.0)), 6)
+            else:
+                loop_current_ma = round(8.0 + (value / 400.0), 3)
+                pv_percent_range = round(20.0 + (value / 50.0), 3)
+                noise_floor = round(0.5 + (value / 6000.0), 6)
+                rate_of_change = round(value / 120.0, 6)
+                local_stability = round(max(0.55, 0.97 - (value / 10000.0)), 6)
             state.observations_by_sensor[sensor_name] = replace(
                 payload,
                 process_data=replace(
                     payload.process_data,
                     pv=replace(payload.process_data.pv, value=float(value)),
+                    loop_current_ma=loop_current_ma,
+                    pv_percent_range=pv_percent_range,
+                    physics_metrics=replace(
+                        payload.process_data.physics_metrics,
+                        noise_floor=noise_floor,
+                        rate_of_change_dtdt=rate_of_change,
+                        local_stability_score=local_stability,
+                    ),
                 ),
             )
 
@@ -183,26 +207,21 @@ class RuntimeScenarioControlSmokeTests(unittest.TestCase):
                 scenario_control_stage=scenario_control_stage,
                 scada_replay_stage=scada_replay_stage,
             )
-            fingerprint_stage, fingerprint_inference_results = (
-                execute_deferred_fingerprint_lifecycle(
-                    cycle_index=cycle_index,
-                    artifact_store=store,
-                    sequence_length=config.demo_fingerprint_sequence_length,
-                    train_after_eligible_cycles=config.demo_train_after_eligible_cycles,
-                )
-            )
-            replay_behavior_result, replay_inference_results = (
-                run_scada_replay_behavior_detection(
-                    current_round_id=round_id,
-                    consensus_final_status="success",
-                    scada_state=scada_state,
-                    comparison_output=comparison_output,
-                    replay_stage=scada_replay_stage,
-                    artifact_store=store,
-                    sequence_length=config.demo_fingerprint_sequence_length,
-                )
-                if scada_state is not None and comparison_output is not None
-                else (None, ())
+            (
+                fingerprint_stage,
+                fingerprint_inference_results,
+                replay_behavior_result,
+                replay_inference_results,
+            ) = run_local_demo.execute_fingerprint_pipeline_for_cycle(
+                cycle_index=cycle_index,
+                config=config,
+                artifact_store=store,
+                scada_state=scada_state,
+                comparison_output=comparison_output,
+                comparison_stage=comparison_stage,
+                persistence_stage=persistence_stage,
+                scada_replay_stage=scada_replay_stage,
+                consensus_summary=build_round_summary(audit_package),
             )
             return {
                 "cycle_index": cycle_index,
@@ -283,13 +302,10 @@ class RuntimeScenarioControlSmokeTests(unittest.TestCase):
                 payload["cycle_history"][3]["scenario_control"]["training_eligible"]
             )
             self.assertEqual(
-                payload["cycle_history"][3]["replay_behavior"]["output_channel"],
-                "scada_replay_behavior",
-            )
-            self.assertEqual(
                 payload["latest_cycle"]["scenario_control"]["expected_output_channels"],
                 [
-                    "scada_divergence_alert",
+                    "consensus_alert",
+                    "persistence_stage",
                     "replay_behavior",
                     "fingerprint_inference",
                 ],
@@ -299,8 +315,16 @@ class RuntimeScenarioControlSmokeTests(unittest.TestCase):
                 ["reused"],
             )
             self.assertEqual(
-                payload["latest_cycle"]["replay_behavior"]["classification"],
-                "anomalous",
+                payload["latest_cycle"]["fingerprint_lifecycle"]["inference_status"],
+                "completed",
+            )
+            self.assertEqual(
+                payload["latest_cycle"]["replay_behavior"]["output_channel"],
+                "scada_replay_behavior",
+            )
+            self.assertEqual(
+                payload["latest_cycle"]["comparison_stage"]["status"],
+                "completed",
             )
 
             valid_artifact_keys = store.list_json_objects(prefix="valid-consensus-artifacts/")
@@ -323,6 +347,10 @@ class RuntimeScenarioControlSmokeTests(unittest.TestCase):
             self.assertEqual(
                 saved_log["latest_cycle"]["replay_behavior"]["output_channel"],
                 "scada_replay_behavior",
+            )
+            self.assertEqual(
+                saved_log["latest_cycle"]["comparison_stage"]["status"],
+                "completed",
             )
         finally:
             log_path.unlink(missing_ok=True)

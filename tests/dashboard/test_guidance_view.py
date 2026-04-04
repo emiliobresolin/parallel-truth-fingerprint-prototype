@@ -89,7 +89,7 @@ class DashboardGuidanceViewTests(unittest.TestCase):
         what_should_happen = guidance["panels"][1]["bullets"]
         evidence_signals = guidance["panels"][3]["bullets"]
         self.assertTrue(
-            any("Replay or freeze should show up through the fingerprint/replay behavior path" in bullet for bullet in what_should_happen)
+            any("Replay should show up through the fingerprint/replay behavior path" in bullet for bullet in what_should_happen)
         )
         self.assertTrue(
             any("Runtime-valid only." in bullet for bullet in evidence_signals)

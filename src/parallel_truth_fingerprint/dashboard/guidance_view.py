@@ -16,6 +16,7 @@ def build_dashboard_guidance_view(
     latest_cycle = payload.get("latest_cycle") or {}
     lifecycle = latest_cycle.get("fingerprint_lifecycle") or {}
     consensus_summary = latest_cycle.get("consensus_summary") or {}
+    comparison_stage = latest_cycle.get("comparison_stage") or {}
     replay_behavior = latest_cycle.get("replay_behavior") or {}
     scada_divergence = latest_cycle.get("scada_divergence_alert")
     explainability_state = explainability.get("what_changed_since_startup") or {}
@@ -39,6 +40,7 @@ def build_dashboard_guidance_view(
             active_scenario=active_scenario,
             consensus_status=consensus_status,
             lifecycle=lifecycle,
+            comparison_stage=comparison_stage,
             replay_behavior=replay_behavior,
             scada_divergence=scada_divergence,
         ),
@@ -97,6 +99,7 @@ def _what_is_happening_bullets(
     active_scenario: str,
     consensus_status: str,
     lifecycle: dict[str, object],
+    comparison_stage: dict[str, object],
     replay_behavior: dict[str, object],
     scada_divergence: object,
 ) -> list[str]:
@@ -105,9 +108,16 @@ def _what_is_happening_bullets(
         f"Consensus channel currently reports: {consensus_status}.",
         f"Fingerprint lifecycle status: {lifecycle.get('inference_status') or 'not_available'}.",
     ]
+    if comparison_stage.get("status") in {"blocked", "blocked_downstream"}:
+        bullets.append(
+            str(
+                comparison_stage.get("operator_message")
+                or "The latest cycle was blocked before downstream propagation."
+            )
+        )
     if replay_behavior:
         bullets.append(
-            "Replay behavior is currently visible through the fingerprint/replay channel."
+            "Replay behavior is currently visible through the fingerprint/replay channel as a richer behavioral inconsistency."
         )
     else:
         bullets.append(
@@ -131,8 +141,9 @@ def _what_should_happen_bullets(
 ) -> list[str]:
     bullets = [
         "Normal operation should keep edges aligned, let consensus succeed, and keep valid artifacts accumulating over time.",
-        "Replay or freeze should show up through the fingerprint/replay behavior path rather than pretending to be a consensus failure.",
-        "SCADA divergence should appear in the SCADA comparison channel without redefining the consensus result.",
+        "Replay should show up through the fingerprint/replay behavior path as a richer behavioral inconsistency rather than pretending to be a consensus failure.",
+        "SCADA divergence should appear in the SCADA comparison channel without redefining the consensus result, and it should block that cycle before persistence and fingerprint evaluation.",
+        "If quorum is not reached, the consensus stage should refuse to produce a trusted payload and the cycle should stop there.",
     ]
     if model_status == "model_available":
         bullets.append(

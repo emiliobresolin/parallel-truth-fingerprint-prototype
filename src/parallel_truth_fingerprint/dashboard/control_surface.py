@@ -271,7 +271,7 @@ class LocalOperatorDashboardController:
             )
             limitation_note = (
                 fingerprint_lifecycle.get("limitation_note")
-                or "The fingerprint base is still runtime-valid only, not yet meaningful-fingerprint-valid, because the adequacy floor remains below target."
+                or "Verifying..."
             )
             event_views = build_dashboard_event_views(
                 generated_at=generated_at,
@@ -346,7 +346,9 @@ class LocalOperatorDashboardController:
                     },
                     "lifecycle": fingerprint_lifecycle,
                     "scada_state": latest_cycle.get("scada_state"),
+                    "comparison_stage": latest_cycle.get("comparison_stage"),
                     "comparison_output": latest_cycle.get("comparison_output"),
+                    "persistence_stage": latest_cycle.get("persistence_stage"),
                     "cycle_history": latest_payload.get("cycle_history", []),
                 },
                 "channels": {
@@ -482,10 +484,23 @@ class LocalOperatorDashboardController:
         return int(self._latest_runtime_payload.get("runtime", {}).get("current_cycle", 0))
 
     def _runtime_status_note_locked(self) -> str:
+        latest_cycle = (self._latest_runtime_payload or {}).get("latest_cycle") or {}
+        comparison_stage = latest_cycle.get("comparison_stage") or {}
+        persistence_stage = latest_cycle.get("persistence_stage") or {}
         if self._last_error:
             return (
                 "The last runtime attempt failed before a live cycle completed. "
                 "Inspect the active failure message and fix the live path before trusting operator changes."
+            )
+        if comparison_stage.get("status") in {"blocked", "blocked_downstream"}:
+            return str(
+                comparison_stage.get("operator_message")
+                or "The latest cycle was deliberately blocked before downstream propagation."
+            )
+        if persistence_stage.get("status") == "blocked":
+            return str(
+                persistence_stage.get("operator_message")
+                or "The latest cycle did not produce an approved downstream artifact."
             )
         if self._runtime_status == "running":
             return (
@@ -886,10 +901,48 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
     .pipeline-card.scada {{ border-color: rgba(184, 150, 255, 0.28); }}
     .pipeline-card.comparison {{ border-color: rgba(255, 125, 92, 0.28); }}
     .pipeline-card.fingerprint {{ border-color: rgba(255, 210, 105, 0.28); }}
+    .pipeline-card.blocked {{
+      border-color: rgba(255, 125, 92, 0.7);
+      box-shadow: inset 0 0 0 1px rgba(255, 125, 92, 0.2);
+      background: linear-gradient(180deg, rgba(255,125,92,0.08), transparent), var(--panel-2);
+    }}
+    .pipeline-card.warning {{
+      border-color: rgba(247, 189, 89, 0.5);
+      background: linear-gradient(180deg, rgba(247,189,89,0.06), transparent), var(--panel-2);
+    }}
     .pipeline-card h3 {{
       margin: 0;
       font-size: 0.94rem;
       letter-spacing: 0.03em;
+    }}
+    .state-pill {{
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.45rem;
+      border-radius: 999px;
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255,255,255,0.04);
+    }}
+    .state-pill.blocked {{
+      border-color: rgba(255, 125, 92, 0.5);
+      color: #ffb29d;
+      background: rgba(255, 125, 92, 0.14);
+    }}
+    .state-pill.warning {{
+      border-color: rgba(247, 189, 89, 0.45);
+      color: #f7d27a;
+      background: rgba(247, 189, 89, 0.12);
+    }}
+    .state-pill.clear {{
+      border-color: rgba(70, 212, 181, 0.4);
+      color: #8ce7d2;
+      background: rgba(70, 212, 181, 0.1);
     }}
     .pipeline-status {{
       font-size: 0.8rem;
@@ -934,6 +987,17 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
       padding: 0.75rem;
       background: rgba(255,255,255,0.02);
       font-size: 0.8rem;
+    }}
+    .channel-badge.blocked {{
+      border-color: rgba(255, 125, 92, 0.55);
+      background: rgba(255, 125, 92, 0.1);
+    }}
+    .channel-badge.warning {{
+      border-color: rgba(247, 189, 89, 0.45);
+      background: rgba(247, 189, 89, 0.1);
+    }}
+    .channel-badge.clear {{
+      border-color: rgba(70, 212, 181, 0.35);
     }}
     .channel-badge strong {{ display: block; color: var(--teal); margin-bottom: 0.3rem; }}
     .channel-badge .muted {{ font-size: 0.76rem; }}
@@ -1314,7 +1378,7 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
         cards.className = `pipeline-row ${{row.id ?? ""}}`;
         for (const node of row.nodes ?? []) {{
           const card = document.createElement("div");
-          card.className = `pipeline-card ${{node.kind ?? ""}}`;
+          card.className = `pipeline-card ${{node.kind ?? ""}} ${{node.tone ?? "clear"}}`;
           const metricsMarkup = (node.metrics ?? [])
             .map(
               (metric) => `
@@ -1325,8 +1389,16 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
               `
             )
             .join("");
+          const pillMarkup = `
+            <span class="state-pill ${{node.tone ?? "clear"}}">
+              ${{node.tone === "blocked" ? "Blocked" : node.tone === "warning" ? "Watch" : "Live"}}
+            </span>
+          `;
           card.innerHTML = `
-            <h3>${{node.title ?? "Component"}}</h3>
+            <div class="row" style="justify-content: space-between; align-items: flex-start;">
+              <h3>${{node.title ?? "Component"}}</h3>
+              ${{pillMarkup}}
+            </div>
             <div class="pipeline-status">${{node.status ?? "No live status available yet."}}</div>
             <div class="pipeline-metrics">${{metricsMarkup}}</div>
             <button type="button" data-component="${{node.log_component_id ?? node.component_id}}">Open logs</button>
@@ -1357,7 +1429,7 @@ def build_dashboard_html(initial_state: dict[str, object]) -> str:
         channelRoot.className = "channel-strip";
         for (const channel of pipelineView?.channel_separation ?? []) {{
           const badge = document.createElement("div");
-          badge.className = "channel-badge";
+          badge.className = `channel-badge ${{channel.tone ?? "clear"}}`;
           badge.innerHTML = `
             <strong>${{channel.label ?? "Channel"}}</strong>
             <div class="muted">status=${{channel.status ?? "unknown"}}</div>

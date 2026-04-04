@@ -19,10 +19,15 @@ SCENARIO_OUTPUTS_NORMAL = (
     "persistence_stage",
     "fingerprint_lifecycle",
 )
-SCENARIO_OUTPUTS_SCADA = (
-    "scada_divergence_alert",
+SCENARIO_OUTPUTS_REPLAY = (
+    "consensus_alert",
+    "persistence_stage",
     "replay_behavior",
     "fingerprint_inference",
+)
+SCENARIO_OUTPUTS_SCADA_BLOCKING = (
+    "scada_divergence_alert",
+    "persistence_stage",
 )
 SCENARIO_OUTPUTS_EDGE = (
     "consensus_alert",
@@ -31,7 +36,7 @@ SCENARIO_OUTPUTS_EDGE = (
 )
 SCENARIO_OUTPUTS_SCADA_DIVERGENCE = (
     "scada_divergence_alert",
-    "fingerprint_inference",
+    "persistence_stage",
 )
 SCENARIO_OUTPUTS_QUORUM = (
     "consensus_alert",
@@ -123,7 +128,7 @@ def resolve_runtime_scenario_control_stage(
             training_label="non_normal",
             training_eligible=False,
             training_eligibility_reason="scada_replay",
-            expected_output_channels=SCENARIO_OUTPUTS_SCADA,
+            expected_output_channels=SCENARIO_OUTPUTS_REPLAY,
         )
 
     if configured_scenario == "scada_freeze":
@@ -138,7 +143,7 @@ def resolve_runtime_scenario_control_stage(
             training_label="non_normal",
             training_eligible=False,
             training_eligibility_reason="scada_freeze",
-            expected_output_channels=SCENARIO_OUTPUTS_SCADA,
+            expected_output_channels=SCENARIO_OUTPUTS_SCADA_BLOCKING,
         )
 
     if configured_scenario == "scada_divergence":

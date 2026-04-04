@@ -12,8 +12,6 @@ import unittest
 from parallel_truth_fingerprint.config.runtime import RuntimeDemoConfig
 from parallel_truth_fingerprint.lstm_service import (
     configure_scada_replay_runtime_stage,
-    execute_deferred_fingerprint_lifecycle,
-    run_scada_replay_behavior_detection,
 )
 from parallel_truth_fingerprint.persistence import MinioArtifactStore, MinioStoreConfig
 from parallel_truth_fingerprint.scada import FakeOpcUaScadaService
@@ -49,7 +47,7 @@ def build_variable_audit_package(
     pressure: float,
     rpm: float,
 ):
-    """Create one valid audit package with deterministic but varying PV values."""
+    """Create one valid audit package with deterministic supervisory and behavioral drift."""
 
     audit_package = build_valid_audit_package(round_id=round_id)
     updated_values = {
@@ -65,11 +63,37 @@ def build_variable_audit_package(
     for state in audit_package.round_input.replicated_states:
         for sensor_name, value in updated_values.items():
             payload = state.observations_by_sensor[sensor_name]
+            if sensor_name == "temperature":
+                loop_current_ma = round(10.0 + (value / 10.0), 3)
+                pv_percent_range = round(35.0 + value, 3)
+                noise_floor = round(0.15 + (value / 200.0), 6)
+                rate_of_change = round(value / 25.0, 6)
+                local_stability = round(max(0.55, 0.98 - (value / 120.0)), 6)
+            elif sensor_name == "pressure":
+                loop_current_ma = round(11.0 + (value * 1.5), 3)
+                pv_percent_range = round(40.0 + (value * 8.0), 3)
+                noise_floor = round(0.05 + (value / 20.0), 6)
+                rate_of_change = round(value / 3.0, 6)
+                local_stability = round(max(0.55, 0.99 - (value / 15.0)), 6)
+            else:
+                loop_current_ma = round(8.0 + (value / 400.0), 3)
+                pv_percent_range = round(20.0 + (value / 50.0), 3)
+                noise_floor = round(0.5 + (value / 6000.0), 6)
+                rate_of_change = round(value / 120.0, 6)
+                local_stability = round(max(0.55, 0.97 - (value / 10000.0)), 6)
             state.observations_by_sensor[sensor_name] = replace(
                 payload,
                 process_data=replace(
                     payload.process_data,
                     pv=replace(payload.process_data.pv, value=float(value)),
+                    loop_current_ma=loop_current_ma,
+                    pv_percent_range=pv_percent_range,
+                    physics_metrics=replace(
+                        payload.process_data.physics_metrics,
+                        noise_floor=noise_floor,
+                        rate_of_change_dtdt=rate_of_change,
+                        local_stability_score=local_stability,
+                    ),
                 ),
             )
 
@@ -89,7 +113,7 @@ def build_variable_audit_package(
     "Local MinIO is not reachable on 127.0.0.1:9000.",
 )
 class RuntimeReplayBehaviorSmokeTests(unittest.TestCase):
-    def test_real_runtime_replay_behavior_surfaces_through_distinct_fingerprint_channel(
+    def test_real_runtime_replay_behavior_surfaces_through_fingerprint_path_without_mandatory_scada_divergence(
         self,
     ) -> None:
         run_suffix = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
@@ -138,18 +162,29 @@ class RuntimeReplayBehaviorSmokeTests(unittest.TestCase):
                 pressure=pressure,
                 rpm=rpm,
             )
-            run_local_demo.run_scada_comparison_and_persistence(
+            (
+                scada_state,
+                comparison_stage,
+                comparison_output,
+                _scada_alert,
+                persistence_stage,
+            ) = run_local_demo.run_scada_comparison_and_persistence(
                 consensus_audit=audit_package,
                 artifact_store=store,
                 scada_service=scada_service,
                 fault_mode="none",
                 scada_replay_stage=replay_stage,
             )
-            execute_deferred_fingerprint_lifecycle(
+            run_local_demo.execute_fingerprint_pipeline_for_cycle(
                 cycle_index=cycle_index,
+                config=config,
                 artifact_store=store,
-                sequence_length=config.demo_fingerprint_sequence_length,
-                train_after_eligible_cycles=config.demo_train_after_eligible_cycles,
+                scada_state=scada_state,
+                comparison_output=comparison_output,
+                comparison_stage=comparison_stage,
+                persistence_stage=persistence_stage,
+                scada_replay_stage=replay_stage,
+                consensus_summary=run_local_demo.build_round_summary(audit_package),
             )
 
         replay_stage = configure_scada_replay_runtime_stage(
@@ -176,48 +211,35 @@ class RuntimeReplayBehaviorSmokeTests(unittest.TestCase):
             fault_mode="none",
             scada_replay_stage=replay_stage,
         )
-        lifecycle_stage, _generic_inference_results = execute_deferred_fingerprint_lifecycle(
+        (
+            lifecycle_stage,
+            generic_inference_results,
+            replay_result,
+            replay_inference_results,
+        ) = run_local_demo.execute_fingerprint_pipeline_for_cycle(
             cycle_index=4,
+            config=config,
             artifact_store=store,
-            sequence_length=config.demo_fingerprint_sequence_length,
-            train_after_eligible_cycles=config.demo_train_after_eligible_cycles,
-        )
-        replay_result, replay_inference_results = run_scada_replay_behavior_detection(
-            current_round_id=replay_audit_package.consensused_valid_state.round_identity.round_id,
-            consensus_final_status="success",
             scada_state=replay_scada_state,
             comparison_output=comparison_output,
-            replay_stage=replay_stage,
-            artifact_store=store,
-            sequence_length=config.demo_fingerprint_sequence_length,
+            comparison_stage=comparison_stage,
+            persistence_stage=persistence_stage,
+            scada_replay_stage=replay_stage,
+            consensus_summary=run_local_demo.build_round_summary(replay_audit_package),
         )
 
         self.assertEqual(comparison_stage["status"], "completed")
+        self.assertTrue(comparison_stage["downstream_permitted"])
         self.assertEqual(persistence_stage["status"], "persisted")
-        self.assertEqual(
-            persistence_stage["record"]["dataset_context"]["training_eligible"],
-            False,
-        )
-        self.assertEqual(
-            persistence_stage["record"]["dataset_context"]["scenario_label"],
-            "scada_replay",
-        )
         self.assertEqual(lifecycle_stage.training_events, ("reused",))
+        self.assertEqual(lifecycle_stage.inference_status, "completed")
         self.assertEqual(lifecycle_stage.model_status, "model_available")
+        self.assertTrue(generic_inference_results)
         self.assertIsNotNone(replay_result)
+        self.assertTrue(replay_inference_results)
         self.assertEqual(replay_result.output_channel, "scada_replay_behavior")
         self.assertEqual(replay_result.scenario_mode, "replay")
-        self.assertEqual(replay_result.consensus_final_status, "success")
-        self.assertTrue(replay_result.scada_divergent_sensors)
-        self.assertEqual(replay_result.source_dataset_validation_level, "runtime_valid_only")
-        self.assertIn(
-            "runtime-valid but not yet meaningfully fingerprint-valid",
-            replay_result.limitation_note,
-        )
-        self.assertNotIn("Story ", replay_result.limitation_note)
-        self.assertTrue(replay_inference_results)
-        self.assertEqual(replay_inference_results[0].output_channel, "lstm_fingerprint")
-        self.assertEqual(replay_result.classification.value, "anomalous")
+        self.assertEqual(replay_result.scada_divergent_sensors, ())
 
         valid_artifact_keys = store.list_json_objects(prefix="valid-consensus-artifacts/")
         dataset_manifest_keys = store.list_json_objects(prefix="fingerprint-datasets/")

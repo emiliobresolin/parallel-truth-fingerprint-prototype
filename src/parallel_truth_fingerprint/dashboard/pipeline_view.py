@@ -27,6 +27,7 @@ def build_dashboard_pipeline_view(
     comparison_output = extract_structured_comparison_output(
         latest_cycle.get("comparison_output") or {}
     )
+    comparison_stage = latest_cycle.get("comparison_stage") or {}
     divergence_alert = extract_structured_divergence_alert(
         latest_cycle.get("scada_divergence_alert") or {}
     )
@@ -82,9 +83,14 @@ def build_dashboard_pipeline_view(
             title="Consensus",
             kind="consensus",
             status=_latest_component_status(event_views, "consensus"),
+            tone=_consensus_tone(consensus_summary),
             metrics=(
                 ("Status", str(consensus_summary.get("final_consensus_status") or "unknown")),
                 ("Round", str(consensus_summary.get("round_id") or "not_available")),
+                (
+                    "Valid / quorum",
+                    _consensus_quorum_metric(consensus_summary),
+                ),
             ),
         ),
         "scada_source": _node(
@@ -104,6 +110,10 @@ def build_dashboard_pipeline_view(
             title="SCADA Comparison",
             kind="comparison",
             status=_latest_component_status(event_views, "scada_comparison"),
+            tone=_scada_comparison_tone(
+                comparison_stage=comparison_stage,
+                comparison_output=comparison_output,
+            ),
             metrics=(
                 (
                     "Divergent sensors",
@@ -113,6 +123,10 @@ def build_dashboard_pipeline_view(
                     "Source round",
                     str(scada_state.get("source_round_id") or "not_available"),
                 ),
+                (
+                    "Decision",
+                    _scada_comparison_decision(comparison_stage, comparison_output),
+                ),
             ),
         ),
         "fingerprint_lifecycle": _node(
@@ -120,10 +134,18 @@ def build_dashboard_pipeline_view(
             title="Fingerprint / LSTM",
             kind="fingerprint",
             status=_latest_component_status(event_views, "fingerprint_lifecycle"),
+            tone=_fingerprint_tone(fingerprint_results, replay_behavior, lifecycle),
             metrics=(
                 ("Model", str(lifecycle.get("model_status") or "no_model_yet")),
                 ("Inference", str(lifecycle.get("inference_status") or "not_available")),
-                ("Classification", _fingerprint_classification(fingerprint_results, replay_behavior)),
+                (
+                    "Classification",
+                    _fingerprint_classification(
+                        fingerprint_results,
+                        replay_behavior,
+                        lifecycle,
+                    ),
+                ),
             ),
         ),
     }
@@ -172,7 +194,15 @@ def build_dashboard_pipeline_view(
                 "id": "scada_divergence",
                 "label": "SCADA divergence",
                 "status": (
-                    "active"
+                    "blocked"
+                    if _scada_divergence_is_active(
+                        divergence_alert=divergence_alert,
+                        comparison_output=comparison_output,
+                    )
+                    else "clear"
+                ),
+                "tone": (
+                    "blocked"
                     if _scada_divergence_is_active(
                         divergence_alert=divergence_alert,
                         comparison_output=comparison_output,
@@ -184,13 +214,19 @@ def build_dashboard_pipeline_view(
             {
                 "id": "consensus",
                 "label": "Consensus status",
-                "status": str(consensus_summary.get("final_consensus_status") or "unknown"),
+                "status": _consensus_channel_status(consensus_summary),
+                "tone": _consensus_tone(consensus_summary),
                 "explanation": "Consensus trust state stays distinct from SCADA comparison and fingerprint channels.",
             },
             {
                 "id": "fingerprint",
                 "label": "Fingerprint / replay",
-                "status": _fingerprint_classification(fingerprint_results, replay_behavior),
+                "status": _fingerprint_channel_status(
+                    fingerprint_results=fingerprint_results,
+                    replay_behavior=replay_behavior,
+                    lifecycle=lifecycle,
+                ),
+                "tone": _fingerprint_tone(fingerprint_results, replay_behavior, lifecycle),
                 "explanation": "Behavioral anomaly output remains separate from the consensus and SCADA divergence channels.",
             },
         ],
@@ -260,6 +296,7 @@ def _node(
     status: str,
     metrics: tuple[tuple[str, str], ...],
     log_component_id: str | None = None,
+    tone: str = "clear",
 ) -> dict[str, object]:
     return {
         "component_id": component_id,
@@ -267,6 +304,7 @@ def _node(
         "title": title,
         "kind": kind,
         "status": status,
+        "tone": tone,
         "metrics": [{"label": label, "value": value} for label, value in metrics],
     }
 
@@ -299,11 +337,15 @@ def _find_scada_value(scada_state: dict[str, object], sensor_name: str) -> objec
 def _fingerprint_classification(
     fingerprint_results: list[dict[str, object]],
     replay_behavior: dict[str, object],
+    lifecycle: dict[str, object],
 ) -> str:
     if replay_behavior:
         return str(replay_behavior.get("classification") or "not_available")
     if fingerprint_results:
         return str(fingerprint_results[0].get("classification") or "not_available")
+    inference_status = str(lifecycle.get("inference_status") or "")
+    if inference_status.startswith("blocked:"):
+        return "blocked"
     return "not_available"
 
 
@@ -323,3 +365,84 @@ def _scada_divergence_is_active(
     if divergence_alert.get("divergent_sensors"):
         return True
     return False
+
+
+def _consensus_tone(consensus_summary: dict[str, object]) -> str:
+    status = str(consensus_summary.get("final_consensus_status") or "unknown")
+    valid_participants = consensus_summary.get("valid_participants_after_exclusions")
+    quorum_required = consensus_summary.get("quorum_required")
+    if (
+        status == "failed_consensus"
+        and valid_participants is not None
+        and quorum_required is not None
+        and int(valid_participants) < int(quorum_required)
+    ):
+        return "blocked"
+    return "clear" if status == "success" else "warning"
+
+
+def _consensus_quorum_metric(consensus_summary: dict[str, object]) -> str:
+    valid_participants = consensus_summary.get("valid_participants_after_exclusions")
+    quorum_required = consensus_summary.get("quorum_required")
+    if valid_participants is None or quorum_required is None:
+        return "not_available"
+    return f"{valid_participants}/{quorum_required}"
+
+
+def _consensus_channel_status(consensus_summary: dict[str, object]) -> str:
+    status = str(consensus_summary.get("final_consensus_status") or "unknown")
+    if _consensus_tone(consensus_summary) == "blocked":
+        return "no_quorum_block"
+    return status
+
+
+def _scada_comparison_tone(
+    comparison_stage: dict[str, object],
+    comparison_output: dict[str, object],
+) -> str:
+    if comparison_stage.get("status") in {"blocked", "blocked_downstream"}:
+        return "blocked"
+    return "clear" if not extract_divergent_sensors(comparison_output) else "warning"
+
+
+def _scada_comparison_decision(
+    comparison_stage: dict[str, object],
+    comparison_output: dict[str, object],
+) -> str:
+    if comparison_stage.get("status") == "blocked":
+        return "blocked_before_comparison"
+    if extract_divergent_sensors(comparison_output):
+        return "blocked_on_divergence"
+    return "forwarded_downstream"
+
+
+def _fingerprint_channel_status(
+    *,
+    fingerprint_results: list[dict[str, object]],
+    replay_behavior: dict[str, object],
+    lifecycle: dict[str, object],
+) -> str:
+    if replay_behavior:
+        return str(replay_behavior.get("classification") or "not_available")
+    if fingerprint_results:
+        return str(fingerprint_results[0].get("classification") or "not_available")
+    inference_status = str(lifecycle.get("inference_status") or "")
+    if inference_status.startswith("blocked:"):
+        return "blocked"
+    return "not_available"
+
+
+def _fingerprint_tone(
+    fingerprint_results: list[dict[str, object]],
+    replay_behavior: dict[str, object],
+    lifecycle: dict[str, object],
+) -> str:
+    if replay_behavior:
+        return "warning"
+    if fingerprint_results:
+        classification = str(fingerprint_results[0].get("classification") or "")
+        return "warning" if classification == "anomalous" else "clear"
+    inference_status = str(lifecycle.get("inference_status") or "")
+    if inference_status.startswith("blocked:"):
+        return "blocked"
+    return "clear"

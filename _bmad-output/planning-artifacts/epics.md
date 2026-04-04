@@ -881,6 +881,8 @@ Scope boundary:
   - semantic correction of dashboard state mapping against the current runtime payload
   - architecture-aligned grouping of sensors, edges, consensus, SCADA comparison, and fingerprint stages
   - clearer dashboard hierarchy and standardized collapse behavior
+  - explicit no-quorum and SCADA-divergence blocking semantics in the visible demo path
+  - replay behavior aligned to a richer SCADA-side payload while keeping the simple SCADA comparison rule narrow
 - Out of scope:
   - new sensors, new edge roles, or changes to the five pillars
   - new ML model families, new anomaly engines, or training-policy redesign
@@ -893,10 +895,24 @@ Sequencing note:
   - Story 6.2
   - Story 6.1
   - Story 6.3
+  - Story 6.4
+  - Story 6.5
 - This order is intentional:
   - first correct dashboard truthfulness and state mapping
   - then expose stronger fingerprint readiness evidence
   - then reorganize the UI around the corrected architecture and evidence model
+  - then make blocking security and supervisory decisions explicit in the live path
+  - then strengthen replay so the fingerprint alert is demonstrably distinct from simple SCADA divergence
+
+Execution gate note:
+
+- Stories 6.4 and 6.5 are to be implemented one at a time.
+- Each story must complete its own QA pass before the next story begins.
+- The intended order is:
+  - Story 6.4 development
+  - Story 6.4 QA validation
+  - Story 6.5 development
+  - Story 6.5 QA validation
 
 ### Story 6.1: Establish Fingerprint Readiness Evidence and Meaningful-Validity Gate
 
@@ -1018,3 +1034,90 @@ So that the prototype becomes easier to read and explain on a normal laptop-size
 **When** grouped sections and labels are shown
 **Then** they use architecture and domain language that a professor or evaluator can understand directly
 **And** they do not rely on internal story numbering or implementation jargon.
+
+### Story 6.4: Make No-Quorum and SCADA-Divergence Blocking Explicit in the Pipeline
+
+As a researcher and demo operator,
+I want no-quorum and SCADA-divergence outcomes to appear as explicit blocking decisions in the pipeline,
+So that the demo shows exactly why a cycle was stopped and why no downstream payload was forwarded.
+
+**Acceptance Criteria:**
+
+**Given** the distributed-validation requirement
+**When** valid participants remaining after exclusions fall below quorum
+**Then** the prototype shows an explicit no-quorum alert in the consensus stage
+**And** it explains that no trusted payload was produced because majority was not reached
+**And** it does not present this as a generic runtime crash.
+
+**Given** the blocked-forwarding rule
+**When** no quorum is reached
+**Then** the cycle does not advance to:
+- SCADA comparison
+- valid-artifact persistence
+- downstream fingerprint evaluation
+**And** the dashboard makes that blocked progression visible.
+
+**Given** the supervisory-validation rule
+**When** SCADA comparison is executed
+**Then** the divergence decision is based only on:
+- temperature
+- pressure
+- rpm
+**Even if** the SCADA-side payload carries richer contextual fields for later stages.
+
+**Given** the SCADA-integrity requirement
+**When** any of those supervisory values diverge beyond tolerance
+**Then** the prototype emits a SCADA-divergence alert
+**And** it stops the cycle from progressing further downstream for that cycle.
+
+**Given** the alert-separation requirement
+**When** no-quorum, SCADA divergence, and fingerprint anomaly are displayed
+**Then** they remain clearly distinct in meaning and pipeline location:
+- no quorum = distributed validation refused to produce trusted data
+- SCADA divergence = supervisory values do not match the trusted committed state
+- fingerprint anomaly = behavioral inconsistency detected after trusted and supervisory checks
+
+### Story 6.5: Detect Replay Through Richer SCADA-Side Behavioral Payload
+
+As a researcher and demo operator,
+I want replay behavior to be evaluated from a richer SCADA-side behavioral payload while keeping the simple SCADA comparison rule narrow,
+So that replay can be demonstrated as a fingerprint-level anomaly rather than only as an obvious supervisory mismatch.
+
+**Acceptance Criteria:**
+
+**Given** the SCADA-side contract requirement
+**When** the fake SCADA stage projects its state
+**Then** it carries:
+- the three supervisory values used for comparison
+- richer behavioral and contextual fields needed for replay-oriented fingerprint evaluation
+**And** those richer fields remain distinct from the narrow SCADA-comparison decision rule.
+
+**Given** the comparison-boundary rule
+**When** SCADA divergence is decided
+**Then** the decision still uses only:
+- temperature
+- pressure
+- rpm
+**And** it does not widen into a richer multi-field comparison engine.
+
+**Given** the replay-scenario requirement
+**When** SCADA replay is activated after normal history exists
+**Then** the replayed SCADA-side state can preserve or reintroduce stale behavioral detail while top-level supervisory values may still appear plausible
+**So that** replay success is not defined only by obvious SCADA divergence.
+
+**Given** the fingerprint-path requirement
+**When** replay behavior is evaluated
+**Then** the anomaly decision is driven by the fingerprint or replay-behavior stage using the richer SCADA-side payload
+**And** replay can be surfaced even when consensus succeeded and SCADA divergence is absent or weak.
+
+**Given** the training-integrity rule
+**When** replay cycles occur
+**Then** they remain excluded from normal training
+**And** the existing saved-model reuse flow remains intact unless an explicit later story changes it.
+
+**Given** the demo-clarity requirement
+**When** replay is shown in the dashboard
+**Then** the UI explains it as a behavioral inconsistency detected by the fingerprint path
+**And** it keeps replay distinct from:
+- no-quorum alerts
+- SCADA-divergence alerts

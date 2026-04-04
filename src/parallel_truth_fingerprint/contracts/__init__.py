@@ -51,6 +51,7 @@ from parallel_truth_fingerprint.contracts.scada_comparison_output import (
     SensorScadaComparisonOutput,
 )
 from parallel_truth_fingerprint.contracts.scada_state import (
+    ScadaBehavioralSensorState,
     ScadaSensorState,
     ScadaState,
 )
@@ -91,6 +92,7 @@ __all__ = [
     "RoundIdentity",
     "ScadaAlert",
     "ScadaAlertType",
+    "ScadaBehavioralSensorState",
     "ScadaComparisonResult",
     "ScadaComparisonOutput",
     "ScadaDivergenceClassification",

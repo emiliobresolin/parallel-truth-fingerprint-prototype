@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 import unittest
 
@@ -15,6 +16,7 @@ from parallel_truth_fingerprint.contracts.consensused_valid_state import (
 )
 from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
 from parallel_truth_fingerprint.scada import FakeOpcUaScadaService
+from tests.persistence.test_service import build_valid_audit_package
 
 
 def build_valid_state(
@@ -113,6 +115,60 @@ class ScadaComparisonServiceTests(unittest.TestCase):
             {
                 "scada_mode": "offset",
                 "note": "simulated supervisory offset for demo preparation",
+            },
+        )
+
+    def test_richer_behavioral_payload_does_not_widen_the_supervisory_comparison_rule(
+        self,
+    ) -> None:
+        valid_state = build_valid_state(round_id="round-211")
+        source_state = build_valid_audit_package(
+            round_id="round-211"
+        ).round_input.replicated_states[0]
+        scada_state = FakeOpcUaScadaService().project_state(
+            valid_state,
+            source_replicated_state=source_state,
+        )
+        stale_behavior_state = replace(
+            scada_state,
+            behavioral_source_round_id="round-199",
+            behavioral_sensor_values={
+                sensor_name: replace(
+                    behavior_state,
+                    source_round_id="round-199",
+                    noise_floor=99.999,
+                    local_stability_score=0.111,
+                    mode="replay",
+                )
+                for sensor_name, behavior_state in (
+                    scada_state.behavioral_sensor_values or {}
+                ).items()
+            },
+        )
+
+        result = compare_consensused_to_scada(
+            valid_state=valid_state,
+            scada_state=stale_behavior_state,
+            contextual_evidence={
+                sensor_name: {
+                    "behavioral_source_round_id": "round-199",
+                    "behavioral_mode": "replay",
+                }
+                for sensor_name in ("temperature", "pressure", "rpm")
+            },
+        )
+
+        self.assertTrue(result.all_within_tolerance)
+        self.assertTrue(all(item.within_tolerance for item in result.sensor_comparisons))
+        self.assertEqual(
+            next(
+                item.contextual_evidence
+                for item in result.sensor_comparisons
+                if item.sensor_name == "temperature"
+            ),
+            {
+                "behavioral_source_round_id": "round-199",
+                "behavioral_mode": "replay",
             },
         )
 

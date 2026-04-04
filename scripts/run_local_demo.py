@@ -47,6 +47,10 @@ from parallel_truth_fingerprint.lstm_service import (
     execute_deferred_fingerprint_lifecycle,
     run_scada_replay_behavior_detection,
 )
+from parallel_truth_fingerprint.lstm_service.dataset_builder import (
+    build_normal_training_windows,
+)
+from parallel_truth_fingerprint.lstm_service.lifecycle import latest_model_metadata_key
 from parallel_truth_fingerprint.persistence import (
     MinioArtifactStore,
     MinioStoreConfig,
@@ -60,6 +64,11 @@ from parallel_truth_fingerprint.scenario_control import (
     resolve_runtime_scenario_control_stage,
 )
 from parallel_truth_fingerprint.sensor_simulation.simulator import CompressorSimulator
+
+
+NO_QUORUM_BLOCK_REASON = "no_quorum_reached"
+SCADA_DIVERGENCE_BLOCK_REASON = "scada_divergence_detected"
+PERSISTENCE_BLOCK_REASON = "downstream_persistence_unavailable"
 
 
 def default_demo_log_path(log_path: str) -> Path:
@@ -334,7 +343,19 @@ def format_comparison_stage_compact(stage: dict[str, object]) -> str:
     """Render one compact comparison-stage line for demo output."""
 
     if stage["status"] == "blocked":
-        return f"comparison=blocked reason={stage['reason']}"
+        return (
+            f"comparison=blocked "
+            f"stage={stage.get('blocked_by_stage', 'comparison')} "
+            f"reason={stage['reason']}"
+        )
+    if stage["status"] == "blocked_downstream":
+        divergent_sensors = ",".join(stage.get("divergent_sensors") or []) or "none"
+        return (
+            f"comparison=completed "
+            f"downstream=blocked "
+            f"reason={stage.get('reason', 'unknown')} "
+            f"divergent[{divergent_sensors}]"
+        )
     return stage["compact"]
 
 
@@ -348,6 +369,7 @@ def format_persistence_stage_compact(stage: dict[str, object]) -> str:
             f"endpoint={stage['endpoint']} "
             f"secure={str(stage['secure']).lower()} "
             f"bucket={stage['bucket']} "
+            f"stage={stage.get('blocked_by_stage', 'persistence')} "
             f"reason={stage['reason']}"
         )
     if stage["status"] == "error":
@@ -368,6 +390,93 @@ def format_persistence_stage_compact(stage: dict[str, object]) -> str:
         f"artifact_key={stage['artifact_key']} "
         f"artifact_uri={stage['artifact_uri']}"
     )
+
+
+def _resolve_consensus_block_reason(consensus_summary) -> str:
+    if (
+        consensus_summary.final_consensus_status.value == "failed_consensus"
+        and consensus_summary.valid_participants_after_exclusions
+        < consensus_summary.quorum_required
+    ):
+        return NO_QUORUM_BLOCK_REASON
+    return "no_consensused_valid_state"
+
+
+def _consensus_block_message(consensus_summary) -> str:
+    if _resolve_consensus_block_reason(consensus_summary) == NO_QUORUM_BLOCK_REASON:
+        return (
+            "No quorum was reached in distributed validation, so no trusted payload "
+            "was produced and nothing was forwarded downstream."
+        )
+    return (
+        "Consensus did not produce a trusted payload, so downstream stages were "
+        "blocked for this cycle."
+    )
+
+
+def _scada_divergence_block_message(comparison_output) -> str:
+    divergent_sensors = ", ".join(comparison_output.divergent_sensors)
+    return (
+        "SCADA supervisory values diverged on "
+        f"{divergent_sensors}, so the cycle was blocked before persistence and "
+        "fingerprint evaluation."
+    )
+
+
+def _select_scada_source_state(consensus_audit, source_edges: tuple[str, ...]):
+    for state in consensus_audit.round_input.replicated_states:
+        if state.owner_edge_id in source_edges:
+            return state
+    raise ValueError(
+        "SCADA projection could not find a validated source edge view inside the current round input."
+    )
+
+
+def _build_scada_contextual_evidence(scada_state) -> dict[str, dict[str, object]]:
+    sensor_values = scada_state.sensor_values if scada_state is not None else {}
+    behavioral_values = (
+        scada_state.behavioral_sensor_values if scada_state is not None else {}
+    ) or {}
+    contextual_evidence: dict[str, dict[str, object]] = {}
+    for sensor_name in sorted(sensor_values):
+        sensor_state = sensor_values[sensor_name]
+        behavioral_state = behavioral_values.get(sensor_name)
+        contextual_evidence[sensor_name] = {
+            "supervisory_mode": sensor_state.mode,
+            "supervisory_source_round_id": scada_state.source_round_id,
+            "behavioral_mode": None if behavioral_state is None else behavioral_state.mode,
+            "behavioral_source_round_id": (
+                None if behavioral_state is None else behavioral_state.source_round_id
+            ),
+            "behavioral_payload": (
+                None if behavioral_state is None else behavioral_state.to_dict()
+            ),
+        }
+    return contextual_evidence
+
+
+def _downstream_block_reason(
+    *,
+    comparison_stage: dict[str, object],
+    persistence_stage: dict[str, object],
+) -> dict[str, str] | None:
+    if not comparison_stage.get("downstream_permitted", False):
+        return {
+            "reason": str(comparison_stage.get("reason") or "downstream_blocked"),
+            "operator_message": str(
+                comparison_stage.get("operator_message")
+                or "The cycle was blocked before downstream fingerprint evaluation."
+            ),
+        }
+    if persistence_stage.get("status") != "persisted":
+        return {
+            "reason": str(persistence_stage.get("reason") or PERSISTENCE_BLOCK_REASON),
+            "operator_message": str(
+                persistence_stage.get("operator_message")
+                or "The cycle could not continue because no approved downstream artifact was available."
+            ),
+        }
+    return None
 
 
 def build_cadence_stage(
@@ -604,17 +713,33 @@ def run_scada_comparison_and_persistence(
 
     storage_metadata = build_minio_runtime_metadata(artifact_store)
     valid_state = consensus_audit.consensused_valid_state
+    consensus_summary = build_round_summary(consensus_audit)
     if valid_state is None:
-        blocked_reason = "no_consensused_valid_state"
+        blocked_reason = _resolve_consensus_block_reason(consensus_summary)
+        operator_message = _consensus_block_message(consensus_summary)
         return (
             None,
-            {"status": "blocked", "reason": blocked_reason, "compact": None},
+            {
+                "status": "blocked",
+                "reason": blocked_reason,
+                "compact": None,
+                "blocked_by_stage": "consensus",
+                "downstream_permitted": False,
+                "operator_message": operator_message,
+                "quorum_required": consensus_summary.quorum_required,
+                "valid_participants_after_exclusions": (
+                    consensus_summary.valid_participants_after_exclusions
+                ),
+            },
             None,
             None,
             {
                 "status": "blocked",
                 **storage_metadata,
                 "reason": blocked_reason,
+                "blocked_by_stage": "consensus",
+                "downstream_permitted": False,
+                "operator_message": operator_message,
                 "write_confirmed": False,
             },
         )
@@ -622,18 +747,56 @@ def run_scada_comparison_and_persistence(
     resolved_scada_service = (
         scada_service if scada_service is not None else FakeOpcUaScadaService(compressor_id="compressor-1")
     )
-    scada_state = resolved_scada_service.update_from_consensused_state(valid_state)
+    source_replicated_state = _select_scada_source_state(
+        consensus_audit,
+        valid_state.source_edges,
+    )
+    scada_state = resolved_scada_service.update_from_consensused_state(
+        valid_state,
+        source_replicated_state=source_replicated_state,
+    )
     comparison_result = compare_consensused_to_scada(
         valid_state=valid_state,
         scada_state=scada_state,
+        contextual_evidence=_build_scada_contextual_evidence(scada_state),
     )
     comparison_output = build_scada_comparison_output(comparison_result)
     scada_alert = build_scada_divergence_alert(comparison_output)
+    divergent_sensors = comparison_output.divergent_sensors
 
     comparison_stage = {
-        "status": "completed",
+        "status": "completed" if not divergent_sensors else "blocked_downstream",
         "compact": format_scada_comparison_output_compact(comparison_output),
+        "reason": None if not divergent_sensors else SCADA_DIVERGENCE_BLOCK_REASON,
+        "blocked_by_stage": None if not divergent_sensors else "scada_comparison",
+        "downstream_permitted": not bool(divergent_sensors),
+        "operator_message": (
+            "SCADA supervisory values matched the trusted committed state, so the "
+            "cycle can continue downstream."
+            if not divergent_sensors
+            else _scada_divergence_block_message(comparison_output)
+        ),
+        "divergent_sensors": list(divergent_sensors),
     }
+
+    if divergent_sensors:
+        persistence_stage = {
+            "status": "blocked",
+            **storage_metadata,
+            "reason": SCADA_DIVERGENCE_BLOCK_REASON,
+            "blocked_by_stage": "scada_comparison",
+            "downstream_permitted": False,
+            "operator_message": _scada_divergence_block_message(comparison_output),
+            "divergent_sensors": list(divergent_sensors),
+            "write_confirmed": False,
+        }
+        return (
+            scada_state,
+            comparison_stage,
+            comparison_output,
+            scada_alert,
+            persistence_stage,
+        )
 
     try:
         dataset_context = build_dataset_context(
@@ -660,6 +823,11 @@ def run_scada_comparison_and_persistence(
             ),
             "storage_action": "put_object",
             "content_type": "application/json",
+            "downstream_permitted": True,
+            "operator_message": (
+                "Trusted and supervisory validation both succeeded, so the cycle was "
+                "forwarded for downstream fingerprint use."
+            ),
             "write_confirmed": True,
             "record": persistence_record.to_dict(),
         }
@@ -668,6 +836,12 @@ def run_scada_comparison_and_persistence(
             "status": "blocked",
             **storage_metadata,
             "reason": str(exc),
+            "blocked_by_stage": "persistence",
+            "downstream_permitted": False,
+            "operator_message": (
+                "Persistence refused to accept the cycle, so no downstream-valid "
+                "artifact was approved."
+            ),
             "write_confirmed": False,
         }
     except Exception as exc:
@@ -675,6 +849,11 @@ def run_scada_comparison_and_persistence(
             "status": "error",
             **storage_metadata,
             "reason": str(exc),
+            "blocked_by_stage": "persistence",
+            "downstream_permitted": False,
+            "operator_message": (
+                "Persistence failed, so the cycle could not continue downstream."
+            ),
             "write_confirmed": False,
         }
 
@@ -765,6 +944,114 @@ def build_lifecycle_error_stage(
     )
 
 
+def build_lifecycle_blocked_stage(
+    *,
+    cycle_index: int,
+    config,
+    artifact_store,
+    reason_code: str,
+    operator_message: str,
+) -> FingerprintLifecycleStage:
+    """Return a read-only lifecycle stage when downstream forwarding is blocked."""
+
+    valid_artifact_keys = artifact_store.list_json_objects(prefix="valid-consensus-artifacts/")
+    latest_valid_artifact_key = valid_artifact_keys[-1] if valid_artifact_keys else None
+    training_windows, dataset_manifest = build_normal_training_windows(
+        artifact_store=artifact_store,
+        sequence_length=config.demo_fingerprint_sequence_length,
+        prefix="valid-consensus-artifacts/",
+    )
+    del training_windows
+    latest_model_key = latest_model_metadata_key(artifact_store)
+    return FingerprintLifecycleStage(
+        cycle_index=cycle_index,
+        valid_artifact_count=len(valid_artifact_keys),
+        eligible_history_count=dataset_manifest.eligible_record_count,
+        eligible_history_threshold=config.demo_train_after_eligible_cycles,
+        window_count=dataset_manifest.window_count,
+        latest_valid_artifact_key=latest_valid_artifact_key,
+        model_status="model_available" if latest_model_key is not None else "no_model_yet",
+        training_events=("blocked",),
+        inference_status=f"blocked:{reason_code}",
+        inference_result_count=0,
+        model_metadata_object_key=latest_model_key,
+        limitation_note=operator_message,
+    )
+
+
+def execute_fingerprint_pipeline_for_cycle(
+    *,
+    cycle_index: int,
+    config,
+    artifact_store,
+    scada_state,
+    comparison_output,
+    comparison_stage: dict[str, object],
+    persistence_stage: dict[str, object],
+    scada_replay_stage: ScadaReplayRuntimeStage,
+    consensus_summary,
+) -> tuple[FingerprintLifecycleStage, tuple, object | None, tuple]:
+    """Execute downstream fingerprint stages only when the cycle was forwarded."""
+
+    block_reason = _downstream_block_reason(
+        comparison_stage=comparison_stage,
+        persistence_stage=persistence_stage,
+    )
+    if block_reason is not None:
+        fingerprint_stage = build_lifecycle_blocked_stage(
+            cycle_index=cycle_index,
+            config=config,
+            artifact_store=artifact_store,
+            reason_code=block_reason["reason"],
+            operator_message=block_reason["operator_message"],
+        )
+        return fingerprint_stage, (), None, ()
+
+    try:
+        fingerprint_stage, fingerprint_inference_results = (
+            execute_deferred_fingerprint_lifecycle(
+                cycle_index=cycle_index,
+                artifact_store=artifact_store,
+                sequence_length=config.demo_fingerprint_sequence_length,
+                train_after_eligible_cycles=config.demo_train_after_eligible_cycles,
+            )
+        )
+    except Exception as exc:
+        fingerprint_stage = build_lifecycle_error_stage(
+            cycle_index=cycle_index,
+            config=config,
+            artifact_key=persistence_stage.get("artifact_key"),
+            error=exc,
+        )
+        return fingerprint_stage, (), None, ()
+
+    try:
+        replay_behavior_result, replay_inference_results = (
+            run_scada_replay_behavior_detection(
+                current_round_id=consensus_summary.round_id,
+                consensus_final_status=consensus_summary.final_consensus_status.value,
+                scada_state=scada_state,
+                comparison_output=comparison_output,
+                replay_stage=scada_replay_stage,
+                artifact_store=artifact_store,
+                sequence_length=config.demo_fingerprint_sequence_length,
+            )
+            if scada_state is not None and comparison_output is not None
+            else (None, ())
+        )
+    except Exception as exc:
+        replay_behavior_result = None
+        replay_inference_results = ()
+        comparison_stage["replay_behavior_error"] = str(exc)
+
+    return (
+        fingerprint_stage,
+        fingerprint_inference_results,
+        replay_behavior_result,
+        replay_inference_results,
+    )
+
+
 def execute_demo_cycle(
     *,
     cycle_index: int,
@@ -829,45 +1116,22 @@ def execute_demo_cycle(
         cycle_config,
         consensus_round_input.participating_edges,
     )
-    try:
-        fingerprint_stage, fingerprint_inference_results = (
-            execute_deferred_fingerprint_lifecycle(
-                cycle_index=cycle_index,
-                artifact_store=artifact_store,
-                sequence_length=config.demo_fingerprint_sequence_length,
-                train_after_eligible_cycles=config.demo_train_after_eligible_cycles,
-            )
-        )
-    except Exception as exc:
-        fingerprint_stage = build_lifecycle_error_stage(
-            cycle_index=cycle_index,
-            config=config,
-            artifact_key=persistence_stage.get("artifact_key"),
-            error=exc,
-        )
-        fingerprint_inference_results = ()
-
-    try:
-        replay_behavior_result, replay_inference_results = (
-            run_scada_replay_behavior_detection(
-                current_round_id=consensus_summary.round_id,
-                consensus_final_status=consensus_summary.final_consensus_status.value,
-                scada_state=scada_state,
-                comparison_output=comparison_output,
-                replay_stage=scada_replay_stage,
-                artifact_store=artifact_store,
-                sequence_length=config.demo_fingerprint_sequence_length,
-            )
-            if scada_state is not None and comparison_output is not None
-            else (None, ())
-        )
-    except Exception as exc:
-        replay_behavior_result = None
-        replay_inference_results = ()
-        comparison_stage = {
-            **comparison_stage,
-            "replay_behavior_error": str(exc),
-        }
+    (
+        fingerprint_stage,
+        fingerprint_inference_results,
+        replay_behavior_result,
+        replay_inference_results,
+    ) = execute_fingerprint_pipeline_for_cycle(
+        cycle_index=cycle_index,
+        config=config,
+        artifact_store=artifact_store,
+        scada_state=scada_state,
+        comparison_output=comparison_output,
+        comparison_stage=comparison_stage,
+        persistence_stage=persistence_stage,
+        scada_replay_stage=scada_replay_stage,
+        consensus_summary=consensus_summary,
+    )
 
     return {
         "cycle_index": cycle_index,

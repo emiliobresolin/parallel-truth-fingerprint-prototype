@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from parallel_truth_fingerprint.contracts.replay_behavior import ReplayBehaviorResult
+from parallel_truth_fingerprint.contracts.scada_state import ScadaState
 from parallel_truth_fingerprint.contracts.training_dataset import (
     TrainingDatasetManifest,
     TrainingWindow,
@@ -108,6 +109,7 @@ def run_scada_replay_behavior_detection(
     persisted_dataset = persist_scada_replay_inference_dataset(
         artifact_store=artifact_store,
         current_round_id=current_round_id,
+        scada_state=scada_state,
         replay_stage=replay_stage,
         sequence_length=sequence_length,
     )
@@ -126,7 +128,10 @@ def run_scada_replay_behavior_detection(
         scenario_mode=replay_stage.mode,
         current_round_id=current_round_id,
         scada_source_round_id=scada_state.source_round_id,
-        replay_source_round_id=replay_stage.replay_source_round_id,
+        replay_source_round_id=(
+            scada_state.behavioral_source_round_id
+            or replay_stage.replay_source_round_id
+        ),
         model_id=first_result.model_id,
         source_dataset_id=first_result.source_dataset_id,
         inference_dataset_id=first_result.inference_dataset_id,
@@ -147,10 +152,16 @@ def persist_scada_replay_inference_dataset(
     *,
     artifact_store,
     current_round_id: str,
+    scada_state: ScadaState,
     replay_stage: ScadaReplayRuntimeStage,
     sequence_length: int,
 ):
-    """Persist one replay-oriented inference dataset derived from valid artifacts."""
+    """Persist one replay-oriented inference dataset derived from valid artifacts.
+
+    The replay window stays anchored in the real valid-artifact history, but the final
+    step is rebuilt from the current SCADA-side state so replay is evaluated through
+    the richer supervisory payload rather than by simply reusing a stale valid artifact.
+    """
 
     if sequence_length <= 0:
         raise ValueError("sequence_length must be positive for replay detection.")
@@ -173,18 +184,19 @@ def persist_scada_replay_inference_dataset(
 
     chronological_history = artifacts[: current_index + 1]
     recent_real_artifacts = chronological_history[-sequence_length:-1]
-    replay_artifact = _resolve_replay_source_artifact(
-        chronological_history=chronological_history,
+    scada_schema, scada_feature_vector = extract_scada_behavioral_feature_vector(scada_state)
+    synthetic_artifact_key = _build_scada_state_artifact_key(
+        current_round_id=current_round_id,
+        scada_state=scada_state,
         replay_stage=replay_stage,
     )
-    selected_artifacts = recent_real_artifacts + [replay_artifact]
 
     feature_schema = ()
     feature_matrix = []
     artifact_keys = []
     round_ids = []
     timestamps = []
-    for artifact in selected_artifacts:
+    for artifact in recent_real_artifacts:
         current_schema, feature_vector = extract_feature_vector(artifact)
         if not feature_schema:
             feature_schema = current_schema
@@ -195,9 +207,21 @@ def persist_scada_replay_inference_dataset(
         round_ids.append(artifact["round_identity"]["round_id"])
         timestamps.append(artifact["round_identity"]["window_ended_at"])
 
-    replay_round_id = replay_stage.replay_source_round_id or replay_artifact["round_identity"][
-        "round_id"
-    ]
+    if not feature_schema:
+        feature_schema = scada_schema
+    elif scada_schema != feature_schema:
+        raise ValueError("Replay inference dataset feature schema mismatch.")
+
+    feature_matrix.append(scada_feature_vector)
+    artifact_keys.append(synthetic_artifact_key)
+    round_ids.append(current_round_id)
+    timestamps.append(scada_state.timestamp)
+
+    replay_round_id = (
+        scada_state.behavioral_source_round_id
+        or replay_stage.replay_source_round_id
+        or scada_state.source_round_id
+    )
     dataset_id = (
         f"replay-dataset::{current_round_id}::{replay_stage.mode}::{replay_round_id}"
         f"::seq-{sequence_length}"
@@ -230,22 +254,65 @@ def persist_scada_replay_inference_dataset(
     )
 
 
-def _resolve_replay_source_artifact(
+def extract_scada_behavioral_feature_vector(
+    scada_state: ScadaState,
+) -> tuple[tuple[str, ...], tuple[float, ...]]:
+    """Build a model-ready feature vector from the richer SCADA-side payload."""
+
+    behavioral_sensor_values = scada_state.behavioral_sensor_values or {}
+    feature_schema: list[str] = []
+    feature_values: list[float] = []
+    for sensor_name in sorted(scada_state.sensor_values):
+        supervisory_state = scada_state.sensor_values[sensor_name]
+        behavioral_state = behavioral_sensor_values.get(sensor_name)
+        if behavioral_state is None:
+            raise ValueError(
+                f"SCADA replay evaluation requires behavioral payload for sensor '{sensor_name}'."
+            )
+        feature_schema.extend(
+            [
+                f"{sensor_name}.pv",
+                f"{sensor_name}.loop_current_ma",
+                f"{sensor_name}.pv_percent_range",
+                f"{sensor_name}.noise_floor",
+                f"{sensor_name}.rate_of_change_dtdt",
+                f"{sensor_name}.local_stability_score",
+                f"{sensor_name}.field_device_malfunction",
+                f"{sensor_name}.loop_current_saturated",
+                f"{sensor_name}.cold_start",
+            ]
+        )
+        feature_values.extend(
+            [
+                float(supervisory_state.value),
+                float(behavioral_state.loop_current_ma or 0.0),
+                float(behavioral_state.pv_percent_range or 0.0),
+                float(behavioral_state.noise_floor or 0.0),
+                float(behavioral_state.rate_of_change_dtdt or 0.0),
+                float(behavioral_state.local_stability_score or 0.0),
+                _bool_to_float(bool(behavioral_state.field_device_malfunction)),
+                _bool_to_float(bool(behavioral_state.loop_current_saturated)),
+                _bool_to_float(bool(behavioral_state.cold_start)),
+            ]
+        )
+    return tuple(feature_schema), tuple(feature_values)
+
+
+def _build_scada_state_artifact_key(
     *,
-    chronological_history: list[dict[str, object]],
+    current_round_id: str,
+    scada_state: ScadaState,
     replay_stage: ScadaReplayRuntimeStage,
-) -> dict[str, object]:
-    if replay_stage.mode == "freeze":
-        if len(chronological_history) < 2:
-            raise ValueError("Freeze detection requires at least one previous round.")
-        return chronological_history[-2]
-
-    if replay_stage.replay_source_round_id is not None:
-        for artifact in chronological_history:
-            if artifact["round_identity"]["round_id"] == replay_stage.replay_source_round_id:
-                return artifact
-
-    return chronological_history[0]
+) -> str:
+    behavioral_source_round_id = (
+        scada_state.behavioral_source_round_id
+        or replay_stage.replay_source_round_id
+        or scada_state.source_round_id
+    )
+    return (
+        f"scada-state::{current_round_id}::{replay_stage.mode}::"
+        f"{behavioral_source_round_id}"
+    )
 
 
 def _resolve_scada_offset(sensor_name: str, config) -> float:
@@ -257,3 +324,7 @@ def _resolve_scada_offset(sensor_name: str, config) -> float:
     if sensor_name == "pressure":
         return round(base_offset / 10.0, 3)
     return round(base_offset * 50.0, 3)
+
+
+def _bool_to_float(value: bool) -> float:
+    return 1.0 if value else 0.0

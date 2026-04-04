@@ -297,7 +297,10 @@ class DashboardEventTimelineTests(unittest.TestCase):
             any("SCADA comparison classified" in message for message in sensor_messages)
         )
         self.assertTrue(
-            any("SCADA comparison reports divergence on temperature." in message for message in scada_messages)
+            any(
+                "SCADA comparison detected supervisory divergence on temperature" in message
+                for message in scada_messages
+            )
         )
 
 

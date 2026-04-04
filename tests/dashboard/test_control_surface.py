@@ -61,6 +61,16 @@ class FakeDashboardController:
                 "quorum_consensus": {"summary": {"final_consensus_status": "success"}},
                 "valid_artifact_accumulation": {"count": 2},
                 "lifecycle": {"model_status": "model_available"},
+                "comparison_stage": {
+                    "status": "blocked_downstream",
+                    "reason": "scada_divergence_detected",
+                    "operator_message": "SCADA divergence blocked the cycle.",
+                },
+                "persistence_stage": {
+                    "status": "blocked",
+                    "reason": "scada_divergence_detected",
+                    "operator_message": "SCADA divergence blocked downstream persistence.",
+                },
                 "cycle_history": [{"cycle_index": 1}],
             },
             "channels": {
@@ -136,7 +146,8 @@ class FakeDashboardController:
                 "channel_separation": [
                     {
                         "label": "SCADA divergence",
-                        "status": "active",
+                        "status": "blocked",
+                        "tone": "blocked",
                         "explanation": "Direct mismatch is visible here.",
                     }
                 ],
@@ -303,7 +314,12 @@ class FakeDashboardController:
                     "demo_scenario_name": scenario_name,
                     "demo_scenario_start_cycle": 3,
                 },
-                "expected_output_channels": ["scada_divergence_alert", "replay_behavior"],
+                "expected_output_channels": [
+                    "consensus_alert",
+                    "persistence_stage",
+                    "replay_behavior",
+                    "fingerprint_inference",
+                ],
                 "effect_scope": "applies_next_cycle",
                 "note": "Scenario updated.",
             },

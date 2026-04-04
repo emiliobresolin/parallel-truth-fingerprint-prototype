@@ -526,7 +526,7 @@ class DemoFormattingTest(unittest.TestCase):
         )
         self.assertEqual(
             format_comparison_stage_compact(comparison_blocked),
-            "comparison=blocked reason=no_consensused_valid_state",
+            "comparison=blocked stage=comparison reason=no_consensused_valid_state",
         )
         self.assertIn(
             "backend=minio",
@@ -557,6 +557,7 @@ class DemoFormattingTest(unittest.TestCase):
             (
                 "persistence=blocked backend=minio endpoint=localhost:9000 "
                 "secure=false bucket=valid-consensus-artifacts "
+                "stage=persistence "
                 "reason=no_consensused_valid_state"
             ),
         )
@@ -667,7 +668,8 @@ class DemoFormattingTest(unittest.TestCase):
             training_eligible=False,
             training_eligibility_reason="scada_replay",
             expected_output_channels=(
-                "scada_divergence_alert",
+                "consensus_alert",
+                "persistence_stage",
                 "replay_behavior",
                 "fingerprint_inference",
             ),
@@ -677,7 +679,7 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIn("current=scada_replay", scenario_text)
         self.assertIn("training_eligible=false", scenario_text)
         self.assertIn(
-            "expected_outputs=scada_divergence_alert,replay_behavior,fingerprint_inference",
+            "expected_outputs=consensus_alert,persistence_stage,replay_behavior,fingerprint_inference",
             scenario_text,
         )
         replay_stage = ScadaReplayRuntimeStage(
@@ -926,6 +928,10 @@ class DemoFormattingTest(unittest.TestCase):
             ConsensusRoundInput,
         )
         from parallel_truth_fingerprint.contracts.consensus_status import ConsensusStatus
+        from parallel_truth_fingerprint.contracts.exclusion_decision import (
+            ExclusionDecision,
+        )
+        from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReason
         from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
         from parallel_truth_fingerprint.contracts.trust_ranking import (
             TrustRankEntry,
@@ -1000,7 +1006,10 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIsNone(comparison_output)
         self.assertIsNone(scada_alert)
         self.assertEqual(comparison_stage["status"], "blocked")
+        self.assertEqual(comparison_stage["reason"], "no_consensused_valid_state")
+        self.assertFalse(comparison_stage["downstream_permitted"])
         self.assertEqual(persistence_stage["status"], "blocked")
+        self.assertEqual(persistence_stage["reason"], "no_consensused_valid_state")
         self.assertEqual(persistence_stage["backend"], "minio")
         self.assertEqual(persistence_stage["endpoint"], "localhost:9000")
         self.assertEqual(persistence_stage["host"], "localhost")
@@ -1040,7 +1049,9 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertIsNotNone(scada_state)
         self.assertIsNotNone(comparison_output)
         self.assertEqual(comparison_stage["status"], "completed")
+        self.assertTrue(comparison_stage["downstream_permitted"])
         self.assertEqual(persistence_stage["status"], "persisted")
+        self.assertTrue(persistence_stage["downstream_permitted"])
         self.assertEqual(persistence_stage["backend"], "minio")
         self.assertEqual(persistence_stage["endpoint"], "localhost:9000")
         self.assertEqual(persistence_stage["host"], "localhost")
@@ -1115,6 +1126,235 @@ class DemoFormattingTest(unittest.TestCase):
         self.assertEqual(persistence_stage["bucket"], "valid-consensus-artifacts")
         self.assertEqual(persistence_stage["reason"], "MinIO connection refused")
         self.assertFalse(persistence_stage["write_confirmed"])
+
+    def test_run_scada_comparison_and_persistence_blocks_downstream_on_scada_divergence(self) -> None:
+        from parallel_truth_fingerprint.persistence import (
+            MinioArtifactStore,
+            MinioStoreConfig,
+        )
+        from parallel_truth_fingerprint.scada import FakeOpcUaScadaService
+        from scripts.run_local_demo import run_scada_comparison_and_persistence
+        from tests.persistence.test_service import FakeMinioClient
+        from tests.persistence.test_service import build_valid_audit_package
+
+        fake_client = FakeMinioClient()
+        artifact_store = MinioArtifactStore(
+            MinioStoreConfig(
+                endpoint="localhost:9000",
+                access_key="minioadmin",
+                secret_key="minioadmin",
+                bucket="valid-consensus-artifacts",
+            ),
+            client=fake_client,
+        )
+        scada_service = FakeOpcUaScadaService(compressor_id="compressor-1")
+        scada_service.set_sensor_override("temperature", mode="offset", offset=12.0)
+
+        audit_package = build_valid_audit_package()
+        scada_state, comparison_stage, comparison_output, scada_alert, persistence_stage = (
+            run_scada_comparison_and_persistence(
+                consensus_audit=audit_package,
+                artifact_store=artifact_store,
+                scada_service=scada_service,
+            )
+        )
+
+        self.assertIsNotNone(scada_state)
+        self.assertIsNotNone(comparison_output)
+        self.assertIsNotNone(scada_alert)
+        self.assertEqual(comparison_stage["status"], "blocked_downstream")
+        self.assertEqual(comparison_stage["reason"], "scada_divergence_detected")
+        self.assertFalse(comparison_stage["downstream_permitted"])
+        self.assertEqual(comparison_stage["divergent_sensors"], ["temperature"])
+        self.assertEqual(persistence_stage["status"], "blocked")
+        self.assertEqual(persistence_stage["reason"], "scada_divergence_detected")
+        self.assertFalse(persistence_stage["downstream_permitted"])
+        self.assertFalse(persistence_stage["write_confirmed"])
+        self.assertEqual(fake_client.objects, {})
+
+    def test_execute_fingerprint_pipeline_for_cycle_blocks_when_no_quorum_or_scada_divergence(self) -> None:
+        from parallel_truth_fingerprint.config.runtime import RuntimeDemoConfig
+        from parallel_truth_fingerprint.lstm_service import ScadaReplayRuntimeStage
+        from parallel_truth_fingerprint.persistence import (
+            MinioArtifactStore,
+            MinioStoreConfig,
+        )
+        from parallel_truth_fingerprint.scada import FakeOpcUaScadaService
+        from parallel_truth_fingerprint.consensus import build_round_summary
+        from scripts.run_local_demo import (
+            execute_fingerprint_pipeline_for_cycle,
+            run_scada_comparison_and_persistence,
+        )
+        from tests.persistence.test_service import FakeMinioClient
+        from tests.persistence.test_service import build_valid_audit_package
+
+        config = RuntimeDemoConfig(
+            mqtt_transport="passive",
+            demo_train_after_eligible_cycles=3,
+            demo_fingerprint_sequence_length=2,
+        )
+
+        blocked_store = MinioArtifactStore(
+            MinioStoreConfig(
+                endpoint="localhost:9000",
+                access_key="minioadmin",
+                secret_key="minioadmin",
+                bucket="valid-consensus-artifacts",
+            ),
+            client=FakeMinioClient(),
+        )
+        failed_audit = self._build_failed_consensus_audit_package()
+        (
+            scada_state,
+            comparison_stage,
+            comparison_output,
+            _scada_alert,
+            persistence_stage,
+        ) = run_scada_comparison_and_persistence(
+            consensus_audit=failed_audit,
+            artifact_store=blocked_store,
+        )
+        fingerprint_stage, inference_results, replay_result, replay_inference_results = (
+            execute_fingerprint_pipeline_for_cycle(
+                cycle_index=1,
+                config=config,
+                artifact_store=blocked_store,
+                scada_state=scada_state,
+                comparison_output=comparison_output,
+                comparison_stage=comparison_stage,
+                persistence_stage=persistence_stage,
+                scada_replay_stage=ScadaReplayRuntimeStage(
+                    active=False,
+                    mode="match",
+                    start_cycle=0,
+                ),
+                consensus_summary=build_round_summary(failed_audit),
+            )
+        )
+        self.assertEqual(fingerprint_stage.training_events, ("blocked",))
+        self.assertEqual(fingerprint_stage.inference_status, "blocked:no_quorum_reached")
+        self.assertEqual(inference_results, ())
+        self.assertIsNone(replay_result)
+        self.assertEqual(replay_inference_results, ())
+
+        divergent_store = MinioArtifactStore(
+            MinioStoreConfig(
+                endpoint="localhost:9000",
+                access_key="minioadmin",
+                secret_key="minioadmin",
+                bucket="valid-consensus-artifacts",
+            ),
+            client=FakeMinioClient(),
+        )
+        scada_service = FakeOpcUaScadaService(compressor_id="compressor-1")
+        scada_service.set_sensor_override("temperature", mode="offset", offset=12.0)
+        valid_audit = build_valid_audit_package(round_id="round-divergence")
+        (
+            scada_state,
+            comparison_stage,
+            comparison_output,
+            _scada_alert,
+            persistence_stage,
+        ) = run_scada_comparison_and_persistence(
+            consensus_audit=valid_audit,
+            artifact_store=divergent_store,
+            scada_service=scada_service,
+        )
+        fingerprint_stage, inference_results, replay_result, replay_inference_results = (
+            execute_fingerprint_pipeline_for_cycle(
+                cycle_index=2,
+                config=config,
+                artifact_store=divergent_store,
+                scada_state=scada_state,
+                comparison_output=comparison_output,
+                comparison_stage=comparison_stage,
+                persistence_stage=persistence_stage,
+                scada_replay_stage=ScadaReplayRuntimeStage(
+                    active=True,
+                    mode="replay",
+                    start_cycle=2,
+                    replay_source_round_id="round-000",
+                ),
+                consensus_summary=build_round_summary(valid_audit),
+            )
+        )
+        self.assertEqual(
+            fingerprint_stage.inference_status,
+            "blocked:scada_divergence_detected",
+        )
+        self.assertEqual(fingerprint_stage.training_events, ("blocked",))
+        self.assertEqual(inference_results, ())
+        self.assertIsNone(replay_result)
+        self.assertEqual(replay_inference_results, ())
+
+    def _build_failed_consensus_audit_package(self):
+        from parallel_truth_fingerprint.contracts.consensus_audit_package import (
+            ConsensusAuditPackage,
+        )
+        from parallel_truth_fingerprint.contracts.consensus_result import ConsensusResult
+        from parallel_truth_fingerprint.contracts.consensus_round_input import (
+            ConsensusRoundInput,
+        )
+        from parallel_truth_fingerprint.contracts.consensus_status import ConsensusStatus
+        from parallel_truth_fingerprint.contracts.exclusion_decision import (
+            ExclusionDecision,
+        )
+        from parallel_truth_fingerprint.contracts.exclusion_reason import ExclusionReason
+        from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
+        from parallel_truth_fingerprint.contracts.trust_ranking import (
+            TrustRankEntry,
+            TrustRanking,
+        )
+        from datetime import datetime, timezone
+
+        round_identity = RoundIdentity(
+            round_id="round-blocked",
+            window_started_at=datetime(2026, 4, 1, 16, 0, tzinfo=timezone.utc),
+            window_ended_at=datetime(2026, 4, 1, 16, 1, tzinfo=timezone.utc),
+        )
+        trust_ranking = TrustRanking(
+            round_identity=round_identity,
+            participating_edges=("edge-1", "edge-2", "edge-3"),
+            entries=(
+                TrustRankEntry(edge_id="edge-1", score=0.9),
+                TrustRankEntry(edge_id="edge-2", score=0.2),
+                TrustRankEntry(edge_id="edge-3", score=0.1),
+            ),
+        )
+        exclusions = (
+            ExclusionDecision(
+                round_identity=round_identity,
+                edge_id="edge-2",
+                reason=ExclusionReason.SUSPECTED_BYZANTINE_BEHAVIOR,
+                detail="score=0.2",
+            ),
+            ExclusionDecision(
+                round_identity=round_identity,
+                edge_id="edge-3",
+                reason=ExclusionReason.SUSPECTED_BYZANTINE_BEHAVIOR,
+                detail="score=0.1",
+            ),
+        )
+        return ConsensusAuditPackage(
+            round_input=ConsensusRoundInput(
+                round_identity=round_identity,
+                participating_edges=("edge-1", "edge-2", "edge-3"),
+                replicated_states=(),
+            ),
+            trust_ranking=trust_ranking,
+            exclusions=exclusions,
+            trust_evidence=(),
+            final_status=ConsensusStatus.FAILED_CONSENSUS,
+            consensus_result=ConsensusResult(
+                round_identity=round_identity,
+                status=ConsensusStatus.FAILED_CONSENSUS,
+                participating_edges=("edge-1", "edge-2", "edge-3"),
+                trust_ranking=trust_ranking,
+                exclusions=exclusions,
+                consensused_valid_state=None,
+            ),
+            consensused_valid_state=None,
+        )
 
 
 class DemoFaultInjectionTest(unittest.TestCase):

@@ -48,7 +48,8 @@ class RuntimeScenarioControlTests(unittest.TestCase):
         self.assertEqual(
             stage.expected_output_channels,
             (
-                "scada_divergence_alert",
+                "consensus_alert",
+                "persistence_stage",
                 "replay_behavior",
                 "fingerprint_inference",
             ),
@@ -112,7 +113,7 @@ class RuntimeScenarioControlTests(unittest.TestCase):
             stage.expected_output_channels,
             (
                 "scada_divergence_alert",
-                "fingerprint_inference",
+                "persistence_stage",
             ),
         )
         self.assertEqual(cycle_config.demo_scada_mode, "offset")
