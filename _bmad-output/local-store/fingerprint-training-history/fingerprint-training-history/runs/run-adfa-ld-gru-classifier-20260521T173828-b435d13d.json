@@ -1,0 +1,166 @@
+{
+  "run_id": "run-adfa-ld-gru-classifier-20260521T173828-b435d13d",
+  "created_at": "2026-05-21T17:38:28.037498+00:00",
+  "dataset_name": "adfa-ld",
+  "model_name": "gru-classifier",
+  "seed": 42,
+  "sequence_length": 60,
+  "epochs_planned": 8,
+  "epochs_executed": 8,
+  "hyperparameters": {
+    "learning_rate": 0.01,
+    "batch_size": 128,
+    "extra": {
+      "hidden_units": 32,
+      "num_layers": 1
+    }
+  },
+  "metrics": {
+    "accuracy": 0.45210084033613446,
+    "macro_precision": 0.18297059032255802,
+    "macro_recall": 0.20635706852385527,
+    "macro_f1": 0.1460040951584622
+  },
+  "per_class_metrics": {
+    "precision": [
+      0.9402173913043478,
+      0.028037383177570093,
+      0.043478260869565216,
+      0.03225806451612903,
+      0.023529411764705882,
+      0.030303030303030304
+    ],
+    "recall": [
+      0.49855907780979825,
+      0.3333333333333333,
+      0.03125,
+      0.2,
+      0.05,
+      0.125
+    ],
+    "f1": [
+      0.6516007532956686,
+      0.05172413793103448,
+      0.03636363636363636,
+      0.05555555555555555,
+      0.032,
+      0.04878048780487805
+    ],
+    "false_positive_rate": [
+      0.2214765100671141,
+      0.17747440273037543,
+      0.018998272884283247,
+      0.18181818181818182,
+      0.07217391304347825,
+      0.0823327615780446
+    ]
+  },
+  "per_epoch_loss": [
+    1.798538327217102,
+    1.7727493047714233,
+    1.7588181495666504,
+    1.7331154346466064,
+    1.7100403308868408,
+    1.6907113790512085,
+    1.6566441059112549,
+    1.6396955251693726
+  ],
+  "parameter_count": 3558,
+  "split_record": {
+    "seed": 42,
+    "train_ratio": 0.8,
+    "total_samples": 5951,
+    "train_samples": 4761,
+    "test_samples": 1190,
+    "per_class_counts_train": {
+      "0": 4164,
+      "4": 159,
+      "5": 94,
+      "2": 130,
+      "3": 141,
+      "1": 73
+    },
+    "per_class_counts_test": {
+      "0": 1041,
+      "3": 35,
+      "4": 40,
+      "2": 32,
+      "1": 18,
+      "5": 24
+    }
+  },
+  "confusion_matrix": [
+    [
+      519,
+      160,
+      20,
+      191,
+      71,
+      80
+    ],
+    [
+      3,
+      6,
+      0,
+      3,
+      5,
+      1
+    ],
+    [
+      9,
+      12,
+      1,
+      4,
+      3,
+      3
+    ],
+    [
+      13,
+      8,
+      2,
+      7,
+      2,
+      3
+    ],
+    [
+      5,
+      18,
+      0,
+      6,
+      2,
+      9
+    ],
+    [
+      3,
+      10,
+      0,
+      6,
+      2,
+      3
+    ]
+  ],
+  "dataset_provenance": {
+    "origin": "ADFA-LD",
+    "year": 2013,
+    "version": "ADFA-LD",
+    "citation": "Creech, G., and Hu, J. 'Generation of a New IDS Test Dataset: Time to Retire the KDD Collection'. IEEE WCNC 2013.",
+    "feature_count": 1,
+    "per_class_counts": {
+      "Normal": 5205,
+      "Adduser": 91,
+      "Hydra-FTP": 162,
+      "Hydra-SSH": 176,
+      "Java-Meterpreter": 199,
+      "Web-Shell": 118
+    },
+    "max_syscall_id": 340
+  },
+  "label_names": [
+    "Normal",
+    "Adduser",
+    "Hydra-FTP",
+    "Hydra-SSH",
+    "Java-Meterpreter",
+    "Web-Shell"
+  ]
+}

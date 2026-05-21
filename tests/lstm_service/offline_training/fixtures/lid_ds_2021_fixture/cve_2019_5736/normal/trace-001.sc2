@@ -1,0 +1,10 @@
+6 read
+3 close
+5 open
+6 read
+3 close
+174 mmap
+33 write
+6 read
+3 close
+5 open

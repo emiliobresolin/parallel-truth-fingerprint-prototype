@@ -1,0 +1,15 @@
+{
+  "benchmark": "adfa-ld",
+  "models": ["lstm-classifier", "gru-classifier"],
+  "epochs": 8,
+  "seed": 42,
+  "extra_hyperparameters": {
+    "hidden_units": 32,
+    "num_layers": 1
+  },
+  "grid": {
+    "learning_rate": [0.001, 0.01],
+    "batch_size": [64, 128],
+    "sequence_length": [30, 60]
+  }
+}

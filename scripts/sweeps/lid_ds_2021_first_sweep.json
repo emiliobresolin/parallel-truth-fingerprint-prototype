@@ -1,0 +1,15 @@
+{
+  "benchmark": "lid-ds-2021",
+  "models": ["lstm-classifier", "gru-classifier"],
+  "epochs": 30,
+  "seed": 42,
+  "extra_hyperparameters": {
+    "hidden_units": 64,
+    "num_layers": 2
+  },
+  "grid": {
+    "learning_rate": [0.01, 0.001, 0.0001],
+    "batch_size": [32, 64, 128],
+    "sequence_length": [30, 50, 100]
+  }
+}

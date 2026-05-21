@@ -1,0 +1,7 @@
+{
+  "run_id": "run-adfa-ld-gru-classifier-20260521T173524-3fc71cc1",
+  "dataset_name": "adfa-ld",
+  "model_name": "gru-classifier",
+  "promoted_at": "2026-05-21T17:43:48.764958+00:00",
+  "previous_run_id": null
+}

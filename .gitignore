@@ -30,3 +30,14 @@ Thumbs.db
 
 # BMAD generated implementation outputs
 _bmad-output/implementation-artifacts/*.log
+
+# Claude Code local configuration
+.claude/
+
+# Public benchmark datasets fetched out-of-band (ADFA-LD, LID-DS 2021, ...)
+# Documented in the README; not for version control.
+datasets/
+
+# Scratch directories used by the legacy autoencoder export path
+.tmp/
+src/.tmp/

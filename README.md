@@ -12,6 +12,14 @@ The current codebase preserves the five real pillars of the prototype:
 4. comparison between consensused data and SCADA data
 5. LSTM-based fingerprint generation
 
+> **2026-05-21 advisor course correction (Prof. Fabiano).** The fingerprint
+> stage was decoupled from the live pipeline and rebuilt around a
+> supervised LSTM classifier trained offline on public benchmarks
+> (ADFA-LD now, LID-DS 2021 next) with an explicit 80/20 stratified
+> split and full hyperparameter / metric provenance per run, mirroring
+> the methodology in F. A. M. do Nascimento's 2023 doctoral thesis. See
+> [_bmad-output/planning-artifacts/course-correction-2026-05-21.md](_bmad-output/planning-artifacts/course-correction-2026-05-21.md).
+
 Implemented in the current prototype:
 
 - one local compressor process simulation with temperature, pressure, and RPM
@@ -41,6 +49,20 @@ Implemented in the current prototype:
 - deferred first training after an eligible-history threshold
 - saved-model reuse for later-cycle inference
 - replay-oriented fingerprint evaluation through a richer SCADA-side behavioral payload
+- **offline benchmark-driven training track** (Epic 7) with:
+  - ADFA-LD adapter (`src/parallel_truth_fingerprint/lstm_service/offline_training/benchmarks/adfa_ld.py`)
+    that loads the real UNSW 2013 archive (5951 traces, 6 classes) end-to-end
+  - LID-DS 2021 adapter (same module path)
+  - stratified 80/20 split with recorded seed
+  - per-run history schema (hyperparameters, epochs, architecture, F1, accuracy, FPR, confusion matrix) persisted to MinIO under `fingerprint-training-history/` or to a local-filesystem store
+  - supervised LSTM and GRU classifiers (keras + torch backend), both with inverse-frequency class weighting for imbalanced benchmarks
+  - hyperparameter sweep harness driven by JSON config
+  - cross-benchmark comparative Markdown report
+- **promotion + online-inference path** (Epic 8) with:
+  - `scripts/promote_lstm_run.py` to endorse one run as the live-runtime classifier
+  - `lstm_service/online_inference.py` loading the promoted run from MinIO and serving per-window predictions
+  - `lstm_service/promoted_run_view.py` JSON view ready to be embedded in the dashboard
+  - `DEMO_DISABLE_RUNTIME_AUTOENCODER=1` opt-out to suppress the deprecated runtime autoencoder
 - local operator dashboard with:
   - runtime start and stop
   - scenario activation
@@ -124,7 +146,7 @@ The defaults are already present in [.env.example](./.env.example):
 - `MINIO_BUCKET=valid-consensus-artifacts`
 - `MINIO_SECURE=false`
 - `DEMO_STEPS=3`
-- `DEMO_CYCLE_INTERVAL_SECONDS=60`
+- `DEMO_CYCLE_INTERVAL_SECONDS=10`
 - `DEMO_MAX_CYCLES=0`
 - `DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES=10`
 - `DEMO_FINGERPRINT_SEQUENCE_LENGTH=2`
@@ -289,6 +311,117 @@ This keeps:
 - The committed state returned from CometBFT defines the valid system state.
 - SCADA comparison remains a later supervisory check, not the origin of truth.
 - The fingerprint path is a behavioral interpretation stage built on persisted valid history.
+
+## Real-Data Evidence
+
+The offline training track and the Epic 8 reintegration path were
+exercised end-to-end against the **real ADFA-LD archive** on
+2026-05-21. 5951 traces parsed, 16-cell hyperparameter sweep persisted,
+champion gru-classifier promoted, live `OnlineLstmInferencer` loaded and
+classified a synthetic syscall window across all six ADFA-LD classes.
+Full reproducibility report:
+[_bmad-output/implementation-artifacts/real-data-evidence-2026-05-21.md](_bmad-output/implementation-artifacts/real-data-evidence-2026-05-21.md).
+
+## Offline Benchmark-Driven Training Track (Epic 7 + Epic 8)
+
+This track exists because the live runtime's autoencoder cannot produce
+F1 / accuracy numbers against labelled anomalies — a requirement raised
+by Prof. Fabiano in the 2026-05-21 orientation meeting. The supervised
+LSTM classifier is trained offline against public benchmarks
+(ADFA-LD now, LID-DS 2021 next) and the resulting record is promoted
+into the live runtime as the inference channel.
+
+Everything below is fully local and stores its artifacts to a normal
+filesystem path (`--persist-local <dir>`), so MinIO is **not** required
+for the offline track.
+
+### 1. Obtain the benchmark datasets (one-off)
+
+ADFA-LD (UNSW Canberra, 2013) is mirrored on GitHub. The current
+prototype was validated against:
+
+```powershell
+# From the project root
+mkdir datasets
+curl -L -o datasets\ADFA-LD.zip `
+  "https://github.com/verazuo/a-labelled-version-of-the-ADFA-LD-dataset/raw/master/ADFA-LD.zip"
+# Unzip — Windows Expand-Archive or any unzip tool works
+```
+
+LID-DS 2021 is hosted at `github.com/LID-DS/LID-DS`; clone or download
+the release archive and unzip into `datasets/LID-DS-2021-real/` so that
+the immediate subdirectories are scenario names with `normal/` and
+`attack/` subfolders. See
+`src/parallel_truth_fingerprint/lstm_service/offline_training/benchmarks/lid_ds_2021.py`
+for the exact layout the adapter expects.
+
+### 2. Run one training cycle
+
+```powershell
+$env:KERAS_BACKEND='torch'
+$env:PYTHONPATH='src'
+$env:ADFA_LD_PATH=(Resolve-Path 'datasets\ADFA-LD-real\ADFA-LD').Path
+
+.venv\Scripts\python.exe scripts\train_lstm_offline.py `
+    --benchmark adfa-ld --model lstm-classifier `
+    --epochs 30 --batch-size 64 --learning-rate 1e-3 `
+    --sequence-length 50 --seed 42 `
+    --persist-local _bmad-output\local-store
+```
+
+The script prints the run id, accuracy, macro F1, macro precision, and
+macro recall. Persistence writes:
+
+```
+_bmad-output\local-store\fingerprint-training-history\
+  runs\<run_id>.json
+  runs\<run_id>.confusion.json
+  index\by-benchmark\adfa-ld.json
+```
+
+### 3. Run a hyperparameter sweep
+
+```powershell
+.venv\Scripts\python.exe scripts\train_lstm_sweep.py `
+    --config scripts\sweeps\adfa_ld_quick_sweep.json `
+    --output _bmad-output\implementation-artifacts\7-9-adfa-ld-sweep-summary.md `
+    --persist-local _bmad-output\local-store
+```
+
+The sweep config grid is data, not code; edit
+`scripts\sweeps\adfa_ld_first_sweep.json` (or `_quick_sweep.json`) to
+extend the search without touching Python.
+
+### 4. Build the cross-benchmark report
+
+```powershell
+.venv\Scripts\python.exe scripts\build_cross_benchmark_report.py `
+    --output _bmad-output\implementation-artifacts\7-13-cross-benchmark-report.md
+```
+
+The report has three sections: champion runs per benchmark, per-class
+metrics for each champion, and dataset provenance (origin, year,
+citation).
+
+### 5. Promote one run into the live runtime (Epic 8)
+
+```powershell
+# Pick the winning run_id from the sweep report.
+.venv\Scripts\python.exe scripts\promote_lstm_run.py `
+    --run-id run-adfa-ld-lstm-classifier-... `
+    --persist-local _bmad-output\local-store
+```
+
+Promotion writes a single pointer to
+`_bmad-output\local-store\fingerprint-training-history\index\latest.json`.
+
+### 6. Switch the live demo to the supervised classifier
+
+Set `DEMO_DISABLE_RUNTIME_AUTOENCODER=1` in your environment before
+starting `scripts\run_local_demo.py`. The runtime stops invoking the
+deprecated in-runtime autoencoder lifecycle and the dashboard
+fingerprint card surfaces the promoted run via
+`lstm_service.promoted_run_view.build_promoted_run_dashboard_view`.
 
 ## Tests
 

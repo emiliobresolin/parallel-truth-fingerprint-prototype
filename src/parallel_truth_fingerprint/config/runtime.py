@@ -19,7 +19,7 @@ class RuntimeDemoConfig:
     minio_bucket: str = "valid-consensus-artifacts"
     minio_secure: bool = False
     demo_steps: int = 3
-    demo_cycle_interval_seconds: float = 60.0
+    demo_cycle_interval_seconds: float = 10.0
     demo_max_cycles: int = 0
     demo_train_after_eligible_cycles: int = 10
     demo_fingerprint_sequence_length: int = 2
@@ -34,6 +34,10 @@ class RuntimeDemoConfig:
     demo_scada_start_cycle: int = 0
     demo_scada_offset_value: float = 6.0
     demo_log_path: str = "logs/run_local_demo.log"
+    # Epic 8 (Story 8.3) opt-out switch: when True, the runtime loop skips
+    # the deprecated in-runtime autoencoder lifecycle and surfaces an
+    # explicit "offline" status to the dashboard.
+    demo_disable_runtime_autoencoder: bool = False
 
 
 def load_runtime_demo_config() -> RuntimeDemoConfig:
@@ -57,7 +61,7 @@ def load_runtime_demo_config() -> RuntimeDemoConfig:
         minio_secure=os.getenv("MINIO_SECURE", "false").strip().lower()
         in {"1", "true", "yes", "on"},
         demo_steps=int(os.getenv("DEMO_STEPS", "3")),
-        demo_cycle_interval_seconds=float(os.getenv("DEMO_CYCLE_INTERVAL_SECONDS", "60")),
+        demo_cycle_interval_seconds=float(os.getenv("DEMO_CYCLE_INTERVAL_SECONDS", "10")),
         demo_max_cycles=int(os.getenv("DEMO_MAX_CYCLES", "0")),
         demo_train_after_eligible_cycles=int(
             os.getenv("DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES", "10")
@@ -76,4 +80,8 @@ def load_runtime_demo_config() -> RuntimeDemoConfig:
         demo_scada_start_cycle=int(os.getenv("DEMO_SCADA_START_CYCLE", "0")),
         demo_scada_offset_value=float(os.getenv("DEMO_SCADA_OFFSET_VALUE", "6.0")),
         demo_log_path=os.getenv("DEMO_LOG_PATH", "logs/run_local_demo.log"),
+        demo_disable_runtime_autoencoder=os.getenv(
+            "DEMO_DISABLE_RUNTIME_AUTOENCODER", "false"
+        ).strip().lower()
+        in {"1", "true", "yes", "on"},
     )

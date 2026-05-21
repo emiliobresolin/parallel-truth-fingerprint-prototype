@@ -1,0 +1,21 @@
+{
+  "dataset": "adfa-ld",
+  "run_ids": [
+    "run-adfa-ld-lstm-classifier-20260521T173154-3570e52f",
+    "run-adfa-ld-lstm-classifier-20260521T173236-de66e91f",
+    "run-adfa-ld-lstm-classifier-20260521T173249-97091949",
+    "run-adfa-ld-lstm-classifier-20260521T173314-9b28919d",
+    "run-adfa-ld-lstm-classifier-20260521T173337-81e9a8a7",
+    "run-adfa-ld-lstm-classifier-20260521T173420-c4789a4c",
+    "run-adfa-ld-lstm-classifier-20260521T173434-bd379132",
+    "run-adfa-ld-lstm-classifier-20260521T173459-d28e6181",
+    "run-adfa-ld-gru-classifier-20260521T173524-3fc71cc1",
+    "run-adfa-ld-gru-classifier-20260521T173608-5191bd81",
+    "run-adfa-ld-gru-classifier-20260521T173621-8f514a4d",
+    "run-adfa-ld-gru-classifier-20260521T173646-fed9996e",
+    "run-adfa-ld-gru-classifier-20260521T173709-07cdbde1",
+    "run-adfa-ld-gru-classifier-20260521T173751-470300d1",
+    "run-adfa-ld-gru-classifier-20260521T173804-2f835d7b",
+    "run-adfa-ld-gru-classifier-20260521T173828-b435d13d"
+  ]
+}
