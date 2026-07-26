@@ -47,7 +47,7 @@ try {
     docker run --rm `
       -v "${workspace}:/workspace" `
       -w /workspace `
-      cometbft/cometbft:latest `
+      cometbft/cometbft@sha256:d086a1318d05a41389460f2160aaaf7ca135aa961987e6d7689e4448599c5a76 `
       testnet --v 3 --o "/workspace/.cometbft/$stagingName"
 
     Assert-GeneratedTestnet -RootPath $stagingRoot

@@ -979,6 +979,44 @@ def build_lifecycle_blocked_stage(
     )
 
 
+def build_runtime_autoencoder_disabled_stage(
+    *,
+    cycle_index: int,
+    config,
+    artifact_store,
+    artifact_key: str | None,
+) -> FingerprintLifecycleStage:
+    """Return a stable lifecycle stage when the deprecated runtime trainer is off."""
+
+    valid_artifact_keys = artifact_store.list_json_objects(prefix="valid-consensus-artifacts/")
+    latest_valid_artifact_key = (
+        artifact_key or (valid_artifact_keys[-1] if valid_artifact_keys else None)
+    )
+    training_windows, dataset_manifest = build_normal_training_windows(
+        artifact_store=artifact_store,
+        sequence_length=config.demo_fingerprint_sequence_length,
+        prefix="valid-consensus-artifacts/",
+    )
+    del training_windows
+    return FingerprintLifecycleStage(
+        cycle_index=cycle_index,
+        valid_artifact_count=len(valid_artifact_keys),
+        eligible_history_count=dataset_manifest.eligible_record_count,
+        eligible_history_threshold=config.demo_train_after_eligible_cycles,
+        window_count=dataset_manifest.window_count,
+        latest_valid_artifact_key=latest_valid_artifact_key,
+        model_status="runtime_autoencoder_disabled",
+        training_events=("runtime_autoencoder_disabled",),
+        inference_status="skipped_runtime_autoencoder_disabled",
+        inference_result_count=0,
+        limitation_note=(
+            "The deprecated runtime autoencoder is disabled. Use the offline "
+            "benchmark training track and promoted supervised classifier evidence "
+            "for the academic fingerprint claim."
+        ),
+    )
+
+
 def execute_fingerprint_pipeline_for_cycle(
     *,
     cycle_index: int,
@@ -1004,6 +1042,15 @@ def execute_fingerprint_pipeline_for_cycle(
             artifact_store=artifact_store,
             reason_code=block_reason["reason"],
             operator_message=block_reason["operator_message"],
+        )
+        return fingerprint_stage, (), None, ()
+
+    if config.demo_disable_runtime_autoencoder:
+        fingerprint_stage = build_runtime_autoencoder_disabled_stage(
+            cycle_index=cycle_index,
+            config=config,
+            artifact_store=artifact_store,
+            artifact_key=persistence_stage.get("artifact_key"),
         )
         return fingerprint_stage, (), None, ()
 

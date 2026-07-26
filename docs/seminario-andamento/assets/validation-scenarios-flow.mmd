@@ -1,0 +1,18 @@
+%% Fluxo dos 3 cenários obrigatórios executados ao vivo (2026-06-23).
+flowchart TD
+    START(["Ciclo do runtime<br/>(DEMO_SCENARIO)"]) --> CONS{"Consenso BFT<br/>quórum >= 2 ?"}
+
+    CONS -->|"normal: 3/3 válidos"| SCADA{"Comparação SCADA<br/>dentro da tolerância ?"}
+    CONS -->|"quorum_loss: 3 excluídos<br/>(suspected_byzantine)"| BLK1["BLOQUEADO no consenso<br/>reason=no_quorum_reached"]
+
+    SCADA -->|"normal: match"| PERS["PERSISTE no MinIO<br/>bucket sem-normal"]
+    SCADA -->|"scada_divergence:<br/>temp/press/rpm divergentes"| BLK2["BLOQUEADO<br/>reason=scada_divergence_detected"]
+
+    PERS --> DS["Alimenta dataset<br/>de fingerprint"]
+    BLK1 --> NOART1["sem artefato / sem bucket"]
+    BLK2 --> NOART2["sem artefato / sem bucket"]
+
+    classDef ok fill:#d6f5d6,stroke:#2e7d32;
+    classDef bad fill:#ffd6d6,stroke:#c62828;
+    class PERS,DS ok;
+    class BLK1,BLK2,NOART1,NOART2 bad;

@@ -1,0 +1,528 @@
+{
+  "artifact_key": "valid-consensus-artifacts/round-20260623191939738847.json",
+  "persisted_at": "2026-06-23T19:19:41.992526+00:00",
+  "artifact_identity": {
+    "artifact_type": "valid_consensus_artifact",
+    "artifact_version": "2.0",
+    "record_id": "valid-consensus-artifact::valid-consensus-artifacts/round-20260623191939738847.json"
+  },
+  "round_identity": {
+    "round_id": "round-20260623191939738847",
+    "window_started_at": "2026-06-23T19:18:39.738847+00:00",
+    "window_ended_at": "2026-06-23T19:19:39.738847+00:00"
+  },
+  "consensus_context": {
+    "final_consensus_status": "success",
+    "participating_edges": [
+      "edge-1",
+      "edge-2",
+      "edge-3"
+    ],
+    "quorum_required": 2,
+    "source_edges": [
+      "edge-1",
+      "edge-2",
+      "edge-3"
+    ],
+    "trust_ranking": [
+      {
+        "edge_id": "edge-1",
+        "score": 1.0
+      },
+      {
+        "edge_id": "edge-2",
+        "score": 1.0
+      },
+      {
+        "edge_id": "edge-3",
+        "score": 1.0
+      }
+    ],
+    "exclusions": [],
+    "trust_evidence": [
+      {
+        "edge_id": "edge-1",
+        "score": 1.0,
+        "compatible_peer_count": 2,
+        "overall_normalized_deviation": 0.0,
+        "sensor_deviations": [
+          {
+            "sensor_name": "pressure",
+            "deviation_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "sensor_name": "rpm",
+            "deviation_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "sensor_name": "temperature",
+            "deviation_value": 0.0,
+            "unit": "degC"
+          }
+        ],
+        "pairwise_distances": [
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          }
+        ]
+      },
+      {
+        "edge_id": "edge-2",
+        "score": 1.0,
+        "compatible_peer_count": 2,
+        "overall_normalized_deviation": 0.0,
+        "sensor_deviations": [
+          {
+            "sensor_name": "pressure",
+            "deviation_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "sensor_name": "rpm",
+            "deviation_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "sensor_name": "temperature",
+            "deviation_value": 0.0,
+            "unit": "degC"
+          }
+        ],
+        "pairwise_distances": [
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          }
+        ]
+      },
+      {
+        "edge_id": "edge-3",
+        "score": 1.0,
+        "compatible_peer_count": 2,
+        "overall_normalized_deviation": 0.0,
+        "sensor_deviations": [
+          {
+            "sensor_name": "pressure",
+            "deviation_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "sensor_name": "rpm",
+            "deviation_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "sensor_name": "temperature",
+            "deviation_value": 0.0,
+            "unit": "degC"
+          }
+        ],
+        "pairwise_distances": [
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          }
+        ]
+      }
+    ]
+  },
+  "validated_state": {
+    "state_type": "consensused_valid_state",
+    "source_edges": [
+      "edge-1",
+      "edge-2",
+      "edge-3"
+    ],
+    "sensor_values": {
+      "pressure": 6.075,
+      "rpm": 3186.012,
+      "temperature": 76.835
+    },
+    "structured_payload_snapshot": {
+      "snapshot_type": "validated_source_view",
+      "selected_source_edge_id": "edge-1",
+      "payloads_by_sensor": {
+        "pressure": {
+          "protocol": "HART",
+          "gateway_id": "GW-EDGE-02",
+          "timestamp": "2026-06-23T19:19:39.739210+00:00",
+          "device_info": {
+            "tag": "PIT-101",
+            "long_tag": "Pressure_Compressor_Discharge",
+            "manufacturer_id": 38,
+            "device_type": 44
+          },
+          "process_data": {
+            "pv": {
+              "value": 6.075,
+              "unit": "bar",
+              "unit_code": 7,
+              "description": "Process_Pressure"
+            },
+            "sv": {
+              "value": 32.6,
+              "unit": "degC",
+              "unit_code": 32,
+              "description": "Transmitter_Module_Temperature"
+            },
+            "loop_current_ma": 14.209,
+            "pv_percent_range": 63.806,
+            "physics_metrics": {
+              "noise_floor": 0.708,
+              "rate_of_change_dtdt": -0.116,
+              "local_stability_score": 0.927
+            }
+          },
+          "diagnostics": {
+            "device_status_hex": "0x00",
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false
+          }
+        },
+        "rpm": {
+          "protocol": "HART",
+          "gateway_id": "GW-EDGE-03",
+          "timestamp": "2026-06-23T19:19:39.739469+00:00",
+          "device_info": {
+            "tag": "RIT-101",
+            "long_tag": "Speed_Compressor_Shaft",
+            "manufacturer_id": 55,
+            "device_type": 52
+          },
+          "process_data": {
+            "pv": {
+              "value": 3186.012,
+              "unit": "rpm",
+              "unit_code": null,
+              "description": "Shaft_Speed"
+            },
+            "loop_current_ma": 14.592,
+            "pv_percent_range": 66.2,
+            "physics_metrics": {
+              "noise_floor": 0.708,
+              "rate_of_change_dtdt": -23.056,
+              "local_stability_score": 0.583
+            }
+          },
+          "diagnostics": {
+            "device_status_hex": "0x00",
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false
+          }
+        },
+        "temperature": {
+          "protocol": "HART",
+          "gateway_id": "GW-EDGE-01",
+          "timestamp": "2026-06-23T19:19:39.738847+00:00",
+          "device_info": {
+            "tag": "TIT-101",
+            "long_tag": "Temperature_Compressor_Casing",
+            "manufacturer_id": 26,
+            "device_type": 33
+          },
+          "process_data": {
+            "pv": {
+              "value": 76.835,
+              "unit": "degC",
+              "unit_code": 32,
+              "description": "Process_Temperature"
+            },
+            "sv": {
+              "value": 57.287,
+              "unit": "degC",
+              "unit_code": 32,
+              "description": "Sensor_Body_Temperature"
+            },
+            "loop_current_ma": 13.816,
+            "pv_percent_range": 61.351,
+            "physics_metrics": {
+              "noise_floor": 0.708,
+              "rate_of_change_dtdt": -4.78,
+              "local_stability_score": 0.857
+            }
+          },
+          "diagnostics": {
+            "device_status_hex": "0x00",
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false
+          }
+        }
+      }
+    }
+  },
+  "dataset_context": {
+    "scenario_label": "normal",
+    "training_label": "normal",
+    "training_eligible": true,
+    "training_eligibility_reason": "normal_validated_run"
+  },
+  "scada_context": {
+    "scada_state": {
+      "compressor_id": "compressor-1",
+      "source_round_id": "round-20260623191939738847",
+      "timestamp": "2026-06-23T19:19:39.738847+00:00",
+      "behavioral_source_round_id": "round-20260623191939738847",
+      "sensor_values": {
+        "pressure": {
+          "value": 6.075,
+          "unit": "bar",
+          "mode": "match"
+        },
+        "rpm": {
+          "value": 3186.012,
+          "unit": "rpm",
+          "mode": "match"
+        },
+        "temperature": {
+          "value": 76.835,
+          "unit": "degC",
+          "mode": "match"
+        }
+      },
+      "behavioral_sensor_values": {
+        "pressure": {
+          "loop_current_ma": 14.209,
+          "pv_percent_range": 63.806,
+          "noise_floor": 0.708,
+          "rate_of_change_dtdt": -0.116,
+          "local_stability_score": 0.927,
+          "field_device_malfunction": false,
+          "loop_current_saturated": false,
+          "cold_start": false,
+          "mode": "match",
+          "source_round_id": "round-20260623191939738847"
+        },
+        "rpm": {
+          "loop_current_ma": 14.592,
+          "pv_percent_range": 66.2,
+          "noise_floor": 0.708,
+          "rate_of_change_dtdt": -23.056,
+          "local_stability_score": 0.583,
+          "field_device_malfunction": false,
+          "loop_current_saturated": false,
+          "cold_start": false,
+          "mode": "match",
+          "source_round_id": "round-20260623191939738847"
+        },
+        "temperature": {
+          "loop_current_ma": 13.816,
+          "pv_percent_range": 61.351,
+          "noise_floor": 0.708,
+          "rate_of_change_dtdt": -4.78,
+          "local_stability_score": 0.857,
+          "field_device_malfunction": false,
+          "loop_current_saturated": false,
+          "cold_start": false,
+          "mode": "match",
+          "source_round_id": "round-20260623191939738847"
+        }
+      }
+    },
+    "comparison_output": {
+      "round_identity": {
+        "round_id": "round-20260623191939738847",
+        "window_started_at": "2026-06-23T19:18:39.738847+00:00",
+        "window_ended_at": "2026-06-23T19:19:39.738847+00:00"
+      },
+      "scada_source_round_id": "round-20260623191939738847",
+      "divergent_sensors": [],
+      "sensor_outputs": [
+        {
+          "sensor_name": "temperature",
+          "physical_value": 76.835,
+          "scada_value": 76.835,
+          "absolute_difference": 0.0,
+          "tolerance": 2.0,
+          "tolerance_evaluation": "within_tolerance",
+          "divergence_classification": "match",
+          "contextual_evidence": {
+            "supervisory_mode": "match",
+            "supervisory_source_round_id": "round-20260623191939738847",
+            "behavioral_mode": "match",
+            "behavioral_source_round_id": "round-20260623191939738847",
+            "behavioral_payload": {
+              "loop_current_ma": 13.816,
+              "pv_percent_range": 61.351,
+              "noise_floor": 0.708,
+              "rate_of_change_dtdt": -4.78,
+              "local_stability_score": 0.857,
+              "field_device_malfunction": false,
+              "loop_current_saturated": false,
+              "cold_start": false,
+              "mode": "match",
+              "source_round_id": "round-20260623191939738847"
+            }
+          }
+        },
+        {
+          "sensor_name": "pressure",
+          "physical_value": 6.075,
+          "scada_value": 6.075,
+          "absolute_difference": 0.0,
+          "tolerance": 0.35,
+          "tolerance_evaluation": "within_tolerance",
+          "divergence_classification": "match",
+          "contextual_evidence": {
+            "supervisory_mode": "match",
+            "supervisory_source_round_id": "round-20260623191939738847",
+            "behavioral_mode": "match",
+            "behavioral_source_round_id": "round-20260623191939738847",
+            "behavioral_payload": {
+              "loop_current_ma": 14.209,
+              "pv_percent_range": 63.806,
+              "noise_floor": 0.708,
+              "rate_of_change_dtdt": -0.116,
+              "local_stability_score": 0.927,
+              "field_device_malfunction": false,
+              "loop_current_saturated": false,
+              "cold_start": false,
+              "mode": "match",
+              "source_round_id": "round-20260623191939738847"
+            }
+          }
+        },
+        {
+          "sensor_name": "rpm",
+          "physical_value": 3186.012,
+          "scada_value": 3186.012,
+          "absolute_difference": 0.0,
+          "tolerance": 120.0,
+          "tolerance_evaluation": "within_tolerance",
+          "divergence_classification": "match",
+          "contextual_evidence": {
+            "supervisory_mode": "match",
+            "supervisory_source_round_id": "round-20260623191939738847",
+            "behavioral_mode": "match",
+            "behavioral_source_round_id": "round-20260623191939738847",
+            "behavioral_payload": {
+              "loop_current_ma": 14.592,
+              "pv_percent_range": 66.2,
+              "noise_floor": 0.708,
+              "rate_of_change_dtdt": -23.056,
+              "local_stability_score": 0.583,
+              "field_device_malfunction": false,
+              "loop_current_saturated": false,
+              "cold_start": false,
+              "mode": "match",
+              "source_round_id": "round-20260623191939738847"
+            }
+          }
+        }
+      ]
+    },
+    "divergence_alert": null
+  },
+  "diagnostics": {
+    "final_consensus_status": "success",
+    "has_scada_divergence": false,
+    "divergent_sensors": [],
+    "participating_edges": [
+      "edge-1",
+      "edge-2",
+      "edge-3"
+    ],
+    "persisted_record_type": "valid_consensus_artifact"
+  }
+}

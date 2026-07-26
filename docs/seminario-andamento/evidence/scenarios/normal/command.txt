@@ -1,0 +1,9 @@
+# Cenario: normal
+# Execucao LIVE 2026-06-23 (UTC 2026-06-23T19:19:38Z -> 2026-06-23T19:19:50Z)
+# Diretorio: <project-root>
+
+# Variaveis de ambiente:
+PYTHONPATH=src KERAS_BACKEND=torch MQTT_TRANSPORT=real DEMO_DISABLE_RUNTIME_AUTOENCODER=true DEMO_MAX_CYCLES=2 DEMO_CYCLE_INTERVAL_SECONDS=2 DEMO_SCENARIO=normal DEMO_SCENARIO_START_CYCLE=1 MINIO_BUCKET=sem-normal DEMO_LOG_PATH=logs/sem-normal.log
+
+# Comando:
+.venv/Scripts/python.exe scripts/run_local_demo.py

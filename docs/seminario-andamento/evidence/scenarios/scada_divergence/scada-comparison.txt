@@ -1,0 +1,13 @@
+COMPARACAO FISICO x LOGICO (SCADA) - cenario scada_divergence (LIVE 2026-06-23)
+======================================================================
+status do estagio ......... blocked_downstream
+motivo .................... scada_divergence_detected
+downstream_permitido ...... False
+sensores divergentes ...... temperature, pressure, rpm
+
+scada_source_round_id ..... round-20260623192028230653
+
+Comparacao sensor a sensor (valor fisico consensado x valor logico SCADA):
+  - temperature: fisico=81.11 scada=87.11 diff=6.0 tol=2.0 [outside_tolerance] -> divergent
+  - pressure: fisico=6.141 scada=6.741 diff=0.6 tol=0.35 [outside_tolerance] -> divergent
+  - rpm: fisico=3204.308 scada=3504.308 diff=300.0 tol=120.0 [outside_tolerance] -> divergent

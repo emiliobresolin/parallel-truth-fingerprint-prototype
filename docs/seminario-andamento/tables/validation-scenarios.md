@@ -1,0 +1,8 @@
+<!-- Execucao ao vivo 2026-06-23 pelo caminho oficial (DEMO_SCENARIO), DEMO_MAX_CYCLES=2. single_edge_exclusion e replay/freeze NAO executados como resultado principal (ver prototype-limitations). -->
+| cenario | objetivo | consenso | comparacao_scada | persistencia | resultado_esperado | resultado_observado | artefatos_gerados |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| normal | Caminho feliz do pipeline | success (3/3 validos, 0 exclusoes) | match em temperature/pressure/rpm | persistido (bucket sem-normal) | persistir artefato valido | CONFIRMADO (EXIT=0) | consensus/scada/minio + terminal |
+| quorum_loss | Bloquear sem quorum confiavel | failed_consensus (3 edges excluidos: suspected_byzantine_behavior) | bloqueada no stage consensus (sem estado fisico) | bloqueada (no_quorum_reached); bucket nao criado | bloquear downstream | CONFIRMADO (EXIT=0) | consensus + missing-artifact |
+| scada_divergence | Comparacao fisico-logica | success (3/3 validos) | divergent em temperature/pressure/rpm (offset) | bloqueada (scada_divergence_detected); bucket nao criado | bloquear downstream | CONFIRMADO (EXIT=0) | consensus/scada + missing-artifact |
+
+> Execucao ao vivo 2026-06-23 pelo caminho oficial (DEMO_SCENARIO), DEMO_MAX_CYCLES=2. single_edge_exclusion e replay/freeze NAO executados como resultado principal (ver prototype-limitations).

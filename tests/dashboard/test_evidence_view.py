@@ -139,6 +139,44 @@ def _artifact_loader(object_key: str) -> dict[str, object] | None:
 
 
 class DashboardEvidenceViewTests(unittest.TestCase):
+    def test_guidance_distinguishes_adequate_run_from_inadequate_saved_model(self) -> None:
+        def adequate_current_dataset_loader(
+            object_key: str,
+        ) -> dict[str, object] | None:
+            if object_key.endswith("round-4::seq-2.manifest.json"):
+                return {
+                    "dataset_id": "training-dataset::round-1::round-4::seq-2",
+                    "window_count": 60,
+                    "adequacy_assessment": {
+                        "validation_level": "meaningful_fingerprint_valid",
+                        "eligible_artifact_count": 61,
+                        "window_count": 60,
+                        "minimum_eligible_artifact_count": 30,
+                        "minimum_window_count": 20,
+                    },
+                }
+            return _artifact_loader(object_key)
+
+        explainability = build_dashboard_explainability_view(
+            generated_at="2026-04-02T00:05:00+00:00",
+            latest_runtime_payload=_sample_runtime_payload(),
+            operator_actions=[],
+            limitation_note="Runtime-valid only.",
+            artifact_json_loader=adequate_current_dataset_loader,
+        )
+
+        changed = explainability["what_changed_since_startup"]
+        self.assertTrue(
+            any(
+                "The current run has reached the adequacy floor" in message
+                for message in changed["not_happened_yet"]
+            )
+        )
+        self.assertIn(
+            "ready for adequate-model retraining",
+            changed["expected_next"]["summary"],
+        )
+
     def test_explainability_view_translates_required_status_labels(self) -> None:
         explainability = build_dashboard_explainability_view(
             generated_at="2026-04-02T00:05:00+00:00",

@@ -1,0 +1,29 @@
+PAYLOAD DE CONSENSO - cenario quorum_loss (LIVE 2026-06-23)
+======================================================================
+Fonte: latest_cycle.consensus_summary + .cometbft do log JSON do runtime.
+
+round_id .................. round-20260623192009763877
+total_participants ........ 3  (edge-1, edge-2, edge-3)
+quorum_required ........... 2
+valid_after_exclusions .... 0
+final_consensus_status .... failed_consensus
+has_consensused_valid_state False
+exclusoes (com detalhe da deteccao bizantina):
+   - edge-1: suspected_byzantine_behavior
+        compatible_peers=0, overall_normalized_deviation=2.353, pressure:4.200bar(norm=1.400), rpm:1895.000rpm(norm=3.158), temperature:50.000degC(norm=2.500)
+   - edge-2: suspected_byzantine_behavior
+        compatible_peers=0, overall_normalized_deviation=3.289, pressure:5.900bar(norm=1.967), rpm:2640.000rpm(norm=4.400), temperature:70.000degC(norm=3.500)
+   - edge-3: suspected_byzantine_behavior
+        compatible_peers=0, overall_normalized_deviation=3.769, pressure:6.700bar(norm=2.233), rpm:3045.000rpm(norm=5.075), temperature:80.000degC(norm=4.000)
+
+--- Prova da camada de consenso real (CometBFT) ---
+node_version .............. 0.39.0
+latest_block_height ....... 54
+committed_height .......... 55
+tx_hash ................... 34E79CC7CDB29EFEDD0793E6F3413F4806A32CCC88230DC28F7D20A6E03E4446
+check_tx_code ............. 0  (0 = aceito)
+deliver_tx_code ........... 0  (0 = aplicado)
+
+Interpretacao: a rodada foi submetida a uma rede BFT real de 3 validadores;
+a aplicacao ABCI em Go computou o resultado de confianca/exclusao de forma
+deterministica e o estado committado foi lido de volta pela camada Python.

@@ -1,0 +1,24 @@
+{
+  "promoted_run_id": "run-adfa-ld-gru-classifier-20260521T173524-3fc71cc1",
+  "predicted_class_id": 0,
+  "predicted_class_name": "Normal",
+  "class_probabilities": [
+    0.347211,
+    0.027301,
+    0.170606,
+    0.228406,
+    0.089162,
+    0.137313
+  ],
+  "label_names": [
+    "Normal",
+    "Adduser",
+    "Hydra-FTP",
+    "Hydra-SSH",
+    "Java-Meterpreter",
+    "Web-Shell"
+  ],
+  "sequence_length": 30,
+  "feature_count": 1,
+  "input_window": "zeros[30x1] synthetic probe window"
+}

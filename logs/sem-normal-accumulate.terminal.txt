@@ -1,0 +1,288 @@
+=== Local Demo Cycle 1 ===
+Compact view:
+- edge-1: published=3 consumed=6 complete=True validated=False view[pressure=6.075, rpm=3186.012, temperature=76.835]
+- edge-2: published=3 consumed=6 complete=True validated=False view[pressure=6.075, rpm=3186.012, temperature=76.835]
+- edge-3: published=3 consumed=6 complete=True validated=False view[pressure=6.075, rpm=3186.012, temperature=76.835]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 76.835, 'pressure': 6.075, 'rpm': 3186.012}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=12
+- committed_height=13 tx_hash=0D217DD044880180816354823644E98B0CEBAA115544EB4D5EA3B1CAD8ACDBAB check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193124938936: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193124938936: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=1 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=3.291 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193124938936: scada_source=round-20260623193124938936 outputs[temperature=match(76.835->76.835,diff=0.0,tol=2.0), pressure=match(6.075->6.075,diff=0.0,tol=0.35), rpm=match(3186.012->3186.012,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193124938936.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193124938936.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=3 eligible_history=3/10 windows=2 latest_artifact=valid-consensus-artifacts/round-20260623193124938936.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log
+=== Local Demo Cycle 2 ===
+Compact view:
+- edge-1: published=6 consumed=12 complete=True validated=False view[pressure=6.141, rpm=3204.308, temperature=81.11]
+- edge-2: published=6 consumed=12 complete=True validated=False view[pressure=6.141, rpm=3204.308, temperature=81.11]
+- edge-3: published=6 consumed=12 complete=True validated=False view[pressure=6.141, rpm=3204.308, temperature=81.11]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 81.11, 'pressure': 6.141, 'rpm': 3204.308}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=14
+- committed_height=15 tx_hash=063BB9BA47A37626A295ECCBB28AE51696BA2E27FD54007A75FBACE9DE4981F5 check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193128231023: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193128231023: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=2 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=2.213 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193128231023: scada_source=round-20260623193128231023 outputs[temperature=match(81.11->81.11,diff=0.0,tol=2.0), pressure=match(6.141->6.141,diff=0.0,tol=0.35), rpm=match(3204.308->3204.308,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193128231023.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193128231023.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=4 eligible_history=4/10 windows=3 latest_artifact=valid-consensus-artifacts/round-20260623193128231023.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log
+=== Local Demo Cycle 3 ===
+Compact view:
+- edge-1: published=9 consumed=18 complete=True validated=False view[pressure=6.322, rpm=3193.826, temperature=75.98]
+- edge-2: published=9 consumed=18 complete=True validated=False view[pressure=6.322, rpm=3193.826, temperature=75.98]
+- edge-3: published=9 consumed=18 complete=True validated=False view[pressure=6.322, rpm=3193.826, temperature=75.98]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 75.98, 'pressure': 6.322, 'rpm': 3193.826}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=16
+- committed_height=17 tx_hash=D869FDF7B52CB044A5490C0299512A5083245735A2BF0DBD0800DFD98B491180 check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193130447048: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193130447048: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=3 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=2.563 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193130447048: scada_source=round-20260623193130447048 outputs[temperature=match(75.98->75.98,diff=0.0,tol=2.0), pressure=match(6.322->6.322,diff=0.0,tol=0.35), rpm=match(3193.826->3193.826,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193130447048.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193130447048.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=5 eligible_history=5/10 windows=4 latest_artifact=valid-consensus-artifacts/round-20260623193130447048.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log
+=== Local Demo Cycle 4 ===
+Compact view:
+- edge-1: published=12 consumed=24 complete=True validated=False view[pressure=5.848, rpm=3137.347, temperature=78.728]
+- edge-2: published=12 consumed=24 complete=True validated=False view[pressure=5.848, rpm=3137.347, temperature=78.728]
+- edge-3: published=12 consumed=24 complete=True validated=False view[pressure=5.848, rpm=3137.347, temperature=78.728]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 78.728, 'pressure': 5.848, 'rpm': 3137.347}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=18
+- committed_height=19 tx_hash=8800FB2A1393941F8989E44F2B0938FC28C77A7A91FF82071B6703DDE9104C29 check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193133014955: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193133014955: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=4 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=2.577 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193133014955: scada_source=round-20260623193133014955 outputs[temperature=match(78.728->78.728,diff=0.0,tol=2.0), pressure=match(5.848->5.848,diff=0.0,tol=0.35), rpm=match(3137.347->3137.347,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193133014955.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193133014955.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=6 eligible_history=6/10 windows=5 latest_artifact=valid-consensus-artifacts/round-20260623193133014955.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log
+=== Local Demo Cycle 5 ===
+Compact view:
+- edge-1: published=15 consumed=30 complete=True validated=False view[pressure=5.783, rpm=3092.033, temperature=73.962]
+- edge-2: published=15 consumed=30 complete=True validated=False view[pressure=5.783, rpm=3092.033, temperature=73.962]
+- edge-3: published=15 consumed=30 complete=True validated=False view[pressure=5.783, rpm=3092.033, temperature=73.962]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 73.962, 'pressure': 5.783, 'rpm': 3092.033}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=20
+- committed_height=21 tx_hash=E729E4A1767F533571E94A95736BA02C4203A0FA327CE2D1CCACDEAA4951ECBF check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193135595850: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193135595850: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=5 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=2.528 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193135595850: scada_source=round-20260623193135595850 outputs[temperature=match(73.962->73.962,diff=0.0,tol=2.0), pressure=match(5.783->5.783,diff=0.0,tol=0.35), rpm=match(3092.033->3092.033,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193135595850.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193135595850.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=7 eligible_history=7/10 windows=6 latest_artifact=valid-consensus-artifacts/round-20260623193135595850.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log
+=== Local Demo Cycle 6 ===
+Compact view:
+- edge-1: published=18 consumed=36 complete=True validated=False view[pressure=5.933, rpm=3151.64, temperature=75.318]
+- edge-2: published=18 consumed=36 complete=True validated=False view[pressure=5.933, rpm=3151.64, temperature=75.318]
+- edge-3: published=18 consumed=36 complete=True validated=False view[pressure=5.933, rpm=3151.64, temperature=75.318]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 75.318, 'pressure': 5.933, 'rpm': 3151.64}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=22
+- committed_height=23 tx_hash=A08919BA6233278E908F68BDE65C9BAB838024CC5D9B538C29385F57C2247663 check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193138127668: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193138127668: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=6 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=2.538 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193138127668: scada_source=round-20260623193138127668 outputs[temperature=match(75.318->75.318,diff=0.0,tol=2.0), pressure=match(5.933->5.933,diff=0.0,tol=0.35), rpm=match(3151.64->3151.64,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193138127668.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193138127668.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=8 eligible_history=8/10 windows=7 latest_artifact=valid-consensus-artifacts/round-20260623193138127668.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log
+=== Local Demo Cycle 7 ===
+Compact view:
+- edge-1: published=21 consumed=42 complete=True validated=False view[pressure=5.847, rpm=3182.53, temperature=72.698]
+- edge-2: published=21 consumed=42 complete=True validated=False view[pressure=5.847, rpm=3182.53, temperature=72.698]
+- edge-3: published=21 consumed=42 complete=True validated=False view[pressure=5.847, rpm=3182.53, temperature=72.698]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 72.698, 'pressure': 5.847, 'rpm': 3182.53}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=24
+- committed_height=25 tx_hash=25C1363D810D5E6CE09FEEF2F1EF5DFF928DF418A4BB2A1EDDB850916C6E5EFF check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193140670829: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193140670829: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=7 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=2.596 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193140670829: scada_source=round-20260623193140670829 outputs[temperature=match(72.698->72.698,diff=0.0,tol=2.0), pressure=match(5.847->5.847,diff=0.0,tol=0.35), rpm=match(3182.53->3182.53,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193140670829.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193140670829.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=9 eligible_history=9/10 windows=8 latest_artifact=valid-consensus-artifacts/round-20260623193140670829.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log
+=== Local Demo Cycle 8 ===
+Compact view:
+- edge-1: published=24 consumed=48 complete=True validated=False view[pressure=5.792, rpm=3144.721, temperature=79.053]
+- edge-2: published=24 consumed=48 complete=True validated=False view[pressure=5.792, rpm=3144.721, temperature=79.053]
+- edge-3: published=24 consumed=48 complete=True validated=False view[pressure=5.792, rpm=3144.721, temperature=79.053]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 79.053, 'pressure': 5.792, 'rpm': 3144.721}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=26
+- committed_height=27 tx_hash=C5BC362D41FECA9064207180B5D2BDD8C342FDE45B78C16D7F6A39EBF45D92AD check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193143275808: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193143275808: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=8 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=2.557 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193143275808: scada_source=round-20260623193143275808 outputs[temperature=match(79.053->79.053,diff=0.0,tol=2.0), pressure=match(5.792->5.792,diff=0.0,tol=0.35), rpm=match(3144.721->3144.721,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193143275808.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193143275808.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=10 eligible_history=10/10 windows=9 latest_artifact=valid-consensus-artifacts/round-20260623193143275808.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log
+=== Local Demo Cycle 9 ===
+Compact view:
+- edge-1: published=27 consumed=54 complete=True validated=False view[pressure=6.254, rpm=3158.219, temperature=82.212]
+- edge-2: published=27 consumed=54 complete=True validated=False view[pressure=6.254, rpm=3158.219, temperature=82.212]
+- edge-3: published=27 consumed=54 complete=True validated=False view[pressure=6.254, rpm=3158.219, temperature=82.212]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 82.212, 'pressure': 6.254, 'rpm': 3158.219}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=28
+- committed_height=29 tx_hash=953F33F9132CA65F0B2EABC5D1939396851BD0C49664A6C9A31551C3118926AD check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193145839679: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193145839679: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=9 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=2.599 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193145839679: scada_source=round-20260623193145839679 outputs[temperature=match(82.212->82.212,diff=0.0,tol=2.0), pressure=match(6.254->6.254,diff=0.0,tol=0.35), rpm=match(3158.219->3158.219,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193145839679.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193145839679.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=11 eligible_history=11/10 windows=10 latest_artifact=valid-consensus-artifacts/round-20260623193145839679.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log
+=== Local Demo Cycle 10 ===
+Compact view:
+- edge-1: published=30 consumed=60 complete=True validated=False view[pressure=5.985, rpm=3187.48, temperature=83.046]
+- edge-2: published=30 consumed=60 complete=True validated=False view[pressure=5.985, rpm=3187.48, temperature=83.046]
+- edge-3: published=30 consumed=60 complete=True validated=False view[pressure=5.985, rpm=3187.48, temperature=83.046]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 83.046, 'pressure': 5.985, 'rpm': 3187.48}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=30
+- committed_height=31 tx_hash=8561FC6428B77B110F6C747C574793A79C62E1B4467F78B6303ACD6527A5BE6A check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193148446162: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193148446162: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=10 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=2.579 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193148446162: scada_source=round-20260623193148446162 outputs[temperature=match(83.046->83.046,diff=0.0,tol=2.0), pressure=match(5.985->5.985,diff=0.0,tol=0.35), rpm=match(3187.48->3187.48,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193148446162.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193148446162.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=12 eligible_history=12/10 windows=11 latest_artifact=valid-consensus-artifacts/round-20260623193148446162.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log
+=== Local Demo Cycle 11 ===
+Compact view:
+- edge-1: published=33 consumed=66 complete=True validated=False view[pressure=6.409, rpm=3152.121, temperature=78.398]
+- edge-2: published=33 consumed=66 complete=True validated=False view[pressure=6.409, rpm=3152.121, temperature=78.398]
+- edge-3: published=33 consumed=66 complete=True validated=False view[pressure=6.409, rpm=3152.121, temperature=78.398]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 78.398, 'pressure': 6.409, 'rpm': 3152.121}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=32
+- committed_height=33 tx_hash=518F7F1D621A80CEA72156E792A89D6F04E89310312ECFFFA84A21363434C3E3 check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193151033981: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193151033981: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=11 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=2.662 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193151033981: scada_source=round-20260623193151033981 outputs[temperature=match(78.398->78.398,diff=0.0,tol=2.0), pressure=match(6.409->6.409,diff=0.0,tol=0.35), rpm=match(3152.121->3152.121,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193151033981.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193151033981.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=13 eligible_history=13/10 windows=12 latest_artifact=valid-consensus-artifacts/round-20260623193151033981.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log
+=== Local Demo Cycle 12 ===
+Compact view:
+- edge-1: published=36 consumed=72 complete=True validated=False view[pressure=6.303, rpm=3116.043, temperature=79.203]
+- edge-2: published=36 consumed=72 complete=True validated=False view[pressure=6.303, rpm=3116.043, temperature=79.203]
+- edge-3: published=36 consumed=72 complete=True validated=False view[pressure=6.303, rpm=3116.043, temperature=79.203]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 79.203, 'pressure': 6.303, 'rpm': 3116.043}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=34
+- committed_height=35 tx_hash=EF17A369D50F3AE543BA63681775957456AF6D33717F3090FF92C8BEB4C2E4F4 check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260623193153706235: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260623193153706235: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=12 cadence=cycle_complete interval_seconds=1.0 elapsed_seconds=2.601 next_sleep_seconds=0.0
+- scenario=active=true configured=normal current=normal start_cycle=1 training_eligible=true expected_outputs=consensus_alert,persistence_stage,fingerprint_lifecycle
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- round-20260623193153706235: scada_source=round-20260623193153706235 outputs[temperature=match(79.203->79.203,diff=0.0,tol=2.0), pressure=match(6.303->6.303,diff=0.0,tol=0.35), rpm=match(3116.043->3116.043,diff=0.0,tol=120.0)]
+- none
+- persistence=persisted backend=minio endpoint=localhost:9000 secure=false bucket=sem-normal artifact_key=valid-consensus-artifacts/round-20260623193153706235.json artifact_uri=minio://sem-normal/valid-consensus-artifacts/round-20260623193153706235.json
+- fingerprint=model_status=runtime_autoencoder_disabled training=runtime_autoencoder_disabled inference=skipped_runtime_autoencoder_disabled valid_artifacts=14 eligible_history=14/10 windows=13 latest_artifact=valid-consensus-artifacts/round-20260623193153706235.json
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\햞ea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-normal-accumulate.log

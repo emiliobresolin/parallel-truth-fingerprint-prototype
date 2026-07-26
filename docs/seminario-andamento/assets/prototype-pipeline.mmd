@@ -1,0 +1,28 @@
+%% Pipeline do protótipo (estado vivo 2026-06-23). Componentes reais x simulados.
+flowchart LR
+    subgraph Z4["Camada Física (simulada)"]
+        C["Compressor simulado<br/>(seed=101)"]
+        S["Sensores: temperatura,<br/>pressão, rotação"]
+    end
+    subgraph Z3["Edge / Consenso (real)"]
+        E1["Edge-1<br/>(temperatura)"]
+        E2["Edge-2<br/>(pressão)"]
+        E3["Edge-3<br/>(rotação)"]
+        MQ(["MQTT broker<br/>ptfp-mqtt-broker:1883"])
+        CB["CometBFT x3 + ABCI Go x3<br/>consenso BFT + exclusão"]
+    end
+    subgraph Z2["Dom. Lógico / Persistência"]
+        SC["SCADA fake (OPC-UA)<br/>comparação físico-lógica"]
+        MI[("MinIO<br/>valid-consensus-artifacts")]
+    end
+    subgraph Z1["Fingerprint"]
+        DS["Dataset temporal<br/>(.manifest + .windows.npz)"]
+        FP["LSTM/GRU<br/>(ADFA-LD supervisionado)"]
+    end
+    C --> S --> E1 & E2 & E3
+    E1 & E2 & E3 -->|publish/subscribe| MQ
+    MQ --> CB
+    CB -->|estado consensado| SC
+    SC -->|match| MI
+    SC -.->|divergente: bloqueia| X1["downstream bloqueado"]
+    MI --> DS --> FP --> AL(["Anomalia / Alerta"])

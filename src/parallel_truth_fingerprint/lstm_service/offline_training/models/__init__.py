@@ -22,6 +22,11 @@ from parallel_truth_fingerprint.lstm_service.offline_training.models import (
 from parallel_truth_fingerprint.lstm_service.offline_training.models import (
     gru_classifier as _gru_classifier_registration,  # noqa: F401
 )
+# Registers `lstm-embedding-classifier` and `gru-embedding-classifier`
+# (Embedding over the syscall vocabulary; paired with adfa-ld-embed*).
+from parallel_truth_fingerprint.lstm_service.offline_training.models import (
+    embedding_classifiers as _embedding_classifiers_registration,  # noqa: F401
+)
 
 __all__ = [
     "ClassifierAdapter",

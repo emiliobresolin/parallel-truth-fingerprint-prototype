@@ -1,0 +1,7 @@
+AUSENCIA DE ARTEFATOS - cenario scada_divergence (LIVE 2026-06-23)
+============================================================
+
+minio-artifact.pretty.json / minio-artifact.txt: AUSENTE.
+   Motivo: persistencia bloqueada (`scada_divergence_detected` no stage `scada_comparison`).
+   O bucket MinIO `sem-scada-divergence` nao foi criado porque nada foi persistido -
+   comportamento esperado e correto para este cenario de bloqueio.

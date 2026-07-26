@@ -1,0 +1,21 @@
+LISTAGEM DO MINIO (LIVE 2026-06-23, localhost:9000)
+============================================================
+
+[bucket] sem-normal  (16 objetos)
+    fingerprint-datasets/training-dataset::round-20260623191939738847::round-20260623193153706235::seq-2.manifest.json    3038 bytes
+    fingerprint-datasets/training-dataset::round-20260623191939738847::round-20260623193153706235::seq-2.windows.npz    3006 bytes
+    valid-consensus-artifacts/round-20260623191939738847.json    15644 bytes
+    valid-consensus-artifacts/round-20260623191948013076.json    15630 bytes
+    valid-consensus-artifacts/round-20260623193124938936.json    15644 bytes
+    valid-consensus-artifacts/round-20260623193128231023.json    15630 bytes
+    valid-consensus-artifacts/round-20260623193130447048.json    15636 bytes
+    valid-consensus-artifacts/round-20260623193133014955.json    15647 bytes
+    valid-consensus-artifacts/round-20260623193135595850.json    15653 bytes
+    valid-consensus-artifacts/round-20260623193138127668.json    15633 bytes
+    valid-consensus-artifacts/round-20260623193140670829.json    15639 bytes
+    valid-consensus-artifacts/round-20260623193143275808.json    15647 bytes
+    valid-consensus-artifacts/round-20260623193145839679.json    15632 bytes
+    valid-consensus-artifacts/round-20260623193148446162.json    15618 bytes
+    valid-consensus-artifacts/round-20260623193151033981.json    15650 bytes
+    valid-consensus-artifacts/round-20260623193153706235.json    15641 bytes
+

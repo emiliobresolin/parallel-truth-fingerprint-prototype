@@ -1,0 +1,17 @@
+ARTEFATO DE CONSENSO VALIDO (amostra MinIO, LIVE 2026-06-23)
+============================================================
+
+bucket .................... sem-normal
+artifact_key .............. valid-consensus-artifacts/round-20260623191939738847.json
+persisted_at .............. 2026-06-23T19:19:41.992526+00:00
+round_id .................. round-20260623191939738847
+final_consensus_status .... success
+participating_edges ....... ['edge-1', 'edge-2', 'edge-3']
+quorum_required ........... 2  | source_edges ['edge-1', 'edge-2', 'edge-3']
+exclusions ................ []
+validated sensor_values ... {'pressure': 6.075, 'rpm': 3186.012, 'temperature': 76.835}
+dataset_context ........... {'scenario_label': 'normal', 'training_label': 'normal', 'training_eligible': True, 'training_eligibility_reason': 'normal_validated_run'}
+diagnostics ............... {'final_consensus_status': 'success', 'has_scada_divergence': False, 'divergent_sensors': [], 'participating_edges': ['edge-1', 'edge-2', 'edge-3'], 'persisted_record_type': 'valid_consensus_artifact'}
+
+Este e o objeto que alimenta o dataset de fingerprint (training_label=normal,
+training_eligible=true). Apenas estados pos-consenso e pos-SCADA sao persistidos.

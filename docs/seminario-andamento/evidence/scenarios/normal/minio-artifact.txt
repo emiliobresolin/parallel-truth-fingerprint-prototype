@@ -1,0 +1,34 @@
+ARTEFATO PERSISTIDO NO MINIO - explicacao dos campos (LIVE 2026-06-23)
+======================================================================
+artifact_key .............. valid-consensus-artifacts/round-20260623191948013076.json
+persisted_at .............. 2026-06-23T19:19:50.439592+00:00
+round_id .................. round-20260623191948013076
+janela .................... 2026-06-23T19:18:48.013076+00:00 -> 2026-06-23T19:19:48.013076+00:00
+
+consensus_context:
+   final_consensus_status . success
+   participating_edges .... ['edge-1', 'edge-2', 'edge-3']
+   quorum_required ........ 2
+   source_edges ........... ['edge-1', 'edge-2', 'edge-3']
+   exclusions ............. []
+
+validated_state (estado fisico consensado):
+   state_type ............. consensused_valid_state
+   sensor_values .......... {'pressure': 6.141, 'rpm': 3204.308, 'temperature': 81.11}
+
+dataset_context (rotulagem para o pipeline de fingerprint):
+   scenario_label = normal
+   training_label = normal
+   training_eligible = True
+   training_eligibility_reason = normal_validated_run
+
+diagnostics:
+   final_consensus_status = success
+   has_scada_divergence = False
+   divergent_sensors = []
+   participating_edges = ['edge-1', 'edge-2', 'edge-3']
+   persisted_record_type = valid_consensus_artifact
+
+Observacao: este e o unico tipo de registro persistido - pos-consenso e
+pos-comparacao-SCADA. Cenarios bloqueados (quorum_loss, scada_divergence)
+NAO geram este artefato (ver missing-artifact.txt nesses cenarios).

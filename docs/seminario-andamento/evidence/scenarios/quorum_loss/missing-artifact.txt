@@ -1,0 +1,11 @@
+AUSENCIA DE ARTEFATOS - cenario quorum_loss (LIVE 2026-06-23)
+============================================================
+
+scada-comparison.pretty.json / scada-comparison.txt (payload estruturado): AUSENTE.
+   Motivo: o consenso terminou com status `failed_consensus` (reason `no_quorum_reached`). Sem estado fisico consensado, a projecao SCADA e a
+   comparacao sensor-a-sensor nao sao executadas. (scada-comparison.txt registra essa ausencia.)
+
+minio-artifact.pretty.json / minio-artifact.txt: AUSENTE.
+   Motivo: persistencia bloqueada (`no_quorum_reached` no stage `consensus`).
+   O bucket MinIO `sem-quorum-loss` nao foi criado porque nada foi persistido -
+   comportamento esperado e correto para este cenario de bloqueio.

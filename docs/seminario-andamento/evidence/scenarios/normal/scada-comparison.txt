@@ -1,0 +1,11 @@
+COMPARACAO FISICO x LOGICO (SCADA) - cenario normal (LIVE 2026-06-23)
+======================================================================
+status do estagio ......... completed
+downstream_permitido ...... True
+
+scada_source_round_id ..... round-20260623191948013076
+
+Comparacao sensor a sensor (valor fisico consensado x valor logico SCADA):
+  - temperature: fisico=81.11 scada=81.11 diff=0.0 tol=2.0 [within_tolerance] -> match
+  - pressure: fisico=6.141 scada=6.141 diff=0.0 tol=0.35 [within_tolerance] -> match
+  - rpm: fisico=3204.308 scada=3204.308 diff=0.0 tol=120.0 [within_tolerance] -> match

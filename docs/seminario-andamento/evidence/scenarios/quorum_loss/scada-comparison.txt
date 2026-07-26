@@ -1,0 +1,8 @@
+COMPARACAO FISICO x LOGICO (SCADA) - cenario quorum_loss (LIVE 2026-06-23)
+======================================================================
+status do estagio ......... blocked
+motivo .................... no_quorum_reached
+downstream_permitido ...... False
+
+comparison_output: AUSENTE (consenso falhou antes da projecao SCADA;
+nenhum estado fisico validado foi produzido para comparar).

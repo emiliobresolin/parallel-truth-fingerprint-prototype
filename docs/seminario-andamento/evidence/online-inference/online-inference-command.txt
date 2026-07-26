@@ -1,0 +1,9 @@
+# Inferencia online com o modelo PROMOVIDO (LIVE 2026-06-23)
+# Variaveis: PYTHONPATH=src KERAS_BACKEND=torch ADFA_LD_PATH=datasets/ADFA-LD
+
+# Store local (ponteiro de promocao em _bmad-output/local-store):
+from parallel_truth_fingerprint.persistence import LocalFileArtifactStore, LocalFileStoreConfig
+from parallel_truth_fingerprint.lstm_service.online_inference import OnlineLstmInferencer
+store = LocalFileArtifactStore(LocalFileStoreConfig(bucket='fingerprint-training-history', root_path='_bmad-output/local-store'))
+inf = OnlineLstmInferencer.load(artifact_store=store)   # le o ponteiro, reconstroi e RE-TREINA na carga
+res = inf.predict_sequence([[0.0]*inf.feature_count for _ in range(inf.sequence_length)])

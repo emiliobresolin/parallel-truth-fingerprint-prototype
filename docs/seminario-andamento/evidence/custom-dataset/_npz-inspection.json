@@ -1,0 +1,56 @@
+{
+  "npz_object": "fingerprint-datasets/training-dataset::round-20260623191939738847::round-20260623193153706235::seq-2.windows.npz",
+  "npz_keys": [
+    "feature_tensor",
+    "window_ids",
+    "artifact_keys",
+    "round_ids",
+    "timestamps",
+    "labels"
+  ],
+  "npz_shapes": {
+    "feature_tensor": [
+      13,
+      2,
+      27
+    ],
+    "window_ids": [
+      13
+    ],
+    "artifact_keys": [
+      13,
+      2
+    ],
+    "round_ids": [
+      13,
+      2
+    ],
+    "timestamps": [
+      13,
+      2
+    ],
+    "labels": [
+      13
+    ]
+  },
+  "tensor_shape": [
+    13,
+    2,
+    27
+  ],
+  "window_count": 13,
+  "eligible_artifact_count": 14,
+  "feature_schema_len": 27,
+  "training_label": "normal",
+  "adequacy_assessment": {
+    "validation_level": "runtime_valid_only",
+    "adequacy_met": false,
+    "status_reason": "below_default_adequacy_floor",
+    "minimum_eligible_artifact_count": 30,
+    "minimum_window_count": 20,
+    "eligible_artifact_count": 14,
+    "window_count": 13,
+    "eligible_artifact_floor_met": false,
+    "window_floor_met": false
+  }
+}

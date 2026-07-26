@@ -1,0 +1,156 @@
+{
+  "scada_state": {
+    "compressor_id": "compressor-1",
+    "source_round_id": "round-20260623191939738847",
+    "timestamp": "2026-06-23T19:19:39.738847+00:00",
+    "behavioral_source_round_id": "round-20260623191939738847",
+    "sensor_values": {
+      "pressure": {
+        "value": 6.075,
+        "unit": "bar",
+        "mode": "match"
+      },
+      "rpm": {
+        "value": 3186.012,
+        "unit": "rpm",
+        "mode": "match"
+      },
+      "temperature": {
+        "value": 76.835,
+        "unit": "degC",
+        "mode": "match"
+      }
+    },
+    "behavioral_sensor_values": {
+      "pressure": {
+        "loop_current_ma": 14.209,
+        "pv_percent_range": 63.806,
+        "noise_floor": 0.708,
+        "rate_of_change_dtdt": -0.116,
+        "local_stability_score": 0.927,
+        "field_device_malfunction": false,
+        "loop_current_saturated": false,
+        "cold_start": false,
+        "mode": "match",
+        "source_round_id": "round-20260623191939738847"
+      },
+      "rpm": {
+        "loop_current_ma": 14.592,
+        "pv_percent_range": 66.2,
+        "noise_floor": 0.708,
+        "rate_of_change_dtdt": -23.056,
+        "local_stability_score": 0.583,
+        "field_device_malfunction": false,
+        "loop_current_saturated": false,
+        "cold_start": false,
+        "mode": "match",
+        "source_round_id": "round-20260623191939738847"
+      },
+      "temperature": {
+        "loop_current_ma": 13.816,
+        "pv_percent_range": 61.351,
+        "noise_floor": 0.708,
+        "rate_of_change_dtdt": -4.78,
+        "local_stability_score": 0.857,
+        "field_device_malfunction": false,
+        "loop_current_saturated": false,
+        "cold_start": false,
+        "mode": "match",
+        "source_round_id": "round-20260623191939738847"
+      }
+    }
+  },
+  "comparison_output": {
+    "round_identity": {
+      "round_id": "round-20260623191939738847",
+      "window_started_at": "2026-06-23T19:18:39.738847+00:00",
+      "window_ended_at": "2026-06-23T19:19:39.738847+00:00"
+    },
+    "scada_source_round_id": "round-20260623191939738847",
+    "divergent_sensors": [],
+    "sensor_outputs": [
+      {
+        "sensor_name": "temperature",
+        "physical_value": 76.835,
+        "scada_value": 76.835,
+        "absolute_difference": 0.0,
+        "tolerance": 2.0,
+        "tolerance_evaluation": "within_tolerance",
+        "divergence_classification": "match",
+        "contextual_evidence": {
+          "supervisory_mode": "match",
+          "supervisory_source_round_id": "round-20260623191939738847",
+          "behavioral_mode": "match",
+          "behavioral_source_round_id": "round-20260623191939738847",
+          "behavioral_payload": {
+            "loop_current_ma": 13.816,
+            "pv_percent_range": 61.351,
+            "noise_floor": 0.708,
+            "rate_of_change_dtdt": -4.78,
+            "local_stability_score": 0.857,
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false,
+            "mode": "match",
+            "source_round_id": "round-20260623191939738847"
+          }
+        }
+      },
+      {
+        "sensor_name": "pressure",
+        "physical_value": 6.075,
+        "scada_value": 6.075,
+        "absolute_difference": 0.0,
+        "tolerance": 0.35,
+        "tolerance_evaluation": "within_tolerance",
+        "divergence_classification": "match",
+        "contextual_evidence": {
+          "supervisory_mode": "match",
+          "supervisory_source_round_id": "round-20260623191939738847",
+          "behavioral_mode": "match",
+          "behavioral_source_round_id": "round-20260623191939738847",
+          "behavioral_payload": {
+            "loop_current_ma": 14.209,
+            "pv_percent_range": 63.806,
+            "noise_floor": 0.708,
+            "rate_of_change_dtdt": -0.116,
+            "local_stability_score": 0.927,
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false,
+            "mode": "match",
+            "source_round_id": "round-20260623191939738847"
+          }
+        }
+      },
+      {
+        "sensor_name": "rpm",
+        "physical_value": 3186.012,
+        "scada_value": 3186.012,
+        "absolute_difference": 0.0,
+        "tolerance": 120.0,
+        "tolerance_evaluation": "within_tolerance",
+        "divergence_classification": "match",
+        "contextual_evidence": {
+          "supervisory_mode": "match",
+          "supervisory_source_round_id": "round-20260623191939738847",
+          "behavioral_mode": "match",
+          "behavioral_source_round_id": "round-20260623191939738847",
+          "behavioral_payload": {
+            "loop_current_ma": 14.592,
+            "pv_percent_range": 66.2,
+            "noise_floor": 0.708,
+            "rate_of_change_dtdt": -23.056,
+            "local_stability_score": 0.583,
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false,
+            "mode": "match",
+            "source_round_id": "round-20260623191939738847"
+          }
+        }
+      }
+    ]
+  },
+  "divergence_alert": null
+}

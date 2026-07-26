@@ -1,0 +1,23 @@
+PAYLOAD DE CONSENSO - cenario scada_divergence (LIVE 2026-06-23)
+======================================================================
+Fonte: latest_cycle.consensus_summary + .cometbft do log JSON do runtime.
+
+round_id .................. round-20260623192028230653
+total_participants ........ 3  (edge-1, edge-2, edge-3)
+quorum_required ........... 2
+valid_after_exclusions .... 3
+final_consensus_status .... success
+has_consensused_valid_state True
+exclusoes ................. nenhuma
+
+--- Prova da camada de consenso real (CometBFT) ---
+node_version .............. 0.39.0
+latest_block_height ....... 68
+committed_height .......... 69
+tx_hash ................... 2EA949FD561E71388CBA8A8BA8CF6D2FBF7CAE8D8185B019ABDD1CC0ADBCC345
+check_tx_code ............. 0  (0 = aceito)
+deliver_tx_code ........... 0  (0 = aplicado)
+
+Interpretacao: a rodada foi submetida a uma rede BFT real de 3 validadores;
+a aplicacao ABCI em Go computou o resultado de confianca/exclusao de forma
+deterministica e o estado committado foi lido de volta pela camada Python.

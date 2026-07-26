@@ -1,0 +1,13 @@
+COMPARACAO SCADA (amostra, extraida do scada_context do artefato MinIO normal)
+============================================================
+
+scada_source_round_id ..... round-20260623191939738847
+divergent_sensors ......... []
+
+  - temperature: fisico=76.835 scada=76.835 diff=0.0 tol=2.0 [within_tolerance] -> match
+  - pressure: fisico=6.075 scada=6.075 diff=0.0 tol=0.35 [within_tolerance] -> match
+  - rpm: fisico=3186.012 scada=3186.012 diff=0.0 tol=120.0 [within_tolerance] -> match
+
+No cenario normal todos os sensores ficam 'match' (diff=0, dentro da tolerancia),
+por isso o estado e persistido. Em scada_divergence todos ficam 'divergent' e o
+downstream e bloqueado (ver evidence/scenarios/scada_divergence/).

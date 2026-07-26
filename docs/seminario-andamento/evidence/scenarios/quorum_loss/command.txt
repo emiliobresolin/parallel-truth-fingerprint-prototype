@@ -1,0 +1,9 @@
+# Cenario: quorum_loss
+# Execucao LIVE 2026-06-23 (UTC 2026-06-23T19:20:05Z -> 2026-06-23T19:20:11Z)
+# Diretorio: <project-root>
+
+# Variaveis de ambiente:
+PYTHONPATH=src KERAS_BACKEND=torch MQTT_TRANSPORT=real DEMO_DISABLE_RUNTIME_AUTOENCODER=true DEMO_MAX_CYCLES=2 DEMO_CYCLE_INTERVAL_SECONDS=2 DEMO_SCENARIO=quorum_loss DEMO_SCENARIO_START_CYCLE=1 MINIO_BUCKET=sem-quorum-loss DEMO_LOG_PATH=logs/sem-quorum-loss.log
+
+# Comando:
+.venv/Scripts/python.exe scripts/run_local_demo.py

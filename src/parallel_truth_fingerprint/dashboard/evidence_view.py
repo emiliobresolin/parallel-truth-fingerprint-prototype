@@ -100,11 +100,15 @@ def build_dashboard_explainability_view(
         lifecycle=lifecycle,
         first_training_cycle=first_training_cycle,
         replay_behavior=replay_behavior,
+        source_dataset_manifest=source_dataset_manifest,
+        current_dataset_manifest=current_dataset_manifest,
     )
     expected_next = _build_expected_next(
         lifecycle=lifecycle,
         current_model_identity=current_model_identity,
         comparison_stage=comparison_stage,
+        source_dataset_manifest=source_dataset_manifest,
+        current_dataset_manifest=current_dataset_manifest,
     )
     fingerprint_readiness = _build_fingerprint_readiness(
         lifecycle=lifecycle,
@@ -462,6 +466,8 @@ def _build_not_happened_yet(
     lifecycle: dict[str, object],
     first_training_cycle: int | None,
     replay_behavior: dict[str, object],
+    source_dataset_manifest: dict[str, object] | None,
+    current_dataset_manifest: dict[str, object] | None,
 ) -> list[str]:
     pending = []
     validation_level = str(
@@ -474,10 +480,39 @@ def _build_not_happened_yet(
     if not replay_behavior:
         pending.append("No replay-oriented anomaly is active in the current dashboard state.")
     if validation_level != "meaningful_fingerprint_valid":
-        pending.append(
-            "The run has not yet reached the agreed adequacy floor for a stronger "
-            "fingerprint claim."
+        source_adequacy = (source_dataset_manifest or {}).get("adequacy_assessment") or {}
+        current_adequacy = (current_dataset_manifest or {}).get("adequacy_assessment") or {}
+        source_eligible = int(source_adequacy.get("eligible_artifact_count") or 0)
+        source_windows = int(source_adequacy.get("window_count") or 0)
+        minimum_eligible = int(
+            source_adequacy.get("minimum_eligible_artifact_count")
+            or DEFAULT_MIN_ELIGIBLE_ARTIFACT_COUNT
         )
+        minimum_windows = int(
+            source_adequacy.get("minimum_window_count") or DEFAULT_MIN_WINDOW_COUNT
+        )
+        current_eligible = int(current_adequacy.get("eligible_artifact_count") or 0)
+        current_windows = int(current_adequacy.get("window_count") or 0)
+        current_is_adequate = (
+            current_adequacy.get("validation_level") == "meaningful_fingerprint_valid"
+            or (
+                current_eligible >= minimum_eligible
+                and current_windows >= minimum_windows
+            )
+        )
+        if current_is_adequate:
+            pending.append(
+                "The current run has reached the adequacy floor, but the reused model "
+                f"was trained earlier from only {source_eligible}/{minimum_eligible} "
+                f"eligible artifacts and {source_windows}/{minimum_windows} windows. "
+                "A new model has not yet been trained from the adequate accumulated history."
+            )
+        else:
+            pending.append(
+                "The saved model source and current run history remain below the agreed "
+                f"adequacy floor of {minimum_eligible} eligible artifacts and "
+                f"{minimum_windows} windows."
+            )
     return pending
 
 
@@ -486,6 +521,8 @@ def _build_expected_next(
     lifecycle: dict[str, object],
     current_model_identity: str | None,
     comparison_stage: dict[str, object],
+    source_dataset_manifest: dict[str, object] | None,
+    current_dataset_manifest: dict[str, object] | None,
 ) -> dict[str, object]:
     if comparison_stage.get("status") == "blocked":
         return {
@@ -533,6 +570,31 @@ def _build_expected_next(
             "evidence": {"current_model_identity": current_model_identity},
         }
     if "reused" in training_events:
+        source_adequacy = (source_dataset_manifest or {}).get("adequacy_assessment") or {}
+        current_adequacy = (current_dataset_manifest or {}).get("adequacy_assessment") or {}
+        source_is_adequate = (
+            source_adequacy.get("validation_level") == "meaningful_fingerprint_valid"
+        )
+        current_is_adequate = (
+            current_adequacy.get("validation_level") == "meaningful_fingerprint_valid"
+        )
+        if current_is_adequate and not source_is_adequate:
+            return {
+                "summary": (
+                    "The accumulated history is ready for adequate-model retraining. "
+                    "Until a retraining or reset path is invoked, the runtime will keep "
+                    "reusing the earlier runtime-valid-only model."
+                ),
+                "evidence": {
+                    "current_model_identity": current_model_identity,
+                    "current_dataset_validation_level": current_adequacy.get(
+                        "validation_level"
+                    ),
+                    "source_dataset_validation_level": source_adequacy.get(
+                        "validation_level"
+                    ),
+                },
+            }
         return {
             "summary": (
                 "The runtime should continue reusing the saved model on later eligible "

@@ -1,0 +1,7 @@
+modelo,sequence_length,epocas,seed,embed_dim,hidden_units,batch,learning_rate,macro_f1,accuracy,macro_precision,macro_recall,run_id
+LSTM,80,18,42,64,64,256,0.001,0.9187,0.9229,0.9116,0.9304,run-adfa-ld-embed-binary-lstm-embedding-classifier-20260602T175338-3acfb039
+LSTM,120,18,42,64,64,256,0.001,0.9165,0.9244,0.9098,0.925,run-adfa-ld-embed-binary-lstm-embedding-classifier-20260602T175837-51f32fab
+GRU,120,18,42,64,64,256,0.001,0.9158,0.9238,0.9092,0.9241,run-adfa-ld-embed-binary-gru-embedding-classifier-20260602T180932-29f8fc35
+GRU,80,18,42,64,64,256,0.001,0.912,0.9162,0.9046,0.9259,run-adfa-ld-embed-binary-gru-embedding-classifier-20260602T180426-1a2fd1a8
+LSTM,50,18,42,64,64,256,0.001,0.891,0.8962,0.8843,0.9033,run-adfa-ld-embed-binary-lstm-embedding-classifier-20260602T174931-5020f1aa
+GRU,50,18,42,64,64,256,0.001,0.8819,0.8871,0.8752,0.8961,run-adfa-ld-embed-binary-gru-embedding-classifier-20260602T180044-96300a59

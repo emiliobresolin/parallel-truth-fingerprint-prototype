@@ -1,0 +1,23 @@
+PAYLOAD DE CONSENSO - cenario normal (LIVE 2026-06-23)
+======================================================================
+Fonte: latest_cycle.consensus_summary + .cometbft do log JSON do runtime.
+
+round_id .................. round-20260623191948013076
+total_participants ........ 3  (edge-1, edge-2, edge-3)
+quorum_required ........... 2
+valid_after_exclusions .... 3
+final_consensus_status .... success
+has_consensused_valid_state True
+exclusoes ................. nenhuma
+
+--- Prova da camada de consenso real (CometBFT) ---
+node_version .............. 0.39.0
+latest_block_height ....... 38
+committed_height .......... 39
+tx_hash ................... C45D71C56E85A0924784B29ACFBF8B8299E2651337314B2BF24AF7C901939ADB
+check_tx_code ............. 0  (0 = aceito)
+deliver_tx_code ........... 0  (0 = aplicado)
+
+Interpretacao: a rodada foi submetida a uma rede BFT real de 3 validadores;
+a aplicacao ABCI em Go computou o resultado de confianca/exclusao de forma
+deterministica e o estado committado foi lido de volta pela camada Python.

@@ -45,7 +45,7 @@ services:
       - ./.cometbft/state/node2:/state/node2
 
   node0:
-    image: cometbft/cometbft:latest
+    image: cometbft/cometbft@sha256:d086a1318d05a41389460f2160aaaf7ca135aa961987e6d7689e4448599c5a76
     depends_on:
       - abci-node0
     entrypoint:
@@ -53,17 +53,19 @@ services:
       - -c
     command:
       - >
+        cp -R /bootstrap/config/. /cometbft/config/ &&
         cometbft unsafe-reset-all --home /cometbft &&
         rm -f /cometbft/config/addrbook.json &&
         exec cometbft node --home /cometbft
     volumes:
-      - ./.cometbft/testnet/node0:/cometbft
+      - cometbft-node0-home:/cometbft
+      - ./.cometbft/testnet/node0/config:/bootstrap/config:ro
     ports:
       - "26657:26657"
       - "26656:26656"
 
   node1:
-    image: cometbft/cometbft:latest
+    image: cometbft/cometbft@sha256:d086a1318d05a41389460f2160aaaf7ca135aa961987e6d7689e4448599c5a76
     depends_on:
       - abci-node1
     entrypoint:
@@ -71,17 +73,19 @@ services:
       - -c
     command:
       - >
+        cp -R /bootstrap/config/. /cometbft/config/ &&
         cometbft unsafe-reset-all --home /cometbft &&
         rm -f /cometbft/config/addrbook.json &&
         exec cometbft node --home /cometbft
     volumes:
-      - ./.cometbft/testnet/node1:/cometbft
+      - cometbft-node1-home:/cometbft
+      - ./.cometbft/testnet/node1/config:/bootstrap/config:ro
     ports:
       - "26667:26657"
       - "26666:26656"
 
   node2:
-    image: cometbft/cometbft:latest
+    image: cometbft/cometbft@sha256:d086a1318d05a41389460f2160aaaf7ca135aa961987e6d7689e4448599c5a76
     depends_on:
       - abci-node2
     entrypoint:
@@ -89,11 +93,18 @@ services:
       - -c
     command:
       - >
+        cp -R /bootstrap/config/. /cometbft/config/ &&
         cometbft unsafe-reset-all --home /cometbft &&
         rm -f /cometbft/config/addrbook.json &&
         exec cometbft node --home /cometbft
     volumes:
-      - ./.cometbft/testnet/node2:/cometbft
+      - cometbft-node2-home:/cometbft
+      - ./.cometbft/testnet/node2/config:/bootstrap/config:ro
     ports:
       - "26677:26657"
       - "26676:26656"
+
+volumes:
+  cometbft-node0-home:
+  cometbft-node1-home:
+  cometbft-node2-home:

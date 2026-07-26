@@ -1,0 +1,264 @@
+{
+  "comparison_stage": {
+    "status": "blocked_downstream",
+    "compact": "round-20260623192028230653: scada_source=round-20260623192028230653 outputs[temperature=divergent(81.11->87.11,diff=6.0,tol=2.0), pressure=divergent(6.141->6.741,diff=0.6,tol=0.35), rpm=divergent(3204.308->3504.308,diff=300.0,tol=120.0)]",
+    "reason": "scada_divergence_detected",
+    "blocked_by_stage": "scada_comparison",
+    "downstream_permitted": false,
+    "operator_message": "SCADA supervisory values diverged on temperature, pressure, rpm, so the cycle was blocked before persistence and fingerprint evaluation.",
+    "divergent_sensors": [
+      "temperature",
+      "pressure",
+      "rpm"
+    ]
+  },
+  "comparison_output": {
+    "round_identity": {
+      "round_id": "round-20260623192028230653",
+      "window_started_at": "2026-06-23T19:19:28.230653+00:00",
+      "window_ended_at": "2026-06-23T19:20:28.230653+00:00"
+    },
+    "scada_source_round_id": "round-20260623192028230653",
+    "divergent_sensors": [
+      "temperature",
+      "pressure",
+      "rpm"
+    ],
+    "sensor_outputs": [
+      {
+        "sensor_name": "temperature",
+        "physical_value": 81.11,
+        "scada_value": 87.11,
+        "absolute_difference": 6.0,
+        "tolerance": 2.0,
+        "tolerance_evaluation": "outside_tolerance",
+        "divergence_classification": "divergent",
+        "contextual_evidence": {
+          "supervisory_mode": "offset",
+          "supervisory_source_round_id": "round-20260623192028230653",
+          "behavioral_mode": "offset",
+          "behavioral_source_round_id": "round-20260623192028230653",
+          "behavioral_payload": {
+            "loop_current_ma": 15.272,
+            "pv_percent_range": 70.447,
+            "noise_floor": 0.714,
+            "rate_of_change_dtdt": 5.024,
+            "local_stability_score": 0.853,
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false,
+            "mode": "offset",
+            "source_round_id": "round-20260623192028230653"
+          }
+        }
+      },
+      {
+        "sensor_name": "pressure",
+        "physical_value": 6.141,
+        "scada_value": 6.741,
+        "absolute_difference": 0.6,
+        "tolerance": 0.35,
+        "tolerance_evaluation": "outside_tolerance",
+        "divergence_classification": "divergent",
+        "contextual_evidence": {
+          "supervisory_mode": "offset",
+          "supervisory_source_round_id": "round-20260623192028230653",
+          "behavioral_mode": "offset",
+          "behavioral_source_round_id": "round-20260623192028230653",
+          "behavioral_payload": {
+            "loop_current_ma": 14.367,
+            "pv_percent_range": 64.791,
+            "noise_floor": 0.714,
+            "rate_of_change_dtdt": 0.08,
+            "local_stability_score": 0.927,
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false,
+            "mode": "offset",
+            "source_round_id": "round-20260623192028230653"
+          }
+        }
+      },
+      {
+        "sensor_name": "rpm",
+        "physical_value": 3204.308,
+        "scada_value": 3504.308,
+        "absolute_difference": 300.0,
+        "tolerance": 120.0,
+        "tolerance_evaluation": "outside_tolerance",
+        "divergence_classification": "divergent",
+        "contextual_evidence": {
+          "supervisory_mode": "offset",
+          "supervisory_source_round_id": "round-20260623192028230653",
+          "behavioral_mode": "offset",
+          "behavioral_source_round_id": "round-20260623192028230653",
+          "behavioral_payload": {
+            "loop_current_ma": 14.69,
+            "pv_percent_range": 66.81,
+            "noise_floor": 0.714,
+            "rate_of_change_dtdt": 29.695,
+            "local_stability_score": 0.483,
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false,
+            "mode": "offset",
+            "source_round_id": "round-20260623192028230653"
+          }
+        }
+      }
+    ]
+  },
+  "scada_state": {
+    "compressor_id": "compressor-1",
+    "source_round_id": "round-20260623192028230653",
+    "timestamp": "2026-06-23T19:20:28.230653+00:00",
+    "behavioral_source_round_id": "round-20260623192028230653",
+    "sensor_values": {
+      "pressure": {
+        "value": 6.741,
+        "unit": "bar",
+        "mode": "offset"
+      },
+      "rpm": {
+        "value": 3504.308,
+        "unit": "rpm",
+        "mode": "offset"
+      },
+      "temperature": {
+        "value": 87.11,
+        "unit": "degC",
+        "mode": "offset"
+      }
+    },
+    "behavioral_sensor_values": {
+      "pressure": {
+        "loop_current_ma": 14.367,
+        "pv_percent_range": 64.791,
+        "noise_floor": 0.714,
+        "rate_of_change_dtdt": 0.08,
+        "local_stability_score": 0.927,
+        "field_device_malfunction": false,
+        "loop_current_saturated": false,
+        "cold_start": false,
+        "mode": "offset",
+        "source_round_id": "round-20260623192028230653"
+      },
+      "rpm": {
+        "loop_current_ma": 14.69,
+        "pv_percent_range": 66.81,
+        "noise_floor": 0.714,
+        "rate_of_change_dtdt": 29.695,
+        "local_stability_score": 0.483,
+        "field_device_malfunction": false,
+        "loop_current_saturated": false,
+        "cold_start": false,
+        "mode": "offset",
+        "source_round_id": "round-20260623192028230653"
+      },
+      "temperature": {
+        "loop_current_ma": 15.272,
+        "pv_percent_range": 70.447,
+        "noise_floor": 0.714,
+        "rate_of_change_dtdt": 5.024,
+        "local_stability_score": 0.853,
+        "field_device_malfunction": false,
+        "loop_current_saturated": false,
+        "cold_start": false,
+        "mode": "offset",
+        "source_round_id": "round-20260623192028230653"
+      }
+    }
+  },
+  "scada_divergence_alert": {
+    "alert_type": "scada_divergence",
+    "round_identity": {
+      "round_id": "round-20260623192028230653",
+      "window_started_at": "2026-06-23T19:19:28.230653+00:00",
+      "window_ended_at": "2026-06-23T19:20:28.230653+00:00"
+    },
+    "scada_source_round_id": "round-20260623192028230653",
+    "divergent_sensor_outputs": [
+      {
+        "sensor_name": "temperature",
+        "physical_value": 81.11,
+        "scada_value": 87.11,
+        "absolute_difference": 6.0,
+        "tolerance": 2.0,
+        "tolerance_evaluation": "outside_tolerance",
+        "divergence_classification": "divergent",
+        "contextual_evidence": {
+          "supervisory_mode": "offset",
+          "supervisory_source_round_id": "round-20260623192028230653",
+          "behavioral_mode": "offset",
+          "behavioral_source_round_id": "round-20260623192028230653",
+          "behavioral_payload": {
+            "loop_current_ma": 15.272,
+            "pv_percent_range": 70.447,
+            "noise_floor": 0.714,
+            "rate_of_change_dtdt": 5.024,
+            "local_stability_score": 0.853,
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false,
+            "mode": "offset",
+            "source_round_id": "round-20260623192028230653"
+          }
+        }
+      },
+      {
+        "sensor_name": "pressure",
+        "physical_value": 6.141,
+        "scada_value": 6.741,
+        "absolute_difference": 0.6,
+        "tolerance": 0.35,
+        "tolerance_evaluation": "outside_tolerance",
+        "divergence_classification": "divergent",
+        "contextual_evidence": {
+          "supervisory_mode": "offset",
+          "supervisory_source_round_id": "round-20260623192028230653",
+          "behavioral_mode": "offset",
+          "behavioral_source_round_id": "round-20260623192028230653",
+          "behavioral_payload": {
+            "loop_current_ma": 14.367,
+            "pv_percent_range": 64.791,
+            "noise_floor": 0.714,
+            "rate_of_change_dtdt": 0.08,
+            "local_stability_score": 0.927,
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false,
+            "mode": "offset",
+            "source_round_id": "round-20260623192028230653"
+          }
+        }
+      },
+      {
+        "sensor_name": "rpm",
+        "physical_value": 3204.308,
+        "scada_value": 3504.308,
+        "absolute_difference": 300.0,
+        "tolerance": 120.0,
+        "tolerance_evaluation": "outside_tolerance",
+        "divergence_classification": "divergent",
+        "contextual_evidence": {
+          "supervisory_mode": "offset",
+          "supervisory_source_round_id": "round-20260623192028230653",
+          "behavioral_mode": "offset",
+          "behavioral_source_round_id": "round-20260623192028230653",
+          "behavioral_payload": {
+            "loop_current_ma": 14.69,
+            "pv_percent_range": 66.81,
+            "noise_floor": 0.714,
+            "rate_of_change_dtdt": 29.695,
+            "local_stability_score": 0.483,
+            "field_device_malfunction": false,
+            "loop_current_saturated": false,
+            "cold_start": false,
+            "mode": "offset",
+            "source_round_id": "round-20260623192028230653"
+          }
+        }
+      }
+    ]
+  }
+}

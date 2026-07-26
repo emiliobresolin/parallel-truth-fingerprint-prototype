@@ -1,0 +1,48 @@
+=== Local Demo Cycle 1 ===
+Compact view:
+- edge-1: published=3 consumed=6 complete=True validated=False view[pressure=6.075, rpm=3186.012, temperature=76.835]
+- edge-2: published=3 consumed=6 complete=True validated=False view[pressure=6.075, rpm=3186.012, temperature=76.835]
+- edge-3: published=3 consumed=6 complete=True validated=False view[pressure=6.075, rpm=3186.012, temperature=76.835]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 76.835, 'pressure': 6.075, 'rpm': 3186.012}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=3608
+- committed_height=3609 tx_hash=784B382A57294C0E47DDC155501BFB76F66BCD3E57F6855FEB7CE9F87A474A84 check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260602174935228098: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260602174935228098: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=1 cadence=continuing_without_sleep interval_seconds=1.0 elapsed_seconds=2.822 next_sleep_seconds=0.0
+- scenario=active=true configured=scada_divergence current=scada_divergence start_cycle=1 training_eligible=false expected_outputs=scada_divergence_alert,persistence_stage
+- scada_runtime=active=true mode=offset start_cycle=1 replay_source_round_id=none
+- comparison=completed downstream=blocked reason=scada_divergence_detected divergent[temperature,pressure,rpm]
+- round-20260602174935228098: alert=scada_divergence divergent[temperature:divergent, pressure:divergent, rpm:divergent]
+- persistence=blocked backend=minio endpoint=localhost:9000 secure=false bucket=evidence-scada-divergence stage=scada_comparison reason=scada_divergence_detected
+- fingerprint=model_status=no_model_yet training=blocked inference=blocked:scada_divergence_detected valid_artifacts=0 eligible_history=0/10 windows=0 latest_artifact=none
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\Área de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\evidence-evidence-scada-divergence.log
+=== Local Demo Cycle 2 ===
+Compact view:
+- edge-1: published=6 consumed=12 complete=True validated=False view[pressure=6.141, rpm=3204.308, temperature=81.11]
+- edge-2: published=6 consumed=12 complete=True validated=False view[pressure=6.141, rpm=3204.308, temperature=81.11]
+- edge-3: published=6 consumed=12 complete=True validated=False view[pressure=6.141, rpm=3204.308, temperature=81.11]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 81.11, 'pressure': 6.141, 'rpm': 3204.308}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=3610
+- committed_height=3611 tx_hash=18D91BCE938C0B32C3B3A9F2E9DEE2B038FDAD739E2B2D3064D0912544CCA16B check_tx_code=0 deliver_tx_code=0
+- fault_mode=none faulty_edges=[]
+- round-20260602174938050844: participants=3 quorum=2 valid=3 status=success valid_state=present exclusions[none]
+- round-20260602174938050844: status=success participants=3 excluded=0 exclusions[none]
+- none
+- cycle=2 cadence=cycle_complete interval_seconds=1.0 elapsed_seconds=2.06 next_sleep_seconds=0.0
+- scenario=active=true configured=scada_divergence current=scada_divergence start_cycle=1 training_eligible=false expected_outputs=scada_divergence_alert,persistence_stage
+- scada_runtime=active=true mode=offset start_cycle=1 replay_source_round_id=none
+- comparison=completed downstream=blocked reason=scada_divergence_detected divergent[temperature,pressure,rpm]
+- round-20260602174938050844: alert=scada_divergence divergent[temperature:divergent, pressure:divergent, rpm:divergent]
+- persistence=blocked backend=minio endpoint=localhost:9000 secure=false bucket=evidence-scada-divergence stage=scada_comparison reason=scada_divergence_detected
+- fingerprint=model_status=no_model_yet training=blocked inference=blocked:scada_divergence_detected valid_artifacts=0 eligible_history=0/10 windows=0 latest_artifact=none
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\Área de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\evidence-evidence-scada-divergence.log

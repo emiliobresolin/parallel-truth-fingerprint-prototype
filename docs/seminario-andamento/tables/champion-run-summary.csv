@@ -1,0 +1,2 @@
+run_id,modelo,dataset,sequence_length,parametros,macro_f1,accuracy,macro_precision,macro_recall,caminho_do_artefato
+run-adfa-ld-embed-binary-lstm-embedding-classifier-20260602T175338-3acfb039,lstm-embedding-classifier,adfa-ld-embed-binary,80,65922,0.9187,0.9229,0.9116,0.9304,persistido no MinIO fingerprint-training-history (run JSON nao presente no working tree local)

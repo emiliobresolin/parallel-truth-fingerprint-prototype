@@ -1,0 +1,11 @@
+componente,tecnologia,real_ou_simulado,funcao_no_prototipo,evidencia_disponivel,caminho_do_artefato
+CometBFT validator x3,CometBFT v0.39.0 (container),real,Camada BFT real; ordena e committa as rodadas de consenso,docker ps live; tx_hash/height nos payloads,evidence/scenarios/*/consensus-payload.txt
+ABCI app x3,Go (abci/consensus_app),real,Calcula confianca/exclusao deterministica por rodada,exclusoes com detalhe no quorum_loss,evidence/scenarios/quorum_loss/consensus-payload.txt
+MQTT broker,Eclipse Mosquitto (ptfp-mqtt-broker:1883),real,Transporte pub/sub entre edges,containers up; runtime real (MQTT_TRANSPORT=real),evidence/minio/minio-listing.txt (contexto)
+Object store,MinIO (ptfp-minio:9000/9001),real,Persiste artefatos validos e datasets de fingerprint,bucket sem-normal com 14 artefatos + dataset,evidence/minio/minio-listing.txt
+Edge services x3,Python (edge_1/2/3),real (logica) / simulado (sensor),"Aquisicao, publicacao, consumo e reconstrucao da visao replicada",views por edge no terminal,evidence/scenarios/normal/terminal-output.txt
+Compressor + sensores,Simulador Python (seed=101),simulado,"Fonte de processo (temperatura, pressao, rotacao)",simulator_snapshot nos logs,logs/sem-normal.log
+SCADA / OPC-UA,FakeOpcUaScadaService,simulado/fake,Projecao do dominio logico para comparacao fisico-logica,scada-comparison nos cenarios,evidence/scenarios/*/scada-comparison.txt
+Pipeline de demo,scripts/run_local_demo.py,real,Orquestra o ciclo completo sem bypass,3 cenarios executados ao vivo,evidence/scenarios/
+Fingerprint offline (ADFA-LD),Keras 3 + torch backend,real,Classificador supervisionado binario/multiclasse (metrica D6),sweeps + champion,tables/adfa-ld-binary-results.md
+Inferencia online,OnlineLstmInferencer,real,Carrega modelo promovido e classifica janela,execucao ao vivo 2026-06-23,evidence/online-inference/

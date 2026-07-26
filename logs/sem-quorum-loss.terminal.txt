@@ -1,0 +1,48 @@
+=== Local Demo Cycle 1 ===
+Compact view:
+- edge-1: published=3 consumed=6 complete=True validated=False view[pressure=6.075, rpm=3186.012, temperature=76.835]
+- edge-2: published=3 consumed=6 complete=True validated=False view[pressure=6.075, rpm=3186.012, temperature=76.835]
+- edge-3: published=3 consumed=6 complete=True validated=False view[pressure=6.075, rpm=3186.012, temperature=76.835]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 76.835, 'pressure': 6.075, 'rpm': 3186.012}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=52
+- committed_height=53 tx_hash=1C28A02C38838957A178FE9F54B243DD8C482BBD3A389F80B5D57099AEA2630B check_tx_code=0 deliver_tx_code=0
+- fault_mode=quorum_loss faulty_edges=['edge-2', 'edge-3']
+- round-20260623192006626799: participants=3 quorum=2 valid=0 status=failed_consensus valid_state=absent exclusions[edge-1:suspected_byzantine_behavior, edge-2:suspected_byzantine_behavior, edge-3:suspected_byzantine_behavior]
+- round-20260623192006626799: status=failed_consensus participants=3 excluded=3 exclusions[edge-1:suspected_byzantine_behavior, edge-2:suspected_byzantine_behavior, edge-3:suspected_byzantine_behavior]
+- round-20260623192006626799: alert=consensus_failed status=failed_consensus exclusions[edge-1:suspected_byzantine_behavior, edge-2:suspected_byzantine_behavior, edge-3:suspected_byzantine_behavior]
+- cycle=1 cadence=continuing_without_sleep interval_seconds=2.0 elapsed_seconds=3.135 next_sleep_seconds=0.0
+- scenario=active=true configured=quorum_loss current=quorum_loss start_cycle=1 training_eligible=false expected_outputs=consensus_alert,persistence_stage
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- comparison=blocked stage=consensus reason=no_quorum_reached
+- none
+- persistence=blocked backend=minio endpoint=localhost:9000 secure=false bucket=sem-quorum-loss stage=consensus reason=no_quorum_reached
+- fingerprint=model_status=no_model_yet training=blocked inference=blocked:no_quorum_reached valid_artifacts=0 eligible_history=0/10 windows=0 latest_artifact=none
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\Área de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-quorum-loss.log
+=== Local Demo Cycle 2 ===
+Compact view:
+- edge-1: published=6 consumed=12 complete=True validated=False view[pressure=6.141, rpm=3204.308, temperature=81.11]
+- edge-2: published=6 consumed=12 complete=True validated=False view[pressure=6.141, rpm=3204.308, temperature=81.11]
+- edge-3: published=6 consumed=12 complete=True validated=False view[pressure=6.141, rpm=3204.308, temperature=81.11]
+- compressor=compressor-1 power_pct=65.0 sensors={'temperature': 81.11, 'pressure': 6.141, 'rpm': 3204.308}
+
+Consensus summary:
+- source=cometbft node_version=0.39.0 latest_block_height=54
+- committed_height=55 tx_hash=34E79CC7CDB29EFEDD0793E6F3413F4806A32CCC88230DC28F7D20A6E03E4446 check_tx_code=0 deliver_tx_code=0
+- fault_mode=quorum_loss faulty_edges=['edge-2', 'edge-3']
+- round-20260623192009763877: participants=3 quorum=2 valid=0 status=failed_consensus valid_state=absent exclusions[edge-1:suspected_byzantine_behavior, edge-2:suspected_byzantine_behavior, edge-3:suspected_byzantine_behavior]
+- round-20260623192009763877: status=failed_consensus participants=3 excluded=3 exclusions[edge-1:suspected_byzantine_behavior, edge-2:suspected_byzantine_behavior, edge-3:suspected_byzantine_behavior]
+- round-20260623192009763877: alert=consensus_failed status=failed_consensus exclusions[edge-1:suspected_byzantine_behavior, edge-2:suspected_byzantine_behavior, edge-3:suspected_byzantine_behavior]
+- cycle=2 cadence=cycle_complete interval_seconds=2.0 elapsed_seconds=2.254 next_sleep_seconds=0.0
+- scenario=active=true configured=quorum_loss current=quorum_loss start_cycle=1 training_eligible=false expected_outputs=consensus_alert,persistence_stage
+- scada_runtime=active=false mode=match start_cycle=0 replay_source_round_id=none
+- comparison=blocked stage=consensus reason=no_quorum_reached
+- none
+- persistence=blocked backend=minio endpoint=localhost:9000 secure=false bucket=sem-quorum-loss stage=consensus reason=no_quorum_reached
+- fingerprint=model_status=no_model_yet training=blocked inference=blocked:no_quorum_reached valid_artifacts=0 eligible_history=0/10 windows=0 latest_artifact=none
+- fingerprint_inference=none
+- replay_behavior=none
+- detailed_log=C:\Users\emili\OneDrive\Área de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\logs\sem-quorum-loss.log

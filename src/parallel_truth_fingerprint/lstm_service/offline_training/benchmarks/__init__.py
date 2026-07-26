@@ -25,6 +25,11 @@ from parallel_truth_fingerprint.lstm_service.offline_training.benchmarks import 
 from parallel_truth_fingerprint.lstm_service.offline_training.benchmarks import (
     lid_ds_2021 as _lid_ds_2021_registration,  # noqa: F401
 )
+# Registers `adfa-ld-embed` (6-class) and `adfa-ld-embed-binary` (Normal vs
+# Attack): raw syscall tokens + sliding windows for the embedding classifiers.
+from parallel_truth_fingerprint.lstm_service.offline_training.benchmarks import (
+    adfa_ld_embedding as _adfa_ld_embedding_registration,  # noqa: F401
+)
 
 __all__ = [
     "BenchmarkAdapter",

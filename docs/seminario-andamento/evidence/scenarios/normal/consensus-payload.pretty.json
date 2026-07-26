@@ -1,0 +1,522 @@
+{
+  "consensus_summary": {
+    "round_id": "round-20260623191948013076",
+    "total_participants": 3,
+    "quorum_required": 2,
+    "valid_participants_after_exclusions": 3,
+    "excluded_edge_ids": [],
+    "exclusion_reasons": [],
+    "excluded_edges": [],
+    "final_consensus_status": "success",
+    "has_consensused_valid_state": true
+  },
+  "consensus_log_structured": {
+    "round_id": "round-20260623191948013076",
+    "window_started_at": "2026-06-23T19:18:48.013076+00:00",
+    "window_ended_at": "2026-06-23T19:19:48.013076+00:00",
+    "participating_edges": [
+      "edge-1",
+      "edge-2",
+      "edge-3"
+    ],
+    "trust_ranking": [
+      {
+        "edge_id": "edge-1",
+        "score": 1.0
+      },
+      {
+        "edge_id": "edge-2",
+        "score": 1.0
+      },
+      {
+        "edge_id": "edge-3",
+        "score": 1.0
+      }
+    ],
+    "exclusions": [],
+    "trust_evidence": [
+      {
+        "edge_id": "edge-1",
+        "score": 1.0,
+        "compatible_peer_count": 2,
+        "overall_normalized_deviation": 0.0,
+        "sensor_deviations": [
+          {
+            "sensor_name": "pressure",
+            "deviation_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "sensor_name": "rpm",
+            "deviation_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "sensor_name": "temperature",
+            "deviation_value": 0.0,
+            "unit": "degC"
+          }
+        ],
+        "pairwise_distances": [
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          }
+        ]
+      },
+      {
+        "edge_id": "edge-2",
+        "score": 1.0,
+        "compatible_peer_count": 2,
+        "overall_normalized_deviation": 0.0,
+        "sensor_deviations": [
+          {
+            "sensor_name": "pressure",
+            "deviation_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "sensor_name": "rpm",
+            "deviation_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "sensor_name": "temperature",
+            "deviation_value": 0.0,
+            "unit": "degC"
+          }
+        ],
+        "pairwise_distances": [
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          }
+        ]
+      },
+      {
+        "edge_id": "edge-3",
+        "score": 1.0,
+        "compatible_peer_count": 2,
+        "overall_normalized_deviation": 0.0,
+        "sensor_deviations": [
+          {
+            "sensor_name": "pressure",
+            "deviation_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "sensor_name": "rpm",
+            "deviation_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "sensor_name": "temperature",
+            "deviation_value": 0.0,
+            "unit": "degC"
+          }
+        ],
+        "pairwise_distances": [
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "pressure",
+            "distance_value": 0.0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "rpm",
+            "distance_value": 0.0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "temperature",
+            "distance_value": 0.0,
+            "unit": "degC"
+          }
+        ]
+      }
+    ],
+    "final_status": "success",
+    "consensused_valid_state": {
+      "source_edges": [
+        "edge-1",
+        "edge-2",
+        "edge-3"
+      ],
+      "sensor_values": {
+        "pressure": 6.141,
+        "rpm": 3204.308,
+        "temperature": 81.11
+      }
+    }
+  },
+  "consensus_alert": null,
+  "cometbft": {
+    "node_version": "0.39.0",
+    "latest_block_height": "38",
+    "committed_height": 39,
+    "tx_hash": "C45D71C56E85A0924784B29ACFBF8B8299E2651337314B2BF24AF7C901939ADB",
+    "check_tx_code": 0,
+    "deliver_tx_code": 0
+  },
+  "committed_round_state": {
+    "round_id": "round-20260623191948013076",
+    "window_started_at": "2026-06-23T19:18:48.013076+00:00",
+    "window_ended_at": "2026-06-23T19:19:48.013076+00:00",
+    "participating_edges": [
+      "edge-1",
+      "edge-2",
+      "edge-3"
+    ],
+    "replicated_states": [
+      {
+        "owner_edge_id": "edge-1",
+        "sensor_values": {
+          "pressure": {
+            "value": 6.141,
+            "unit": "bar"
+          },
+          "rpm": {
+            "value": 3204.308,
+            "unit": "rpm"
+          },
+          "temperature": {
+            "value": 81.11,
+            "unit": "degC"
+          }
+        }
+      },
+      {
+        "owner_edge_id": "edge-2",
+        "sensor_values": {
+          "pressure": {
+            "value": 6.141,
+            "unit": "bar"
+          },
+          "rpm": {
+            "value": 3204.308,
+            "unit": "rpm"
+          },
+          "temperature": {
+            "value": 81.11,
+            "unit": "degC"
+          }
+        }
+      },
+      {
+        "owner_edge_id": "edge-3",
+        "sensor_values": {
+          "pressure": {
+            "value": 6.141,
+            "unit": "bar"
+          },
+          "rpm": {
+            "value": 3204.308,
+            "unit": "rpm"
+          },
+          "temperature": {
+            "value": 81.11,
+            "unit": "degC"
+          }
+        }
+      }
+    ],
+    "trust_ranking": [
+      {
+        "edge_id": "edge-1",
+        "score": 1
+      },
+      {
+        "edge_id": "edge-2",
+        "score": 1
+      },
+      {
+        "edge_id": "edge-3",
+        "score": 1
+      }
+    ],
+    "exclusions": [],
+    "trust_evidence": [
+      {
+        "edge_id": "edge-1",
+        "score": 1,
+        "compatible_peer_count": 2,
+        "overall_normalized_deviation": 0,
+        "sensor_deviations": [
+          {
+            "sensor_name": "pressure",
+            "deviation_value": 0,
+            "unit": "bar"
+          },
+          {
+            "sensor_name": "rpm",
+            "deviation_value": 0,
+            "unit": "rpm"
+          },
+          {
+            "sensor_name": "temperature",
+            "deviation_value": 0,
+            "unit": "degC"
+          }
+        ],
+        "pairwise_distances": [
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "pressure",
+            "distance_value": 0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "pressure",
+            "distance_value": 0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "rpm",
+            "distance_value": 0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "rpm",
+            "distance_value": 0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "temperature",
+            "distance_value": 0,
+            "unit": "degC"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "temperature",
+            "distance_value": 0,
+            "unit": "degC"
+          }
+        ]
+      },
+      {
+        "edge_id": "edge-2",
+        "score": 1,
+        "compatible_peer_count": 2,
+        "overall_normalized_deviation": 0,
+        "sensor_deviations": [
+          {
+            "sensor_name": "pressure",
+            "deviation_value": 0,
+            "unit": "bar"
+          },
+          {
+            "sensor_name": "rpm",
+            "deviation_value": 0,
+            "unit": "rpm"
+          },
+          {
+            "sensor_name": "temperature",
+            "deviation_value": 0,
+            "unit": "degC"
+          }
+        ],
+        "pairwise_distances": [
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "pressure",
+            "distance_value": 0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "pressure",
+            "distance_value": 0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "rpm",
+            "distance_value": 0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "rpm",
+            "distance_value": 0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "temperature",
+            "distance_value": 0,
+            "unit": "degC"
+          },
+          {
+            "peer_edge_id": "edge-3",
+            "sensor_name": "temperature",
+            "distance_value": 0,
+            "unit": "degC"
+          }
+        ]
+      },
+      {
+        "edge_id": "edge-3",
+        "score": 1,
+        "compatible_peer_count": 2,
+        "overall_normalized_deviation": 0,
+        "sensor_deviations": [
+          {
+            "sensor_name": "pressure",
+            "deviation_value": 0,
+            "unit": "bar"
+          },
+          {
+            "sensor_name": "rpm",
+            "deviation_value": 0,
+            "unit": "rpm"
+          },
+          {
+            "sensor_name": "temperature",
+            "deviation_value": 0,
+            "unit": "degC"
+          }
+        ],
+        "pairwise_distances": [
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "pressure",
+            "distance_value": 0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "pressure",
+            "distance_value": 0,
+            "unit": "bar"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "rpm",
+            "distance_value": 0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "rpm",
+            "distance_value": 0,
+            "unit": "rpm"
+          },
+          {
+            "peer_edge_id": "edge-1",
+            "sensor_name": "temperature",
+            "distance_value": 0,
+            "unit": "degC"
+          },
+          {
+            "peer_edge_id": "edge-2",
+            "sensor_name": "temperature",
+            "distance_value": 0,
+            "unit": "degC"
+          }
+        ]
+      }
+    ],
+    "final_status": "success",
+    "consensused_valid_state": {
+      "source_edges": [
+        "edge-1",
+        "edge-2",
+        "edge-3"
+      ],
+      "sensor_values": {
+        "pressure": 6.141,
+        "rpm": 3204.308,
+        "temperature": 81.11
+      }
+    },
+    "commit_height": 39
+  }
+}

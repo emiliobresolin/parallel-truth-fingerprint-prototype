@@ -1,0 +1,16 @@
+%% Pipeline de fingerprint: do artefato válido à métrica e ao modelo campeão.
+flowchart LR
+    VA[("Artefatos válidos<br/>(MinIO valid-consensus-artifacts)")]
+    VA --> W["Janelas temporais<br/>seq_len=2, stride=1<br/>27 features, label=normal"]
+    W --> CD["Dataset custom<br/>(integração; normal-only,<br/>abaixo do piso de adequação)"]
+
+    PUB[("ADFA-LD<br/>5951 traces<br/>5205 normal / 746 attack")] --> EMB["Embedding de syscalls<br/>+ janelas deslizantes"]
+    EMB --> SWEEP["Sweep LSTM vs GRU<br/>seq 50/80/120, 18 épocas"]
+    SWEEP --> BIN["Binário (Normal vs Attack)<br/>4/6 runs passam D6"]
+    SWEEP --> MC["6-classe<br/>(melhor F1=0.561, não-D6)"]
+    BIN --> CHAMP["Campeão LSTM seq=80<br/>F1=0.9187 / acc=0.9229"]
+    CHAMP --> PROMO["Promoção -> inferência online"]
+
+    CD -.->|"não suporta métrica supervisionada<br/>(sem rótulo de ataque)"| MC
+    classDef weak fill:#fff3cd,stroke:#b8860b;
+    class CD weak;
