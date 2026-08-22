@@ -22,13 +22,27 @@ project_name: 'parallel-truth-fingerprint-prototype'
 user_name: 'Emilio'
 date: '2026-03-24'
 lastStep: 8
-status: 'complete'
-completedAt: '2026-03-24'
+status: 'controlling-consolidated-planning'
+completedAt: '2026-08-22'
+supersedesNormativeOverlays:
+  - _bmad-output/planning-artifacts/architecture-update-2026-05-21.md
+  - _bmad-output/planning-artifacts/architecture-update-2026-08-15.md
+approvedChangeProposal: _bmad-output/planning-artifacts/sprint-change-proposal-2026-08-22.md
 ---
 
 # Architecture Decision Document
 
 _This document builds collaboratively through step-by-step discovery. Sections are appended as we work through each architectural decision together._
+
+## Controlling Reading Rule
+
+This consolidated `architecture.md` is the sole current normative architecture.
+The original brownfield sections remain useful for v1 structure and context,
+but the 2026-08-22 consolidation below controls every conflict involving v2,
+scientific evidence, datasets, profiles, numeric parameters, mocks, workload,
+truth, evaluation, authorization, or optional presentation. Dated architecture
+updates are historical traceability only and are not additional normative
+layers.
 
 ## Project Context Analysis
 
@@ -916,7 +930,7 @@ The architecture validation confirmed and preserved the following critical invar
 
 ### Architecture Readiness Assessment
 
-**Overall Status:** READY FOR IMPLEMENTATION
+**Overall Status:** HISTORICAL V1 ASSESSMENT; SEE CONTROLLING V2 CONSOLIDATION
 
 **Confidence Level:** High
 
@@ -950,4 +964,205 @@ uv init --bare
 ```
 
 Then implement the shared typed contracts and architectural skeleton before service logic.
+
+## Controlling V2 Architecture Consolidation - 2026-08-22
+
+### Scope and simplicity boundary
+
+The target remains one local academic prototype operated by one researcher.
+It retains the existing Python services, Go ABCI/CometBFT boundary, MQTT,
+OPC UA, MinIO, and simple Python-served dashboard surface. This correction adds
+flat evidence contracts and deterministic validators only. It adds no database,
+workflow service, authorization server, service mesh, frontend framework,
+production HMI, cloud platform, or additional scientific modality.
+
+Exactly two detection modalities exist: physical instrumentation and Linux
+host syscalls. Raw mA, normalized span, and engineering value are linked
+representations of the physical modality. External datasets retain native
+scope. Only synchronized `PTFP-Custom-v1` runs can support the paired
+physical/syscall/fusion ablation.
+
+Planning approval never authorizes implementation, dataset acquisition,
+training, syscall capture, experiment execution, model promotion, dashboard
+activation, deployment, or publication. Each later activity requires its own
+immutable authorization identity.
+
+### Trust and authority boundaries
+
+- Only the experiment/control boundary may write a command or schedule.
+- Analytics, consensus, storage, OPC UA, capture, evaluation, and presentation
+  identities have no actuator credentials or analytics-to-control conduit.
+- The OPC UA source is a separate pre-consensus branch read through a distinct
+  real `opc.tcp` client; consensus projection cannot substitute for it.
+- Detector-facing writers cannot read restricted truth. Evaluation joins truth
+  only after bundle, threshold, fusion-policy, and score identities freeze.
+- Infrastructure or dashboard failure may degrade or abort evidence but cannot
+  change a command, artifact identity, score, gate, or scientific status.
+
+### Authoritative evidence contracts
+
+All records are flat, versioned, canonically serializable, immutable after
+approval/freeze, and owned by one validating boundary. No service is added.
+
+| Contract | Required content | Owner and validator | Fail-closed condition |
+| --- | --- | --- | --- |
+| `DecisionRecord.v1` | decision ID; values/factors and units; rationale; bounded question; component, experiment, track, and final-output scope; owner/approval; freeze time; truth/test lock state; source constraints; prohibited interpretations | Research owner; decision validator at G1 | post-test, mutable, unapproved, truth-informed, or scope-mismatched decision |
+| `MockAdmission.v1` | mock ID; capability gap; attempted or unavailable authentic path; official sources and exact locators; supported behavior and numbers; transfer rationale; component; bounded question; track; final output; limitations and prohibited claims; replacement condition; owner/approval | Research owner plus architecture validator at G1 and G9 | reproducible authentic path; convenience rationale; absent/inapplicable authority; weak transfer; missing result linkage; or real-plant/digital-twin claim |
+| `ParameterEvidence.v1` | stable ID; value/unit/class; class-specific authority; exact source/decision/calibration/mock locator; derivation and input IDs; profile and experiment scope; approval; uncertainty/limitation; authentic-reproduction feasibility; component/question/track/final-output linkage; transfer rationale | Source/parameter registry; parameter validator at startup, experiment freeze, and G9 | incomplete, conflicting, circular, dimensionally invalid, non-transferable, unresolved, or class-promoted record |
+| `InstrumentProfile.v1` | profile identity/hash; exact device/variant; electrical endpoints; engineering LRV/URV and unit; conversion direction; quality policy; parameter/source identities and locators; approved scope | Profile registry; profile validator at G1/G2 | anonymous endpoint, pending source, unresolved parameter, incompatible unit, or scope mismatch |
+| `ExperimentSpec.v1` | immutable experiment/run identities; decision, parameter, profile, mock-admission, code/runtime/input hashes; phases; schedules; expected streams; split; metrics; abort/stopping and truth-unlock policy | Experiment controller; spec validator before activity authorization | inferred defaults, missing evidence identity, post-freeze change, or authorization mismatch |
+| `ScenarioTruth.v1` | restricted immutable condition/intervention intervals, opaque correlation, provenance, writer, unlock, and hash | Restricted truth writer/evaluator | truth in any detector-facing contract or join before declared unlock |
+| `SignalObservation.v2` | raw mA; pre-clipping quality/diagnostics; profile and parameter hashes; normalized and engineering representations; units; experiment/run/round/edge/sensor/event; sequence; source/observed time and clock quality | Acquisition boundary | representation mismatch, missing identity, bad profile, truth/label field, or silent coercion |
+| `SyscallEventBatch.v1` | authentic categorical call events; workload/host-or-VM/boot/container/cgroup/process/thread; kernel/ABI/collector/filter; sequence/time; gaps/drops/duplicates/queue; capture mode; raw segment URI/hash | Linux capture boundary | fabricated/modified/substituted calls, fixture role in formal evidence, unknown attribution, or unhandled capture-quality failure |
+| `DetectorBundle.v1` / `DetectorScore.v1` | immutable model/schema/preprocessing/data/split/calibration/threshold/runtime hashes and inference-only scores without truth | Track-specific model registry/detector | fit/recalibration during load or inference, mutable latest identity, truth field, or incompatibility |
+| `FusionDecision.v1` / `EvaluationResult.v1` | same-run calibrated score references, frozen preregistered fusion policy, truth-unlock identity, metrics, uncertainty, limitations, and lineage | Fusion worker/restricted evaluator | cross-dataset fusion, pre-unlock truth, mismatched support, or retroactive choice |
+| `ArtifactManifest.v1` | content/schema hashes, parents, activity/tool/code/runtime/source/license identity; complete manifest published last | Evidence registry | mutable alias as identity, missing object, digest mismatch, or incomplete manifest |
+
+Class-specific authority is binding:
+
+- `direct` uses official authority applicable to the exact selected profile;
+- `derived` uses validated input IDs and deterministic dimensional derivation;
+- `measured` uses preserved calibration or pilot method, environment, run,
+  timestamp, uncertainty, and artifact hash;
+- `preregistered_factor` uses a pre-test frozen `DecisionRecord.v1`, while
+  official sources establish only capability or constraint;
+- `mock` uses an approved `MockAdmission.v1` plus official support for every
+  asserted domain behavior and number.
+
+No class can be silently promoted into another. A citation is not value
+authority for a researcher-selected factor and does not transfer unrelated
+values from the same document.
+
+### Exact command-profile and parameter mapping
+
+`instrument-profile-cds803-terminal53-linear-0-100-v1` binds the archived
+Danfoss VLT CDS 803 Programming Guide
+`AU356039245821 en-000201 / 130R0597`, printed p. 54, Tables 60-63:
+
+- parameter 6-12 is Terminal 53 Low Current, default 4 mA;
+- parameter 6-13 is Terminal 53 High Current, default 20 mA;
+- parameter 6-14 is the low reference/feedback value corresponding to 6-12;
+- parameter 6-15 is the high reference/feedback value corresponding to 6-13.
+
+The selected 6-14=0 and 6-15=100 values are project preregistration choices in
+`decision-custom-reference-window-v1`, not Danfoss defaults or recommendations.
+The same decision authorizes 25 and 75 as `speed_reference_pct` research
+factors. Under the frozen profile:
+
+```text
+reference_current_ma = 4 mA + (20 mA - 4 mA) * reference_pct / 100
+25% -> 8 mA
+75% -> 16 mA
+```
+
+Ramp, dwell, settling, ordering, repetitions, timing, and safety remain
+separate evidence records. The mapping makes no power, efficiency, operating
+range, or safety claim.
+
+The initial temperature candidate is Siemens TH320 option D73, archived PDF
+p. 4, Pt100 0-100 degC four-wire with 4-20 mA output. The initial pressure
+candidate is the exact Siemens P200 0-10 bar gauge/4-20 mA two-wire variant,
+but remains blocked until official bytes are archived and hashed. The FB420
+source supports a directly proportional 4-20 mA RPM profile with user-defined
+endpoints; the project minimum and maximum RPM remain blocked until Emilio
+freezes a decision within that documented capability. No legacy 1.8-8.5 bar or
+1200-4200 rpm fallback is permitted.
+
+### Bounded physical signal emulator admission
+
+The only approved planning mock boundary is
+`mock-admission-ptfp-signal-emulator-v1`. The capability gap is absence of a
+physical compressor, selected instruments/drive, DAQ, and qualified real-plant
+acquisition in the approved software-only prototype. Its sole purpose is to
+produce controlled synthetic current-domain physical observations for
+`PTFP-Custom-v1` and the same-run physical/syscall/fusion ablation.
+
+The component is a controlled signal emulator plus profile conversion, not a
+compressor digital twin. Official NIST, Rockwell, Danfoss, Siemens, FB420, and
+DOE sources support only their exact bounded testbed, electrical, device, or
+qualitative statements. They do not establish universal compressor dynamics,
+noise, delay, bias, safety, energy, efficiency, or operating ranges.
+
+Prohibited claims are: real plant; validated compressor dynamics or digital
+twin; safety/energy/control-performance validation; manufacturer-endorsed
+operating range; external validation; or a global cross-domain champion. The
+admission is replaced if qualified real hardware and preserved calibration/
+acquisition evidence become available under a new approved scope.
+
+Every anonymous v1 engineering range, behavior weight, period, phase, offset,
+noise value, secondary-variable formula, comparison tolerance, consensus scale,
+or threshold is `formal_v2_status=disabled` in
+`docs/reference-archive/catalog/legacy-constant-quarantine-v1.csv`. Exact v1
+reproduction may retain them only under a visible legacy identity; they cannot
+affect a formal v2 run, dataset, result table, gate, metric, or claim. Formal v2
+may use a simpler scripted signal design rather than invent realism.
+
+### Authentic Linux workload and syscall boundary
+
+The default path is an allowlisted controlled Linux edge workload executing
+authentically. Only a specifically unavailable behavior may be mocked after a
+complete `MockAdmission.v1`; convenience, cost, timing, or an unfavorable
+result is insufficient. Sysdig/eBPF or an equivalently qualified collector
+captures the calls actually emitted by the named Linux kernel boundary.
+Syscalls are never fabricated, renumbered, modified, replayed as executable
+evidence, or substituted. Fixture replay is test-only. On Windows, the named
+capture host is the Docker Desktop Linux VM/kernel or a separately pinned Linux
+VM/host, never the Windows kernel.
+
+### Data, fusion, and final comparison boundary
+
+- ADFA-LD is external categorical syscall benchmark evidence.
+- LID-DS 2021 is external syscall evidence and capture-method precedent, with
+  actual version/layout/hash/license qualification required; an honest blocked
+  result is acceptable.
+- HAI 23.05 is external native physical/SCADA evidence, never compressor data.
+- `PTFP-Custom-v1` alone contains synchronized custom physical observations and
+  authentic Linux syscalls from the same correlated runs.
+
+Each dataset has a separate native result table. No global metric, rank, or
+champion compares incompatible datasets. Only the held-out synchronized custom
+campaign may quantify physical-only, syscall-only, and frozen late-fusion
+outcomes on identical support. Every final claim resolves through immutable
+source, decision, parameter, mock admission, profile, split, bundle, threshold,
+score, truth-unlock, metric, uncertainty, limitation, and status identities.
+
+### Optional presentation modes
+
+Epic 18 is optional, terminal, and excluded from scientific readiness gates.
+If activated, `legacy_demo` may show live/current state only with persistent
+`DEMO - NOT PUBLISHED SCIENTIFIC EVIDENCE` status. `frozen_evidence` loads one
+explicit immutable `G9_PASS` package, never a mutable `latest` identity, and
+exposes no control or mutation route. The server rejects mutation requests;
+hiding buttons is insufficient. Styling, responsive behavior, and accessibility
+suggestions remain optional guidance.
+
+### Verification gates and failure semantics
+
+| Gate | Required evidence |
+| --- | --- |
+| G1 Provenance | Complete class-specific source, decision, parameter, profile, mock-admission, and legacy-quarantine validation; all active hashes/licences resolve. |
+| G2 Signal v2 | Profile endpoint, conversion, round-trip, pre-clipping quality, representation, identity, timestamp, and source invariants pass. |
+| G3 Consensus v2 | Deterministic Python/Go golden parity and atomic versioned state/query migration pass. |
+| G4 Independent OPC | Distinct real-client round trip preserves `DataValue` quality/time and branch-isolation tests prove no consensus projection. |
+| G5 Physical bundle | Immutable inference-only bundle and declared-environment replay pass without truth leakage. |
+| G6 Syscall capture | Authentic workload attribution, ordering, gaps/drops/duplicates, overhead, backpressure, raw hash, and canonical replay are recorded. |
+| G7 External datasets | Exact owner source, version, layout, roles, hashes, citation, licence scope, and leakage-safe split qualify independently. |
+| G8 PTFP-Custom | Synchronized immutable same-run streams, quality, partitions, and protected truth pass; mixed/incomplete runs remain explicit. |
+| G9 Reproducible result | Frozen scores/fusion join truth only after unlock; separate tables and paired custom ablation rebuild from manifests with limitations. |
+
+Profile, authority, source, decision, mock, schema, hash, bundle, version, or
+scope mismatch fails closed. Missing calls are not normal. Invalid OPC evidence
+is never replaced by consensus. Truth leakage, mixed identities, or post-unlock
+changes abort the formal run. Unknown dataset layouts are rejected. Dashboard
+output never overrides artifact/evaluator truth. An unresolved planning record
+may remain honestly blocked without receiving an architecture default.
+
+### Controlling handoff status
+
+The normative planning architecture is complete for implementation-readiness
+assessment. PM owns the consolidated PRD; the Solution Architect owns these
+contracts and validators; PO/SM preserves epic traceability; Emilio owns frozen
+research decisions and mock scope. The development team receives no activity
+authorization from this document. Sprint Planning remains blocked until a fresh
+implementation-readiness report returns `READY`.
 

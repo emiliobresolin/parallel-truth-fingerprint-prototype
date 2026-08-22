@@ -1,0 +1,175 @@
+# generated: 2026-08-22T14:49:17-03:00
+# last_updated: 2026-08-22T16:33:46-03:00
+# project: parallel-truth-fingerprint-prototype
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: C:\Users\emili\OneDrive\Área de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\_bmad-output\implementation-artifacts
+#
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog -> in-progress: Automatically when first story is created
+#   - in-progress -> done: Manually when all stories reach done status
+#
+# Story Status:
+#   - backlog: Story only exists in the controlling epic file
+#   - ready-for-dev: Story file created in the implementation artifacts folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but is not required
+#   - done: Retrospective completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to in-progress when its first story is created
+# - Stories can be worked in parallel only when declared dependencies and gates allow
+# - The Scrum Master normally creates the next story after the previous story is done
+# - Development moves a story to review before code review and completion
+# - READY authorizes Sprint Planning only; scientific and implementation activities
+#   still require their separate authorization and fail-closed evidence gates
+# - Epic 18 is optional, terminal, and outside the scientific critical path
+
+generated: "2026-08-22T14:49:17-03:00"
+last_updated: "2026-08-22T16:33:46-03:00"
+project: parallel-truth-fingerprint-prototype
+project_key: NOKEY
+tracking_system: file-system
+story_location: "C:\\Users\\emili\\OneDrive\\Área de Trabalho\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\_bmad-output\\implementation-artifacts"
+
+development_status:
+  # Epic 9: Reproduce and Trust the Existing Prototype
+  epic-9: in-progress
+  9-1-freeze-and-index-the-v1-evidence-baseline: ready-for-dev
+  9-2-establish-the-semantic-and-evidence-role-vocabulary: ready-for-dev
+  9-3-build-the-authoritative-source-evidence-catalog: ready-for-dev
+  9-4-build-the-parameter-evidence-catalog-and-validation-gate: ready-for-dev
+  9-5-preserve-v1-contracts-as-golden-versioned-fixtures: ready-for-dev
+  9-6-define-immutable-artifact-and-evaluation-manifests: backlog
+  9-7-qualify-minimal-persistent-evidence-storage: backlog
+  9-8-define-partition-freeze-and-activity-authorization-records: backlog
+  epic-9-retrospective: optional
+
+  # Epic 10: Run Evidence-Grounded Physical Experiments
+  epic-10: backlog
+  10-1-define-evidence-backed-instrument-profiles: backlog
+  10-2-define-and-validate-signalobservation-v2: backlog
+  10-3-separate-process-physics-from-transmitter-and-edge-evidence: backlog
+  10-4-define-experimentspec-v1-and-the-preregistered-matrix: backlog
+  10-5-isolate-scenariotruth-v1-and-control-truth-unlock: backlog
+  10-6-run-and-persist-controlled-physical-evidence: backlog
+  10-7-qualify-and-publish-physical-experiment-evidence: backlog
+  epic-10-retrospective: optional
+
+  # Epic 11: Validate Physical Evidence Through Current-Domain Consensus
+  epic-11: backlog
+  11-1-define-the-versioned-consensus-v2-contracts: backlog
+  11-2-resolve-comparison-and-trust-parameters: backlog
+  11-3-implement-the-deterministic-python-consensus-reference: backlog
+  11-4-integrate-consensus-v2-with-go-abci-and-cometbft: backlog
+  11-5-preserve-versioned-state-query-restart-and-rollback: backlog
+  11-6-qualify-consensus-v2-and-close-gate-g3: backlog
+  epic-11-retrospective: optional
+
+  # Epic 12: Compare Against Independent OPC UA Evidence
+  epic-12: backlog
+  12-1-publish-the-pre-consensus-plant-and-transmitter-snapshot: backlog
+  12-2-run-opc-ua-as-a-separate-server-boundary: backlog
+  12-3-read-opc-ua-through-a-real-client-contract: backlog
+  12-4-validate-and-compare-eligible-opc-ua-evidence: backlog
+  12-5-prove-opc-and-consensus-causal-path-independence: backlog
+  12-6-qualify-independent-opc-ua-evidence-and-close-gate-g4: backlog
+  epic-12-retrospective: optional
+
+  # Epic 13: Train and Serve a Calibrated Physical Anomaly Detector
+  epic-13: backlog
+  13-1-define-the-physical-feature-schema: backlog
+  13-2-build-leakage-safe-physical-partitions-and-windows: backlog
+  13-3-compare-physical-detector-candidates-fairly: backlog
+  13-4-calibrate-and-freeze-the-physical-threshold: backlog
+  13-5-build-the-immutable-physical-detectorbundle-v1: backlog
+  13-6-produce-frozen-blind-physical-scores: backlog
+  13-7-evaluate-physical-regimes-and-anomalies-after-truth-unlock: backlog
+  13-8-serve-an-authorized-physical-bundle-in-shadow-and-close-g5: backlog
+  epic-13-retrospective: optional
+
+  # Epic 14: Capture and Detect Real Linux Edge Syscall Anomalies
+  epic-14: backlog
+  14-1-define-an-allowlisted-linux-edge-workload: backlog
+  14-2-qualify-the-real-linux-kernel-capture-boundary: backlog
+  14-3-preserve-raw-capture-and-syscalleventbatch-v1: backlog
+  14-4-build-categorical-syscall-partitions-and-windows: backlog
+  14-5-compare-normal-only-categorical-syscall-candidates: backlog
+  14-6-calibrate-and-bundle-the-custom-syscall-detector: backlog
+  14-7-produce-frozen-blind-syscall-scores: backlog
+  14-8-evaluate-the-custom-syscall-detector-after-truth-unlock: backlog
+  14-9-correlate-custom-streams-and-close-syscall-capture-gate-g6: backlog
+  epic-14-retrospective: optional
+
+  # Epic 15A: Reproduce ADFA-LD as an External Syscall Benchmark
+  epic-15a: backlog
+  15a-1-pin-and-inventory-the-official-adfa-ld-source: backlog
+  15a-2-parse-categorical-traces-and-isolate-adfa-ld-labels: backlog
+  15a-3-build-trace-safe-adfa-ld-partitions-and-windows: backlog
+  15a-4-compare-adfa-ld-categorical-detector-candidates: backlog
+  15a-5-calibrate-bundle-and-freeze-blind-adfa-ld-scores: backlog
+  15a-6-evaluate-and-publish-the-adfa-ld-benchmark-result: backlog
+  epic-15a-retrospective: optional
+
+  # Epic 15B: Qualify and Evaluate LID-DS 2021 Independently
+  epic-15b: backlog
+  15b-1-authorize-the-exact-lid-ds-2021-scope-or-record-no-execution: backlog
+  15b-2-qualify-the-official-lid-source-and-isolated-environment: backlog
+  15b-3-parse-the-authorized-official-lid-ds-2021-layout: backlog
+  15b-4-build-official-group-safe-lid-partitions-and-windows: backlog
+  15b-5-compare-authorized-lid-categorical-detector-candidates: backlog
+  15b-6-calibrate-bundle-and-freeze-blind-lid-scores: backlog
+  15b-7-publish-the-lid-result-or-honest-blocked-state: backlog
+  epic-15b-retrospective: optional
+
+  # Epic 16: Evaluate HAI 23.05 in Its Native Physical Domain
+  epic-16: backlog
+  16-1-pin-and-qualify-the-official-hai-23-05-source: backlog
+  16-2-implement-the-version-specific-hai-23-05-adapter: backlog
+  16-3-build-native-hai-partitions-preprocessing-and-windows: backlog
+  16-4-compare-hai-physical-detector-candidates-fairly: backlog
+  16-5-calibrate-bundle-and-freeze-blind-hai-scores: backlog
+  16-6-evaluate-hai-point-window-and-temporal-event-outcomes: backlog
+  16-7-publish-the-hai-dataset-card-result-and-g7-component: backlog
+  epic-16-retrospective: optional
+
+  # Epic 17A: Produce Synchronized Custom Evidence and Frozen Fusion Results
+  epic-17a: backlog
+  17a-1-preregister-the-synchronized-custom-campaign: backlog
+  17a-2-verify-and-authorize-campaign-readiness: backlog
+  17a-3-execute-and-preserve-synchronized-custom-runs: backlog
+  17a-4-assemble-and-qualify-ptfp-custom-v1: backlog
+  17a-5-freeze-paired-physical-and-syscall-scores-before-truth: backlog
+  17a-6-execute-preregistered-truth-blind-late-fusion: backlog
+  17a-7-perform-the-paired-modality-ablation-after-truth-unlock: backlog
+  epic-17a-retrospective: optional
+
+  # Epic 17B: Publish the Defensible Academic Evidence Package
+  epic-17b: backlog
+  17b-1-validate-and-register-the-final-evidence-tracks: backlog
+  17b-2-publish-separate-dataset-and-modality-result-tables: backlog
+  17b-3-publish-the-paired-custom-only-ablation-table: backlog
+  17b-4-build-the-capability-and-limitation-matrix: backlog
+  17b-5-build-the-immutable-claim-to-evidence-index: backlog
+  17b-6-reconstruct-the-final-evidence-package-and-decide-g9: backlog
+  epic-17b-retrospective: optional
+
+  # Epic 18: Optionally Present Published Evidence in the Existing Dashboard
+  epic-18: backlog
+  18-1-bind-a-read-only-projection-to-the-frozen-evidence-package: backlog
+  18-2-present-linked-physical-representations-and-distinct-channels: backlog
+  18-3-present-separate-results-claims-and-limitations: backlog
+  18-4-enforce-and-verify-the-optional-presentation-only-mode: backlog
+  epic-18-retrospective: optional

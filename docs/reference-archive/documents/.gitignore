@@ -1,0 +1,7 @@
+*.pdf
+*.zip
+*.tar
+*.gz
+*.scap
+!.gitignore
+

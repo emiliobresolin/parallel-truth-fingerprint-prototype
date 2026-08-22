@@ -146,9 +146,9 @@ The defaults are already present in [.env.example](./.env.example):
 - `MINIO_BUCKET=valid-consensus-artifacts`
 - `MINIO_SECURE=false`
 - `DEMO_STEPS=3`
-- `DEMO_CYCLE_INTERVAL_SECONDS=10`
+- `DEMO_CYCLE_INTERVAL_SECONDS=30`
 - `DEMO_MAX_CYCLES=0`
-- `DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES=10`
+- `DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES=30`
 - `DEMO_FINGERPRINT_SEQUENCE_LENGTH=2`
 - `DEMO_POWER=65.0`
 - `DEMO_DASHBOARD_HOST=127.0.0.1`
@@ -438,3 +438,30 @@ Reference payload artifacts are available in:
 
 - `src/parallel_truth_fingerprint/contracts/samples/hart_payload_sample.txt`
 - `src/parallel_truth_fingerprint/contracts/samples/unified_hart_payload_sample.txt`
+
+
+
+
+# QUICK MANUAL RUNTIME FOR DEMO:
+
+## copy and paste the following commands:
+cd "C:\Users\emili\OneDrive\Área de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype"
+
+# Clean any remaining consensus containers and volumes
+docker compose -f compose.consensus.yml down -v
+
+# Recreate MQTT and MinIO
+docker compose -f compose.local.yml up -d mqtt-broker minio
+
+# Recreate and start the three-validator consensus network
+.\scripts\init_cometbft_testnet.ps1
+.\scripts\start_consensus_stack.ps1
+
+# Configure a fresh, stronger fingerprint run
+$env:PYTHONPATH='src'
+$env:MINIO_BUCKET='strong-fingerprint-demo'
+$env:DEMO_LOG_PATH='logs/strong-fingerprint-demo.log'
+$env:DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES='30'
+
+# Start the dashboard
+.\venv\Scripts\python scripts\run_local_dashboard.py

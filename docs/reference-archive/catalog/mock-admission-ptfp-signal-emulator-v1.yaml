@@ -1,0 +1,73 @@
+schema: MockAdmission.v1
+mock_id: mock-admission-ptfp-signal-emulator-v1
+status: approved_planning_conditional
+owner: Emilio
+approved_by: Emilio
+approved_at: 2026-08-22T14:15:07-03:00
+mutable: false
+capability_gap: >-
+  The approved software-only academic prototype contains no physical compressor,
+  temperature/pressure/RPM instruments, variable-speed drive, DAQ hardware, or
+  qualified real-plant acquisition path.
+attempted_or_unavailable_authentic_path: >-
+  Simultaneous real compressor measurements cannot be produced inside the
+  approved local software-only prototype boundary. Authentic Linux workload
+  execution and kernel syscall capture are available and are therefore excluded
+  from this mock admission.
+purpose: >-
+  Produce controlled synthetic physical observations for PTFP-Custom-v1 and
+  the same-run physical/syscall/fusion ablation. This is a bounded controlled
+  signal emulator, not a compressor digital twin.
+component: custom current-domain signal emulator and instrument-profile conversion path
+question: >-
+  Does frozen calibrated late fusion improve detection quality or operational
+  trade-offs over either custom modality on the same held-out synchronized runs?
+evidence_tracks: PTFP-Custom-v1 physical; PTFP-Custom-v1 syscall; custom fusion
+final_outputs: custom dataset manifest; physical result table; syscall result table; paired custom ablation; capability/limitation matrix; claim index
+official_support:
+  - source_id: gov-nist-ir8089-2015
+    locator: PDF p. 8 (document p. 1) and PDF p. 54 (document p. 47)
+    supported_scope: bounded testbed emulation and explicit limitation to represented model/purpose
+  - source_id: vendor-rockwell-5034-um003-2025
+    locator: PDF p. 22, Scaling, Table 7
+    supported_scope: linear 4/12/20 mA representation
+  - source_id: vendor-danfoss-cds803-programming-2021
+    locator: printed p. 54, Tables 60-63, parameters 6-12 through 6-15
+    supported_scope: selected command-profile configurability
+  - source_id: vendor-siemens-sitrans-th-2025
+    locator: archived PDF p. 4, option D73
+    supported_scope: candidate 0-100 degC Pt100/4-20 mA profile
+  - source_id: vendor-siemens-sitrans-p200-2025
+    locator: official PDF selection table printed p. 1/7
+    supported_scope: candidate 0-10 bar gauge-pressure/4-20 mA profile; blocked until source bytes are archived
+  - source_id: vendor-electrosensors-fb420-datasheet-2025
+    locator: archived PDF pp. 1-2
+    supported_scope: directly proportional 4-20 mA RPM output; project endpoints unresolved
+  - source_id: vendor-doe-compressed-air-sourcebook
+    locator: section 5 and Figure 2.8
+    supported_scope: qualitative variable-speed/capacity design dependence only
+transferability_rationale: >-
+  Each adopted device/profile fact controls the exact current-domain observation
+  component that produces the custom physical track. Those observations share
+  run identities with authentic captured syscalls and can therefore change the
+  paired custom ablation. No source is transferred into a universal compressor
+  dynamics, noise, safety, or performance claim.
+supported_behavior_and_numbers: >-
+  Only values that resolve through parameter-evidence.csv as direct, derived,
+  measured, preregistered_factor, or separately admitted mock may execute.
+  Anonymous dynamics, noise, lag, bias, tolerance, consensus, threshold, timing,
+  repetition, and fusion constants are not admitted.
+prohibited_claims:
+  - real plant or real compressor measurements
+  - validated compressor dynamics or digital twin
+  - safety, energy, efficiency, reliability, or control-performance validation
+  - manufacturer-endorsed operating range
+  - external validation or cross-domain global champion
+replacement_condition: >-
+  Replace this admission when qualified real compressor hardware, selected
+  instruments/drive, and preserved calibration/acquisition evidence become
+  available under a newly approved scope.
+execution_gate: >-
+  Formal execution remains blocked until every active profile/parameter resolves,
+  including archived pressure-source bytes and frozen RPM endpoints, and until a
+  separate activity authorization exists.
