@@ -1,6 +1,6 @@
 # Story 9.5: Preserve v1 Contracts as Golden Versioned Fixtures
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Planning READY does not authorize implementation or scientific activity. -->
 
@@ -34,7 +34,7 @@ so that v2 capabilities can be introduced without rewriting history or breaking 
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Enforce prerequisites and freeze an independent fixture-requirement inventory (AC: 1, 4-5, 10)
+- [x] Task 1: Enforce prerequisites and freeze an independent fixture-requirement inventory (AC: 1, 4-5, 10)
   - [ ] Treat Stories 9.1-9.4 as hard implementation prerequisites. Require their public contracts, resolvers, machine authorities, and focused suites to exist and pass before Story 9.5 code begins. Stop rather than duplicate canonicalization, evidence roles, source identities, parameter identities, mock admission, or baseline resolution.
   - [ ] Define `V1GoldenFixtureRequirementSet.v1` independently from caller-supplied catalog entries. Pin stable required slots for MQTT/topic/observation boundaries; Python and Go consensus transaction/state/query/decision boundaries; persistence object key/content and extant manifest boundaries; legacy detector input/output/schema/incompatibility boundaries; and a separate optional dashboard group. A catalog cannot pass by omitting a difficult required slot or declaring it not applicable.
   - [ ] Pin the exact v1 requirement-set identity in code, together with every required slot ID, cardinality, and core/optional group. Catalog data and a caller-supplied requirement file cannot jointly substitute a smaller inventory and still pass.
@@ -42,7 +42,7 @@ so that v2 capabilities can be introduced without rewriting history or breaking 
   - [ ] Document the closed inventory in a compact slot table containing stable requirement ID, native reader, origin, expected legacy-reader outcome, expected gate outcome, and comparison mode, so completeness is auditable without inferring it from catalog contents.
   - [ ] Resolve every frozen historical item to exact Story 9.1 `baseline_id` and baseline entry identity. Where the verified baseline lacks a required byte/object/result, emit a stable blocked requirement result; do not capture a new live run, retrain, infer, copy an easy neighbor, or fabricate an oracle to make the inventory green.
 
-- [ ] Task 2: Define the flat fixture catalog, comparison, routing, and diagnostic contracts (AC: 2-3, 5-9)
+- [x] Task 2: Define the flat fixture catalog, comparison, routing, and diagnostic contracts (AC: 2-3, 5-9)
   - [ ] Add `src/parallel_truth_fingerprint/contracts/v1_golden_fixture.py` with frozen dataclasses, tuple-backed collections/defensive copies, deterministic `to_dict()` methods, explicit `StrEnum` tokens, and schema identities for `V1GoldenFixtureCatalog.v1`, `V1GoldenFixtureEntry.v1`, `V1GoldenFixtureRequirementSet.v1`, `V1GoldenAdapterDeclaration.v1`, `V1GoldenReplayRequest.v1`, `V1GoldenReplayResult.v1`, and structured violations. Re-export only intended public types from `contracts/__init__.py`.
   - [ ] Keep `baseline_generation: v1` separate from the artifact's observed native contract version. Record `native_contract_id`, `native_version_status` (`explicit` or `versionless`), and the untouched native token where present. In particular, preserve the legacy persistence payload's embedded `"artifact_version": "2.0"`; never reinterpret or rewrite it as the fixture generation.
   - [ ] Pin exactly one fixture origin: `frozen_historical_bytes`, `reconstructed_legacy_fixture`, `non_domain_sentinel`, or `admitted_domain_mock_fixture`. A reconstruction must bind exact frozen v1 code/runtime/seed, may never be called an observed historical capture, and may enter the passing core only with conspicuous non-domain sentinels or the complete admitted-domain-mock evidence chain.
@@ -53,7 +53,7 @@ so that v2 capabilities can be introduced without rewriting history or breaking 
   - [ ] Define separate logical and immutable identities for every requirement set, fixture entry, catalog, adapter declaration, replay request, and replay result. Pin each canonical identity preimage and self-ID exclusions; replay-result identity includes bound request/catalog/fixture identities, outcomes, and structured violations while excluding its own ID and mutable explanation text.
   - [ ] Return deterministically sorted violations with stable rule ID, fixture/requirement/contract ID, field path, bounded/redacted offending reference or token, expected value, observed value, and explanation. Secret or arbitrarily large malformed content is never echoed. Scientific outcome identity excludes mutable wording while retaining structured diagnostic facts.
 
-- [ ] Task 3: Assemble the reviewed shared v1 golden corpus without rewriting history (AC: 1-6, 9-10)
+- [x] Task 3: Assemble the reviewed shared v1 golden corpus without rewriting history (AC: 1-6, 9-10)
   - [ ] Add the shared, versioned, append-only authority under identity-addressed paths: `testdata/golden/v1/requirements/sha256-<digest>/requirements.v1.json`, `testdata/golden/v1/catalogs/sha256-<digest>/catalog.v1.json`, and `testdata/golden/v1/fixtures/<fixture-id>/sha256-<digest>/...`. Add a README with claim limits and the required-slot table. Future changes create a new identity path; no singleton mutable catalog, `latest` alias, in-place update, or automatic snapshot blessing is permitted.
   - [ ] Preserve exact historical bytes in canonical RFC 4648 base64 carriers when Git checkout newline conversion could alter them. Require the standard alphabet, padding, ASCII only, no BOM, whitespace, line wrapping, or trailing newline; use strict decoding equivalent to `base64.b64decode(..., validate=True)`, re-encoding equality, and an explicit maximum decoded size before allocation. Hash and size the decoded original bytes and separately validate the carrier identity/encoding.
   - [ ] Add a narrowly scoped `.gitattributes` rule for `testdata/golden/v1/** -text` so catalog and carrier bytes survive `core.autocrlf=true`; tests still verify decoded historical bytes rather than treating a transformed checkout as the original MinIO/Git blob.
@@ -66,13 +66,13 @@ so that v2 capabilities can be introduced without rewriting history or breaking 
   - [ ] Keep SCADA/dashboard projection fixtures optional and outside the core pass/fail set. If present, use fixed inputs and `generated_at`; do not start a dashboard/browser/server and do not add or redesign any UI/UX.
   - [ ] Scan selected fixture carriers and catalog fields for credentials, access keys, private keys, tokens, `.env` contents, CometBFT keys, or secret-bearing log fragments. Redact by exclusion before registration; never hash low-entropy secret values into fixture metadata.
 
-- [ ] Task 4: Enforce the legacy, sentinel, and admitted-domain-mock boundaries (AC: 4-5, 10)
+- [x] Task 4: Enforce the legacy, sentinel, and admitted-domain-mock boundaries (AC: 4-5, 10)
   - [ ] Preserve domain-looking content without current Story 9.3/9.4 authority only when it is exact `frozen_historical_bytes` and only for `contract_fixture_replay`. A reconstruction does not inherit that carve-out merely by using v1 code/constants or a legacy label.
   - [ ] Permit `non_domain_sentinel` only when its ID, assertion scope, values, two expected outcome paths, role, and limitations make clear that it tests structure/rejection rather than a valid physical, consensus-quality, attack, model, or dataset claim.
   - [ ] Permit `admitted_domain_mock_fixture` only after Story 9.4 resolves a valid immutable `MockAdmission.v1`, exact parameter revision IDs, authentic-path unavailability evidence, bounded component/question/track/final-output linkage, and exact applicable Story 9.3 official source-use locators for every represented behavior and number. If the authentic path is reproducible or any authority is unresolved, fail closed without fallback.
   - [ ] Add a closed Story 9.5 use-policy validator that rejects fixture IDs/roots/roles for scientific dataset, label/truth, metric, ranking, uncertainty, training/calibration, or final-result uses. Regression-test it against current dataset/window consumers only; future manifests/report writers must integrate the same gate in their owning stories. Do not broadly retrofit future consumers here. Passing replay is never evidence of detector quality, dataset quality, domain fidelity, or experimental success.
 
-- [ ] Task 5: Implement explicit, read-only v1 registration, routing, replay, and drift reporting (AC: 3, 6-9)
+- [x] Task 5: Implement explicit, read-only v1 registration, routing, replay, and drift reporting (AC: 3, 6-9)
   - [ ] Add `src/parallel_truth_fingerprint/evidence/v1_golden_fixtures.py`, reusing the prerequisite baseline resolver, semantic vocabulary, source catalog, parameter/mock gate, hashing, and canonicalization. Add no database, service, dependency, runtime hook, or competing general manifest framework.
   - [ ] Provide exactly two routes: registered fixture replay requires an exact catalog revision, fixture revision, and decoded content hash; explicit envelope replay requires a registered/versioned envelope whose own immutable identity binds the native version and payload hash. An out-of-band `v1` argument alone never authorizes arbitrary unregistered versionless bytes. Missing/unknown/unsupported versions fail before deserialization, and v1 is never inferred from shape, topic, filename, object prefix, Python type, or the embedded `artifact_version` token.
   - [ ] Keep `contract_fixture_replay` pure and offline: bounded byte loading, base64 decoding, parsing, serialization, validation, comparison, and diagnostic emission only. It must not publish MQTT, open network sockets, start CometBFT/Docker/MinIO/OPC/dashboard, mutate runtime configuration/state, load or execute a Keras model, train, capture, or write evidence.
@@ -83,7 +83,7 @@ so that v2 capabilities can be introduced without rewriting history or breaking 
   - [ ] Reject unexpected type changes, undeclared semantic exclusions, locale/timezone/path-separator dependence, and mutable aliases such as `latest` at the fixture-gate boundary without modifying the recorded native outcome.
   - [ ] Make replay results deterministic and side-effect-free, with stable exit/outcome tokens and sorted diagnostics. No `--update`, `--bless`, overwrite, migration, or write-back mode exists.
 
-- [ ] Task 6: Add focused shared Python/Go fixture tests and a read-only validation command (AC: 1-10)
+- [x] Task 6: Add focused shared Python/Go fixture tests and a read-only validation command (AC: 1-10)
   - [ ] Add `tests/evidence/test_v1_golden_fixtures.py` covering requirement completeness, exact pinned requirement-set identity, every origin/comparison/version and both expected-outcome paths, hash/size drift, strict carrier corruption, duplicate IDs/JSON keys, malformed bytes, secret canaries, diagnostic redaction/bounds, optional dashboard absence, and `authorization_effect: none`.
   - [ ] Reject filesystem fixture locators containing absolute/drive/UNC/device paths, ADS, backslashes, empty or dot segments, `..`, NUL, non-regular files, symlinks/junctions, or any resolved target outside the fixture root. Real symlink/junction creation tests are conditional where Windows privileges/filesystems do not allow them; an injected fake resolver exercises the same escape rule on every platform.
   - [ ] Keep opaque MinIO/object-store keys in a separate identity type and validator; never feed them to the filesystem locator resolver. A traversal-like object key may be preserved and compared without becoming a local filesystem path.
@@ -203,12 +203,36 @@ so that v2 capabilities can be introduced without rewriting history or breaking 
 - [Python 3.14 `json`](https://docs.python.org/3.14/library/json.html)
 - [Go `encoding/json`](https://pkg.go.dev/encoding/json)
 
+## Mandatory Academic Evidence Amendment
+
+Before implementation, apply the relevant mandatory controls in [Academic Evidence Admission Amendment — 2026-08-31](../planning-artifacts/academic-evidence-admission-amendment-2026-08-31.md). This story must fail closed on an unresolved evidence origin, numeric authority, required mock closure, or prohibited dataset substitution. The amendment adds no activity authorization.
 ## Dev Agent Record
 
 ### Agent Model Used
 
+GPT-5.6 Codex
+
 ### Debug Log References
+
+- `PYTHONPATH=src .\\venv\\Scripts\\python.exe -m unittest tests.evidence.test_v1_golden_fixtures tests.lstm_service.test_dataset_builder -q` — 21 tests passed.
+- `go test ./...` from `abci/consensus_app` — passed using the repository's portable Go toolchain.
+- `PYTHONPATH=src .\\venv\\Scripts\\python.exe -m unittest discover -s tests -t . -q` — passed.
 
 ### Completion Notes List
 
+- Implemented the code-owned requirement set, immutable identity-addressed corpus, strict carrier/loading boundaries, closed route/reader/comparator registries, deterministic replay diagnostics, and read-only validator.
+- Resolved review follow-ups for structural catalog validation before replay, explicit-envelope identity binding, bounded raw loading, dataset-root exclusion, named reader routing, comparator drift detection, and Go fixture integrity/status coverage.
+- The catalog intentionally remains `unverifiable` for baseline provenance: Story 9.1 records that no historical baseline was published. This is a stable blocked-evidence result, not a passing scientific claim or fabricated baseline.
+
 ### File List
+
+- `src/parallel_truth_fingerprint/contracts/v1_golden_fixture.py`
+- `src/parallel_truth_fingerprint/contracts/__init__.py`
+- `src/parallel_truth_fingerprint/evidence/v1_golden_fixtures.py`
+- `src/parallel_truth_fingerprint/lstm_service/dataset_builder.py`
+- `tests/evidence/test_v1_golden_fixtures.py`
+- `tests/lstm_service/test_dataset_builder.py`
+- `abci/consensus_app/internal/app/v1_golden_test.go`
+- `scripts/validate_v1_golden_fixtures.py`
+- `testdata/golden/v1/`
+- `.gitattributes`

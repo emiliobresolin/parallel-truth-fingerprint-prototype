@@ -1,0 +1,6 @@
+ERROR: Could not install packages due to an OSError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\emili\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\site-packages\\boto3\\resources\\action.py'
+Consider using the `--user` option or check the permissions.
+
+
+[notice] A new release of pip is available: 26.1.1 -> 26.2.1
+[notice] To update, run: C:\Users\emili\AppData\Local\Python\pythoncore-3.14-64\python.exe -m pip install --upgrade pip

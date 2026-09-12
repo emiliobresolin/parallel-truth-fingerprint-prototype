@@ -1,0 +1,16 @@
+# Operator-supplied image must be an exact immutable OCI digest; there is no default.
+services:
+  minio-evidence:
+    image: ${MINIO_EVIDENCE_IMAGE:?must be minio/minio@sha256:<immutable digest>}
+    command: server /data --console-address ":19001"
+    ports:
+      - "127.0.0.1:19000:9000"
+      - "127.0.0.1:19001:19001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_EVIDENCE_ROOT_USER:?operator secret required}
+      MINIO_ROOT_PASSWORD: ${MINIO_EVIDENCE_ROOT_PASSWORD:?operator secret required}
+    volumes:
+      - ptfp_evidence_data_v1:/data
+volumes:
+  ptfp_evidence_data_v1:
+    name: ${COMPOSE_PROJECT_NAME:?isolated project required}_evidence_data_v1

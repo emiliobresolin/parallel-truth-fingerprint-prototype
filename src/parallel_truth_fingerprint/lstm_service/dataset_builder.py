@@ -9,6 +9,9 @@ from parallel_truth_fingerprint.contracts.training_dataset import (
     TrainingDatasetManifest,
     TrainingWindow,
 )
+from parallel_truth_fingerprint.evidence.v1_golden_fixtures import (
+    validate_fixture_consumer_source,
+)
 
 
 @dataclass(frozen=True)
@@ -29,6 +32,13 @@ def build_normal_training_windows(
 
     if sequence_length <= 0:
         raise ValueError("sequence_length must be a positive integer.")
+
+    fixture_use_violations = validate_fixture_consumer_source(
+        "dataset_root",
+        prefix,
+    )
+    if fixture_use_violations:
+        raise ValueError(fixture_use_violations[0].rule_id)
 
     object_keys = artifact_store.list_json_objects(prefix=prefix)
     eligible_records: list[_EligibleArtifact] = []

@@ -1,118 +1,180 @@
-# Source Register
+# Source Register (SourceCatalog.v1 projection)
 
-Retrieval baseline: **2026-08-15**. Correct-course source update:
-**2026-08-22**.
+This file is generated deterministically from `source-catalog.v1.json`; edit the machine authority, not this projection.
+Catalog inclusion has `authorization_effect: none` and does not authorize acquisition, training, capture, experiments, or publication.
 
-Status meanings:
+| Source ID | Revision ID | Title / version | Official source | Retrieval | Bounded scope |
+|---|---|---|---|---|---|
+| `dataset-adfa-historical-project-copy` | `dataset-adfa-historical-project-copy:revision:unknown-legacy` | Historical third-party ADFA material -- unknown_legacy | unavailable:historical-project-copy | `unavailable` | Mirror/retrieval evidence only; not official ADFA owner bytes. |
+| `dataset-adfa-official` | `dataset-adfa-official:revision:metadata:21a3b9244ea8db2dba6b` | ADFA IDS datasets -- not_stated | https://research.unsw.edu.au/projects/adfa-ids-datasets | `link_only` | Owner page, academic-use terms and dataset identity |
+| `dataset-hai-manual-v4` | `dataset-hai-manual-v4:revision:sha256:0668345c4e80331b918fe17c81f8f363b13bd22886831d286e761bc62b71a556` | HAI Technical Details v4.0 -- HAI Technical Details v4.0 | https://raw.githubusercontent.com/icsdataset/hai/master/hai_dataset_technical_details.pdf | `local` | Tag ranges, layouts and scenario details |
+| `dataset-hai-official` | `dataset-hai-official:revision:metadata:32c7194fec3bd5879f48` | HAI official repository -- not_stated | https://github.com/icsdataset/hai | `link_only` | Versioned data and license caveat |
+| `dataset-lid-official` | `dataset-lid-official:revision:metadata:a4fe73dcaac5c94c8c42` | LID-DS official repository -- not_stated | https://github.com/LID-DS/LID-DS | `link_only` | Official layouts, loader and GPL terms |
+| `dataset-lid-paper-2023` | `dataset-lid-paper-2023:revision:sha256:832b5b7dfd7efd7b6f4a752d46965dfd3793c53c8dcf320130985e16e981c6ff` | LID-DS 2021 evaluation paper -- LID-DS 2021 evaluation paper | https://dbs.uni-leipzig.de/files/research/publications/2023-6/pdf/978-3-031-35190-7_6.pdf | `local` | Official split/schema/evaluation semantics |
+| `gov-cisa-segmentation-2022` | `gov-cisa-segmentation-2022:revision:sha256:71462d1423fc3c057ceb465ee587d4d9b08271e137dbf88f05162aae015c6ade` | Layering Network Security Through Segmentation -- Layering Network Security Through Segmentation | https://www.cisa.gov/sites/default/files/publications/layering-network-security-segmentation_infographic_508_0.pdf | `local` | Supporting network-segmentation guidance |
+| `gov-nist-ai-rmf-2023` | `gov-nist-ai-rmf-2023:revision:sha256:7576edb531d9848825814ee88e28b1795d3a84b435b4b797d3670eafdc4a89f1` | NIST AI RMF 1.0 -- NIST AI RMF 1.0 | https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf | `local` | Model documentation and TEVV |
+| `gov-nist-ai-rmf-playbook` | `gov-nist-ai-rmf-playbook:revision:sha256:65d6101d806502875aadb0fd19a75c3a9cc9a5e9461129e9398a39192d8202d2` | NIST AI RMF Playbook -- NIST AI RMF Playbook | https://airc.nist.gov/docs/AI_RMF_Playbook.pdf | `local` | Repeatable evaluation/documentation practices |
+| `gov-nist-ir8089-2015` | `gov-nist-ir8089-2015:revision:sha256:26fc56f15aa24a2461f493ddae9f707fd488daa83ea094a7769262b003cbac0d` | NIST IR 8089 -- NIST IR 8089 | https://nvlpubs.nist.gov/nistpubs/ir/2015/NIST.IR.8089.pdf | `local` | Realistic bounded ICS cybersecurity testbed |
+| `gov-nist-ir8219-2020` | `gov-nist-ir8219-2020:revision:sha256:7247853e3246fcf8e9a7e8ca9b892fc93f93c41d1de42937608d4f6272430898` | NIST IR 8219 -- NIST IR 8219 | https://nvlpubs.nist.gov/nistpubs/ir/2020/NIST.IR.8219.pdf | `local` | Passive behavioral anomaly detection for ICS |
+| `gov-nist-rdaf2-2024` | `gov-nist-rdaf2-2024:revision:sha256:05bc3d5f4e1d399edd9c2e3df025de4eacfd0eee313baf56ec4bd58db20ce833` | NIST SP 1500-18 Rev. 2, RDaF 2.0 -- NIST SP 1500-18 Rev. 2, RDaF 2.0 | https://nvlpubs.nist.gov/nistpubs/SpecialPublications/1500-18/NIST.SP.1500-18r2.pdf | `local` | Raw/derived data, versioning and provenance |
+| `gov-nist-sp1339-2026` | `gov-nist-sp1339-2026:revision:sha256:d7b477ceeae79cc71aa768622037d066752e8a0a8f8dd082714c9ea775623542` | NIST SP 1339 -- NIST SP 1339 | https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1339.pdf | `local` | OT backup and tested restoration |
+| `gov-nist-sp1800-10-2022` | `gov-nist-sp1800-10-2022:revision:metadata:3b171df005c33b1b0e83` | NIST SP 1800-10 -- not_stated | https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1800-10.pdf | `link_only` | Manufacturing integrity example builds |
+| `gov-nist-sp800-218-2022` | `gov-nist-sp800-218-2022:revision:sha256:617746e553a9e2da49bfbd4eef0dfc3094758a39b869314e4173ac36605cde22` | NIST SP 800-218, SSDF -- NIST SP 800-218, SSDF | https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf | `local` | Secure development, verification and documented releases |
+| `gov-nist-sp800-53r5` | `gov-nist-sp800-53r5:revision:sha256:fc63bcd61715d0181dd8e85998b1e6201ae3515fc6626102101cab1841e11ec6` | NIST SP 800-53 Rev. 5 -- NIST SP 800-53 Rev. 5 | https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf | `local` | Least privilege, separation and audit protection |
+| `gov-nist-sp800-82r3-2023` | `gov-nist-sp800-82r3-2023:revision:sha256:608f554514d381853e24e0b33123b7080fbd757826f460032690aade63394616` | NIST SP 800-82 Rev. 3 -- NIST SP 800-82 Rev. 3 | https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-82r3.pdf | `local` | OT architecture, availability, zones and flows |
+| `metric-etapr` | `metric-etapr:revision:metadata:305be270ccc252ea030c` | eTaPR official implementation -- not_stated | https://github.com/wshw4ng/eTaPR | `link_only` | Range/event-aware anomaly evaluation |
+| `paper-deeplog-2017` | `paper-deeplog-2017:revision:sha256:713243f79c4a2b4b97ccb31e0b1ac0820099894aab3db62a3fba6cd83d462f66` | DeepLog -- DeepLog | https://www2.cs.utah.edu/~lifeifei/papers/deeplog.pdf | `local` | Categorical event-sequence LSTM precedent |
+| `paper-gru-2014` | `paper-gru-2014:revision:sha256:c948d89ccd33da2a48421b45445f1c30f5fe677a829af9e5e1b6f9ff75a14a81` | Cho et al., GRU -- Cho et al., GRU | https://aclanthology.org/D14-1179.pdf | `local` | GRU primary paper |
+| `paper-hai-2020` | `paper-hai-2020:revision:sha256:d59b538ed91640ce71f236ca079387805bca4223c7f2014c9d6f64a360f803dc` | HAI 1.0 -- HAI 1.0 | https://www.usenix.org/system/files/cset20-paper-shin.pdf | `local` | Dataset origin and evaluation context |
+| `paper-lstm-1997` | `paper-lstm-1997:revision:sha256:ceb9e53dbc0493f5b3bf5520ed940f3e6b526064d17b2118d77e51f79c0edcc6` | Hochreiter & Schmidhuber, LSTM -- Hochreiter & Schmidhuber, LSTM | https://direct.mit.edu/neco/article/9/8/1735/6109/Long-Short-Term-Memory | `local` | LSTM design motivation, not superiority evidence |
+| `paper-lstm-ed-anomaly-2016` | `paper-lstm-ed-anomaly-2016:revision:sha256:d4c506d82061d0eb532a7c172682c7c8c1803705a8dbd9561fc8980927d9b3cd` | Malhotra et al., LSTM encoder-decoder anomaly detector -- Malhotra et al., LSTM encoder-decoder anomaly detector | https://arxiv.org/abs/1607.00148 | `local` | Sequence-autoencoder precedent; not universal threshold evidence |
+| `paper-rnn-search-2015` | `paper-rnn-search-2015:revision:sha256:7f363f955ef10b20b8c258dec7f7e3b1a150d984cc46916a43ab0a00c6acd1c6` | Jozefowicz et al. -- Jozefowicz et al. | https://proceedings.mlr.press/v37/jozefowicz15.pdf | `local` | No universal LSTM/GRU winner |
+| `std-bipm-si-brochure-9-v4.01-2026` | `std-bipm-si-brochure-9-v4.01-2026:revision:doi-10.59161-auez1291` | The International System of Units (SI Brochure), 9th edition -- 9th edition, version 4.01 (2026) | https://doi.org/10.59161/AUEZ1291 | `link_only` | Bounded SI unit-system and quantity representation context. |
+| `std-cloudevents-102` | `std-cloudevents-102:revision:sha256:e327435c858d19fd171e4ab9781a01fc22dfa949d23c4220976529ebd16a1aa3` | CloudEvents v1.0.2 -- CloudEvents v1.0.2 | https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md | `local` | Envelope identity semantics only |
+| `std-iec-60381-1-1982` | `std-iec-60381-1-1982:revision:metadata:7dc6c6baf8929ecb2870` | IEC 60381-1 Ed. 2.0 (1982) -- IEC 60381-1 Ed. 2.0 (1982) | https://webstore.iec.ch/en/publication/1948 | `restricted` | Industrial DC-current signals |
+| `std-iec-60381-2-1978` | `std-iec-60381-2-1978:revision:metadata:2fac104390b7335e6e36` | IEC 60381-2 Ed. 1.0 (1978) -- IEC 60381-2 Ed. 1.0 (1978) | https://webstore.iec.ch/en/publication/1949 | `restricted` | Industrial DC-voltage signals and limitations |
+| `std-iec-61511-1-2017` | `std-iec-61511-1-2017:revision:metadata:b3ccbe268c80ae73b92b` | IEC 61511-1 Ed. 2.1 consolidated (2017) -- IEC 61511-1 Ed. 2.1 consolidated (2017) | https://webstore.iec.ch/en/publication/61289 | `restricted` | Functional-safety boundary; no compliance claim |
+| `std-iec-62443-3-2-2020` | `std-iec-62443-3-2-2020:revision:metadata:18325164f573e0ec6ca2` | IEC 62443-3-2 Ed. 1.0 (2020) -- IEC 62443-3-2 Ed. 1.0 (2020) | https://webstore.iec.ch/en/publication/30727 | `restricted` | Zones, conduits, and risk assessment |
+| `std-isa-50-archived` | `std-isa-50-archived:revision:metadata:2c1636ac962f256a69e3` | ANSI/ISA-50.00.01, archived 2024 -- ANSI/ISA-50.00.01, archived 2024 | https://www.isa.org/standards-and-publications/isa-standards/isa-standards-committees/isa50 | `restricted` | Historical 4-20 mA reference; not an active standard |
+| `std-jcgm-100-2008` | `std-jcgm-100-2008:revision:sha256:41bbf068fbc0d7986c98691b2d1af6680cb3044f6a1a89b3560933ed9ef9626c` | JCGM 100:2008, GUM -- JCGM 100:2008, GUM | https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf | `local` | Type-B uncertainty and propagation |
+| `std-mqtt-5-2019` | `std-mqtt-5-2019:revision:sha256:e8f8e9d2467618d5c5a6398bdf971cb90cdbe2c8e33242e028f442bee8e5de20` | MQTT v5.0 OASIS Standard (2019) -- MQTT v5.0 OASIS Standard (2019) | https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.pdf | `local` | QoS, delivery, ordering, duplicates |
+| `std-namur-ne43-2021` | `std-namur-ne43-2021:revision:metadata:90a7fbe7941b6f24dbee` | NAMUR NE 43 revision notice (2021) -- NAMUR NE 43 revision notice (2021) | https://www.namur.net/en/publications/news-archive/ne-43-has-been-revised.html | `restricted` | Failure-current semantics; numerical use requires device manual |
+| `std-oci-image-111` | `std-oci-image-111:revision:sha256:89399b5ffabfeb9688b66de9afcf08b60691710d94d0f5b061cb30e6fbc75428` | OCI Image Specification descriptor v1.1.1 -- OCI Image Specification descriptor v1.1.1 | https://github.com/opencontainers/image-spec/tree/v1.1.1 | `local` | Content identifiers, digest and size verification |
+| `std-opcua-part4-10507` | `std-opcua-part4-10507:revision:metadata:58638cb436146c36dc0f` | OPC UA Part 4 v1.05.07 -- OPC UA Part 4 v1.05.07 | https://reference.opcfoundation.org/specs/OPC-10000-4/v1.05.07 | `link_only` | DataValue quality and timestamps |
+| `std-opcua-part8-10507` | `std-opcua-part8-10507:revision:metadata:b841c0b1b2dfed72700d` | OPC UA Part 8 v1.05.07 -- OPC UA Part 8 v1.05.07 | https://reference.opcfoundation.org/specs/OPC-10000-8/v1.05.07 | `link_only` | AnalogItem, current/process values, ranges and units |
+| `std-otel-log-model-1600` | `std-otel-log-model-1600:revision:sha256:3ee2c391a5d3262130582df89a3dc5a5640d837d010734ea79458fe3ece31173` | OpenTelemetry Log Data Model v1.60.0 -- OpenTelemetry Log Data Model v1.60.0 | https://github.com/open-telemetry/opentelemetry-specification/tree/v1.60.0 | `local` | Source versus observed timestamps and trace context |
+| `std-rfc3339-2002` | `std-rfc3339-2002:revision:metadata:a6bf61dbf9e1c4411d82` | RFC 3339 timestamps -- not_stated | https://www.rfc-editor.org/rfc/rfc3339.html | `link_only` | Timestamp serialization |
+| `std-rfc5905-2010` | `std-rfc5905-2010:revision:sha256:8b7abd903c60202e2953ee012fefa6916666c3b0c71825c748cdd262024fb268` | RFC 5905, NTPv4 -- RFC 5905, NTPv4 | https://www.rfc-editor.org/info/rfc5905/ | `local` | Clock synchronization evidence |
+| `std-rfc8785-2020` | `std-rfc8785-2020:revision:sha256:1796e120ab220ede15bd88f3740c29f00ebd0d52bd39014aee0cd98b49b8a973` | RFC 8785, JSON Canonicalization -- RFC 8785, JSON Canonicalization | https://www.rfc-editor.org/rfc/rfc8785.pdf | `local` | Stable JSON hashing/signing |
+| `std-spdx-301-licensing-profile` | `std-spdx-301-licensing-profile:revision:3.0.1` | SPDX 3.0.1 Licensing Profile -- 3.0.1 | https://spdx.github.io/spdx-spec/v3.0.1/model/Licensing/Licensing/ | `link_only` | conceptual declared/concluded/missing-license distinctions |
+| `std-w3c-prov-dm-2013` | `std-w3c-prov-dm-2013:revision:metadata:543fc393f19b96767d14` | W3C PROV-DM -- not_stated | https://www.w3.org/TR/prov-dm/ | `link_only` | Artifact lineage entities/activities/agents |
+| `tool-docker-container-kernel` | `tool-docker-container-kernel:revision:metadata:7bd6e5fe453641f6748b` | Tool Docker Container Kernel -- not_stated | https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/ | `link_only` | Containers are isolated processes that share the Linux kernel; establishes the capture boundary |
+| `tool-docker-desktop-isolation` | `tool-docker-desktop-isolation:revision:metadata:68698357744868902253` | Tool Docker Desktop Isolation -- not_stated | https://docs.docker.com/security/faqs/containers/ | `link_only` | On Windows, Linux containers run inside Docker Desktop's Linux VM; host-capture claims must name that boundary |
+| `tool-docker-pin` | `tool-docker-pin:revision:metadata:6bc40882985f4a9d1751` | Tool Docker Pin -- not_stated | https://docs.docker.com/build/building/best-practices/ | `link_only` | Pin mutable image tags by digest |
+| `tool-falco-drops` | `tool-falco-drops:revision:metadata:efb3174cf214b525d325` | Tool Falco Drops -- not_stated | https://falco.org/docs/concepts/event-sources/kernel/dropped-events/ | `link_only` | Capture drop counters and run-quality policy |
+| `tool-lid-recording-framework` | `tool-lid-recording-framework:revision:metadata:eeec6fd259ff2084601c` | Tool Lid Recording Framework -- not_stated | https://github.com/LID-DS/LID-DS/wiki/LID-DS-Recording-Framework%3A-Documentation-and-Installation | `link_only` | Primary precedent for building scenario images and recording real syscalls with Sysdig |
+| `tool-linux-tracepoints` | `tool-linux-tracepoints:revision:metadata:8f19c56e4a676d6b5eb5` | Tool Linux Tracepoints -- not_stated | https://docs.kernel.org/trace/tracepoints.html | `link_only` | Kernel hooks used for tracing/performance accounting |
+| `tool-minio-object-lock` | `tool-minio-object-lock:revision:metadata:1d51577740c9b1ba5f34` | Tool Minio Object Lock -- not_stated | https://min.io/docs/minio/windows/administration/object-management/object-retention.html | `link_only` | Optional WORM evidence retention |
+| `tool-minio-versioning` | `tool-minio-versioning:revision:metadata:c0b96765fe2ccf70e039` | Tool Minio Versioning -- not_stated | https://min.io/docs/minio/kubernetes/upstream/administration/object-management/object-versioning.html | `link_only` | Immutable-style artifact storage and capacity caution |
+| `tool-oci-digest` | `tool-oci-digest:revision:metadata:31455dc428b89164d7e0` | Tool Oci Digest -- not_stated | https://github.com/opencontainers/image-spec/blob/main/descriptor.md | `link_only` | Content-addressed image/artifact identity |
+| `tool-python-314-dataclasses` | `tool-python-314-dataclasses:revision:observed-3.14.7-2026-08-22` | Python 3.14.7 dataclasses documentation -- 3.14.7 | https://docs.python.org/3.14/library/dataclasses.html | `link_only` | frozen dataclass behavior and limitations |
+| `tool-python-314-decimal` | `tool-python-314-decimal:revision:3.14` | Python 3.14 decimal documentation -- 3.14 | https://docs.python.org/3.14/library/decimal.html | `link_only` | Python 3.14 Decimal construction, contexts, rounding, and signals only. |
+| `tool-python-314-hashlib` | `tool-python-314-hashlib:revision:observed-3.14.7-2026-08-22` | Python 3.14.7 hashlib documentation -- 3.14.7 | https://docs.python.org/3.14/library/hashlib.html | `link_only` | hashlib.file_digest opaque binary hashing behavior |
+| `tool-python-314-json` | `tool-python-314-json:revision:observed-3.14.7-2026-08-22` | Python 3.14.7 json documentation -- 3.14.7 | https://docs.python.org/3.14/library/json.html | `link_only` | deterministic JSON options and NaN rejection |
+| `tool-pytorch-reproducibility` | `tool-pytorch-reproducibility:revision:metadata:9dcad43dd4f361cd737f` | Tool Pytorch Reproducibility -- not_stated | https://docs.pytorch.org/docs/stable/notes/randomness | `link_only` | Seeds/determinism limits and cost |
+| `tool-sklearn-leakage` | `tool-sklearn-leakage:revision:metadata:2d7d411246a229872482` | Tool Sklearn Leakage -- not_stated | https://scikit-learn.org/stable/common_pitfalls.html | `link_only` | Train-only preprocessing and no test leakage |
+| `tool-sysdig-container-capture` | `tool-sysdig-container-capture:revision:metadata:b3e15be4f1c298e75a12` | Tool Sysdig Container Capture -- not_stated | https://github.com/draios/sysdig | `link_only` | Container-aware Linux system-event capture and immutable `.scap` traces |
+| `tool-uv-locking` | `tool-uv-locking:revision:metadata:955aa6e3d266cf1bd545` | Tool Uv Locking -- not_stated | https://docs.astral.sh/uv/concepts/projects/sync/ | `link_only` | Frozen dependency environment |
+| `vendor-danfoss-cds803-design` | `vendor-danfoss-cds803-design:revision:sha256:acb1236e74792eb1ff320e4a0378bd3360161a5a4f780d8ce9c4fb537235893d` | VLT CDS 803 Design Guide AJ330233902305 -- VLT CDS 803 Design Guide AJ330233902305 | https://assets.danfoss.com/documents/272571/AJ330233902305en-000301.pdf | `local` | Compressor-drive 4-20 mA reference |
+| `vendor-danfoss-cds803-programming-2021` | `vendor-danfoss-cds803-programming-2021:revision:sha256:03485b6f6434ac1d17f96430e0ea5bea8d86a756089e51c782aaf52866ba47a2` | VLT CDS 803 Programming Guide AU356039245821 en-000201 / 130R0597 (2021.07) -- VLT CDS 803 Programming Guide AU356039245821 en-000201 / 130R0597 (2021.07) | https://assets.danfoss.com/documents/273384/AU356039245821en-000201.pdf | `local` | Terminal 53 current and reference/feedback configuration; printed p. 54, Tables 60-63, parameters 6-12 through 6-15 |
+| `vendor-doe-compressed-air-sourcebook` | `vendor-doe-compressed-air-sourcebook:revision:sha256:3280284235b8daef10f7d9e6a21aada90d7b804b805cc9ef842903aeca009c22` | Compressed Air Sourcebook, 3rd ed. -- Compressed Air Sourcebook, 3rd ed. | https://www.energy.gov/sites/prod/files/2016/03/f30/Improving%20Compressed%20Air%20Sourcebook%20version%203.pdf | `local` | Compressor capacity/speed/power limitations |
+| `vendor-electrosensors-fb420-datasheet-2025` | `vendor-electrosensors-fb420-datasheet-2025:revision:sha256:8a7f0dc5f4f26d0c9c07b6ebdd980a35a0120e9b7ee762c9945a58a6ed409eab` | FB420 2.0 ES730 Rev I -- FB420 2.0 ES730 Rev I | https://www.electro-sensors.com/download_file/337/1274 | `local` | Real 4-20 mA RPM sensor and uncertainty |
+| `vendor-electrosensors-fb420-manual` | `vendor-electrosensors-fb420-manual:revision:sha256:a93d9b37eaa57faf80a5e2f64be89337daed7d82e5de7a703aaf96c776e2de0b` | FB420 v2.0 990-003401 Rev A -- FB420 v2.0 990-003401 Rev A | https://www.electro-sensors.com/application/files/4817/1095/7949/FB420_v2.0_Standard_990-003401_Rev_A.pdf | `local` | RPM endpoint configuration |
+| `vendor-endress-ra33-2021` | `vendor-endress-ra33-2021:revision:sha256:00fc11fcc714f471bd84ae0c25b45da090f7e83f46868546421fffdfb46640b8` | Endress+Hauser RA33 BA00300K -- Endress+Hauser RA33 BA00300K | https://bdih-download.endress.com/file/005056A5E3831EECA4FD81E28AFA37F3/BA00300KEN_0621-00.pdf | `local` | Under/over-range and device-fault behavior |
+| `vendor-fieldcomm-hart-guide-r71` | `vendor-fieldcomm-hart-guide-r71:revision:sha256:e04766143267f116cb52b32a0db9fe7c9ea7032e09d3267e7d2d3b7fe9075f17` | HART Application Guide Rev. 7.1 -- HART Application Guide Rev. 7.1 | https://www.fieldcommgroup.org/sites/default/files/imce_files/technology/documents/HART_ApplicationGuide_r7.1.pdf | `local` | HART/4-20 mA relationship; prototype remains HART-inspired |
+| `vendor-ni-scaling-2024` | `vendor-ni-scaling-2024:revision:metadata:581e22f8152b05855af0` | NI 4-20 mA scaling guidance -- not_stated | https://knowledge.ni.com/KnowledgeArticleDetails?id=kA00Z000000PASfSAO | `link_only` | Linear endpoint conversion |
+| `vendor-rockwell-5034-um003-2025` | `vendor-rockwell-5034-um003-2025:revision:sha256:a9b9ee322ad3d8e6cf7dc6abd3cfa510b0fb087a9ba7d7844de83502fd891a50` | PointMax 5034 Analog I/O, 5034-UM003-EN-P -- PointMax 5034 Analog I/O, 5034-UM003-EN-P | https://literature.rockwellautomation.com/idc/groups/literature/documents/um/5034-um003_-en-p.pdf | `local` | 4/12/20 mA scaling and channel data |
+| `vendor-siemens-sitrans-p200-2025` | `vendor-siemens-sitrans-p200-2025:revision:metadata:53600ea36a57f964cfbe` | SITRANS P200/P210/P220 FI 01 (2025) -- SITRANS P200/P210/P220 FI 01 (2025) | https://support.industry.siemens.com/cs/attachments/109765047/sitransp_p200_p210_p220_fi01_fr.pdf | `pending` | Candidate 0-10 bar gauge-pressure, 4-20 mA two-wire profile; printed p. 1/7 selection table; dependent formal profile remains blocked until exact bytes are archived and hashed |
+| `vendor-siemens-sitrans-th-2025` | `vendor-siemens-sitrans-th-2025:revision:sha256:72409ba9305e9073c19a08935207573ca10f1067814aec79c344ad19b3b99068` | SITRANS TH320/TH420 FI01 (official Spanish edition archived) -- SITRANS TH320/TH420 FI01 (official Spanish edition archived) | https://cache.industry.siemens.com/dl/files/161/109765161/att_1324085/v1/sitranst_th320_th420_fi01_es.pdf | `local` | Normal/extended/fault current bands |
 
-- `local`: a verification copy is stored in `../documents/` and identified by
-  `checksums.sha256`.
-- `link-only`: the official source is an HTML/specification/repository page.
-- `restricted`: the full standard is paywalled or access-controlled and is not
-  copied without a license.
-- `pending`: automated retrieval has not yet succeeded and must be performed
-  manually from the official URL.
+## Exact source uses
 
-## Standards and official specifications
-
-| Source ID | Document/version | Official source | Status | Project use |
-|---|---|---|---|---|
-| `std-iec-60381-1-1982` | IEC 60381-1 Ed. 2.0 (1982) | [IEC](https://webstore.iec.ch/en/publication/1948) | restricted | Industrial DC-current signals |
-| `std-iec-60381-2-1978` | IEC 60381-2 Ed. 1.0 (1978) | [IEC](https://webstore.iec.ch/en/publication/1949) | restricted | Industrial DC-voltage signals and limitations |
-| `std-isa-50-archived` | ANSI/ISA-50.00.01, archived 2024 | [ISA50](https://www.isa.org/standards-and-publications/isa-standards/isa-standards-committees/isa50), [archive](https://www.isa.org/standards-and-publications/isa-standards/archived-standards) | restricted | Historical 4-20 mA reference; not an active standard |
-| `std-namur-ne43-2021` | NAMUR NE 43 revision notice (2021) | [NAMUR](https://www.namur.net/en/publications/news-archive/ne-43-has-been-revised.html) | restricted | Failure-current semantics; numerical use requires device manual |
-| `std-iec-62443-3-2-2020` | IEC 62443-3-2 Ed. 1.0 (2020) | [IEC](https://webstore.iec.ch/en/publication/30727) | restricted | Zones, conduits, and risk assessment |
-| `std-iec-61511-1-2017` | IEC 61511-1 Ed. 2.1 consolidated (2017) | [IEC](https://webstore.iec.ch/en/publication/61289) | restricted | Functional-safety boundary; no compliance claim |
-| `std-jcgm-100-2008` | JCGM 100:2008, GUM | [BIPM PDF](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf) | local | Type-B uncertainty and propagation |
-| `std-mqtt-5-2019` | MQTT v5.0 OASIS Standard (2019) | [OASIS PDF](https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.pdf) | local | QoS, delivery, ordering, duplicates |
-| `std-rfc5905-2010` | RFC 5905, NTPv4 | [RFC Editor](https://www.rfc-editor.org/info/rfc5905/) | local (official ASCII edition) | Clock synchronization evidence |
-| `std-rfc3339-2002` | RFC 3339 timestamps | [RFC Editor](https://www.rfc-editor.org/rfc/rfc3339.html) | link-only | Timestamp serialization |
-| `std-rfc8785-2020` | RFC 8785, JSON Canonicalization | [RFC Editor PDF](https://www.rfc-editor.org/rfc/rfc8785.pdf) | local | Stable JSON hashing/signing |
-| `std-opcua-part4-10507` | OPC UA Part 4 v1.05.07 | [OPC Foundation](https://reference.opcfoundation.org/specs/OPC-10000-4/v1.05.07) | link-only | DataValue quality and timestamps |
-| `std-opcua-part8-10507` | OPC UA Part 8 v1.05.07 | [OPC Foundation](https://reference.opcfoundation.org/specs/OPC-10000-8/v1.05.07) | link-only | AnalogItem, current/process values, ranges and units |
-| `std-cloudevents-102` | CloudEvents v1.0.2 | [CNCF specification](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md) | local | Envelope identity semantics only |
-| `std-w3c-prov-dm-2013` | W3C PROV-DM | [W3C Recommendation](https://www.w3.org/TR/prov-dm/) | link-only | Artifact lineage entities/activities/agents |
-| `std-otel-log-model-1600` | OpenTelemetry Log Data Model v1.60.0 | [OpenTelemetry tag](https://github.com/open-telemetry/opentelemetry-specification/tree/v1.60.0) | local | Source versus observed timestamps and trace context |
-| `std-oci-image-111` | OCI Image Specification descriptor v1.1.1 | [OCI tag](https://github.com/opencontainers/image-spec/tree/v1.1.1) | local | Content identifiers, digest and size verification |
-
-## Manufacturer and instrument documentation
-
-| Source ID | Document/version | Official source | Status | Project use |
-|---|---|---|---|---|
-| `vendor-ni-scaling-2024` | NI 4-20 mA scaling guidance | [NI](https://knowledge.ni.com/KnowledgeArticleDetails?id=kA00Z000000PASfSAO) | link-only | Linear endpoint conversion |
-| `vendor-rockwell-5034-um003-2025` | PointMax 5034 Analog I/O, 5034-UM003-EN-P | [Rockwell PDF](https://literature.rockwellautomation.com/idc/groups/literature/documents/um/5034-um003_-en-p.pdf) | local | 4/12/20 mA scaling and channel data |
-| `vendor-siemens-sitrans-th-2025` | SITRANS TH320/TH420 FI01 (official Spanish edition archived) | [Siemens PDF](https://cache.industry.siemens.com/dl/files/161/109765161/att_1324085/v1/sitranst_th320_th420_fi01_es.pdf) | local | Normal/extended/fault current bands |
-| `vendor-endress-ra33-2021` | Endress+Hauser RA33 BA00300K | [Endress PDF](https://bdih-download.endress.com/file/005056A5E3831EECA4FD81E28AFA37F3/BA00300KEN_0621-00.pdf) | local | Under/over-range and device-fault behavior |
-| `vendor-electrosensors-fb420-datasheet-2025` | FB420 2.0 ES730 Rev I | [Electro-Sensors](https://www.electro-sensors.com/download_file/337/1274) | local | Real 4-20 mA RPM sensor and uncertainty |
-| `vendor-electrosensors-fb420-manual` | FB420 v2.0 990-003401 Rev A | [Electro-Sensors PDF](https://www.electro-sensors.com/application/files/4817/1095/7949/FB420_v2.0_Standard_990-003401_Rev_A.pdf) | local | RPM endpoint configuration |
-| `vendor-danfoss-cds803-design` | VLT CDS 803 Design Guide AJ330233902305 | [Danfoss PDF](https://assets.danfoss.com/documents/272571/AJ330233902305en-000301.pdf) | local | Compressor-drive 4-20 mA reference |
-| `vendor-danfoss-cds803-programming-2021` | VLT CDS 803 Programming Guide AU356039245821 en-000201 / 130R0597 (2021.07) | [Danfoss PDF](https://assets.danfoss.com/documents/273384/AU356039245821en-000201.pdf) | local; 2,206,514 bytes; retrieved 2026-08-22 | Terminal 53 current and reference/feedback configuration; printed p. 54, Tables 60-63, parameters 6-12 through 6-15 |
-| `vendor-siemens-sitrans-p200-2025` | SITRANS P200/P210/P220 FI 01 (2025) | [Siemens PDF](https://support.industry.siemens.com/cs/attachments/109765047/sitransp_p200_p210_p220_fi01_fr.pdf) | pending; official server denied automated archival on 2026-08-22 | Candidate 0-10 bar gauge-pressure, 4-20 mA two-wire profile; printed p. 1/7 selection table; dependent formal profile remains blocked until exact bytes are archived and hashed |
-| `vendor-doe-compressed-air-sourcebook` | Compressed Air Sourcebook, 3rd ed. | [US DOE PDF](https://www.energy.gov/sites/prod/files/2016/03/f30/Improving%20Compressed%20Air%20Sourcebook%20version%203.pdf) | local | Compressor capacity/speed/power limitations |
-| `vendor-fieldcomm-hart-guide-r71` | HART Application Guide Rev. 7.1 | [FieldComm PDF](https://www.fieldcommgroup.org/sites/default/files/imce_files/technology/documents/HART_ApplicationGuide_r7.1.pdf) | local | HART/4-20 mA relationship; prototype remains HART-inspired |
-
-## Government and research-data guidance
-
-| Source ID | Document/version | Official source | Status | Project use |
-|---|---|---|---|---|
-| `gov-nist-sp800-82r3-2023` | NIST SP 800-82 Rev. 3 | [NIST PDF](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-82r3.pdf) | local | OT architecture, availability, zones and flows |
-| `gov-nist-ir8219-2020` | NIST IR 8219 | [NIST PDF](https://nvlpubs.nist.gov/nistpubs/ir/2020/NIST.IR.8219.pdf) | local | Passive behavioral anomaly detection for ICS |
-| `gov-nist-ir8089-2015` | NIST IR 8089 | [NIST PDF](https://nvlpubs.nist.gov/nistpubs/ir/2015/NIST.IR.8089.pdf) | local | Realistic bounded ICS cybersecurity testbed |
-| `gov-nist-sp1800-10-2022` | NIST SP 1800-10 | [NIST PDF](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1800-10.pdf) | link-only (automated endpoint returned HTTP 404) | Manufacturing integrity example builds |
-| `gov-nist-sp1339-2026` | NIST SP 1339 | [NIST PDF](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.1339.pdf) | local | OT backup and tested restoration |
-| `gov-nist-rdaf2-2024` | NIST SP 1500-18 Rev. 2, RDaF 2.0 | [NIST PDF](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/1500-18/NIST.SP.1500-18r2.pdf) | local | Raw/derived data, versioning and provenance |
-| `gov-nist-ai-rmf-2023` | NIST AI RMF 1.0 | [NIST PDF](https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf) | local | Model documentation and TEVV |
-| `gov-nist-ai-rmf-playbook` | NIST AI RMF Playbook | [NIST PDF](https://airc.nist.gov/docs/AI_RMF_Playbook.pdf) | local | Repeatable evaluation/documentation practices |
-| `gov-nist-sp800-53r5` | NIST SP 800-53 Rev. 5 | [NIST PDF](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf) | local | Least privilege, separation and audit protection |
-| `gov-nist-sp800-218-2022` | NIST SP 800-218, SSDF | [NIST PDF](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf) | local | Secure development, verification and documented releases |
-| `gov-cisa-segmentation-2022` | Layering Network Security Through Segmentation | [CISA PDF](https://www.cisa.gov/sites/default/files/publications/layering-network-security-segmentation_infographic_508_0.pdf) | local | Supporting network-segmentation guidance |
-
-## Dataset-owner and model primary sources
-
-| Source ID | Document/version | Official source | Status | Project use |
-|---|---|---|---|---|
-| `dataset-adfa-official` | ADFA IDS datasets | [UNSW](https://research.unsw.edu.au/projects/adfa-ids-datasets) | link-only | Owner page, academic-use terms and dataset identity |
-| `dataset-lid-official` | LID-DS official repository | [Leipzig/GitHub](https://github.com/LID-DS/LID-DS) | link-only | Official layouts, loader and GPL terms |
-| `dataset-lid-paper-2023` | LID-DS 2021 evaluation paper | [Leipzig PDF](https://dbs.uni-leipzig.de/files/research/publications/2023-6/pdf/978-3-031-35190-7_6.pdf) | local | Official split/schema/evaluation semantics |
-| `dataset-hai-official` | HAI official repository | [HAI GitHub](https://github.com/icsdataset/hai) | link-only | Versioned data and license caveat |
-| `dataset-hai-manual-v4` | HAI Technical Details v4.0 | [HAI PDF](https://raw.githubusercontent.com/icsdataset/hai/master/hai_dataset_technical_details.pdf) | local | Tag ranges, layouts and scenario details |
-| `paper-lstm-1997` | Hochreiter & Schmidhuber, LSTM | [MIT Press DOI page](https://direct.mit.edu/neco/article/9/8/1735/6109/Long-Short-Term-Memory), [author copy](https://www.bioinf.jku.at/publications/older/2604.pdf) | local (author copy; redistribution caveat) | LSTM design motivation, not superiority evidence |
-| `paper-gru-2014` | Cho et al., GRU | [ACL PDF](https://aclanthology.org/D14-1179.pdf) | local | GRU primary paper |
-| `paper-rnn-search-2015` | Jozefowicz et al. | [PMLR PDF](https://proceedings.mlr.press/v37/jozefowicz15.pdf) | local | No universal LSTM/GRU winner |
-| `paper-deeplog-2017` | DeepLog | [University of Utah PDF](https://www2.cs.utah.edu/~lifeifei/papers/deeplog.pdf) | local (author copy; redistribution caveat) | Categorical event-sequence LSTM precedent |
-| `paper-hai-2020` | HAI 1.0 | [USENIX PDF](https://www.usenix.org/system/files/cset20-paper-shin.pdf) | local | Dataset origin and evaluation context |
-| `paper-lstm-ed-anomaly-2016` | Malhotra et al., LSTM encoder-decoder anomaly detector | [arXiv v2](https://arxiv.org/abs/1607.00148) | local | Sequence-autoencoder precedent; not universal threshold evidence |
-| `metric-etapr` | eTaPR official implementation | [Official GitHub](https://github.com/wshw4ng/eTaPR) | link-only | Range/event-aware anomaly evaluation |
-
-## Tooling and operational references
-
-| Source ID | Official source | Status | Project use |
+| Use ID | Source revision | Status | Exact locator |
 |---|---|---|---|
-| `tool-docker-container-kernel` | [Docker: What is a container?](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/) | link-only | Containers are isolated processes that share the Linux kernel; establishes the capture boundary |
-| `tool-docker-desktop-isolation` | [Docker Desktop container security](https://docs.docker.com/security/faqs/containers/) | link-only | On Windows, Linux containers run inside Docker Desktop's Linux VM; host-capture claims must name that boundary |
-| `tool-linux-tracepoints` | [Linux kernel tracepoints](https://docs.kernel.org/trace/tracepoints.html) | link-only | Kernel hooks used for tracing/performance accounting |
-| `tool-sysdig-container-capture` | [Official Sysdig repository](https://github.com/draios/sysdig) | link-only | Container-aware Linux system-event capture and immutable `.scap` traces |
-| `tool-lid-recording-framework` | [Official LID-DS Docker/Sysdig recording framework](https://github.com/LID-DS/LID-DS/wiki/LID-DS-Recording-Framework%3A-Documentation-and-Installation) | link-only | Primary precedent for building scenario images and recording real syscalls with Sysdig |
-| `tool-uv-locking` | [uv locking and syncing](https://docs.astral.sh/uv/concepts/projects/sync/) | link-only | Frozen dependency environment |
-| `tool-docker-pin` | [Docker build best practices](https://docs.docker.com/build/building/best-practices/) | link-only | Pin mutable image tags by digest |
-| `tool-oci-digest` | [OCI content descriptors](https://github.com/opencontainers/image-spec/blob/main/descriptor.md) | link-only | Content-addressed image/artifact identity |
-| `tool-minio-versioning` | [MinIO versioning](https://min.io/docs/minio/kubernetes/upstream/administration/object-management/object-versioning.html) | link-only | Immutable-style artifact storage and capacity caution |
-| `tool-minio-object-lock` | [MinIO object locking](https://min.io/docs/minio/windows/administration/object-management/object-retention.html) | link-only | Optional WORM evidence retention |
-| `tool-pytorch-reproducibility` | [PyTorch reproducibility](https://docs.pytorch.org/docs/stable/notes/randomness) | link-only | Seeds/determinism limits and cost |
-| `tool-sklearn-leakage` | [scikit-learn common pitfalls](https://scikit-learn.org/stable/common_pitfalls.html) | link-only | Train-only preprocessing and no test leakage |
-| `tool-falco-drops` | [Falco dropped syscall events](https://falco.org/docs/concepts/event-sources/kernel/dropped-events/) | link-only | Capture drop counters and run-quality policy |
-
-## Caveats
-
-- A locally stored manual or paper does not transfer redistribution rights.
-- An official link is not proof that every number in the document applies to
-  this compressor profile; the exact page/table/section belongs in
-  `parameter-evidence.csv`.
-- Repository pages and web specifications are intentionally indexed rather
-  than copied when no stable public document or redistribution basis exists.
-- `latest` URLs are never sufficient provenance without the retrieved file's
-  document number and SHA-256.
-- The Danfoss programming-guide source authorizes configurability and the
-  documented defaults for parameters 6-12 and 6-13. It does not make the
-  project-selected 0/100 reference configuration or 25%/75% experiment factors
-  manufacturer recommendations.
+| `use:dataset-adfa-historical-project-copy:mirror-only` | `dataset-adfa-historical-project-copy:revision:unknown-legacy` | `unresolved` | unresolved |
+| `use:dataset-adfa-official:legacy-project-scope` | `dataset-adfa-official:revision:metadata:21a3b9244ea8db2dba6b` | `unresolved` | unresolved |
+| `use:dataset-hai-manual-v4:legacy-project-scope` | `dataset-hai-manual-v4:revision:sha256:0668345c4e80331b918fe17c81f8f363b13bd22886831d286e761bc62b71a556` | `unresolved` | unresolved |
+| `use:dataset-hai-official:legacy-project-scope` | `dataset-hai-official:revision:metadata:32c7194fec3bd5879f48` | `unresolved` | unresolved |
+| `use:dataset-lid-official:legacy-project-scope` | `dataset-lid-official:revision:metadata:a4fe73dcaac5c94c8c42` | `unresolved` | unresolved |
+| `use:dataset-lid-paper-2023:legacy-project-scope` | `dataset-lid-paper-2023:revision:sha256:832b5b7dfd7efd7b6f4a752d46965dfd3793c53c8dcf320130985e16e981c6ff` | `unresolved` | unresolved |
+| `use:gov-cisa-segmentation-2022:legacy-project-scope` | `gov-cisa-segmentation-2022:revision:sha256:71462d1423fc3c057ceb465ee587d4d9b08271e137dbf88f05162aae015c6ade` | `unresolved` | unresolved |
+| `use:gov-nist-ai-rmf-2023:legacy-project-scope` | `gov-nist-ai-rmf-2023:revision:sha256:7576edb531d9848825814ee88e28b1795d3a84b435b4b797d3670eafdc4a89f1` | `unresolved` | unresolved |
+| `use:gov-nist-ai-rmf-playbook:legacy-project-scope` | `gov-nist-ai-rmf-playbook:revision:sha256:65d6101d806502875aadb0fd19a75c3a9cc9a5e9461129e9398a39192d8202d2` | `unresolved` | unresolved |
+| `use:gov-nist-ir8089-2015:97cade2a9322322f` | `gov-nist-ir8089-2015:revision:sha256:26fc56f15aa24a2461f493ddae9f707fd488daa83ea094a7769262b003cbac0d` | `located` | PDF p. 8 (document p. 1) and PDF p. 54 (document p. 47) |
+| `use:gov-nist-ir8089-2015:legacy-project-scope` | `gov-nist-ir8089-2015:revision:sha256:26fc56f15aa24a2461f493ddae9f707fd488daa83ea094a7769262b003cbac0d` | `unresolved` | unresolved |
+| `use:gov-nist-ir8219-2020:legacy-project-scope` | `gov-nist-ir8219-2020:revision:sha256:7247853e3246fcf8e9a7e8ca9b892fc93f93c41d1de42937608d4f6272430898` | `unresolved` | unresolved |
+| `use:gov-nist-rdaf2-2024:legacy-project-scope` | `gov-nist-rdaf2-2024:revision:sha256:05bc3d5f4e1d399edd9c2e3df025de4eacfd0eee313baf56ec4bd58db20ce833` | `unresolved` | unresolved |
+| `use:gov-nist-sp1339-2026:legacy-project-scope` | `gov-nist-sp1339-2026:revision:sha256:d7b477ceeae79cc71aa768622037d066752e8a0a8f8dd082714c9ea775623542` | `unresolved` | unresolved |
+| `use:gov-nist-sp1800-10-2022:legacy-project-scope` | `gov-nist-sp1800-10-2022:revision:metadata:3b171df005c33b1b0e83` | `unresolved` | unresolved |
+| `use:gov-nist-sp800-218-2022:legacy-project-scope` | `gov-nist-sp800-218-2022:revision:sha256:617746e553a9e2da49bfbd4eef0dfc3094758a39b869314e4173ac36605cde22` | `unresolved` | unresolved |
+| `use:gov-nist-sp800-53r5:legacy-project-scope` | `gov-nist-sp800-53r5:revision:sha256:fc63bcd61715d0181dd8e85998b1e6201ae3515fc6626102101cab1841e11ec6` | `unresolved` | unresolved |
+| `use:gov-nist-sp800-82r3-2023:legacy-project-scope` | `gov-nist-sp800-82r3-2023:revision:sha256:608f554514d381853e24e0b33123b7080fbd757826f460032690aade63394616` | `unresolved` | unresolved |
+| `use:metric-etapr:legacy-project-scope` | `metric-etapr:revision:metadata:305be270ccc252ea030c` | `unresolved` | unresolved |
+| `use:paper-deeplog-2017:legacy-project-scope` | `paper-deeplog-2017:revision:sha256:713243f79c4a2b4b97ccb31e0b1ac0820099894aab3db62a3fba6cd83d462f66` | `unresolved` | unresolved |
+| `use:paper-gru-2014:legacy-project-scope` | `paper-gru-2014:revision:sha256:c948d89ccd33da2a48421b45445f1c30f5fe677a829af9e5e1b6f9ff75a14a81` | `unresolved` | unresolved |
+| `use:paper-hai-2020:legacy-project-scope` | `paper-hai-2020:revision:sha256:d59b538ed91640ce71f236ca079387805bca4223c7f2014c9d6f64a360f803dc` | `unresolved` | unresolved |
+| `use:paper-lstm-1997:legacy-project-scope` | `paper-lstm-1997:revision:sha256:ceb9e53dbc0493f5b3bf5520ed940f3e6b526064d17b2118d77e51f79c0edcc6` | `unresolved` | unresolved |
+| `use:paper-lstm-ed-anomaly-2016:legacy-project-scope` | `paper-lstm-ed-anomaly-2016:revision:sha256:d4c506d82061d0eb532a7c172682c7c8c1803705a8dbd9561fc8980927d9b3cd` | `unresolved` | unresolved |
+| `use:paper-rnn-search-2015:legacy-project-scope` | `paper-rnn-search-2015:revision:sha256:7f363f955ef10b20b8c258dec7f7e3b1a150d984cc46916a43ab0a00c6acd1c6` | `unresolved` | unresolved |
+| `use:std-bipm-si-brochure-9-v4.01-2026:unit-context` | `std-bipm-si-brochure-9-v4.01-2026:revision:doi-10.59161-auez1291` | `located` | Sections 2.2-2.3 and Table 2, SI units and quantities |
+| `use:std-cloudevents-102:legacy-project-scope` | `std-cloudevents-102:revision:sha256:e327435c858d19fd171e4ab9781a01fc22dfa949d23c4220976529ebd16a1aa3` | `unresolved` | unresolved |
+| `use:std-iec-60381-1-1982:legacy-project-scope` | `std-iec-60381-1-1982:revision:metadata:7dc6c6baf8929ecb2870` | `unresolved` | unresolved |
+| `use:std-iec-60381-2-1978:legacy-project-scope` | `std-iec-60381-2-1978:revision:metadata:2fac104390b7335e6e36` | `unresolved` | unresolved |
+| `use:std-iec-61511-1-2017:legacy-project-scope` | `std-iec-61511-1-2017:revision:metadata:b3ccbe268c80ae73b92b` | `unresolved` | unresolved |
+| `use:std-iec-62443-3-2-2020:legacy-project-scope` | `std-iec-62443-3-2-2020:revision:metadata:18325164f573e0ec6ca2` | `unresolved` | unresolved |
+| `use:std-isa-50-archived:legacy-project-scope` | `std-isa-50-archived:revision:metadata:2c1636ac962f256a69e3` | `unresolved` | unresolved |
+| `use:std-jcgm-100-2008:definition-2.2.3` | `std-jcgm-100-2008:revision:sha256:41bbf068fbc0d7986c98691b2d1af6680cb3044f6a1a89b3560933ed9ef9626c` | `located` | Section 2.2.3 |
+| `use:std-jcgm-100-2008:introduction-0.1` | `std-jcgm-100-2008:revision:sha256:41bbf068fbc0d7986c98691b2d1af6680cb3044f6a1a89b3560933ed9ef9626c` | `located` | Section Introduction 0.1 |
+| `use:std-jcgm-100-2008:introduction-0.7-item-1` | `std-jcgm-100-2008:revision:sha256:41bbf068fbc0d7986c98691b2d1af6680cb3044f6a1a89b3560933ed9ef9626c` | `located` | Section Introduction 0.7 item 1 |
+| `use:std-jcgm-100-2008:legacy-project-scope` | `std-jcgm-100-2008:revision:sha256:41bbf068fbc0d7986c98691b2d1af6680cb3044f6a1a89b3560933ed9ef9626c` | `unresolved` | unresolved |
+| `use:std-mqtt-5-2019:legacy-project-scope` | `std-mqtt-5-2019:revision:sha256:e8f8e9d2467618d5c5a6398bdf971cb90cdbe2c8e33242e028f442bee8e5de20` | `unresolved` | unresolved |
+| `use:std-namur-ne43-2021:legacy-project-scope` | `std-namur-ne43-2021:revision:metadata:90a7fbe7941b6f24dbee` | `unresolved` | unresolved |
+| `use:std-oci-image-111:legacy-project-scope` | `std-oci-image-111:revision:sha256:89399b5ffabfeb9688b66de9afcf08b60691710d94d0f5b061cb30e6fbc75428` | `unresolved` | unresolved |
+| `use:std-opcua-part4-10507:legacy-project-scope` | `std-opcua-part4-10507:revision:metadata:58638cb436146c36dc0f` | `unresolved` | unresolved |
+| `use:std-opcua-part8-10507:legacy-project-scope` | `std-opcua-part8-10507:revision:metadata:b841c0b1b2dfed72700d` | `unresolved` | unresolved |
+| `use:std-otel-log-model-1600:legacy-project-scope` | `std-otel-log-model-1600:revision:sha256:3ee2c391a5d3262130582df89a3dc5a5640d837d010734ea79458fe3ece31173` | `unresolved` | unresolved |
+| `use:std-rfc3339-2002:legacy-project-scope` | `std-rfc3339-2002:revision:metadata:a6bf61dbf9e1c4411d82` | `unresolved` | unresolved |
+| `use:std-rfc5905-2010:legacy-project-scope` | `std-rfc5905-2010:revision:sha256:8b7abd903c60202e2953ee012fefa6916666c3b0c71825c748cdd262024fb268` | `unresolved` | unresolved |
+| `use:std-rfc8785-2020:legacy-project-scope` | `std-rfc8785-2020:revision:sha256:1796e120ab220ede15bd88f3740c29f00ebd0d52bd39014aee0cd98b49b8a973` | `unresolved` | unresolved |
+| `use:std-spdx-301-licensing-profile:implementation-guidance` | `std-spdx-301-licensing-profile:revision:3.0.1` | `located` | hasDeclaredLicense; hasConcludedLicense; missing versus NoAssertionLicense |
+| `use:std-w3c-prov-dm-2013:legacy-project-scope` | `std-w3c-prov-dm-2013:revision:metadata:543fc393f19b96767d14` | `unresolved` | unresolved |
+| `use:tool-docker-container-kernel:legacy-project-scope` | `tool-docker-container-kernel:revision:metadata:7bd6e5fe453641f6748b` | `unresolved` | unresolved |
+| `use:tool-docker-desktop-isolation:legacy-project-scope` | `tool-docker-desktop-isolation:revision:metadata:68698357744868902253` | `unresolved` | unresolved |
+| `use:tool-docker-pin:legacy-project-scope` | `tool-docker-pin:revision:metadata:6bc40882985f4a9d1751` | `unresolved` | unresolved |
+| `use:tool-falco-drops:legacy-project-scope` | `tool-falco-drops:revision:metadata:efb3174cf214b525d325` | `unresolved` | unresolved |
+| `use:tool-lid-recording-framework:legacy-project-scope` | `tool-lid-recording-framework:revision:metadata:eeec6fd259ff2084601c` | `unresolved` | unresolved |
+| `use:tool-linux-tracepoints:legacy-project-scope` | `tool-linux-tracepoints:revision:metadata:8f19c56e4a676d6b5eb5` | `unresolved` | unresolved |
+| `use:tool-minio-object-lock:legacy-project-scope` | `tool-minio-object-lock:revision:metadata:1d51577740c9b1ba5f34` | `unresolved` | unresolved |
+| `use:tool-minio-versioning:legacy-project-scope` | `tool-minio-versioning:revision:metadata:c0b96765fe2ccf70e039` | `unresolved` | unresolved |
+| `use:tool-oci-digest:legacy-project-scope` | `tool-oci-digest:revision:metadata:31455dc428b89164d7e0` | `unresolved` | unresolved |
+| `use:tool-python-314-dataclasses:implementation-guidance` | `tool-python-314-dataclasses:revision:observed-3.14.7-2026-08-22` | `unresolved` | frozen parameter |
+| `use:tool-python-314-decimal:context-and-signals` | `tool-python-314-decimal:revision:3.14` | `located` | Decimal objects; Context objects; Signals |
+| `use:tool-python-314-hashlib:implementation-guidance` | `tool-python-314-hashlib:revision:observed-3.14.7-2026-08-22` | `unresolved` | hashlib.file_digest |
+| `use:tool-python-314-json:implementation-guidance` | `tool-python-314-json:revision:observed-3.14.7-2026-08-22` | `unresolved` | json.dumps parameters |
+| `use:tool-pytorch-reproducibility:legacy-project-scope` | `tool-pytorch-reproducibility:revision:metadata:9dcad43dd4f361cd737f` | `unresolved` | unresolved |
+| `use:tool-sklearn-leakage:legacy-project-scope` | `tool-sklearn-leakage:revision:metadata:2d7d411246a229872482` | `unresolved` | unresolved |
+| `use:tool-sysdig-container-capture:legacy-project-scope` | `tool-sysdig-container-capture:revision:metadata:b3e15be4f1c298e75a12` | `unresolved` | unresolved |
+| `use:tool-uv-locking:legacy-project-scope` | `tool-uv-locking:revision:metadata:955aa6e3d266cf1bd545` | `unresolved` | unresolved |
+| `use:vendor-danfoss-cds803-design:legacy-project-scope` | `vendor-danfoss-cds803-design:revision:sha256:acb1236e74792eb1ff320e4a0378bd3360161a5a4f780d8ce9c4fb537235893d` | `unresolved` | unresolved |
+| `use:vendor-danfoss-cds803-programming-2021:15bae9525e2d3de0` | `vendor-danfoss-cds803-programming-2021:revision:sha256:03485b6f6434ac1d17f96430e0ea5bea8d86a756089e51c782aaf52866ba47a2` | `contextual_only` | DecisionRecord.v1 values.reference_window; official sources are capability/constraint context only |
+| `use:vendor-danfoss-cds803-programming-2021:297d917d1d041e6d` | `vendor-danfoss-cds803-programming-2021:revision:sha256:03485b6f6434ac1d17f96430e0ea5bea8d86a756089e51c782aaf52866ba47a2` | `located` | Printed p. 54, Tables 60-63 plus frozen selected profile |
+| `use:vendor-danfoss-cds803-programming-2021:58f68d1f90e51c14` | `vendor-danfoss-cds803-programming-2021:revision:sha256:03485b6f6434ac1d17f96430e0ea5bea8d86a756089e51c782aaf52866ba47a2` | `located` | Printed p. 54, Table 60, parameter 6-12; default 4 mA |
+| `use:vendor-danfoss-cds803-programming-2021:684c54d5293e13b0` | `vendor-danfoss-cds803-programming-2021:revision:sha256:03485b6f6434ac1d17f96430e0ea5bea8d86a756089e51c782aaf52866ba47a2` | `located` | printed p. 54, Tables 60-63, parameters 6-12 through 6-15 |
+| `use:vendor-danfoss-cds803-programming-2021:83793a7bb3f6de8f` | `vendor-danfoss-cds803-programming-2021:revision:sha256:03485b6f6434ac1d17f96430e0ea5bea8d86a756089e51c782aaf52866ba47a2` | `located` | Printed p. 54, Table 61, parameter 6-13; default 20 mA |
+| `use:vendor-danfoss-cds803-programming-2021:a54c42966aeb6143` | `vendor-danfoss-cds803-programming-2021:revision:sha256:03485b6f6434ac1d17f96430e0ea5bea8d86a756089e51c782aaf52866ba47a2` | `located` | DecisionRecord.v1 values.command_profile; Danfoss printed p. 54, Table 62, parameter 6-14 |
+| `use:vendor-danfoss-cds803-programming-2021:b9fdbbf4d755e857` | `vendor-danfoss-cds803-programming-2021:revision:sha256:03485b6f6434ac1d17f96430e0ea5bea8d86a756089e51c782aaf52866ba47a2` | `located` | printed p. 54, Tables 60-63, parameters 6-12 through 6-15 |
+| `use:vendor-danfoss-cds803-programming-2021:cdee2d68ab6ce6c6` | `vendor-danfoss-cds803-programming-2021:revision:sha256:03485b6f6434ac1d17f96430e0ea5bea8d86a756089e51c782aaf52866ba47a2` | `located` | DecisionRecord.v1 values.command_profile; Danfoss printed p. 54, Table 63, parameter 6-15 |
+| `use:vendor-danfoss-cds803-programming-2021:legacy-project-scope` | `vendor-danfoss-cds803-programming-2021:revision:sha256:03485b6f6434ac1d17f96430e0ea5bea8d86a756089e51c782aaf52866ba47a2` | `unresolved` | unresolved |
+| `use:vendor-doe-compressed-air-sourcebook:389aa9e64f198984` | `vendor-doe-compressed-air-sourcebook:revision:sha256:3280284235b8daef10f7d9e6a21aada90d7b804b805cc9ef842903aeca009c22` | `contextual_only` | DecisionRecord.v1 values.reference_window; official sources are capability/constraint context only |
+| `use:vendor-doe-compressed-air-sourcebook:da844e6605e0d8d0` | `vendor-doe-compressed-air-sourcebook:revision:sha256:3280284235b8daef10f7d9e6a21aada90d7b804b805cc9ef842903aeca009c22` | `contextual_only` | section 5 and Figure 2.8 |
+| `use:vendor-doe-compressed-air-sourcebook:f148525831703bee` | `vendor-doe-compressed-air-sourcebook:revision:sha256:3280284235b8daef10f7d9e6a21aada90d7b804b805cc9ef842903aeca009c22` | `contextual_only` | section 5 and Figure 2.8 |
+| `use:vendor-doe-compressed-air-sourcebook:legacy-project-scope` | `vendor-doe-compressed-air-sourcebook:revision:sha256:3280284235b8daef10f7d9e6a21aada90d7b804b805cc9ef842903aeca009c22` | `unresolved` | unresolved |
+| `use:vendor-electrosensors-fb420-datasheet-2025:5a327e5132b004f6` | `vendor-electrosensors-fb420-datasheet-2025:revision:sha256:8a7f0dc5f4f26d0c9c07b6ebdd980a35a0120e9b7ee762c9945a58a6ed409eab` | `located` | Archived PDF pp. 1-2, output/specification table: directly proportional 4-20 mA output |
+| `use:vendor-electrosensors-fb420-datasheet-2025:8500e373c98da87c` | `vendor-electrosensors-fb420-datasheet-2025:revision:sha256:8a7f0dc5f4f26d0c9c07b6ebdd980a35a0120e9b7ee762c9945a58a6ed409eab` | `located` | archived PDF pp. 1-2 |
+| `use:vendor-electrosensors-fb420-datasheet-2025:legacy-project-scope` | `vendor-electrosensors-fb420-datasheet-2025:revision:sha256:8a7f0dc5f4f26d0c9c07b6ebdd980a35a0120e9b7ee762c9945a58a6ed409eab` | `unresolved` | unresolved |
+| `use:vendor-electrosensors-fb420-manual:7546de11f88bc0df` | `vendor-electrosensors-fb420-manual:revision:sha256:a93d9b37eaa57faf80a5e2f64be89337daed7d82e5de7a703aaf96c776e2de0b` | `unresolved` | Archived PDF pp. 1-2: user-programmable maximum RPM endpoint |
+| `use:vendor-electrosensors-fb420-manual:b7fb2e1a35bc86c8` | `vendor-electrosensors-fb420-manual:revision:sha256:a93d9b37eaa57faf80a5e2f64be89337daed7d82e5de7a703aaf96c776e2de0b` | `unresolved` | Archived PDF pp. 1-2: user-programmable minimum RPM endpoint |
+| `use:vendor-electrosensors-fb420-manual:legacy-project-scope` | `vendor-electrosensors-fb420-manual:revision:sha256:a93d9b37eaa57faf80a5e2f64be89337daed7d82e5de7a703aaf96c776e2de0b` | `unresolved` | unresolved |
+| `use:vendor-endress-ra33-2021:legacy-project-scope` | `vendor-endress-ra33-2021:revision:sha256:00fc11fcc714f471bd84ae0c25b45da090f7e83f46868546421fffdfb46640b8` | `unresolved` | unresolved |
+| `use:vendor-fieldcomm-hart-guide-r71:legacy-project-scope` | `vendor-fieldcomm-hart-guide-r71:revision:sha256:e04766143267f116cb52b32a0db9fe7c9ea7032e09d3267e7d2d3b7fe9075f17` | `unresolved` | unresolved |
+| `use:vendor-ni-scaling-2024:246652abfd045664` | `vendor-ni-scaling-2024:revision:metadata:581e22f8152b05855af0` | `unresolved` | Official NI two-point linear scaling equation |
+| `use:vendor-ni-scaling-2024:legacy-project-scope` | `vendor-ni-scaling-2024:revision:metadata:581e22f8152b05855af0` | `unresolved` | unresolved |
+| `use:vendor-rockwell-5034-um003-2025:4591b550be834c4c` | `vendor-rockwell-5034-um003-2025:revision:sha256:a9b9ee322ad3d8e6cf7dc6abd3cfa510b0fb087a9ba7d7844de83502fd891a50` | `located` | PDF p. 22, Scaling, Table 7; 4/12/20 mA maps to 0/50/100% |
+| `use:vendor-rockwell-5034-um003-2025:4f9c478acca22153` | `vendor-rockwell-5034-um003-2025:revision:sha256:a9b9ee322ad3d8e6cf7dc6abd3cfa510b0fb087a9ba7d7844de83502fd891a50` | `located` | PDF p. 22, Scaling, Table 7 |
+| `use:vendor-rockwell-5034-um003-2025:legacy-project-scope` | `vendor-rockwell-5034-um003-2025:revision:sha256:a9b9ee322ad3d8e6cf7dc6abd3cfa510b0fb087a9ba7d7844de83502fd891a50` | `unresolved` | unresolved |
+| `use:vendor-siemens-sitrans-p200-2025:1857fc0cfdcccdb7` | `vendor-siemens-sitrans-p200-2025:revision:metadata:53600ea36a57f964cfbe` | `unresolved` | Official PDF selection table printed p. 1/7: 0-10 bar gauge-pressure version and 4-20 mA two-wire output |
+| `use:vendor-siemens-sitrans-p200-2025:31a5aa538e13a4d1` | `vendor-siemens-sitrans-p200-2025:revision:metadata:53600ea36a57f964cfbe` | `unresolved` | official PDF selection table printed p. 1/7 |
+| `use:vendor-siemens-sitrans-p200-2025:legacy-project-scope` | `vendor-siemens-sitrans-p200-2025:revision:metadata:53600ea36a57f964cfbe` | `unresolved` | unresolved |
+| `use:vendor-siemens-sitrans-th-2025:93ce14fd605223d7` | `vendor-siemens-sitrans-th-2025:revision:sha256:72409ba9305e9073c19a08935207573ca10f1067814aec79c344ad19b3b99068` | `located` | archived PDF p. 4, option D73 |
+| `use:vendor-siemens-sitrans-th-2025:dfef9c873326abac` | `vendor-siemens-sitrans-th-2025:revision:sha256:72409ba9305e9073c19a08935207573ca10f1067814aec79c344ad19b3b99068` | `located` | Archived PDF p. 4, option D73: Pt100 0-100 degC four-wire; document identifies TH320 4-20 mA |
+| `use:vendor-siemens-sitrans-th-2025:legacy-project-scope` | `vendor-siemens-sitrans-th-2025:revision:sha256:72409ba9305e9073c19a08935207573ca10f1067814aec79c344ad19b3b99068` | `unresolved` | unresolved |

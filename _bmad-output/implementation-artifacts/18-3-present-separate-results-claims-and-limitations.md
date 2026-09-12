@@ -1,0 +1,152 @@
+# Story 18.3: Present Separate Results, Claims, and Limitations
+
+Status: ready-for-dev
+
+## Story
+
+### Story 18.3: Present Separate Results, Claims, and Limitations
+**FRs implemented:** FR69, FR71, FR92-FR93.
+
+As an academic reviewer,
+I want the final evidence package projected in its native scopes,
+So that the dashboard demonstrates the publication without creating stronger
+or broader claims.
+
+**Acceptance Criteria:**
+
+**Given** the frozen Epic 17B result tables
+**When** published results are presented
+**Then** ADFA-LD, LID-DS 2021, HAI 23.05, `PTFP-Custom-v1` physical, and
+`PTFP-Custom-v1` syscall results remain in separate identified views with their
+dataset role, version, support, metrics, status, provenance, and limitations
+**And** published-reference and prototype-measured values remain visibly
+distinct.
+
+**Given** the frozen paired custom ablation
+**When** physical-only, syscall-only, and fusion results are displayed together
+**Then** only the exact primary same-support `PTFP-Custom-v1` comparison and any
+separately identified availability or degraded cohort are projected
+**And** external benchmarks never appear as paired samples or fusion gains.
+
+**Given** the capability and limitation matrix
+**When** a capability or evidence track is inspected
+**Then** its supported, limited, unsupported, blocked, not-executed, failed, or
+not-applicable status and exact limitation are presented from the frozen matrix
+**And** controlled custom evidence is not called real-plant evidence, HAI is
+not called compressor validation, and syscall benchmarks are not called
+physical evidence.
+
+**Given** a published claim
+**When** its evidence details are requested
+**Then** the page projects the stable claim identity, bounded wording,
+scientific status, source and version, split, bundle, threshold or calibration,
+run, score or metric, uncertainty, limitation, and immutable evidence locators
+from the claim-to-evidence index
+**And** a dashboard label, visual emphasis, or missing locator cannot create
+support for a claim.
+
+**Given** mock or mock-derived evidence appears in a result, limitation, or
+claim chain
+**When** it is rendered
+**Then** its capability-gap basis, official-document source and exact locator,
+supported scope, transfer limitation, and mock status remain explicit as
+required by the Cross-Epic Mock Admission Guardrail
+**And** it is never styled or described as measured, official-real,
+authentically reproduced, or real-plant evidence.
+
+**Given** all result views are assembled
+**When** headings, ordering, highlights, and summaries are checked
+**Then** no cross-domain aggregate score, leaderboard, rank, or global champion
+is calculated or implied
+**And** unavailable metrics, blocked LID execution, failed or unfavorable
+outcomes, uncertainty, and limitations remain visible.
+
+## Implementation plan
+
+- [ ] Confirm every upstream artifact, schema, parameter, authorization, and code/runtime identity required by the acceptance criteria exists at its exact version and hash. Complete the prior story in Epic 18 before starting this work; never synthesize its planned outputs.
+- [ ] Implement only the smallest pure contracts, validators, adapters, or command-line-facing functions needed by the canonical criteria, in the existing repository structure. Do not add a service, database, cloud component, control path, or UI dependency.
+- [ ] Make all invalid, unavailable, unknown-version, and unauthorized paths explicit and reconstructible. Never substitute a legacy/default/latest value, cached output, fixture, or a successful alternative.
+- [ ] Persist formal evidence atomically: publish immutable objects, verify read-back/hash/size, then publish the complete manifest/receipt. Leave incomplete/orphaned publication visible and non-successful.
+- [ ] Add focused unittest coverage for canonical valid and invalid paths, version/schema rejection, authority/provenance failures, immutability, and every failure mode named in the criteria.
+- [ ] Record only implementation facts in the Dev Agent Record. Do not claim scientific qualification or issue an activity authorization from this story.
+
+## Amendment Acceptance Criteria
+
+**Given** the optional read-only projection presents formal evidence
+**When** it displays an evidence item, result, or limitation
+**Then** it renders only frozen origin, parameter/claim provenance, generator and source-use closure where applicable, current reproduction assessment, and prohibited-claim limitation
+**And** it never calculates, infers, hides, promotes, or modifies scientific status, control, authorization, or evidence identity.
+
+- [ ] Add injected, non-network `unittest` cases proving the projection rejects incomplete provenance and cannot turn custom/mock/fixture evidence into official, authentic, or measured presentation.
+## Non-negotiable scientific guardrails
+
+- This is a local academic prototype. Keep the implementation small, explicit, deterministic, and independent of the optional dashboard.
+- Do not invent or inherit numbers, tolerances, labels, defaults, fixtures, legacy contracts, or authority. Every scientific parameter must have immutable identity and exactly one permitted authority class (`direct`, `derived`, `measured`, `preregistered_factor`, or an approved `mock`).
+- Treat missing prerequisites and authorization as an explicit blocked result. `ready-for-dev` authorizes planning only; it does not authorize implementation, acquisition, persistence, capture, training, evaluation, truth activity, activation, publication, or presentation.
+- Preserve immutable evidence objects before manifests/receipts; read back and verify content identity, hash, and size. Retain incomplete, failed, recovered, and unfavorable outcomes.
+- Keep truth and labels restricted; detector-facing artifacts must not carry truth, expected outcomes, or semantic scenario information. Only evaluator-only, separately authorized post-freeze activities may unlock/join truth.
+- Unit tests use `unittest`, injected dependencies, and non-domain fixtures. Default tests must not start network, Docker, MinIO, MQTT, CometBFT, hardware, capture, control, dashboard, or scientific activity. Live/integration tests are opt-in, isolated, and separately authorized.
+
+## Existing-code and scope notes
+
+- Follow the current Python/Go repository patterns established by Stories 9â€“11; preserve versioned v1 behavior and quarantine legacy/demo material when reproduction requires it.
+- No numbers, thresholds, intervals, weights, or tolerances are specified by this story beyond those already present in immutable, applicable evidence or preregistered records. Fail closed if such evidence is absent.
+- Dataset boundaries are native and separate: ADFA-LD/LID-DS 2021 are syscall evidence; HAI 23.05 is not compressor evidence; only synchronized PTFP-Custom-v1 can support paired physical/syscall/fusion comparison.
+
+### Amendment enforcement: read-only academic disclosure
+
+The read-only presentation must render the frozen origin and limitation for custom-generated/mock-parameterized results, including the prototype component/function, code/runtime, parameter/admission/source-use identities, current reproduction assessment, and prohibited claims. It must never infer, hide, transform, or promote that evidence status.
+## BMAD Party Mode Review
+
+### Initial independent review
+
+| Perspective | Reviewer | Score | Veto | Findings |
+| --- | --- | ---: | --- | --- |
+| Product / PM | John (PM) | 9.2 | No | Scope is minimal and the criteria preserve the stated academic outcome without turning the dashboard into a dependency. |
+| Architecture | Winston (Architect) | 9.3 | No | Versioning, isolation, fail-closed behavior, and existing-structure constraints are explicit. |
+| Academic / QA | Quinn (QA) | 9.4 | No | Acceptance evidence, negative paths, provenance, and isolated unittest requirements are testable. |
+
+### Corrections applied
+
+- Added explicit prohibition on planned-output substitution and legacy/default fallback.
+- Added atomic evidence publication/read-back and non-successful incomplete-state handling.
+- Added exact authority, truth-separation, and opt-in test constraints to make the canonical criteria implementable without scope expansion.
+
+### Final review
+
+| Perspective | Reviewer | Score | Veto | Decision |
+| --- | --- | ---: | --- | --- |
+| Product / PM | John (PM) | 9.4 | No | Approved |
+| Architecture | Winston (Architect) | 9.5 | No | Approved |
+| Academic / QA | Quinn (QA) | 9.5 | No | Approved |
+
+Final average: **9.47/10**. Vetoes: **none**. Decision: **approved for planning (ready-for-dev)**. This decision grants no scientific or implementation activity authorization.
+
+## References
+
+- Canonical acceptance criteria: [_bmad-output/planning-artifacts/epics.md](../planning-artifacts/epics.md), Story 18.3.
+- Current control state: [_bmad-output/implementation-artifacts/sprint-status.yaml](sprint-status.yaml).
+- Governing requirements and authority constraints: _bmad-output/planning-artifacts/prd.md and prd-update-2026-08-15.md.
+- Architecture and project guardrails: _bmad-output/planning-artifacts/architecture.md, architecture-update-2026-08-15.md, and existing Stories 9â€“11.
+
+## Mandatory Academic Evidence Amendment
+
+Before implementation, apply the relevant mandatory controls in [Academic Evidence Admission Amendment — 2026-08-31](../planning-artifacts/academic-evidence-admission-amendment-2026-08-31.md). This story must fail closed on an unresolved evidence origin, numeric authority, required mock closure, or prohibited dataset substitution. The amendment adds no activity authorization.
+## Dev Agent Record
+
+### Agent Model Used
+
+Planning artifact only; implementation has not started.
+
+### Debug Log References
+
+None.
+
+### Completion Notes List
+
+- Complete canonical context analysis and Party Mode review recorded.
+- Status is ready-for-dev; no code, evidence, or authorization was produced.
+
+### File List
+
+- Planned implementation work is intentionally not performed by this story-planning task.

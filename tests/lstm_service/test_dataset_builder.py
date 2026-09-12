@@ -333,6 +333,16 @@ class DatasetBuilderTests(unittest.TestCase):
             "feature_schema_mismatch",
         )
 
+    def test_build_normal_training_windows_rejects_golden_fixture_namespace(self) -> None:
+        store = self.build_store()
+
+        with self.assertRaisesRegex(ValueError, "GOLD-USE-PROHIBITED"):
+            build_normal_training_windows(
+                artifact_store=store,
+                sequence_length=2,
+                prefix="testdata/golden/v1/fixtures/",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

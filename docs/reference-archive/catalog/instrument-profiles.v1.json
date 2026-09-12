@@ -1,0 +1,26 @@
+{
+  "schema_version": "instrument-profiles.v1",
+  "authorization_effect": "none",
+  "profiles": [
+    {
+      "profile_id": "instrument-profile-th320-0-100c-v1",
+      "status": "unavailable_blocking",
+      "limitations": ["D73 documents Pt100/0-100 degC/four-wire only; current mapping and configured quality evidence remain unresolved."]
+    },
+    {
+      "profile_id": "instrument-profile-p200-0-10bar-v1",
+      "status": "unavailable_blocking",
+      "limitations": ["Exact order-code/as-configured official source bytes are unavailable; an externally observed SKU is only a research lead."]
+    },
+    {
+      "profile_id": "instrument-profile-fb420-user-range-v1",
+      "status": "unavailable_blocking",
+      "limitations": ["Only programmable user-minimum/user-maximum relation is evidenced; project RPM endpoints and diagnostics remain unresolved."]
+    },
+    {
+      "profile_id": "instrument-profile-cds803-terminal53-linear-0-100-v1",
+      "status": "unavailable_blocking",
+      "limitations": ["Terminal 53 current mode and exact upstream project-decision binding remain required before admission."]
+    }
+  ]
+}

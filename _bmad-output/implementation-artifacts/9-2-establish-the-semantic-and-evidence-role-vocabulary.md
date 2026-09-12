@@ -1,6 +1,6 @@
 # Story 9.2: Establish the Semantic and Evidence-Role Vocabulary
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -20,9 +20,9 @@ so that contracts and reports cannot make incompatible or overstated claims.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Define the minimal versioned semantic contract (AC: 1, 2, 6)
-  - [ ] Add `src/parallel_truth_fingerprint/contracts/semantic_vocabulary.py` with `SEMANTIC_VOCABULARY_VERSION = "semantic-vocabulary.v1"`, explicit `StrEnum` values, frozen dataclasses, and deterministic `to_dict()` output. Re-export the public types from `contracts/__init__.py` without changing existing imports.
-  - [ ] Pin these Story 9.2 axes and tokens; additions or changed meanings require a new vocabulary version rather than mutation:
+- [x] Task 1: Define the minimal versioned semantic contract (AC: 1, 2, 6)
+  - [x] Add `src/parallel_truth_fingerprint/contracts/semantic_vocabulary.py` with `SEMANTIC_VOCABULARY_VERSION = "semantic-vocabulary.v1"`, explicit `StrEnum` values, frozen dataclasses, and deterministic `to_dict()` output. Re-export the public types from `contracts/__init__.py` without changing existing imports.
+  - [x] Pin these Story 9.2 axes and tokens; additions or changed meanings require a new vocabulary version rather than mutation:
     - `DetectionModality`: `physical_instrumentation`, `linux_host_syscall`.
     - `RepresentationKind`: `raw_current_ma`, `normalized_span`, `engineering_value`, `categorical_syscall_event`.
     - `ModelFamily`: `lstm`, `gru`, `autoencoder`, `baseline`; store a sorted unique tuple so `lstm` + `autoencoder` and `gru` + `autoencoder` are valid combinations.
@@ -33,53 +33,74 @@ so that contracts and reports cannot make incompatible or overstated claims.
     - `EntityKind`: `source`, `dataset`, `run`, `artifact`, `representation`, `model`, `detector_bundle`, `score`, `evaluation_result`, `fixture`, `legacy_mapping`.
     - `DatasetFamily`: `adfa_ld`, `lid_ds_2021`, `hai_23_05`, `ptfp_custom_v1` when a governed dataset is applicable.
     - `DomainScope`: `compressor_prototype`, `native_adfa_ld`, `native_lid_ds_2021`, `native_hai_23_05`, `ptfp_custom_controlled`, `real_plant`, `not_applicable`.
-  - [ ] Define a machine-readable frozen `SemanticVocabularyDefinition` that exports the version and exact axis/token tables, plus one flat `SemanticIdentity` carrying vocabulary version, stable identity, entity kind, zero-to-two sorted unique modalities, representations/model-family tags as applicable, evidence role, result role, scientific status, synthetic status, dataset family/version/native scope/native role/subset, bounded domain scope, provenance and qualification references, detector-bundle reference when applicable, and limitations.
-  - [ ] Require explicit not-applicable handling rather than placeholder guesses. Modality-bearing datasets/runs/results require at least one modality; a two-modality identity denotes aligned physical/syscall support or fusion and never creates a third `fusion` modality.
+  - [x] Define a machine-readable frozen `SemanticVocabularyDefinition` that exports the version and exact axis/token tables, plus one flat `SemanticIdentity` carrying vocabulary version, stable identity, entity kind, zero-to-two sorted unique modalities, representations/model-family tags as applicable, evidence role, result role, scientific status, synthetic status, dataset family/version/native scope/native role/subset, bounded domain scope, provenance and qualification references, detector-bundle reference when applicable, and limitations.
+  - [x] Require explicit not-applicable handling rather than placeholder guesses. Modality-bearing datasets/runs/results require at least one modality; a two-modality identity denotes aligned physical/syscall support or fusion and never creates a third `fusion` modality.
 
-- [ ] Task 2: Implement deterministic semantic validation with stable diagnostics (AC: 1-4, 6)
-  - [ ] Add `src/parallel_truth_fingerprint/evidence/semantic_validation.py`, reusing the `evidence` package created by Story 9.1. If Story 9.1 is not implemented yet, do not duplicate its planned package or canonicalization logic; respect the implementation dependency stated below.
-  - [ ] Return a frozen `SemanticValidationResult` containing `supported`, `valid`, and an ordered tuple of structured violations. Each violation contains a stable rule ID, affected fields, offending tokens, and a concise explanation; callers must not parse free-text messages to determine policy.
-  - [ ] Implement at least these stable rules: `SEM-VERSION-MISSING`, `SEM-VERSION-UNSUPPORTED`, `SEM-TOKEN-UNKNOWN`, `SEM-MODALITY-REQUIRED`, `SEM-REPRESENTATION-CROSS-MODALITY`, `SEM-MODEL-AS-DATASET`, `SEM-MODEL-ONLY-AS-DETECTOR`, `SEM-FIXTURE-AS-MEASURED`, `SEM-REFERENCE-AS-MEASURED`, `SEM-OFFICIAL-REAL-WITHOUT-SOURCE-QUALIFICATION`, `SEM-QUALIFIED-WITHOUT-GATE-REFERENCE`, `SEM-HAI-AS-COMPRESSOR`, `SEM-ADFA-AS-PHYSICAL`, `SEM-LID-AS-PHYSICAL`, `SEM-CUSTOM-AS-OFFICIAL-OR-REAL-PLANT`, `SEM-CUSTOM-PHYSICAL-NOT-MOCK-DERIVED`, `SEM-SYSCALL-SYNTHETIC`, `SEM-EXTERNAL-MODEL-AS-COMPRESSOR-DETECTOR`, `SEM-DATASET-NATIVE-SCOPE-MISSING`, and `SEM-LEGACY-MAPPING-INCOMPLETE`.
-  - [ ] Validate explicit semantic fields only. Do not add heuristic/NLP scanning of arbitrary prose, rewrite Markdown, infer dataset identity from a directory name, or normalize an unknown token by spelling similarity.
-  - [ ] Sort violations deterministically by rule ID and field path. Repeated validation of the same identity must produce equal structured output.
+- [x] Task 2: Implement deterministic semantic validation with stable diagnostics (AC: 1-4, 6)
+  - [x] Add `src/parallel_truth_fingerprint/evidence/semantic_validation.py`, reusing the `evidence` package created by Story 9.1. If Story 9.1 is not implemented yet, do not duplicate its planned package or canonicalization logic; respect the implementation dependency stated below.
+  - [x] Return a frozen `SemanticValidationResult` containing `supported`, `valid`, and an ordered tuple of structured violations. Each violation contains a stable rule ID, affected fields, offending tokens, and a concise explanation; callers must not parse free-text messages to determine policy.
+  - [x] Implement at least these stable rules: `SEM-VERSION-MISSING`, `SEM-VERSION-UNSUPPORTED`, `SEM-TOKEN-UNKNOWN`, `SEM-MODALITY-REQUIRED`, `SEM-REPRESENTATION-CROSS-MODALITY`, `SEM-MODEL-AS-DATASET`, `SEM-MODEL-ONLY-AS-DETECTOR`, `SEM-FIXTURE-AS-MEASURED`, `SEM-REFERENCE-AS-MEASURED`, `SEM-OFFICIAL-REAL-WITHOUT-SOURCE-QUALIFICATION`, `SEM-QUALIFIED-WITHOUT-GATE-REFERENCE`, `SEM-HAI-AS-COMPRESSOR`, `SEM-ADFA-AS-PHYSICAL`, `SEM-LID-AS-PHYSICAL`, `SEM-CUSTOM-AS-OFFICIAL-OR-REAL-PLANT`, `SEM-CUSTOM-PHYSICAL-NOT-MOCK-DERIVED`, `SEM-SYSCALL-SYNTHETIC`, `SEM-EXTERNAL-MODEL-AS-COMPRESSOR-DETECTOR`, `SEM-DATASET-NATIVE-SCOPE-MISSING`, and `SEM-LEGACY-MAPPING-INCOMPLETE`.
+  - [x] Validate explicit semantic fields only. Do not add heuristic/NLP scanning of arbitrary prose, rewrite Markdown, infer dataset identity from a directory name, or normalize an unknown token by spelling similarity.
+  - [x] Sort violations deterministically by rule ID and field path. Repeated validation of the same identity must produce equal structured output.
 
-- [ ] Task 3: Preserve evidence, result, qualification, and mock lineage as separate facts (AC: 2-4, 7)
-  - [ ] Enforce fixture/reference incompatibilities without treating `official_real` as synonymous with “real plant.” `official_real` means qualified owner-origin dataset evidence within its native scope; Story 9.3 still owns source qualification.
-  - [ ] Require an immutable source-qualification reference for `official_real` and an owning-gate reference for `qualified`. Story 9.2 validates presence and semantic compatibility only; it neither creates nor approves those references.
-  - [ ] Keep `locally_measured` independent from qualification and synthetic lineage. A local metric may remain `unqualified`, `blocked`, or `mock_derived`; semantic validation never promotes it to `qualified`.
-  - [ ] Treat `mock`/`mock_derived` as lineage, not a result role. A custom physical run may be `custom_generated` + `locally_measured` + `mock_derived`; an authentic custom syscall capture may be `custom_generated` + `locally_measured` + `authentic`.
-  - [ ] Require a `MockAdmission.v1` provenance reference before accepting `mock` or `mock_derived` for domain evidence. This semantic check does not approve the mock, its behavior, or any number; Story 9.4 owns full parameter/mock admission validation.
-  - [ ] Preserve dataset-native semantics: ADFA-LD and LID-DS 2021 remain external categorical syscall evidence; HAI 23.05 remains external native physical/SCADA evidence and not compressor data; only `PTFP-Custom-v1` may carry aligned custom physical and syscall modalities.
-  - [ ] Under the current approved prototype boundary, custom physical observations require `mock`/`mock_derived` plus the exact admission reference, while formal syscall evidence requires `authentic`; fabricated, modified, or synthetic syscalls fail even if labelled custom-generated.
-  - [ ] Keep “baseline” meanings distinct: evidence baseline, baseline model-family tag, and `LEGACY_BASELINE` are never interchangeable.
+- [x] Task 3: Preserve evidence, result, qualification, and mock lineage as separate facts (AC: 2-4, 7)
+  - [x] Enforce fixture/reference incompatibilities without treating `official_real` as synonymous with “real plant.” `official_real` means qualified owner-origin dataset evidence within its native scope; Story 9.3 still owns source qualification.
+  - [x] Require an immutable source-qualification reference for `official_real` and an owning-gate reference for `qualified`. Story 9.2 validates presence and semantic compatibility only; it neither creates nor approves those references.
+  - [x] Keep `locally_measured` independent from qualification and synthetic lineage. A local metric may remain `unqualified`, `blocked`, or `mock_derived`; semantic validation never promotes it to `qualified`.
+  - [x] Treat `mock`/`mock_derived` as lineage, not a result role. A custom physical run may be `custom_generated` + `locally_measured` + `mock_derived`; an authentic custom syscall capture may be `custom_generated` + `locally_measured` + `authentic`.
+  - [x] Require a `MockAdmission.v1` provenance reference before accepting `mock` or `mock_derived` for domain evidence. This semantic check does not approve the mock, its behavior, or any number; Story 9.4 owns full parameter/mock admission validation.
+  - [x] Preserve dataset-native semantics: ADFA-LD and LID-DS 2021 remain external categorical syscall evidence; HAI 23.05 remains external native physical/SCADA evidence and not compressor data; only `PTFP-Custom-v1` may carry aligned custom physical and syscall modalities.
+  - [x] Under the current approved prototype boundary, custom physical observations require `mock`/`mock_derived` plus the exact admission reference, while formal syscall evidence requires `authentic`; fabricated, modified, or synthetic syscalls fail even if labelled custom-generated.
+  - [x] Keep “baseline” meanings distinct: evidence baseline, baseline model-family tag, and `LEGACY_BASELINE` are never interchangeable.
 
-- [ ] Task 4: Define the historical interpretation mapping without rewriting v1 (AC: 5, 6)
-  - [ ] Add frozen `LegacySemanticMapping` and deterministic serialization in the semantic contract. It must reference exact Story 9.1 `baseline_id` and entry ID rather than a mutable path or copied payload.
-  - [ ] Force mapping `scientific_status` to `legacy`; require vocabulary version, original field/value, provenance reference, and at least one explicit limitation; reject mappings that claim to mutate, replace, qualify, or relabel the source entry.
-  - [ ] Provide explicit mappings for Story 9.1's minimal labels (`IMPLEMENTED_RUNTIME_EVIDENCE`, `FIXTURE`, `PUBLISHED_REFERENCE`, `MEASURED_RESULT`, `EXPERIMENTAL_FINGERPRINT_BASELINE`, `LEGACY_BASELINE`) without assuming `MEASURED_RESULT` means qualified or real-plant.
-  - [ ] Map historical logical `sensor` labels to their preserved logical channel plus known source context; never claim physical hardware when the source was the v1 simulator/signal emulator.
-  - [ ] Do not retrofit, edit, or execute legacy ADFA/LID adapters, historical reports, stored JSON, dashboard state, or training history in this story.
+- [x] Task 4: Define the historical interpretation mapping without rewriting v1 (AC: 5, 6)
+  - [x] Add frozen `LegacySemanticMapping` and deterministic serialization in the semantic contract. It must reference exact Story 9.1 `baseline_id` and entry ID rather than a mutable path or copied payload.
+  - [x] Force mapping `scientific_status` to `legacy`; require vocabulary version, original field/value, provenance reference, and at least one explicit limitation; reject mappings that claim to mutate, replace, qualify, or relabel the source entry.
+  - [x] Provide explicit mappings for Story 9.1's minimal labels (`IMPLEMENTED_RUNTIME_EVIDENCE`, `FIXTURE`, `PUBLISHED_REFERENCE`, `MEASURED_RESULT`, `EXPERIMENTAL_FINGERPRINT_BASELINE`, `LEGACY_BASELINE`) without assuming `MEASURED_RESULT` means qualified or real-plant.
+  - [x] Map historical logical `sensor` labels to their preserved logical channel plus known source context; never claim physical hardware when the source was the v1 simulator/signal emulator.
+  - [x] Do not retrofit, edit, or execute legacy ADFA/LID adapters, historical reports, stored JSON, dashboard state, or training history in this story.
 
-- [ ] Task 5: Specify strict and presentation-only consumer behavior (AC: 3, 4, 6)
-  - [ ] Provide one parser/resolver that preserves the raw unknown version/token in its diagnostic. Unknown or missing semantics must never construct a valid enum through fallback or `Enum._missing_()` coercion.
-  - [ ] Scientific contracts, validators, evaluators, persistence writers, and report publishers require `supported=True` and `valid=True` before writing. Invalid identities produce no measured/complete output.
-  - [ ] Return a separate `UnsupportedSemanticIdentity` containing the untouched raw version/payload and violations when parsing cannot construct a supported identity. A presentation-only caller may render that object as unsupported, but may not turn it into `SemanticIdentity`, persist a corrected identity, infer a default, or affect scientific/control state. This creates no Epic 18 UI requirement.
-  - [ ] Keep operational outcomes (`normal`, `anomalous`, consensus status, SCADA divergence, run success/failure) separate from scientific status, evidence role, result role, scenario truth, fault, and attack labels.
+- [x] Task 5: Specify strict and presentation-only consumer behavior (AC: 3, 4, 6)
+  - [x] Provide one parser/resolver that preserves the raw unknown version/token in its diagnostic. Unknown or missing semantics must never construct a valid enum through fallback or `Enum._missing_()` coercion.
+  - [x] Scientific contracts, validators, evaluators, persistence writers, and report publishers require `supported=True` and `valid=True` before writing. Invalid identities produce no measured/complete output.
+  - [x] Return a separate `UnsupportedSemanticIdentity` containing the untouched raw version/payload and violations when parsing cannot construct a supported identity. A presentation-only caller may render that object as unsupported, but may not turn it into `SemanticIdentity`, persist a corrected identity, infer a default, or affect scientific/control state. This creates no Epic 18 UI requirement.
+  - [x] Keep operational outcomes (`normal`, `anomalous`, consensus status, SCADA divergence, run success/failure) separate from scientific status, evidence role, result role, scenario truth, fault, and attack labels.
 
-- [ ] Task 6: Publish a concise human-readable vocabulary reference (AC: 1-6)
-  - [ ] Add `docs/semantic-vocabulary-v1.md` as the human-readable companion to the code contract: exact tokens, definitions, valid examples, prohibited combinations/rule IDs, legacy mapping behavior, source contexts, and version-change policy.
-  - [ ] Define `sensor` in the physical-instrument context and call software-generated physical channels `signal_emulator` or simulated/logical channels. A `sensor_id` alone never proves hardware.
-  - [ ] State explicitly that scenario, fault, attack, anomaly, incident, SCADA divergence, and suspected Byzantine behavior are not synonyms: scenario/fault/attack belong to declared truth/context, while anomaly is a detector/policy deviation outcome and does not establish cause before authorized truth join.
-  - [ ] Ensure documentation says a model is not a detector: a detector requires the compatible model plus schema/vocabulary, preprocessing, calibration, frozen threshold/decision policy, runtime identity, and bundle compatibility owned by later stories.
+- [x] Task 6: Publish a concise human-readable vocabulary reference (AC: 1-6)
+  - [x] Add `docs/semantic-vocabulary-v1.md` as the human-readable companion to the code contract: exact tokens, definitions, valid examples, prohibited combinations/rule IDs, legacy mapping behavior, source contexts, and version-change policy.
+  - [x] Define `sensor` in the physical-instrument context and call software-generated physical channels `signal_emulator` or simulated/logical channels. A `sensor_id` alone never proves hardware.
+  - [x] State explicitly that scenario, fault, attack, anomaly, incident, SCADA divergence, and suspected Byzantine behavior are not synonyms: scenario/fault/attack belong to declared truth/context, while anomaly is a detector/policy deviation outcome and does not establish cause before authorized truth join.
+  - [x] Ensure documentation says a model is not a detector: a detector requires the compatible model plus schema/vocabulary, preprocessing, calibration, frozen threshold/decision policy, runtime identity, and bundle compatibility owned by later stories.
 
-- [ ] Task 7: Add table-driven semantic tests and regression checks (AC: 1-7)
-  - [ ] Add `tests/evidence/test_semantic_vocabulary.py` using standard-library `unittest`; reuse `tests/evidence/__init__.py` from Story 9.1 and use no network, Docker, MinIO, runtime service, training, capture, experiment, or dashboard fixture.
-  - [ ] Test every enum token, version, deterministic `to_dict()`, unique/sorted modalities and model tags, representation/modality compatibility, dataset-native field retention, and the full structured rule-ID matrix.
-  - [ ] Test valid examples: official ADFA-LD plus local evaluation; custom mock-derived physical measurement; authentic custom syscall measurement; author-published metric; test fixture; combined `lstm` + `autoencoder`; and aligned two-modality custom evidence without a `fusion` modality token.
-  - [ ] Test every AC 3/4 prohibition, unqualified `official_real`/`qualified` claims without the required references, synthetic custom evidence presented as official-real/real-plant, a model artifact presented as a complete detector, fabricated/replayed syscalls presented as formal evidence, unknown/missing/incompatible versions/tokens, and failure to retain dataset-native role/subset/limitations.
-  - [ ] Test legacy mappings against a small frozen Story 9.1 fixture: source bytes/hash remain unchanged, mapping identity is deterministic, `legacy` is forced, provenance/limitation is required, and unknown source entries fail closed.
-  - [ ] Prove the human-readable token tables contain every code token and stable rule ID, so code and documentation cannot drift silently.
-  - [ ] Run `.\.venv\Scripts\python.exe -m unittest tests.evidence.test_semantic_vocabulary` followed by `.\.venv\Scripts\python.exe -m unittest discover -s tests`; preserve the dirty worktree and do not alter unrelated files to make tests pass.
+- [x] Task 7: Add table-driven semantic tests and regression checks (AC: 1-7)
+  - [x] Add `tests/evidence/test_semantic_vocabulary.py` using standard-library `unittest`; reuse `tests/evidence/__init__.py` from Story 9.1 and use no network, Docker, MinIO, runtime service, training, capture, experiment, or dashboard fixture.
+  - [x] Test every enum token, version, deterministic `to_dict()`, unique/sorted modalities and model tags, representation/modality compatibility, dataset-native field retention, and the full structured rule-ID matrix.
+  - [x] Test valid examples: official ADFA-LD plus local evaluation; custom mock-derived physical measurement; authentic custom syscall measurement; author-published metric; test fixture; combined `lstm` + `autoencoder`; and aligned two-modality custom evidence without a `fusion` modality token.
+  - [x] Test every AC 3/4 prohibition, unqualified `official_real`/`qualified` claims without the required references, synthetic custom evidence presented as official-real/real-plant, a model artifact presented as a complete detector, fabricated/replayed syscalls presented as formal evidence, unknown/missing/incompatible versions/tokens, and failure to retain dataset-native role/subset/limitations.
+  - [x] Test legacy mappings against a small frozen Story 9.1 fixture: source bytes/hash remain unchanged, mapping identity is deterministic, `legacy` is forced, provenance/limitation is required, and unknown source entries fail closed.
+  - [x] Prove the human-readable token tables contain every code token and stable rule ID, so code and documentation cannot drift silently.
+  - [x] Run `.\.venv\Scripts\python.exe -m unittest tests.evidence.test_semantic_vocabulary` followed by `.\.venv\Scripts\python.exe -m unittest discover -s tests`; preserve the dirty worktree and do not alter unrelated files to make tests pass.
+
+- [x] Task 8: Resolve focused code-review findings (AC: 2-7)
+  - [x] [AI-Review][High] Require every semantic axis and formal-path flag explicitly; add minimal immutable numeric-authority references for numeric representations, scores, and evaluation results while leaving full authority validation to Story 9.4.
+  - [x] [AI-Review][High] Bind each legacy label to its exact allowed interpretation, validate complete baseline hashes, and reject duplicate or promotional assignments.
+  - [x] [AI-Review][High] Require authentic syscall provenance on formal syscall support, including aligned two-modality evidence, while preserving isolated non-domain fixture behavior.
+  - [x] [AI-Review][High] Enforce native modality, scope, origin, role, and qualification compatibility for ADFA-LD, LID-DS 2021, and HAI 23.05 without a caller-controlled bypass.
+  - [x] [AI-Review][High] Return unsupported diagnostics for semantically invalid parsed payloads and provide a fail-closed scientific serialization gate.
+  - [x] [AI-Review][Medium] Force fixtures to non-domain/test-only semantics and reject mock-generation lineage on authentic captures.
+  - [x] [AI-Review][Medium] Reject blank identities/references and malformed parser collection/boolean types deterministically.
+  - [x] [AI-Review][Medium] Reject incomplete detector bundles rather than accepting a missing model or bundle reference.
+  - [x] [AI-Review][Medium] Exercise every anti-promotion rule and verify exact documentation table membership rather than substring presence.
+
+- [x] Task 9: Resolve final focused code-review findings (AC: 2-7)
+  - [x] [AI-Review][High] Close custom/domain identity to the PTFP custom dataset family and controlled scope.
+  - [x] [AI-Review][High] Validate governed external dataset metadata, family/version compatibility, and explicit limitations.
+  - [x] [AI-Review][High] Close evidence-role, result-role, scientific-status, origin, and synthetic-lineage promotion combinations.
+  - [x] [AI-Review][High] Bind legacy mappings to the exact frozen Story 9.1 baseline entry and require the exact sensor mapping key set.
+  - [x] [AI-Review][Medium] Make semantic parsing fail closed on unknown fields, malformed collection members, and invalid mock-influence values.
+  - [x] [AI-Review][Medium] Validate direct contract boolean and collection member types deterministically.
+  - [x] [AI-Review][High] Require the exact current mock admission and unique mock-influence field paths.
+  - [x] [AI-Review][High] Reject mutable identifiers and require minimally structured immutable numeric-authority references.
 
 ## Dev Notes
 
@@ -179,12 +200,72 @@ so that contracts and reports cannot make incompatible or overstated claims.
 - [NIST anomaly glossary](https://csrc.nist.gov/glossary/term/anomaly)
 - [NIST SP 800-94](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-94.pdf)
 
+## Amendment Acceptance Criteria: Evidence Origin
+
+**Given** a domain-bearing artifact, event, result, or claim
+**When** semantic-role validation runs
+**Then** it requires exactly one closed `EvidenceOrigin` token: `official_native`, `authentic_capture`, `prototype_generated`, `mock_parameterized`, `measured`, or `test_fixture`
+**And** `SyntheticStatus` remains orthogonal lineage rather than a substitute for evidence origin.
+
+**Given** a `mock_parameterized` artifact
+**When** its provenance is validated
+**Then** it also requires `generation_origin=prototype_generated` and a per-field/derivation mock-influence map resolving every affected value to the exact parameter and admission closure
+**And** an official-native custom/fixture record, authentic capture without its required boundary provenance, test fixture in a formal path, or mock-parameterized record without prototype generation fails with stable semantic rule IDs.
+
+- [x] Add a closed `EvidenceOrigin` enum and pure semantic validator with stable missing, unknown, incompatible, official-native-scope, authentic-capture-provenance, and test-fixture-formal-path failures. Keep it versioned and free of activity authorization.
+- [x] Add `unittest` cases for all six origins, mixed direct/mock field lineage, missing/unknown origin, prohibited origin pairing, and origin promotion. Fixtures remain non-domain and test-only.
+
+## Mandatory Academic Evidence Amendment
+
+Before implementation, apply the relevant mandatory controls in [Academic Evidence Admission Amendment — 2026-08-31](../planning-artifacts/academic-evidence-admission-amendment-2026-08-31.md). This story must fail closed on an unresolved evidence origin, numeric authority, required mock closure, or prohibited dataset substitution. The amendment adds no activity authorization.
 ## Dev Agent Record
 
 ### Agent Model Used
 
+GPT-5 Codex
+
+### Implementation Plan
+
+- Define the closed immutable vocabulary and flat semantic identity contract.
+- Implement pure deterministic validation and strict unsupported parsing.
+- Preserve origin, evidence/result role, qualification, synthetic lineage, and v1 interpretation as orthogonal facts.
+- Publish the human-readable reference and prove code/document synchronization with table-driven tests.
+
 ### Debug Log References
+
+- RED: focused test import failed because `semantic_vocabulary` did not exist.
+- GREEN: 20 focused Story 9.2 tests passed.
+- Regression: 87 evidence tests passed with 3 environment-dependent symlink skips.
+- Safe regression: 97 tests passed with 3 skips; the selected suite excludes training, network, Docker, MinIO, capture, experiment, and dashboard activity.
+- `compileall` and `git diff --check` passed; only existing Windows CRLF conversion warnings were reported.
+- Final focused RED phase reproduced 14 invalid acceptances plus malformed-input errors before the eight review patches.
+- Final GREEN/regression phase passed 41 focused semantic tests, 108 evidence tests, and 118 safe regression tests with 3 environment-dependent symlink skips.
 
 ### Completion Notes List
 
+- Added the exact v1 semantic axes, deterministic immutable serialization, sorted multi-tags, and explicit unsupported semantics.
+- Added 33 stable structured diagnostic rule IDs covering role promotion, cross-domain claims, dataset-native retention, qualification references, numeric authority, origin compatibility, mock influence, and authentic capture provenance.
+- Added separate immutable legacy mappings for Story 9.1 labels, the historical `lstm_autoencoder` tag, and logical sensor context without rewriting frozen v1 evidence.
+- Added the mandatory closed EvidenceOrigin model and per-field mock influence binding without introducing activity authorization or infrastructure.
+- Published the synchronized human-readable vocabulary and validated every code token and stable rule ID appears in it.
+- The requested full repository discovery was intentionally replaced by the previously approved safe non-training regression boundary; no training or external activity was triggered.
+- Resolved 9 focused code-review findings: semantic defaults removed, numeric authority minimally referenced, legacy promotion blocked, mixed-modality syscall provenance retained, external dataset substitution closed, invalid parsing/writing failed closed, fixture/authentic lineage separated, references hardened, and detector bundles completed.
+- Final review-fix validation: 33 focused tests, 100 evidence tests, and 110 safe regression tests passed; 3 environment-dependent symlink tests were skipped.
+- Resolved the final 8 focused review groups: closed custom/native dataset identity, version and limitation retention, role/status/origin promotion, exact frozen baseline binding, strict parsing/direct types, exact mock admission, unique mock influence paths, and immutable numeric authority syntax.
+- Final completion validation: 41 focused tests, 108 evidence tests, and 118 safe non-training regression tests passed; 3 environment-dependent symlink tests were skipped. `compileall` and `git diff --check` passed.
+
 ### File List
+
+- `_bmad-output/implementation-artifacts/9-2-establish-the-semantic-and-evidence-role-vocabulary.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `docs/semantic-vocabulary-v1.md`
+- `src/parallel_truth_fingerprint/contracts/__init__.py`
+- `src/parallel_truth_fingerprint/contracts/semantic_vocabulary.py`
+- `src/parallel_truth_fingerprint/evidence/semantic_validation.py`
+- `tests/evidence/test_semantic_vocabulary.py`
+
+## Change Log
+
+- 2026-09-01: Implemented and tested Semantic Vocabulary v1, deterministic validation, evidence-origin amendment controls, legacy mappings, strict unsupported parsing, and synchronized documentation; moved Story 9.2 to review.
+- 2026-09-01: Addressed 9 focused code-review findings, added minimal numeric-authority references and fail-closed scientific serialization, expanded the suite to 33 focused tests, and returned Story 9.2 to review.
+- 2026-09-01: Addressed the final 8 focused review groups, expanded the suite to 41 semantic tests, completed safe regression validation, and closed Story 9.2 without another broad adversarial review per the approved prototype workflow.
