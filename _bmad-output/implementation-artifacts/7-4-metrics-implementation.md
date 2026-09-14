@@ -1,6 +1,6 @@
 # Story 7.4: Metrics Implementation
 
-Status: review
+Status: done
 
 ## Story
 

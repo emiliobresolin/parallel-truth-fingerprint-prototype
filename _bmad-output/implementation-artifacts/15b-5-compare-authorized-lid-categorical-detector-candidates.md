@@ -1,6 +1,6 @@
 # Story 15B.5: Compare Authorized LID Categorical Detector Candidates
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

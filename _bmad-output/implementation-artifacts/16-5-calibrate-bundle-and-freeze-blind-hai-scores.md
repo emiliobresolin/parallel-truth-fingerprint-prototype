@@ -1,6 +1,6 @@
 # Story 16.5: Calibrate, Bundle, and Freeze Blind HAI Scores
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

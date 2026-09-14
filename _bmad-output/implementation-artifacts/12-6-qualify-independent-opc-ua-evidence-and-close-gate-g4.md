@@ -1,6 +1,6 @@
 # Story 12.6: Qualify Independent OPC UA Evidence and Close Gate G4
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

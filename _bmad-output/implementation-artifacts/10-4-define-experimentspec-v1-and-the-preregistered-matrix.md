@@ -1,6 +1,6 @@
 # Story 10.4: Define `ExperimentSpec.v1` and the Preregistered Matrix
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Planning READY does not authorize implementation, source acquisition, profile/mock admission, feature activation, experiment execution, command emission, syscall capture, persistence, truth creation/unlock, training, evaluation, publication, or dashboard work. -->
 

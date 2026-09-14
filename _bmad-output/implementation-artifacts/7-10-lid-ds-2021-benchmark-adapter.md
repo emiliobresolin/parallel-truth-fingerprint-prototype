@@ -1,6 +1,6 @@
 # Story 7.10: LID-DS 2021 Benchmark Adapter
 
-Status: review
+Status: done
 
 ## Story
 

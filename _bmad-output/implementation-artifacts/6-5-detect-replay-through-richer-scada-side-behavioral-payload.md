@@ -1,6 +1,6 @@
 # Story 6.5: Detect Replay Through Richer SCADA-Side Behavioral Payload
 
-Status: ready-for-qa
+Status: done
 
 ## Story
 

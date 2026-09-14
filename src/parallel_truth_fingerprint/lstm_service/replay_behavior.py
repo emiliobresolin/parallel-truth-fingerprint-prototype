@@ -263,7 +263,6 @@ def extract_scada_behavioral_feature_vector(
     feature_schema: list[str] = []
     feature_values: list[float] = []
     for sensor_name in sorted(scada_state.sensor_values):
-        supervisory_state = scada_state.sensor_values[sensor_name]
         behavioral_state = behavioral_sensor_values.get(sensor_name)
         if behavioral_state is None:
             raise ValueError(
@@ -271,12 +270,8 @@ def extract_scada_behavioral_feature_vector(
             )
         feature_schema.extend(
             [
-                f"{sensor_name}.pv",
                 f"{sensor_name}.loop_current_ma",
-                f"{sensor_name}.pv_percent_range",
-                f"{sensor_name}.noise_floor",
-                f"{sensor_name}.rate_of_change_dtdt",
-                f"{sensor_name}.local_stability_score",
+                f"{sensor_name}.loop_current_normalized",
                 f"{sensor_name}.field_device_malfunction",
                 f"{sensor_name}.loop_current_saturated",
                 f"{sensor_name}.cold_start",
@@ -284,12 +279,8 @@ def extract_scada_behavioral_feature_vector(
         )
         feature_values.extend(
             [
-                float(supervisory_state.value),
                 float(behavioral_state.loop_current_ma or 0.0),
-                float(behavioral_state.pv_percent_range or 0.0),
-                float(behavioral_state.noise_floor or 0.0),
-                float(behavioral_state.rate_of_change_dtdt or 0.0),
-                float(behavioral_state.local_stability_score or 0.0),
+                (float(behavioral_state.loop_current_ma or 0.0) - 4.0) / 16.0,
                 _bool_to_float(bool(behavioral_state.field_device_malfunction)),
                 _bool_to_float(bool(behavioral_state.loop_current_saturated)),
                 _bool_to_float(bool(behavioral_state.cold_start)),

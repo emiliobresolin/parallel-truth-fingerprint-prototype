@@ -1,6 +1,6 @@
 # Story 11.3: Implement the Deterministic Python Consensus Reference
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

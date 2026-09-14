@@ -1,6 +1,6 @@
 # Story 7.6: ADFA-LD Benchmark Adapter
 
-Status: review
+Status: done
 
 ## Story
 

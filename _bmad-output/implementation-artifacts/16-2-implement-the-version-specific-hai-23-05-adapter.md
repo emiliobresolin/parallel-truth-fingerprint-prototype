@@ -1,6 +1,6 @@
 # Story 16.2: Implement the Version-Specific HAI 23.05 Adapter
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 5.2: Add Visual Operational Pipeline and Live Component State Overlay
 
-Status: review
+Status: done
 
 ## Story
 

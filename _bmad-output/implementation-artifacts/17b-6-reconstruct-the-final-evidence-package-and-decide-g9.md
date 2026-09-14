@@ -1,6 +1,6 @@
 # Story 17B.6: Reconstruct the Final Evidence Package and Decide G9
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 5.3: Add Human-Readable Status Translation and “What Changed Since Startup” Evidence View
 
-Status: review
+Status: done
 
 ## Story
 

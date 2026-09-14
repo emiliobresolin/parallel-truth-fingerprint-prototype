@@ -1,6 +1,6 @@
 # Story 5.1: Add Interpreted Operational Event Timeline with Component-Scoped Raw Log Access
 
-Status: review
+Status: done
 
 ## Story
 

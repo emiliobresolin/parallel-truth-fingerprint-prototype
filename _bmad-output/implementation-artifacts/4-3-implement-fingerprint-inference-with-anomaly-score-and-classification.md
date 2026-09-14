@@ -1,6 +1,6 @@
 # Story 4.3: Implement Fingerprint Inference With Anomaly Score and Classification
 
-Status: review
+Status: done
 
 ## Story
 

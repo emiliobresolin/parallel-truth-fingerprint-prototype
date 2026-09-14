@@ -1,6 +1,6 @@
 # Story 15A.1: Pin and Inventory the Official ADFA-LD Source
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

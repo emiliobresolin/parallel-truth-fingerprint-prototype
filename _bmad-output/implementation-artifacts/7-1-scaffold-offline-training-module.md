@@ -1,6 +1,6 @@
 # Story 7.1: Scaffold the Offline Training Module
 
-Status: review
+Status: done
 
 ## Story
 

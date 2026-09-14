@@ -1,6 +1,6 @@
 # Story 9.5: Preserve v1 Contracts as Golden Versioned Fixtures
 
-Status: review
+Status: done
 
 <!-- Note: Planning READY does not authorize implementation or scientific activity. -->
 

@@ -1,6 +1,6 @@
 # Story 13.5: Build the Immutable Physical `DetectorBundle.v1`
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

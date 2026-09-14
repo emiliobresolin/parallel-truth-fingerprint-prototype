@@ -228,15 +228,15 @@ class DatasetBuilderTests(unittest.TestCase):
 
         schema, values = extract_feature_vector(artifact)
 
-        self.assertEqual(schema[0], "pressure.pv")
-        self.assertEqual(schema[9], "rpm.pv")
-        self.assertEqual(schema[18], "temperature.pv")
-        self.assertEqual(values[0], 5.1)
-        self.assertEqual(values[1], 13.2)
-        self.assertEqual(values[9], 3110.0)
-        self.assertEqual(values[18], 70.5)
-        self.assertEqual(len(schema), 27)
-        self.assertEqual(len(values), 27)
+        self.assertEqual(schema[0], "pressure.loop_current_ma")
+        self.assertEqual(schema[5], "rpm.loop_current_ma")
+        self.assertEqual(schema[10], "temperature.loop_current_ma")
+        self.assertEqual(values[0], 13.2)
+        self.assertEqual(values[1], 0.575)
+        self.assertEqual(values[5], 14.8)
+        self.assertEqual(values[10], 14.1)
+        self.assertEqual(len(schema), 15)
+        self.assertEqual(len(values), 15)
 
     def test_evaluate_training_eligibility_rejects_non_normal_records(self) -> None:
         missing_context = build_persisted_artifact(index=1)
@@ -288,7 +288,8 @@ class DatasetBuilderTests(unittest.TestCase):
             "valid-consensus-artifacts/round-501.json",
         )
         self.assertEqual(manifest.skipped_artifacts, {})
-        self.assertIn("temperature.pv", manifest.feature_schema)
+        self.assertIn("temperature.loop_current_ma", manifest.feature_schema)
+        self.assertNotIn("temperature.pv", manifest.feature_schema)
 
     def test_build_normal_training_windows_filters_non_normal_and_divergent_records(self) -> None:
         store = self.build_store()

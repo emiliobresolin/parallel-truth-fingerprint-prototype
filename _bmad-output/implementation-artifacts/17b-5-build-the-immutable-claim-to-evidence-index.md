@@ -1,6 +1,6 @@
 # Story 17B.5: Build the Immutable Claim-to-Evidence Index
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

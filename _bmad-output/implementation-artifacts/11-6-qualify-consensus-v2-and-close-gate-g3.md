@@ -1,6 +1,6 @@
 # Story 11.6: Qualify Consensus v2 and Close Gate G3
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

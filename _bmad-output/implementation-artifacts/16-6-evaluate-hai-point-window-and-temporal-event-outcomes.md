@@ -1,6 +1,6 @@
 # Story 16.6: Evaluate HAI Point, Window, and Temporal Event Outcomes
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

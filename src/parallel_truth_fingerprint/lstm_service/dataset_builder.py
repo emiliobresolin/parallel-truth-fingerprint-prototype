@@ -20,6 +20,7 @@ class _EligibleArtifact:
     round_id: str
     timestamp: str
     feature_vector: tuple[float, ...]
+    label: str
 
 
 def build_normal_training_windows(
@@ -29,6 +30,47 @@ def build_normal_training_windows(
     prefix: str = "valid-consensus-artifacts/",
 ) -> tuple[tuple[TrainingWindow, ...], TrainingDatasetManifest]:
     """Build deterministic fixed-length normal windows from MinIO artifacts."""
+
+    return _build_windows_from_artifacts(
+        artifact_store=artifact_store,
+        sequence_length=sequence_length,
+        prefix=prefix,
+        eligibility=evaluate_training_eligibility,
+        manifest_label="normal",
+    )
+
+
+def build_evaluation_windows(
+    *,
+    artifact_store,
+    sequence_length: int,
+    prefix: str = "valid-consensus-artifacts/",
+) -> tuple[tuple[TrainingWindow, ...], TrainingDatasetManifest]:
+    """Build current-domain inference windows from normal *and* test scenarios.
+
+    Unlike the training builder, this retains trusted non-normal artifacts so
+    the autoencoder is actually evaluated against a labelled campaign rather
+    than being fed its normal baseline again.
+    """
+
+    return _build_windows_from_artifacts(
+        artifact_store=artifact_store,
+        sequence_length=sequence_length,
+        prefix=prefix,
+        eligibility=evaluate_inference_eligibility,
+        manifest_label="evaluation",
+    )
+
+
+def _build_windows_from_artifacts(
+    *,
+    artifact_store,
+    sequence_length: int,
+    prefix: str,
+    eligibility,
+    manifest_label: str,
+) -> tuple[tuple[TrainingWindow, ...], TrainingDatasetManifest]:
+    """Shared deterministic artifact reader with an explicit admissibility rule."""
 
     if sequence_length <= 0:
         raise ValueError("sequence_length must be a positive integer.")
@@ -47,7 +89,7 @@ def build_normal_training_windows(
 
     for object_key in object_keys:
         artifact = artifact_store.load_json(object_key)
-        eligible, reason = evaluate_training_eligibility(artifact)
+        eligible, reason = eligibility(artifact)
         if not eligible:
             skipped_artifacts[object_key] = reason
             continue
@@ -66,6 +108,7 @@ def build_normal_training_windows(
                 round_id=round_identity["round_id"],
                 timestamp=round_identity["window_ended_at"],
                 feature_vector=feature_vector,
+                label=str(artifact["dataset_context"].get("scenario_label", "unknown")),
             )
         )
 
@@ -85,6 +128,7 @@ def build_normal_training_windows(
         skipped_artifacts=skipped_artifacts,
         eligible_record_count=len(eligible_records),
         window_count=len(windows),
+        training_label=manifest_label,
     )
     return windows, manifest
 
@@ -112,10 +156,34 @@ def evaluate_training_eligibility(artifact: dict[str, object]) -> tuple[bool, st
     return True, "normal_eligible"
 
 
+def evaluate_inference_eligibility(artifact: dict[str, object]) -> tuple[bool, str]:
+    """Admit trusted labelled observations for evaluation, never for training."""
+
+    consensus_context = artifact.get("consensus_context", {})
+    if consensus_context.get("final_consensus_status") != "success":
+        return False, "consensus_not_success"
+    dataset_context = artifact.get("dataset_context")
+    if not isinstance(dataset_context, dict):
+        return False, "missing_dataset_context"
+    if not dataset_context.get("scenario_label"):
+        return False, "missing_scenario_label"
+    diagnostics = artifact.get("diagnostics", {})
+    if diagnostics.get("has_scada_divergence", False):
+        return False, "scada_divergence"
+    return True, "evaluation_eligible"
+
+
 def extract_feature_vector(
     artifact: dict[str, object],
 ) -> tuple[tuple[str, ...], tuple[float, ...]]:
-    """Extract one deterministic physical-operational feature vector."""
+    """Extract one deterministic current-domain feature vector.
+
+    The custom fingerprint is intentionally trained on what the edge reads
+    from the transmitter loop, not on a reconstructed process variable.  PV,
+    percent-of-engineering-range and synthetic physics metrics may still be
+    carried by the HART envelope for dashboard interoperability, but are not
+    model inputs.
+    """
 
     payload_snapshot = artifact["validated_state"]["structured_payload_snapshot"]
     payloads_by_sensor = payload_snapshot["payloads_by_sensor"]
@@ -125,17 +193,13 @@ def extract_feature_vector(
     for sensor_name in sorted(payloads_by_sensor):
         payload = payloads_by_sensor[sensor_name]
         process_data = payload["process_data"]
-        physics_metrics = process_data["physics_metrics"]
         diagnostics = payload["diagnostics"]
+        loop_current_ma = float(process_data["loop_current_ma"])
 
         feature_schema.extend(
             [
-                f"{sensor_name}.pv",
                 f"{sensor_name}.loop_current_ma",
-                f"{sensor_name}.pv_percent_range",
-                f"{sensor_name}.noise_floor",
-                f"{sensor_name}.rate_of_change_dtdt",
-                f"{sensor_name}.local_stability_score",
+                f"{sensor_name}.loop_current_normalized",
                 f"{sensor_name}.field_device_malfunction",
                 f"{sensor_name}.loop_current_saturated",
                 f"{sensor_name}.cold_start",
@@ -143,12 +207,8 @@ def extract_feature_vector(
         )
         feature_values.extend(
             [
-                float(process_data["pv"]["value"]),
-                float(process_data["loop_current_ma"]),
-                float(process_data["pv_percent_range"]),
-                float(physics_metrics["noise_floor"]),
-                float(physics_metrics["rate_of_change_dtdt"]),
-                float(physics_metrics["local_stability_score"]),
+                loop_current_ma,
+                _normalize_loop_current(loop_current_ma),
                 _bool_to_float(diagnostics["field_device_malfunction"]),
                 _bool_to_float(diagnostics["loop_current_saturated"]),
                 _bool_to_float(diagnostics["cold_start"]),
@@ -170,6 +230,7 @@ def _build_windows(
 
     for start_index in range(len(eligible_records) - sequence_length + 1):
         chunk = eligible_records[start_index : start_index + sequence_length]
+        labels = {record.label for record in chunk}
         windows.append(
             TrainingWindow(
                 window_id=(
@@ -178,8 +239,9 @@ def _build_windows(
                 artifact_keys=tuple(record.artifact_key for record in chunk),
                 round_ids=tuple(record.round_id for record in chunk),
                 timestamps=tuple(record.timestamp for record in chunk),
-                feature_schema=feature_schema,
-                feature_matrix=tuple(record.feature_vector for record in chunk),
+            feature_schema=feature_schema,
+            feature_matrix=tuple(record.feature_vector for record in chunk),
+            label=chunk[0].label if len(labels) == 1 else "mixed",
             )
         )
     return tuple(windows)
@@ -201,3 +263,9 @@ def _build_dataset_id(
 
 def _bool_to_float(value: bool) -> float:
     return 1.0 if value else 0.0
+
+
+def _normalize_loop_current(loop_current_ma: float) -> float:
+    """Normalize the official 4--20 mA electrical interval to [0, 1]."""
+
+    return (loop_current_ma - 4.0) / 16.0

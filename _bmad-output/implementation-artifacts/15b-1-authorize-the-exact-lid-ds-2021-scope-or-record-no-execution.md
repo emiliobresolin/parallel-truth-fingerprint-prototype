@@ -1,6 +1,6 @@
 # Story 15B.1: Authorize the Exact LID-DS 2021 Scope or Record No Execution
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

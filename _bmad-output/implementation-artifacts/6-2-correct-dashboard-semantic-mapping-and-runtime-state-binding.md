@@ -1,6 +1,6 @@
 # Story 6.2: Correct Dashboard Semantic Mapping and Runtime-State Binding
 
-Status: review
+Status: done
 
 ## Story
 

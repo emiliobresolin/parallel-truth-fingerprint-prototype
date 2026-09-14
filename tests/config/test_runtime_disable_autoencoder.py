@@ -1,4 +1,4 @@
-"""Story 8.3: DEMO_DISABLE_RUNTIME_AUTOENCODER env var parsing."""
+"""Runtime autoencoder switch parsing."""
 
 from __future__ import annotations
 

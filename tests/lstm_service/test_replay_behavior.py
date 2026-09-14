@@ -195,8 +195,8 @@ class ReplayBehaviorTests(unittest.TestCase):
             windows[0].round_ids,
             ("round-503", "round-504"),
         )
-        self.assertAlmostEqual(windows[0].feature_matrix[-1][0], 5.4, places=5)
-        self.assertAlmostEqual(windows[0].feature_matrix[-1][1], 13.2, places=5)
+        self.assertAlmostEqual(windows[0].feature_matrix[-1][0], 13.2, places=5)
+        self.assertAlmostEqual(windows[0].feature_matrix[-1][1], 0.575, places=5)
         manifest_payload = store.load_json(persisted_dataset.manifest_object_key)
         self.assertEqual(
             manifest_payload["adequacy_assessment"]["validation_level"],

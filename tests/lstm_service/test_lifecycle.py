@@ -239,7 +239,11 @@ class FingerprintLifecycleTests(unittest.TestCase):
                         train_after_eligible_cycles=3,
                     )
 
-        persist_dataset.assert_called_once()
+        self.assertEqual(persist_dataset.call_count, 2)
+        self.assertEqual(
+            persist_dataset.call_args_list[1].kwargs["dataset_prefix"],
+            "fingerprint-datasets/evaluation/",
+        )
         train_model.assert_not_called()
         run_inference.assert_called_once()
         self.assertEqual(stage.model_status, "model_available")

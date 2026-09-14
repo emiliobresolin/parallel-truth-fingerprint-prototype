@@ -1,6 +1,6 @@
 # Story 7.3: Training History Schema, Writer, and Reader
 
-Status: review
+Status: done
 
 ## Story
 

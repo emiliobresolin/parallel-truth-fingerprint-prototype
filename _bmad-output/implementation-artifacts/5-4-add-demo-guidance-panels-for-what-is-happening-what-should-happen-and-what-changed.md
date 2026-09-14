@@ -1,6 +1,6 @@
 # Story 5.4: Add Demo Guidance Panels for "What Is Happening", "What Should Happen", and "What Changed"
 
-Status: review
+Status: done
 
 ## Story
 

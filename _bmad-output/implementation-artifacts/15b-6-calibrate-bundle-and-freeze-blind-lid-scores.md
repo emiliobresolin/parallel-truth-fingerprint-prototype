@@ -1,6 +1,6 @@
 # Story 15B.6: Calibrate, Bundle, and Freeze Blind LID Scores
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

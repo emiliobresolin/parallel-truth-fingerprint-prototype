@@ -6,6 +6,8 @@ import os
 import unittest
 from collections import Counter
 from pathlib import Path
+import tempfile
+import zipfile
 
 from parallel_truth_fingerprint.lstm_service.offline_training.benchmarks import (
     load_benchmark,
@@ -111,6 +113,32 @@ class LidDsRegistryTests(unittest.TestCase):
                 os.environ.pop("LID_DS_2021_PATH", None)
             else:
                 os.environ["LID_DS_2021_PATH"] = previous
+
+
+class LidDsOfficialArchiveTests(unittest.TestCase):
+    def test_official_archives_are_read_in_place_and_use_syscall_field(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "LID-DS-2021-real"
+            scenario = root / "CVE-2020-example"
+            for role, metadata_role in (
+                ("training", "normal"),
+                ("validation", "normal"),
+                ("test/normal", "normal"),
+                ("test/normal_and_attack", "attack"),
+            ):
+                archive = scenario / role / "recording.zip"
+                archive.parent.mkdir(parents=True, exist_ok=True)
+                with zipfile.ZipFile(archive, "w") as bundle:
+                    bundle.writestr("recording.json", '{"container": [{"role": "' + metadata_role + '"}]}')
+                    bundle.writestr("recording.sc", "1631064318497503973 0 1 app 1 read >\n1631064318497514940 0 1 app 1 write <\n")
+            data = LidDs2021Benchmark(root_path=root).load(sequence_length=3, seed=0)
+        self.assertEqual(data.provenance["source_layout"], "official-zip-recording")
+        self.assertEqual(data.provenance["max_archives_per_scenario_partition"], 0)
+        self.assertEqual(data.provenance["sampling_scope"], "complete official recording set")
+        self.assertEqual(data.provenance["partition_counts"], {"training": 1, "validation": 1, "test-normal": 1, "test-normal-and-attack": 1})
+        self.assertEqual(data.label_names, ("Normal", "CVE-2020-example-attack"))
+        self.assertEqual(Counter(data.labels), Counter({0: 3, 1: 1}))
+        self.assertLess(data.sequences[0][0][0], 1.0)
 
 
 if __name__ == "__main__":

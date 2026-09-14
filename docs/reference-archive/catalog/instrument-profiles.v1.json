@@ -14,8 +14,8 @@
     },
     {
       "profile_id": "instrument-profile-fb420-user-range-v1",
-      "status": "unavailable_blocking",
-      "limitations": ["Only programmable user-minimum/user-maximum relation is evidenced; project RPM endpoints and diagnostics remain unresolved."]
+      "status": "available_current_domain_with_project_selection",
+      "limitations": ["The archived FB420 source directly supports its bounded 4-20 mA output and programmable RPM endpoints. The prototype selection is 500-5000 RPM (4 mA to 20 mA); it is a project configuration within documented capability, not a plant calibration or manufacturer recommendation."]
     },
     {
       "profile_id": "instrument-profile-cds803-terminal53-linear-0-100-v1",

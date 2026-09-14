@@ -1,6 +1,6 @@
 # Story 14.3: Preserve Raw Capture and `SyscallEventBatch.v1`
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 13.3: Compare Physical Detector Candidates Fairly
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

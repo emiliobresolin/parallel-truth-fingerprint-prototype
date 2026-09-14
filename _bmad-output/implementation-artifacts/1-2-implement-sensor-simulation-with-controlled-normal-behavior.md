@@ -1,6 +1,6 @@
 # Story 1.2: Implement Sensor Simulation With Controlled Normal Behavior
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

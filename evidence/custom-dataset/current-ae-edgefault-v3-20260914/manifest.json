@@ -1,0 +1,31 @@
+{
+  "artifact_keys": [
+    "valid-consensus-artifacts/round-20260914164320689528.json"
+  ],
+  "autoencoder_enabled": true,
+  "campaign_id": "current-ae-edgefault-v3-20260914",
+  "output_file": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\evidence\\custom-dataset\\current-ae-edgefault-v3-20260914\\current-syscall-windows.jsonl",
+  "row_count": 1,
+  "rows_with_syscalls": 1,
+  "runtime_log_sha256": "sha256:0edfc80a37973795f036450e5dfe36b51637c1d5e0d8b3c34528e19bef1a1f6f",
+  "schema_version": "PTFP-Custom-current-syscall-v1",
+  "syscall_trace_sha256": {
+    "edge-syscalls.10": "sha256:2b34fdcd03480592154ad0a8fb4f32332ae7dbd0be09d5ca9c77bc46000e2802",
+    "edge-syscalls.11": "sha256:843ed1ac238b64fc63c3b5098d64032948f843d6f8650db512651b196a63eef4",
+    "edge-syscalls.12": "sha256:3f9d678c016396ac2ac27c20e60fca49a1335509c8d5ca5241f0e470bb9ffe04",
+    "edge-syscalls.13": "sha256:8497c9da463638e78d96f2a7f005bb2b92a85d4246e69ad6653226f01d401527",
+    "edge-syscalls.14": "sha256:f5da61c83a2936c43b5bb8696002f3991f51188cb64969f2e337e9045c95cc9c",
+    "edge-syscalls.15": "sha256:d698510e7f5128cd245c533638fc59984ce161de235c63eee135822024b1e78e",
+    "edge-syscalls.16": "sha256:3e3f8990625e0439205011e36586075daaffe867b7d4b00350bdbb2256ec1200",
+    "edge-syscalls.17": "sha256:306b8905997a0cbdd184beddc078f2ad781a69cd3c3e205b25a7fbb7403edfa4",
+    "edge-syscalls.18": "sha256:862a4471ca7fcffbda2c1c0bee89a5532ebd3ce99044f9126d431891899ce072",
+    "edge-syscalls.19": "sha256:ccb687689f05ce41919f1a083ae500744aa598b0bc5bba32cc16eb1f5192f3c6",
+    "edge-syscalls.20": "sha256:4bcf1839b983b0928bbf262556cf49f71cc50535146bcb245fbc825fb8ba92b1",
+    "edge-syscalls.21": "sha256:b12279b0e25819a552ee0e0e55c1b499c546c10301aa81ee5718743d9a133c21",
+    "edge-syscalls.22": "sha256:5d7d3afca042ee272266c134c91a1fefd4232d15814eeee19afe8ad81219d354",
+    "edge-syscalls.23": "sha256:e5d01c67968627fe3f1ec38edc59f5a689a5b332fc52f8c3a06cfb6c8827388f",
+    "edge-syscalls.24": "sha256:e65e02998b0121a359e2e329afbcdaff0f4e668098ebf526c2fadbc02ce1af75",
+    "edge-syscalls.25": "sha256:19d5a4df5b338c33928aad46c0491c4d6e8b753e7e2530af173cc3b3a42febd1",
+    "edge-syscalls.9": "sha256:10045b2d10be34488c1875f181727f2583b34e43db90d3af44752853830c5614"
+  }
+}

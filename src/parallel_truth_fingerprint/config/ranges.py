@@ -28,6 +28,9 @@ DEFAULT_COMPRESSOR_PROFILE = CompressorSimulationProfile(
     compressor_power=SensorRange(minimum=0.0, maximum=100.0),
     temperature=SensorRange(minimum=48.0, maximum=95.0),
     pressure=SensorRange(minimum=1.8, maximum=8.5),
-    rpm=SensorRange(minimum=1200.0, maximum=4200.0),
+    # FB420 prototype configuration: user-approved, bounded within the
+    # archived manual's programmable 0..9999 RPM capability.  Its electrical
+    # endpoints are 4 mA at 500 RPM and 20 mA at 5000 RPM.
+    rpm=SensorRange(minimum=500.0, maximum=5000.0),
     base_noise_floor=0.15,
 )

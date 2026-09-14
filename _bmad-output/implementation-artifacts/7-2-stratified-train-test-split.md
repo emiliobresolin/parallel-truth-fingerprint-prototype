@@ -1,6 +1,6 @@
 # Story 7.2: Stratified 80/20 Train/Test Split with Recorded Seed
 
-Status: review
+Status: done
 
 ## Story
 

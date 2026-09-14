@@ -1,6 +1,6 @@
 # Story 15A.3: Build Trace-Safe ADFA-LD Partitions and Windows
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

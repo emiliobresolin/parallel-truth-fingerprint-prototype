@@ -1,6 +1,6 @@
 # Story 14.9: Correlate Custom Streams and Close Syscall Capture Gate G6
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

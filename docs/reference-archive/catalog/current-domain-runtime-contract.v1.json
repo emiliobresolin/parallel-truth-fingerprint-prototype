@@ -1,0 +1,31 @@
+{
+  "schema_version": "PTFP-CurrentDomainRuntime.v1",
+  "primary_model_input": "loop_current_ma",
+  "official_signal_evidence": {
+    "source_revision_id": "vendor-electrosensors-fb420-datasheet-2025:revision:sha256:8a7ed8d8c2514dd5be2ed937abfcbd05",
+    "quantity": "loop current",
+    "interval_ma": [4.0, 20.0],
+    "claim": "The archived FB420 documentation establishes the 4--20 mA electrical output interval."
+  },
+  "rpm_display_projection": {
+    "selection_type": "user-approved prototype engineering range",
+    "selected_minimum_rpm": 500.0,
+    "selected_maximum_rpm": 5000.0,
+    "mapping": "4 mA -> 500 RPM; 20 mA -> 5000 RPM",
+    "rationale": "A bounded range inside the FB420 programmable capability was explicitly selected for this prototype. It is not represented as a manufacturer-specified universal RPM range."
+  },
+  "model_exclusions": [
+    "process_data.pv",
+    "process_data.pv_percent_range",
+    "process_data.physics_metrics"
+  ],
+  "display_only_fields": [
+    "HART PV engineering-unit projection",
+    "dashboard sensor values"
+  ],
+  "prototype_electrical_policy": {
+    "current_jitter_ma": "0.02 + 0.08 * operating_state_ratio",
+    "status": "prototype controlled acquisition variation",
+    "not_claimed_as": "official public-dataset statistic or physical-plant measurement"
+  }
+}

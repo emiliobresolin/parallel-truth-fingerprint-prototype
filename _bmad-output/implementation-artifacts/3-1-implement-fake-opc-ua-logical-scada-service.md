@@ -1,6 +1,6 @@
 # Story 3.1: Implement Fake OPC UA Logical SCADA Service
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

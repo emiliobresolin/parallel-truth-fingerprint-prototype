@@ -1,6 +1,6 @@
 # Story 18.2: Present Linked Physical Representations and Distinct Channels
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

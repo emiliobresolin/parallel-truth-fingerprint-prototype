@@ -1,6 +1,6 @@
 # Story 14.6: Calibrate and Bundle the Custom Syscall Detector
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

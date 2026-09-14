@@ -1,6 +1,6 @@
 # Story 16.4: Compare HAI Physical Detector Candidates Fairly
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

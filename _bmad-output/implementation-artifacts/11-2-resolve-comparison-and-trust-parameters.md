@@ -1,6 +1,6 @@
 # Story 11.2: Resolve Comparison and Trust Parameters
 
-Status: ready-for-dev
+Status: done
 
 <!-- Planning approval does not authorize implementation, consensus activation, evaluation, persistence, publication, control or dashboard work. -->
 

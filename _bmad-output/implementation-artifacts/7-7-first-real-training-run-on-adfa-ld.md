@@ -1,6 +1,6 @@
 # Story 7.7: First Real Training Run on ADFA-LD
 
-Status: review
+Status: done
 
 ## Story
 

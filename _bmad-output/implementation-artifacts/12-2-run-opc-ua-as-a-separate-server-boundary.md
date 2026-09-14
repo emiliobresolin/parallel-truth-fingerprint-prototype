@@ -1,6 +1,6 @@
 # Story 12.2: Run OPC UA as a Separate Server Boundary
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

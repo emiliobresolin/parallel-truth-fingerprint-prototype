@@ -34,9 +34,10 @@ class RuntimeDemoConfig:
     demo_scada_start_cycle: int = 0
     demo_scada_offset_value: float = 6.0
     demo_log_path: str = "logs/run_local_demo.log"
-    # Epic 8 (Story 8.3) opt-out switch: when True, the runtime loop skips
-    # the deprecated in-runtime autoencoder lifecycle and surfaces an
-    # explicit "offline" status to the dashboard.
+    demo_campaign_id: str = ""
+    # The runtime LSTM autoencoder produces the custom fingerprint from
+    # current-domain windows.  It is enabled by default; the switch exists
+    # only for targeted transport/debug diagnostics.
     demo_disable_runtime_autoencoder: bool = False
 
 
@@ -80,6 +81,7 @@ def load_runtime_demo_config() -> RuntimeDemoConfig:
         demo_scada_start_cycle=int(os.getenv("DEMO_SCADA_START_CYCLE", "0")),
         demo_scada_offset_value=float(os.getenv("DEMO_SCADA_OFFSET_VALUE", "6.0")),
         demo_log_path=os.getenv("DEMO_LOG_PATH", "logs/run_local_demo.log"),
+        demo_campaign_id=os.getenv("DEMO_CAMPAIGN_ID", "").strip(),
         demo_disable_runtime_autoencoder=os.getenv(
             "DEMO_DISABLE_RUNTIME_AUTOENCODER", "false"
         ).strip().lower()

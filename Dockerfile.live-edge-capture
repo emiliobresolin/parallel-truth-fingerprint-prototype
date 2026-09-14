@@ -1,0 +1,24 @@
+# Runs the actual Python demo runtime on the Docker/WSL2 Linux kernel while
+# strace records the process' raw syscall stream.  It is not a synthetic
+# syscall generator and it does not grant an evidence result by itself.
+FROM python:3.14-slim
+
+WORKDIR /workspace
+
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends strace \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml ./
+RUN pip install --no-cache-dir "asyncua>=1.1,<2" "minio>=7.2,<8" "numpy>=2,<3" "paho-mqtt>=2.1,<3" "keras>=3,<4"
+# The evidence image runs CPU-only under Docker Desktop/WSL2.  Pinning the
+# official CPU wheel avoids silently downloading a CUDA toolkit that is never
+# available to this container.
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu "torch==2.11.0+cpu"
+
+COPY src ./src
+COPY scripts/run_local_demo.py ./scripts/run_local_demo.py
+
+ENV PYTHONPATH=/workspace/src
+ENV KERAS_BACKEND=torch
+ENTRYPOINT ["strace", "-ff", "-ttt", "-s", "256", "-o", "/captures/edge-syscalls", "python", "scripts/run_local_demo.py"]

@@ -643,6 +643,7 @@ def build_dataset_context(
     comparison_output,
     scenario_control_stage: RuntimeScenarioControlStage | None = None,
     scada_replay_stage: ScadaReplayRuntimeStage | None = None,
+    campaign_id: str = "",
 ) -> dict[str, object]:
     """Return explicit dataset eligibility metadata for persisted artifacts."""
 
@@ -654,6 +655,7 @@ def build_dataset_context(
             "training_eligibility_reason": (
                 scenario_control_stage.training_eligibility_reason
             ),
+            "campaign_id": campaign_id or None,
         }
     if scada_replay_stage is not None and scada_replay_stage.active:
         return {
@@ -661,6 +663,7 @@ def build_dataset_context(
             "training_label": "non_normal",
             "training_eligible": False,
             "training_eligibility_reason": f"scada_{scada_replay_stage.mode}",
+            "campaign_id": campaign_id or None,
         }
     if comparison_output.divergent_sensors:
         return {
@@ -668,6 +671,7 @@ def build_dataset_context(
             "training_label": "non_normal",
             "training_eligible": False,
             "training_eligibility_reason": "scada_divergence",
+            "campaign_id": campaign_id or None,
         }
     if fault_mode == "none":
         if scenario_control_stage is not None:
@@ -678,12 +682,14 @@ def build_dataset_context(
                 "training_eligibility_reason": (
                     scenario_control_stage.training_eligibility_reason
                 ),
+                "campaign_id": campaign_id or None,
             }
         return {
             "scenario_label": "normal",
             "training_label": "normal",
             "training_eligible": True,
             "training_eligibility_reason": "normal_validated_run",
+            "campaign_id": campaign_id or None,
         }
     if fault_mode == "single_edge_exclusion":
         return {
@@ -691,12 +697,14 @@ def build_dataset_context(
             "training_label": "non_normal",
             "training_eligible": False,
             "training_eligibility_reason": "faulty_edge_exclusion",
+            "campaign_id": campaign_id or None,
         }
     return {
         "scenario_label": fault_mode,
         "training_label": "non_normal",
         "training_eligible": False,
         "training_eligibility_reason": f"scenario:{fault_mode}",
+        "campaign_id": campaign_id or None,
     }
 
 
@@ -708,6 +716,7 @@ def run_scada_comparison_and_persistence(
     fault_mode: str = "none",
     scenario_control_stage: RuntimeScenarioControlStage | None = None,
     scada_replay_stage: ScadaReplayRuntimeStage | None = None,
+    campaign_id: str = "",
 ) -> tuple[object | None, dict[str, object], object | None, object | None, dict[str, object]]:
     """Run the Story 3 comparison/persistence path for demo observability."""
 
@@ -804,6 +813,7 @@ def run_scada_comparison_and_persistence(
             comparison_output=comparison_output,
             scenario_control_stage=scenario_control_stage,
             scada_replay_stage=scada_replay_stage,
+            campaign_id=campaign_id,
         )
         persistence_record = persist_valid_consensus_artifact(
             audit_package=consensus_audit,
@@ -986,7 +996,7 @@ def build_runtime_autoencoder_disabled_stage(
     artifact_store,
     artifact_key: str | None,
 ) -> FingerprintLifecycleStage:
-    """Return a stable lifecycle stage when the deprecated runtime trainer is off."""
+    """Return a diagnostic-only lifecycle stage when the user disables it."""
 
     valid_artifact_keys = artifact_store.list_json_objects(prefix="valid-consensus-artifacts/")
     latest_valid_artifact_key = (
@@ -1010,9 +1020,8 @@ def build_runtime_autoencoder_disabled_stage(
         inference_status="skipped_runtime_autoencoder_disabled",
         inference_result_count=0,
         limitation_note=(
-            "The deprecated runtime autoencoder is disabled. Use the offline "
-            "benchmark training track and promoted supervised classifier evidence "
-            "for the academic fingerprint claim."
+            "Runtime autoencoder was explicitly disabled for a transport-only "
+            "diagnostic. This run cannot produce a custom fingerprint result."
         ),
     )
 
@@ -1157,6 +1166,7 @@ def execute_demo_cycle(
             fault_mode=cycle_config.demo_fault_mode,
             scenario_control_stage=scenario_control_stage,
             scada_replay_stage=scada_replay_stage,
+            campaign_id=config.demo_campaign_id,
         )
     )
     fault_edges = resolve_faulty_edges(
@@ -1227,6 +1237,10 @@ def build_cycle_history_entry(
         "scenario_control": cycle_result["scenario_control_stage"].to_dict(),
         "scada_runtime_scenario": cycle_result["scada_replay_stage"].to_dict(),
         "fingerprint_lifecycle": fingerprint_stage.to_dict(),
+        "fingerprint_inference_results": [
+            result.to_dict()
+            for result in cycle_result["fingerprint_inference_results"]
+        ],
         "replay_behavior": None
         if cycle_result["replay_behavior_result"] is None
         else cycle_result["replay_behavior_result"].to_dict(),

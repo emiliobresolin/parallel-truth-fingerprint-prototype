@@ -1,6 +1,6 @@
 # Story 16.3: Build Native HAI Partitions, Preprocessing, and Windows
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 10.2: Define and Validate `SignalObservation.v2`
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Planning READY does not authorize implementation, source or dataset acquisition, emulator execution, observation production, physical acquisition, experiment execution, MQTT activation, persistence, consensus, feature activation, publication, control, or dashboard work. -->
 

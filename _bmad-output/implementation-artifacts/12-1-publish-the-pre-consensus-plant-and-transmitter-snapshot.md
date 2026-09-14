@@ -1,6 +1,6 @@
 # Story 12.1: Publish the Pre-Consensus Plant and Transmitter Snapshot
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

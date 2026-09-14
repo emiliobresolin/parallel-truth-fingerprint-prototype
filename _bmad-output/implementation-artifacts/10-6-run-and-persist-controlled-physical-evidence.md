@@ -1,6 +1,6 @@
 # Story 10.6: Run and Persist Controlled Physical Evidence
 
-Status: ready-for-dev
+Status: done
 
 <!-- Planning READY does not authorize implementation, feature activation, experiment execution, physical acquisition, command emission, persistence, truth production, publication, dashboard work, source acquisition, or any scientific claim. Each later action requires its own exact approved authorization and fail-closed gate. -->
 

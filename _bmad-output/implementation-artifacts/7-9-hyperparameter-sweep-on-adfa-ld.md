@@ -1,6 +1,6 @@
 # Story 7.9: Hyperparameter Sweep on ADFA-LD
 
-Status: review
+Status: done
 
 ## Story
 

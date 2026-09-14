@@ -1,6 +1,6 @@
 # Story 14.8: Evaluate the Custom Syscall Detector After Truth Unlock
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

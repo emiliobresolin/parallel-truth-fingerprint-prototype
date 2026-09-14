@@ -1,6 +1,6 @@
 # Story 14.5: Compare Normal-Only Categorical Syscall Candidates
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

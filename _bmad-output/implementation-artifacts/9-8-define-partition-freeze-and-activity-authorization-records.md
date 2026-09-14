@@ -1,6 +1,6 @@
 # Story 9.8: Define Partition, Freeze, and Activity-Authorization Records
 
-Status: in-progress
+Status: done
 
 <!-- Note: Planning READY does not authorize implementation, acquisition, capture, training, calibration, scoring, truth unlock, evaluation, fusion, promotion, activation, deployment, publication, control, storage mutation, or dashboard work. -->
 

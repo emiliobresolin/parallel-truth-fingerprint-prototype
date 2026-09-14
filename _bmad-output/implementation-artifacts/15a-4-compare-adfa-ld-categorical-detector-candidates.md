@@ -1,6 +1,6 @@
 # Story 15A.4: Compare ADFA-LD Categorical Detector Candidates
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

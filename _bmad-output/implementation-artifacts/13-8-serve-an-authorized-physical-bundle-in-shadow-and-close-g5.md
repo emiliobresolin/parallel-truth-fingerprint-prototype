@@ -1,6 +1,6 @@
 # Story 13.8: Serve an Authorized Physical Bundle in Shadow and Close G5
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

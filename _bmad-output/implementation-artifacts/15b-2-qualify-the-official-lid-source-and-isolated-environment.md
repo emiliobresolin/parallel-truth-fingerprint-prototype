@@ -1,6 +1,6 @@
 # Story 15B.2: Qualify the Official LID Source and Isolated Environment
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

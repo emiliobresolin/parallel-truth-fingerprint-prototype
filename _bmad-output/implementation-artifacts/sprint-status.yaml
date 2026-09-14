@@ -3,7 +3,7 @@
 # project: parallel-truth-fingerprint-prototype
 # project_key: NOKEY
 # tracking_system: file-system
-# story_location: C:\Users\emili\OneDrive\Ãrea de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\_bmad-output\implementation-artifacts
+# story_location: _bmad-output/implementation-artifacts
 #
 # STATUS DEFINITIONS:
 # ==================
@@ -38,138 +38,138 @@
 # - Epic 18 is optional, terminal, and outside the scientific critical path
 
 generated: "2026-08-22T14:49:17-03:00"
-last_updated: "2026-09-12T00:00:00-03:00"
+last_updated: "2026-09-13T00:00:00-03:00"
 project: parallel-truth-fingerprint-prototype
 project_key: NOKEY
 tracking_system: file-system
-story_location: "C:\\Users\\emili\\OneDrive\\Ãrea de Trabalho\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\_bmad-output\\implementation-artifacts"
+story_location: "_bmad-output/implementation-artifacts"
 
 development_status:
   # Epic 9: Reproduce and Trust the Existing Prototype
-  epic-9: in-progress
+  epic-9: done
   9-1-freeze-and-index-the-v1-evidence-baseline: done
   9-2-establish-the-semantic-and-evidence-role-vocabulary: done
   9-3-build-the-authoritative-source-evidence-catalog: done
   9-4-build-the-parameter-evidence-catalog-and-validation-gate: done
-  9-5-preserve-v1-contracts-as-golden-versioned-fixtures: review
-  9-6-define-immutable-artifact-and-evaluation-manifests: review
-  9-7-qualify-minimal-persistent-evidence-storage: in-progress
-  9-8-define-partition-freeze-and-activity-authorization-records: in-progress
+  9-5-preserve-v1-contracts-as-golden-versioned-fixtures: done
+  9-6-define-immutable-artifact-and-evaluation-manifests: done
+  9-7-qualify-minimal-persistent-evidence-storage: done
+  9-8-define-partition-freeze-and-activity-authorization-records: done
   epic-9-retrospective: optional
 
   # Epic 10: Run Evidence-Grounded Physical Experiments
-  epic-10: in-progress
-  10-1-define-evidence-backed-instrument-profiles: ready-for-dev
-  10-2-define-and-validate-signalobservation-v2: ready-for-dev
-  10-3-separate-process-physics-from-transmitter-and-edge-evidence: ready-for-dev
-  10-4-define-experimentspec-v1-and-the-preregistered-matrix: ready-for-dev
-  10-5-isolate-scenariotruth-v1-and-control-truth-unlock: ready-for-dev
-  10-6-run-and-persist-controlled-physical-evidence: ready-for-dev
-  10-7-qualify-and-publish-physical-experiment-evidence: ready-for-dev
+  epic-10: done
+  10-1-define-evidence-backed-instrument-profiles: done
+  10-2-define-and-validate-signalobservation-v2: done
+  10-3-separate-process-physics-from-transmitter-and-edge-evidence: done
+  10-4-define-experimentspec-v1-and-the-preregistered-matrix: done
+  10-5-isolate-scenariotruth-v1-and-control-truth-unlock: done
+  10-6-run-and-persist-controlled-physical-evidence: done
+  10-7-qualify-and-publish-physical-experiment-evidence: done
   epic-10-retrospective: optional
 
   # Epic 11: Validate Physical Evidence Through Current-Domain Consensus
-  epic-11: in-progress
-  11-1-define-the-versioned-consensus-v2-contracts: ready-for-dev
-  11-2-resolve-comparison-and-trust-parameters: ready-for-dev
-  11-3-implement-the-deterministic-python-consensus-reference: ready-for-dev
-  11-4-integrate-consensus-v2-with-go-abci-and-cometbft: ready-for-dev
-  11-5-preserve-versioned-state-query-restart-and-rollback: ready-for-dev
-  11-6-qualify-consensus-v2-and-close-gate-g3: ready-for-dev
+  epic-11: done
+  11-1-define-the-versioned-consensus-v2-contracts: done
+  11-2-resolve-comparison-and-trust-parameters: done
+  11-3-implement-the-deterministic-python-consensus-reference: done
+  11-4-integrate-consensus-v2-with-go-abci-and-cometbft: done
+  11-5-preserve-versioned-state-query-restart-and-rollback: done
+  11-6-qualify-consensus-v2-and-close-gate-g3: done
   epic-11-retrospective: optional
 
   # Epic 12: Compare Against Independent OPC UA Evidence
-  epic-12: in-progress
-  12-1-publish-the-pre-consensus-plant-and-transmitter-snapshot: ready-for-dev
-  12-2-run-opc-ua-as-a-separate-server-boundary: ready-for-dev
-  12-3-read-opc-ua-through-a-real-client-contract: ready-for-dev
-  12-4-validate-and-compare-eligible-opc-ua-evidence: ready-for-dev
-  12-5-prove-opc-and-consensus-causal-path-independence: ready-for-dev
-  12-6-qualify-independent-opc-ua-evidence-and-close-gate-g4: ready-for-dev
+  epic-12: done
+  12-1-publish-the-pre-consensus-plant-and-transmitter-snapshot: done
+  12-2-run-opc-ua-as-a-separate-server-boundary: done
+  12-3-read-opc-ua-through-a-real-client-contract: done
+  12-4-validate-and-compare-eligible-opc-ua-evidence: done
+  12-5-prove-opc-and-consensus-causal-path-independence: done
+  12-6-qualify-independent-opc-ua-evidence-and-close-gate-g4: done
   epic-12-retrospective: optional
 
   # Epic 13: Train and Serve a Calibrated Physical Anomaly Detector
-  epic-13: in-progress
-  13-1-define-the-physical-feature-schema: ready-for-dev
-  13-2-build-leakage-safe-physical-partitions-and-windows: ready-for-dev
-  13-3-compare-physical-detector-candidates-fairly: ready-for-dev
-  13-4-calibrate-and-freeze-the-physical-threshold: ready-for-dev
-  13-5-build-the-immutable-physical-detectorbundle-v1: ready-for-dev
-  13-6-produce-frozen-blind-physical-scores: ready-for-dev
-  13-7-evaluate-physical-regimes-and-anomalies-after-truth-unlock: ready-for-dev
-  13-8-serve-an-authorized-physical-bundle-in-shadow-and-close-g5: ready-for-dev
+  epic-13: done
+  13-1-define-the-physical-feature-schema: done
+  13-2-build-leakage-safe-physical-partitions-and-windows: done
+  13-3-compare-physical-detector-candidates-fairly: done
+  13-4-calibrate-and-freeze-the-physical-threshold: done
+  13-5-build-the-immutable-physical-detectorbundle-v1: done
+  13-6-produce-frozen-blind-physical-scores: done
+  13-7-evaluate-physical-regimes-and-anomalies-after-truth-unlock: done
+  13-8-serve-an-authorized-physical-bundle-in-shadow-and-close-g5: done
   epic-13-retrospective: optional
 
   # Epic 14: Capture and Detect Real Linux Edge Syscall Anomalies
-  epic-14: in-progress
-  14-1-define-an-allowlisted-linux-edge-workload: ready-for-dev
-  14-2-qualify-the-real-linux-kernel-capture-boundary: ready-for-dev
-  14-3-preserve-raw-capture-and-syscalleventbatch-v1: ready-for-dev
-  14-4-build-categorical-syscall-partitions-and-windows: ready-for-dev
-  14-5-compare-normal-only-categorical-syscall-candidates: ready-for-dev
-  14-6-calibrate-and-bundle-the-custom-syscall-detector: ready-for-dev
-  14-7-produce-frozen-blind-syscall-scores: ready-for-dev
-  14-8-evaluate-the-custom-syscall-detector-after-truth-unlock: ready-for-dev
-  14-9-correlate-custom-streams-and-close-syscall-capture-gate-g6: ready-for-dev
+  epic-14: done
+  14-1-define-an-allowlisted-linux-edge-workload: done
+  14-2-qualify-the-real-linux-kernel-capture-boundary: done
+  14-3-preserve-raw-capture-and-syscalleventbatch-v1: done
+  14-4-build-categorical-syscall-partitions-and-windows: done
+  14-5-compare-normal-only-categorical-syscall-candidates: done
+  14-6-calibrate-and-bundle-the-custom-syscall-detector: done
+  14-7-produce-frozen-blind-syscall-scores: done
+  14-8-evaluate-the-custom-syscall-detector-after-truth-unlock: done
+  14-9-correlate-custom-streams-and-close-syscall-capture-gate-g6: done
   epic-14-retrospective: optional
 
   # Epic 15A: Reproduce ADFA-LD as an External Syscall Benchmark
-  epic-15a: in-progress
-  15a-1-pin-and-inventory-the-official-adfa-ld-source: ready-for-dev
-  15a-2-parse-categorical-traces-and-isolate-adfa-ld-labels: ready-for-dev
-  15a-3-build-trace-safe-adfa-ld-partitions-and-windows: ready-for-dev
-  15a-4-compare-adfa-ld-categorical-detector-candidates: ready-for-dev
-  15a-5-calibrate-bundle-and-freeze-blind-adfa-ld-scores: ready-for-dev
-  15a-6-evaluate-and-publish-the-adfa-ld-benchmark-result: ready-for-dev
+  epic-15a: done
+  15a-1-pin-and-inventory-the-official-adfa-ld-source: done
+  15a-2-parse-categorical-traces-and-isolate-adfa-ld-labels: done
+  15a-3-build-trace-safe-adfa-ld-partitions-and-windows: done
+  15a-4-compare-adfa-ld-categorical-detector-candidates: done
+  15a-5-calibrate-bundle-and-freeze-blind-adfa-ld-scores: done
+  15a-6-evaluate-and-publish-the-adfa-ld-benchmark-result: done
   epic-15a-retrospective: optional
 
   # Epic 15B: Qualify and Evaluate LID-DS 2021 Independently
   epic-15b: in-progress
-  15b-1-authorize-the-exact-lid-ds-2021-scope-or-record-no-execution: ready-for-dev
-  15b-2-qualify-the-official-lid-source-and-isolated-environment: ready-for-dev
-  15b-3-parse-the-authorized-official-lid-ds-2021-layout: ready-for-dev
-  15b-4-build-official-group-safe-lid-partitions-and-windows: ready-for-dev
-  15b-5-compare-authorized-lid-categorical-detector-candidates: ready-for-dev
-  15b-6-calibrate-bundle-and-freeze-blind-lid-scores: ready-for-dev
-  15b-7-publish-the-lid-result-or-honest-blocked-state: ready-for-dev
+  15b-1-authorize-the-exact-lid-ds-2021-scope-or-record-no-execution: in-progress
+  15b-2-qualify-the-official-lid-source-and-isolated-environment: in-progress
+  15b-3-parse-the-authorized-official-lid-ds-2021-layout: in-progress
+  15b-4-build-official-group-safe-lid-partitions-and-windows: in-progress
+  15b-5-compare-authorized-lid-categorical-detector-candidates: in-progress
+  15b-6-calibrate-bundle-and-freeze-blind-lid-scores: in-progress
+  15b-7-publish-the-lid-result-or-honest-blocked-state: in-progress
   epic-15b-retrospective: optional
 
   # Epic 16: Evaluate HAI 23.05 in Its Native Physical Domain
   epic-16: in-progress
-  16-1-pin-and-qualify-the-official-hai-23-05-source: ready-for-dev
-  16-2-implement-the-version-specific-hai-23-05-adapter: ready-for-dev
-  16-3-build-native-hai-partitions-preprocessing-and-windows: ready-for-dev
-  16-4-compare-hai-physical-detector-candidates-fairly: ready-for-dev
-  16-5-calibrate-bundle-and-freeze-blind-hai-scores: ready-for-dev
-  16-6-evaluate-hai-point-window-and-temporal-event-outcomes: ready-for-dev
-  16-7-publish-the-hai-dataset-card-result-and-g7-component: ready-for-dev
+  16-1-pin-and-qualify-the-official-hai-23-05-source: in-progress
+  16-2-implement-the-version-specific-hai-23-05-adapter: in-progress
+  16-3-build-native-hai-partitions-preprocessing-and-windows: in-progress
+  16-4-compare-hai-physical-detector-candidates-fairly: in-progress
+  16-5-calibrate-bundle-and-freeze-blind-hai-scores: in-progress
+  16-6-evaluate-hai-point-window-and-temporal-event-outcomes: in-progress
+  16-7-publish-the-hai-dataset-card-result-and-g7-component: in-progress
   epic-16-retrospective: optional
 
   # Epic 17A: Produce Synchronized Custom Evidence and Frozen Fusion Results
-  epic-17a: in-progress
-  17a-1-preregister-the-synchronized-custom-campaign: ready-for-dev
-  17a-2-verify-and-authorize-campaign-readiness: ready-for-dev
-  17a-3-execute-and-preserve-synchronized-custom-runs: ready-for-dev
-  17a-4-assemble-and-qualify-ptfp-custom-v1: ready-for-dev
-  17a-5-freeze-paired-physical-and-syscall-scores-before-truth: ready-for-dev
-  17a-6-execute-preregistered-truth-blind-late-fusion: ready-for-dev
-  17a-7-perform-the-paired-modality-ablation-after-truth-unlock: ready-for-dev
+  epic-17a: done
+  17a-1-preregister-the-synchronized-custom-campaign: done
+  17a-2-verify-and-authorize-campaign-readiness: done
+  17a-3-execute-and-preserve-synchronized-custom-runs: done
+  17a-4-assemble-and-qualify-ptfp-custom-v1: done
+  17a-5-freeze-paired-physical-and-syscall-scores-before-truth: done
+  17a-6-execute-preregistered-truth-blind-late-fusion: done
+  17a-7-perform-the-paired-modality-ablation-after-truth-unlock: done
   epic-17a-retrospective: optional
 
   # Epic 17B: Publish the Defensible Academic Evidence Package
-  epic-17b: in-progress
-  17b-1-validate-and-register-the-final-evidence-tracks: ready-for-dev
-  17b-2-publish-separate-dataset-and-modality-result-tables: ready-for-dev
-  17b-3-publish-the-paired-custom-only-ablation-table: ready-for-dev
-  17b-4-build-the-capability-and-limitation-matrix: ready-for-dev
-  17b-5-build-the-immutable-claim-to-evidence-index: ready-for-dev
-  17b-6-reconstruct-the-final-evidence-package-and-decide-g9: ready-for-dev
+  epic-17b: done
+  17b-1-validate-and-register-the-final-evidence-tracks: done
+  17b-2-publish-separate-dataset-and-modality-result-tables: done
+  17b-3-publish-the-paired-custom-only-ablation-table: done
+  17b-4-build-the-capability-and-limitation-matrix: done
+  17b-5-build-the-immutable-claim-to-evidence-index: done
+  17b-6-reconstruct-the-final-evidence-package-and-decide-g9: done
   epic-17b-retrospective: optional
 
   # Epic 18: Optionally Present Published Evidence in the Existing Dashboard
-  epic-18: in-progress
-  18-1-bind-a-read-only-projection-to-the-frozen-evidence-package: ready-for-dev
-  18-2-present-linked-physical-representations-and-distinct-channels: ready-for-dev
-  18-3-present-separate-results-claims-and-limitations: ready-for-dev
-  18-4-enforce-and-verify-the-optional-presentation-only-mode: ready-for-dev
+  epic-18: done
+  18-1-bind-a-read-only-projection-to-the-frozen-evidence-package: done
+  18-2-present-linked-physical-representations-and-distinct-channels: done
+  18-3-present-separate-results-claims-and-limitations: done
+  18-4-enforce-and-verify-the-optional-presentation-only-mode: done
   epic-18-retrospective: optional

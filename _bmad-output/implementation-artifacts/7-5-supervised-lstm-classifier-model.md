@@ -1,6 +1,6 @@
 # Story 7.5: Supervised LSTM Classifier Model
 
-Status: review
+Status: done
 
 ## Story
 

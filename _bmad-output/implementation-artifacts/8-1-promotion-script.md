@@ -1,6 +1,6 @@
 # Story 8.1: Promotion Script for the Endorsed Run
 
-Status: review
+Status: done
 
 ## Story
 

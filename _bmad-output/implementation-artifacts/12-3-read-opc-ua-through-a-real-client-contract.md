@@ -1,6 +1,6 @@
 # Story 12.3: Read OPC UA Through a Real Client Contract
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

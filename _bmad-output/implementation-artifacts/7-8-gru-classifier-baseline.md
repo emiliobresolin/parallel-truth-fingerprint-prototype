@@ -1,6 +1,6 @@
 # Story 7.8: GRU Classifier Baseline (Assis 4.2.4 Effect-of-Model)
 
-Status: review
+Status: done
 
 ## Story
 

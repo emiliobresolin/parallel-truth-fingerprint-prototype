@@ -1,6 +1,6 @@
 # Story 1.5: Add Observation-Flow Logging and Runtime MQTT Demo Support
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

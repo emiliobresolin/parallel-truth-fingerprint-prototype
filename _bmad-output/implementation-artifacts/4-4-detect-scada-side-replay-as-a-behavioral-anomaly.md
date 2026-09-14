@@ -1,6 +1,6 @@
 # Story 4.4: Detect SCADA-Side Replay as a Behavioral Anomaly
 
-Status: review
+Status: done
 
 ## Story
 

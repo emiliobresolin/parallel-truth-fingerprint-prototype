@@ -1,6 +1,6 @@
 # Story 1.4: Implement MQTT Exchange and Shared State Reconstruction
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

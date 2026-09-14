@@ -1,6 +1,6 @@
 # Story 15B.7: Publish the LID Result or Honest Blocked State
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

@@ -81,12 +81,12 @@ class DatasetArtifactTests(unittest.TestCase):
         self.assertEqual(manifest_payload["overlap_behavior"], "sliding_stride_1")
         self.assertEqual(manifest_payload["eligible_artifact_count"], 4)
         self.assertEqual(manifest_payload["window_count"], 2)
-        self.assertEqual(manifest_payload["tensor_shape"], [2, 3, 27])
+        self.assertEqual(manifest_payload["tensor_shape"], [2, 3, 15])
         self.assertEqual(
             manifest_payload["adequacy_assessment"]["validation_level"],
             "runtime_valid_only",
         )
-        self.assertEqual(tuple(windows_archive["feature_tensor"].shape), (2, 3, 27))
+        self.assertEqual(tuple(windows_archive["feature_tensor"].shape), (2, 3, 15))
         self.assertEqual(
             tuple(windows_archive["artifact_keys"][0]),
             (
@@ -118,7 +118,7 @@ class DatasetArtifactTests(unittest.TestCase):
                 "valid-consensus-artifacts/round-503.json",
             ),
         )
-        self.assertEqual(len(loaded_windows[0].feature_matrix[0]), 27)
+        self.assertEqual(len(loaded_windows[0].feature_matrix[0]), 15)
 
     def test_persisted_manifest_records_excluded_records_and_reasons(self) -> None:
         store = self.build_store()
@@ -171,7 +171,7 @@ class DatasetArtifactTests(unittest.TestCase):
 
         self.assertEqual(dataset_manifest.eligible_record_count, 1)
         self.assertEqual(dataset_manifest.window_count, 0)
-        self.assertEqual(tuple(windows_archive["feature_tensor"].shape), (0, 2, 27))
+        self.assertEqual(tuple(windows_archive["feature_tensor"].shape), (0, 2, 15))
         self.assertEqual(
             manifest_payload["skipped_artifacts"]["valid-consensus-artifacts/round-502.json"],
             "training_label_not_normal",

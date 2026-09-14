@@ -1,6 +1,6 @@
 # Story 14.1: Define an Allowlisted Linux Edge Workload
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

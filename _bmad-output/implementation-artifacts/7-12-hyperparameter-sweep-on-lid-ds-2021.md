@@ -1,6 +1,6 @@
 # Story 7.12: Hyperparameter Sweep on LID-DS 2021
 
-Status: review
+Status: done
 
 ## Story
 

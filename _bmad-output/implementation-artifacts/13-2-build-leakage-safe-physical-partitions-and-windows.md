@@ -1,6 +1,6 @@
 # Story 13.2: Build Leakage-Safe Physical Partitions and Windows
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

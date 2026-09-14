@@ -1,6 +1,6 @@
 # Story 1.6: Refine Sensor Simulation and Edge Acquisition Fidelity
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

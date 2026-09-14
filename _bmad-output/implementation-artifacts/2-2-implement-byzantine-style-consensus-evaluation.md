@@ -1,6 +1,6 @@
 # Story 2.2: Implement Byzantine-Style Consensus Evaluation
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

@@ -1,6 +1,6 @@
 # Story 17A.2: Verify and Authorize Campaign Readiness
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

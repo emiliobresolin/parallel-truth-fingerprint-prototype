@@ -1,6 +1,6 @@
 # Story 6.3: Reorganize the Dashboard into Architecture-Aligned Pipeline Blocks
 
-Status: review
+Status: done
 
 ## Story
 

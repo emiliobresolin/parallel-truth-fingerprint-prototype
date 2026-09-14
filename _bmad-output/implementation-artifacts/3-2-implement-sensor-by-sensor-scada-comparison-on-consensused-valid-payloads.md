@@ -1,6 +1,6 @@
 # Story 3.2: Implement Sensor-by-Sensor SCADA Comparison on Consensused Valid Payloads
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

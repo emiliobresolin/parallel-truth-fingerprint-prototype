@@ -29,7 +29,7 @@ def main(argv: list[str] | None = None) -> int:
         "--benchmark",
         action="append",
         default=None,
-        help="Repeatable. Defaults to adfa-ld and lid-ds-2021 if omitted.",
+        help="Repeatable. Defaults to HAI, LID-DS, ADFA-LD and the custom campaign.",
     )
     parser.add_argument(
         "--persist-local",
@@ -80,7 +80,7 @@ def main(argv: list[str] | None = None) -> int:
     benchmarks = (
         tuple(args.benchmark)
         if args.benchmark
-        else ("adfa-ld", "lid-ds-2021")
+        else ("hai-23.05", "lid-ds-2021", "adfa-ld", "custom-current-syscall")
     )
     report = build_cross_benchmark_report(
         artifact_store=store, benchmarks=benchmarks

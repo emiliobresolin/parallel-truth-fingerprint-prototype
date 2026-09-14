@@ -1,6 +1,6 @@
 # Story 17A.4: Assemble and Qualify `PTFP-Custom-v1`
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

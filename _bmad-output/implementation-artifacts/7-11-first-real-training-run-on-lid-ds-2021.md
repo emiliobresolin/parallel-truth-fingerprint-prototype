@@ -1,6 +1,6 @@
 # Story 7.11: First Real Training Run on LID-DS 2021
 
-Status: review
+Status: done
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 18.3: Present Separate Results, Claims, and Limitations
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

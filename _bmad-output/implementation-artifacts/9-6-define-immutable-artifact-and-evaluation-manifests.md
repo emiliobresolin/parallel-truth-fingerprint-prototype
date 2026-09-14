@@ -1,6 +1,6 @@
 # Story 9.6: Define Immutable Artifact and Evaluation Manifests
 
-Status: review
+Status: done
 
 <!-- Note: Planning READY does not authorize implementation or scientific activity. -->
 

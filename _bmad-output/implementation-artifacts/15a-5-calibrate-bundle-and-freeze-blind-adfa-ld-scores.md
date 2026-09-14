@@ -1,6 +1,6 @@
 # Story 15A.5: Calibrate, Bundle, and Freeze Blind ADFA-LD Scores
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

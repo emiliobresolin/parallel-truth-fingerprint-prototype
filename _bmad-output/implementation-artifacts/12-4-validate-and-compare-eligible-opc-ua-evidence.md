@@ -1,6 +1,6 @@
 # Story 12.4: Validate and Compare Eligible OPC UA Evidence
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

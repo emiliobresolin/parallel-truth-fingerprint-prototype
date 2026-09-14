@@ -2,6 +2,8 @@
 
 from parallel_truth_fingerprint.lstm_service.dataset_builder import (
     build_normal_training_windows,
+    build_evaluation_windows,
+    evaluate_inference_eligibility,
     evaluate_training_eligibility,
     extract_feature_vector,
 )
@@ -33,8 +35,10 @@ from parallel_truth_fingerprint.lstm_service.trainer import (
 
 __all__ = [
     "build_normal_training_windows",
+    "build_evaluation_windows",
     "build_lstm_autoencoder",
     "evaluate_training_eligibility",
+    "evaluate_inference_eligibility",
     "evaluate_training_dataset_adequacy",
     "extract_feature_vector",
     "configure_scada_replay_runtime_stage",

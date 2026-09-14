@@ -1,6 +1,6 @@
 # Story 15B.3: Parse the Authorized Official LID-DS 2021 Layout
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

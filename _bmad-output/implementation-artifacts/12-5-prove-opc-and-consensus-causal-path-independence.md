@@ -1,6 +1,6 @@
 # Story 12.5: Prove OPC and Consensus Causal Path Independence
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

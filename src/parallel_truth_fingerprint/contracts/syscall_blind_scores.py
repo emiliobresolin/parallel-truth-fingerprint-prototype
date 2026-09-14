@@ -1,17 +1,11 @@
-"""Immutable detector-facing records for frozen custom syscall scoring.
-
-The closed record shapes intentionally exclude truth, labels, attacks, scenario
-meaning, interventions, and expected outcomes.  They are content addressed so a
-later evaluator can admit only the exact pre-truth score closure.
-"""
+"""Immutable, truth-blind syscall detector scoring contracts."""
 from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, fields, replace
+from dataclasses import asdict, dataclass, fields, replace
 from enum import StrEnum
 from typing import Any
-
 
 SYSCALL_DETECTOR_SCORE_SCHEMA = "DetectorScore.v1"
 SYSCALL_SCORE_MANIFEST_SCHEMA = "SyscallScoreManifest.v1"
@@ -41,7 +35,6 @@ class _Record:
 
 @dataclass(frozen=True)
 class SyscallDetectorScore(_Record):
-    """One categorical test-window result or an explicitly retained failure."""
     schema_version: str
     bundle_id: str
     window_id: str
@@ -66,7 +59,6 @@ class SyscallDetectorScore(_Record):
 
 @dataclass(frozen=True)
 class SyscallScoreManifest(_Record):
-    """Complete, immutable accounting of one locked syscall test inventory."""
     schema_version: str
     bundle_id: str
     partition_id: str
@@ -106,3 +98,35 @@ def finalize_syscall_detector_score(score: SyscallDetectorScore) -> SyscallDetec
 
 def finalize_syscall_score_manifest(manifest: SyscallScoreManifest) -> SyscallScoreManifest:
     return replace(manifest, manifest_id=syscall_score_manifest_identity(replace(manifest, manifest_id="")))
+
+
+@dataclass(frozen=True)
+class SyscallBlindScore:
+    """Small boundary record used by lightweight callers before manifest assembly."""
+    bundle_id: str
+    partition_id: str
+    event_batch_id: str
+    score_value: str | None
+    score_status: str
+    code_id: str
+    runtime_id: str
+    content_id: str = ""
+    authorization_effect: str = "none"
+
+    def computed_id(self) -> str:
+        body = asdict(self)
+        body.pop("content_id")
+        return "sha256:" + hashlib.sha256(
+            json.dumps(body, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("ascii")
+        ).hexdigest()
+
+    def validate(self) -> None:
+        if self.score_status not in {"scored", "unavailable", "invalid"}:
+            raise ValueError("SSCORE-STATUS")
+        if self.score_status == "scored" and self.score_value is None:
+            raise ValueError("SSCORE-VALUE")
+        identities = (self.bundle_id, self.partition_id, self.event_batch_id, self.code_id, self.runtime_id)
+        if any(not value.startswith("sha256:") for value in identities):
+            raise ValueError("SSCORE-ID")
+        if self.content_id and self.content_id != self.computed_id():
+            raise ValueError("SSCORE-HASH")

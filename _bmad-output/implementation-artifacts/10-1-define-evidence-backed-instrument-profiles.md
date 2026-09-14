@@ -1,6 +1,6 @@
 # Story 10.1: Define Evidence-Backed Instrument Profiles
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Planning READY does not authorize implementation, source acquisition, device configuration, physical acquisition, experiment execution, feature activation, publication, control, storage mutation, or dashboard work. -->
 

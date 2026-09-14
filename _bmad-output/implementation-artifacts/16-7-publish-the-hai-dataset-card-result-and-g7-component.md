@@ -1,6 +1,6 @@
 # Story 16.7: Publish the HAI Dataset Card, Result, and G7 Component
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

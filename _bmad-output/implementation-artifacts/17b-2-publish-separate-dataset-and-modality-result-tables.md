@@ -1,6 +1,6 @@
 # Story 17B.2: Publish Separate Dataset and Modality Result Tables
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

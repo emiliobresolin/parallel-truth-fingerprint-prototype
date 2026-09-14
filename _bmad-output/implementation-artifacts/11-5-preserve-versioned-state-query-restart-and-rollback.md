@@ -1,6 +1,6 @@
 # Story 11.5: Preserve Versioned State, Query, Restart, and Rollback
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

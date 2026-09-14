@@ -1,6 +1,6 @@
 # Story 18.1: Bind a Read-Only Projection to the Frozen Evidence Package
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

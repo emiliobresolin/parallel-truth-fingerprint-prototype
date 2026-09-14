@@ -1,6 +1,6 @@
 # Story 17A.5: Freeze Paired Physical and Syscall Scores Before Truth
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

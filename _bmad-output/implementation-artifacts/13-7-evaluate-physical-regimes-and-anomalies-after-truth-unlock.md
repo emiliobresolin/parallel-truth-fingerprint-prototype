@@ -1,6 +1,6 @@
 # Story 13.7: Evaluate Physical Regimes and Anomalies After Truth Unlock
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

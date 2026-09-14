@@ -1,4 +1,3 @@
-import statistics
 import unittest
 
 from parallel_truth_fingerprint.sensor_simulation.simulator import CompressorSimulator
@@ -20,44 +19,41 @@ class CompressorSimulatorTest(unittest.TestCase):
         self.assertIn("pressure", reading.transmitter_observations)
         self.assertIn("rpm", reading.transmitter_observations)
         self.assertIn("step", reading.metadata)
-        self.assertIn("noise_level", reading.metadata)
+        self.assertEqual(reading.metadata["input_domain"], "loop_current_ma")
+        self.assertIn("current_noise_ma", reading.metadata)
         self.assertIn("hidden_process_state", reading.metadata)
 
-    def test_higher_power_raises_expected_sensor_values(self) -> None:
+    def test_higher_power_raises_loop_current_and_derived_display_values(self) -> None:
         simulator = CompressorSimulator(seed=21)
 
         low_power_reading = simulator.step(operating_state_pct=25.0)
         high_power_reading = simulator.step(operating_state_pct=85.0)
 
-        self.assertLess(
-            low_power_reading.sensors["temperature"],
-            high_power_reading.sensors["temperature"],
-        )
-        self.assertLess(
-            low_power_reading.sensors["pressure"],
-            high_power_reading.sensors["pressure"],
-        )
-        self.assertLess(low_power_reading.sensors["rpm"], high_power_reading.sensors["rpm"])
+        for sensor_name in ("temperature", "pressure", "rpm"):
+            self.assertLess(
+                low_power_reading.transmitter_observations[sensor_name].loop_current_ma,
+                high_power_reading.transmitter_observations[sensor_name].loop_current_ma,
+            )
+            self.assertLess(
+                low_power_reading.sensors[sensor_name],
+                high_power_reading.sensors[sensor_name],
+            )
 
-    def test_higher_temperature_increases_variability_across_all_sensors(self) -> None:
+    def test_loop_current_stays_inside_the_official_interval(self) -> None:
         simulator = CompressorSimulator(seed=99)
 
-        low_temperature_readings = [simulator.step(operating_state_pct=5.0) for _ in range(20)]
-        high_temperature_readings = [simulator.step(operating_state_pct=95.0) for _ in range(20)]
-
-        for sensor_name in ("temperature", "pressure", "rpm"):
-            low_values = [reading.sensors[sensor_name] for reading in low_temperature_readings]
-            high_values = [reading.sensors[sensor_name] for reading in high_temperature_readings]
-
-            self.assertLess(
-                statistics.pstdev(low_values),
-                statistics.pstdev(high_values),
-                msg=f"Expected higher variability for {sensor_name} at higher temperature",
-            )
+        for operating_state in (0.0, 50.0, 100.0):
+            reading = simulator.step(operating_state_pct=operating_state)
+            for observation in reading.transmitter_observations.values():
+                self.assertGreaterEqual(observation.loop_current_ma, 4.0)
+                self.assertLessEqual(observation.loop_current_ma, 20.0)
 
     def test_scenario_hooks_adjust_inputs_without_bypassing_simulation_output(self) -> None:
         simulator = CompressorSimulator(seed=13)
-        simulator.set_control_hook(operating_state_offset=10.0, temperature_bias=4.0)
+        simulator.set_control_hook(
+            operating_state_offset=10.0,
+            temperature_current_bias_ma=0.5,
+        )
 
         adjusted_reading = simulator.step(operating_state_pct=40.0)
 
@@ -78,8 +74,8 @@ class CompressorSimulatorTest(unittest.TestCase):
         self.assertEqual(temperature_observation.pv.description, "Process_Temperature")
         self.assertEqual(pressure_observation.pv.description, "Process_Pressure")
         self.assertEqual(rpm_observation.pv.description, "Shaft_Speed")
-        self.assertIsNotNone(temperature_observation.sv)
-        self.assertIsNotNone(pressure_observation.sv)
+        self.assertEqual(temperature_observation.sv.description, "Sensor_Body_Temperature")
+        self.assertEqual(pressure_observation.sv.description, "Transmitter_Module_Temperature")
         self.assertIsNone(rpm_observation.sv)
         self.assertNotEqual(
             temperature_observation.sv.description if temperature_observation.sv else "",

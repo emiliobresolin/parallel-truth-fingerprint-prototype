@@ -9,6 +9,7 @@ from parallel_truth_fingerprint.lstm_service.dataset_artifacts import (
     persist_training_dataset_artifacts,
 )
 from parallel_truth_fingerprint.lstm_service.dataset_builder import (
+    build_evaluation_windows,
     build_normal_training_windows,
 )
 from parallel_truth_fingerprint.lstm_service.inference import (
@@ -143,12 +144,23 @@ def execute_deferred_fingerprint_lifecycle(
             (),
         )
 
-    persisted_dataset = persist_training_dataset_artifacts(
+    persisted_training_dataset = persist_training_dataset_artifacts(
         training_windows=training_windows,
         dataset_manifest=dataset_manifest,
         artifact_store=artifact_store,
     )
-    if window_count == 0:
+    evaluation_windows, evaluation_manifest = build_evaluation_windows(
+        artifact_store=artifact_store,
+        sequence_length=sequence_length,
+        prefix=VALID_ARTIFACT_PREFIX,
+    )
+    persisted_evaluation_dataset = persist_training_dataset_artifacts(
+        training_windows=evaluation_windows,
+        dataset_manifest=evaluation_manifest,
+        artifact_store=artifact_store,
+        dataset_prefix=f"{DATASET_PREFIX}evaluation/",
+    )
+    if not evaluation_windows:
         return (
             FingerprintLifecycleStage(
                 cycle_index=cycle_index,
@@ -161,14 +173,14 @@ def execute_deferred_fingerprint_lifecycle(
                 training_events=("reused",),
                 inference_status="skipped_no_windows",
                 inference_result_count=0,
-                dataset_manifest_object_key=persisted_dataset.manifest_object_key,
+                dataset_manifest_object_key=persisted_evaluation_dataset.manifest_object_key,
                 model_metadata_object_key=latest_model_metadata_object_key,
                 source_dataset_validation_level=(
-                    persisted_dataset.adequacy_assessment.validation_level
+                    persisted_training_dataset.adequacy_assessment.validation_level
                 ),
                 limitation_note=(
                     None
-                    if persisted_dataset.adequacy_assessment.validation_level
+                    if persisted_training_dataset.adequacy_assessment.validation_level
                     == "meaningful_fingerprint_valid"
                     else RUNTIME_VALID_LIMITATION_NOTE
                 ),
@@ -178,7 +190,7 @@ def execute_deferred_fingerprint_lifecycle(
 
     inference_results = run_lstm_fingerprint_inference_from_persisted_dataset(
         model_metadata_object_key=latest_model_metadata_object_key,
-        inference_manifest_object_key=persisted_dataset.manifest_object_key,
+        inference_manifest_object_key=persisted_evaluation_dataset.manifest_object_key,
         artifact_store=artifact_store,
     )
     first_result = inference_results[0] if inference_results else None
@@ -194,7 +206,7 @@ def execute_deferred_fingerprint_lifecycle(
             training_events=("reused",),
             inference_status="completed",
             inference_result_count=len(inference_results),
-            dataset_manifest_object_key=persisted_dataset.manifest_object_key,
+            dataset_manifest_object_key=persisted_evaluation_dataset.manifest_object_key,
             model_metadata_object_key=latest_model_metadata_object_key,
             source_dataset_validation_level=None
             if first_result is None

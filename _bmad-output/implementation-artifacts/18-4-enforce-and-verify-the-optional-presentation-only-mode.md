@@ -1,6 +1,6 @@
 # Story 18.4: Enforce and Verify the Optional Presentation-Only Mode
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

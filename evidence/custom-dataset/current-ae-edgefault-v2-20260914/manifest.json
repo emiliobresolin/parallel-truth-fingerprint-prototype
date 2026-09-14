@@ -1,0 +1,37 @@
+{
+  "artifact_keys": [
+    "valid-consensus-artifacts/round-20260914135731629155.json",
+    "valid-consensus-artifacts/round-20260914135951948950.json",
+    "valid-consensus-artifacts/round-20260914140004954864.json"
+  ],
+  "autoencoder_enabled": true,
+  "campaign_id": "current-ae-edgefault-v2-20260914",
+  "output_file": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\evidence\\custom-dataset\\current-ae-edgefault-v2-20260914\\current-syscall-windows.jsonl",
+  "row_count": 3,
+  "rows_with_syscalls": 3,
+  "runtime_log_sha256": "sha256:cddb21bb255e2540bd13f575f29fe32436fa111da25b82554a38122f3d9d9360",
+  "schema_version": "PTFP-Custom-current-syscall-v1",
+  "syscall_trace_sha256": {
+    "edge-syscalls.10": "sha256:209c7d523232972b56730cb0f7135e2347f3accf166fa70d9d8d10cc7afe1189",
+    "edge-syscalls.11": "sha256:8036d3067aad89f9ec1aeb624551323b6e0bf51f674e2b8e7a584cd413bc2c42",
+    "edge-syscalls.12": "sha256:8becce55dc548af7c1e7e06671bf4f50d0e933c4ef8415455efd8da62c6df633",
+    "edge-syscalls.13": "sha256:ecb148b1b85c21e0207090aad76d22fcfef02942bd42a21cfa44ac2135058cd9",
+    "edge-syscalls.14": "sha256:1715cc50d44675bfe0c81ed747f3e3641165d78c95f78134cb5fdb4742041a9a",
+    "edge-syscalls.15": "sha256:057d75e50d6937c03f7169a89458f00dc8ca67ece003451416ed307aea62f9da",
+    "edge-syscalls.16": "sha256:ad56e0d56ea52dd676ac205ac9967261235718d76d56c93fce1e0a9bcf79dbe0",
+    "edge-syscalls.17": "sha256:91aa52b893ccca7c55b16273e08e32d521801aa6547fbce6cf623069c0982e07",
+    "edge-syscalls.18": "sha256:8dcb3b1c6a00d6d78af34537ffd929e4dce7b6b79a0e2a8ba616edf5f603c235",
+    "edge-syscalls.19": "sha256:b0c4dd1c52013db25b79ab5b362444c29cd04a02e552b44a7f1c18b929a2fa76",
+    "edge-syscalls.20": "sha256:bf6955739a5ecd9d0d10a4282c24ddba6dd1bbf6bc0c6fae15394230e942c0c6",
+    "edge-syscalls.21": "sha256:4915b92410d0843de7a1093d1ac10133b48ab17a749327685280b08a91b85a74",
+    "edge-syscalls.22": "sha256:c21da5ce1d2040b671dd654ef00b4dbf8c5fa8a146720e32e2814dae90045d92",
+    "edge-syscalls.23": "sha256:3105baf2b318f256a507a52313396745d13d5c3ecf1f457fb92568a00bc9e977",
+    "edge-syscalls.24": "sha256:482814986dc2532b314227bbbe529d2cd6dd166c6395565ec18d9e409b8c20df",
+    "edge-syscalls.25": "sha256:67527189be57fc57c3eeb59ef78c17aa6af325726f0b998a8efd33c196433d4f",
+    "edge-syscalls.26": "sha256:7968eef2defd805d9b1e968efb61b8285eda2b68f34f8e4f9b2aea6bbb3ce244",
+    "edge-syscalls.27": "sha256:1d6cfe5e799a8c66aeca13fe8a5fab0dc67e64c468c81eeb446a359407e355fb",
+    "edge-syscalls.28": "sha256:0d82e7de70b79219c97ed083ebc244818302e18e63c24d92ac4f163e341c7222",
+    "edge-syscalls.29": "sha256:8266f5b9a4ae158fe1b9ea87504ebdf187cba6b3ecfcf6e8c445e58e361d9495",
+    "edge-syscalls.9": "sha256:2ce424729afe1522ba6c906357814ef670d3ab39bf47f9b52b96b79721c77868"
+  }
+}

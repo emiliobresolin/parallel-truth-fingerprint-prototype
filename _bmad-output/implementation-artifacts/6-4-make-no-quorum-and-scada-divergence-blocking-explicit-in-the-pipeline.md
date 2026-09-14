@@ -1,6 +1,6 @@
 # Story 6.4: Make No-Quorum and SCADA-Divergence Blocking Explicit in the Pipeline
 
-Status: review
+Status: done
 
 ## Story
 

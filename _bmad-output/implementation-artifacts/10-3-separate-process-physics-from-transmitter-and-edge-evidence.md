@@ -1,6 +1,6 @@
 # Story 10.3: Separate Process Physics From Transmitter and Edge Evidence
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Planning READY does not authorize implementation, source acquisition, profile/mock admission, v2 route activation, observation production, broker execution, experiment execution, persistence, consensus, control, publication, or dashboard work. -->
 

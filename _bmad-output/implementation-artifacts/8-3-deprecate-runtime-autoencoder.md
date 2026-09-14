@@ -1,6 +1,6 @@
 # Story 8.3: Deprecate the Runtime Autoencoder Path
 
-Status: review
+Status: done
 
 ## Story
 

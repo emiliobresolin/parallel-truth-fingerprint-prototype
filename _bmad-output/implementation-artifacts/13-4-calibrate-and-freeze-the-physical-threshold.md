@@ -1,6 +1,6 @@
 # Story 13.4: Calibrate and Freeze the Physical Threshold
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

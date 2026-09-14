@@ -1,6 +1,6 @@
 # Story 9.7: Qualify Minimal Persistent Evidence Storage
 
-Status: in-progress
+Status: done
 
 <!-- Note: Planning READY does not authorize implementation, storage mutation, service execution, or scientific activity. -->
 

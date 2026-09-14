@@ -1,6 +1,6 @@
 # Story 14.4: Build Categorical Syscall Partitions and Windows
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

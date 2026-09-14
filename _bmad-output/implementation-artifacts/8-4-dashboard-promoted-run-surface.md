@@ -1,6 +1,6 @@
 # Story 8.4: Dashboard Surface for the Promoted Run
 
-Status: review
+Status: done
 
 ## Story
 

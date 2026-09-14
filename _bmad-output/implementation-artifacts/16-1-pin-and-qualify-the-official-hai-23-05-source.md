@@ -1,6 +1,6 @@
 # Story 16.1: Pin and Qualify the Official HAI 23.05 Source
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

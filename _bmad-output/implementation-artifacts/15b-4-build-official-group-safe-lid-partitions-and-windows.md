@@ -1,6 +1,6 @@
 # Story 15B.4: Build Official-Group-Safe LID Partitions and Windows
 
-Status: ready-for-dev
+Status: in-progress
 
 ## Story
 

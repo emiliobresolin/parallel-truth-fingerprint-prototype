@@ -1,6 +1,6 @@
 # Story 11.1: Define the Versioned Consensus v2 Contracts
 
-Status: ready-for-dev
+Status: done
 
 <!-- Planning READY does not authorize implementation, consensus activation, Go/ABCI migration, CometBFT use, experiment execution, persistence, publication, control, dashboard work, or scientific claims. -->
 

@@ -30,6 +30,9 @@ from parallel_truth_fingerprint.lstm_service.offline_training.benchmarks import 
 from parallel_truth_fingerprint.lstm_service.offline_training.benchmarks import (
     adfa_ld_embedding as _adfa_ld_embedding_registration,  # noqa: F401
 )
+from parallel_truth_fingerprint.lstm_service.offline_training.benchmarks import (
+    hai_23_05 as _hai_23_05_registration,  # noqa: F401
+)
 
 __all__ = [
     "BenchmarkAdapter",

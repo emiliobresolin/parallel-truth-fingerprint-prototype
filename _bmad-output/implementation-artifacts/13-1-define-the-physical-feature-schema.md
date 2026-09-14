@@ -1,6 +1,6 @@
 # Story 13.1: Define the Physical Feature Schema
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

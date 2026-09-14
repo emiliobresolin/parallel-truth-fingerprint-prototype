@@ -127,7 +127,7 @@ The runtime starts with a simulated compressor profile in
 - compressor operating level from `0.0` to `100.0`
 - temperature range from `48.0` to `95.0 degC`
 - pressure range from `1.8` to `8.5 bar`
-- RPM range from `1200.0` to `4200.0 rpm`
+- RPM range from `500.0` to `5000.0 rpm` (prototype configuration: 4 mA to 20 mA)
 
 The dashboard and runtime can set `demo_power`, which is passed through the
 simulator path rather than directly rewriting downstream state.

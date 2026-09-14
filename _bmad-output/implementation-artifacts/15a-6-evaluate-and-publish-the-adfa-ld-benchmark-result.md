@@ -1,6 +1,6 @@
 # Story 15A.6: Evaluate and Publish the ADFA-LD Benchmark Result
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

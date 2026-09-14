@@ -1,6 +1,6 @@
 # Story 17B.4: Build the Capability and Limitation Matrix
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

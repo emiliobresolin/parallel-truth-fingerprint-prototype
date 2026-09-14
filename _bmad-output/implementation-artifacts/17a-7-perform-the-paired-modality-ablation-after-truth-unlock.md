@@ -1,6 +1,6 @@
 # Story 17A.7: Perform the Paired Modality Ablation After Truth Unlock
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

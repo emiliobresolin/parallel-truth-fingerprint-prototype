@@ -1,6 +1,6 @@
 # Story 8.2: Online Inference Helper for the Promoted Classifier
 
-Status: review
+Status: done
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 3.4: Persist Structured Consensus Artifacts Only for Valid States
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

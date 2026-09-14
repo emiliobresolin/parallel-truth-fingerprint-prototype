@@ -1,6 +1,6 @@
 # Story 4.5: Implement Scenario-Control for Demonstration Without Pipeline Bypass
 
-Status: review
+Status: done
 
 ## Story
 

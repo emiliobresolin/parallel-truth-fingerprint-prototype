@@ -1,6 +1,6 @@
 # Story 6.1: Establish Fingerprint Readiness Evidence and Meaningful-Validity Gate
 
-Status: review
+Status: done
 
 ## Story
 

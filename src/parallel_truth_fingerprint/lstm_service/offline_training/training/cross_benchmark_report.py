@@ -24,7 +24,12 @@ from parallel_truth_fingerprint.lstm_service.offline_training.training.run impor
 )
 
 
-DEFAULT_BENCHMARKS: tuple[str, ...] = ("adfa-ld", "lid-ds-2021")
+DEFAULT_BENCHMARKS: tuple[str, ...] = (
+    "hai-23.05",
+    "lid-ds-2021",
+    "adfa-ld",
+    "custom-current-syscall",
+)
 
 
 def build_cross_benchmark_report(
@@ -42,6 +47,11 @@ def build_cross_benchmark_report(
 
     sections: list[str] = []
     sections.append("# Cross-Benchmark Comparative Report\n")
+    sections.append(
+        "This is a source-separated comparison matrix: each score is evaluated "
+        "within its own dataset and label protocol. It must not be read as a "
+        "cross-dataset accuracy claim.\n"
+    )
     sections.append(_render_section_one(champions_per_benchmark))
     sections.append(_render_section_two(champions_per_benchmark))
     sections.append(_render_section_three(champions_per_benchmark))

@@ -1,6 +1,6 @@
 # Story 17A.1: Preregister the Synchronized Custom Campaign
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

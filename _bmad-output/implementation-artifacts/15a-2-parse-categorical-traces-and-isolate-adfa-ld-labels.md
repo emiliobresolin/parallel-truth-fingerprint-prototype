@@ -1,6 +1,6 @@
 # Story 15A.2: Parse Categorical Traces and Isolate ADFA-LD Labels
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

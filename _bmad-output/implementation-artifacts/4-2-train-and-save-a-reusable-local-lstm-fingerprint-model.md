@@ -1,6 +1,6 @@
 # Story 4.2: Train and Save a Reusable Local LSTM Fingerprint Model
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

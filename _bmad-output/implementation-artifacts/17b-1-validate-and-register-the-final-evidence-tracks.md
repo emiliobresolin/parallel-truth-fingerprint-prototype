@@ -1,6 +1,6 @@
 # Story 17B.1: Validate and Register the Final Evidence Tracks
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

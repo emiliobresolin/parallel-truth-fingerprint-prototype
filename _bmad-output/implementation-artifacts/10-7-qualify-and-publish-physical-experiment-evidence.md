@@ -1,6 +1,6 @@
 # Story 10.7: Qualify and Publish Physical Experiment Evidence
 
-Status: ready-for-dev
+Status: done
 
 <!-- Planning READY does not authorize implementation, qualification execution, evidence acquisition, feature activation, training, consensus, syscall capture, truth unlock/join, fusion, deployment, publication, dashboard work or any scientific claim. Each later activity requires its own exact authorization and fail-closed gate. -->
 

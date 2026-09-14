@@ -1,6 +1,6 @@
 # Story 13.6: Produce Frozen Blind Physical Scores
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

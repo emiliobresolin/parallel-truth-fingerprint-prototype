@@ -1,6 +1,6 @@
 # Story 4.6: Build the Local SCADA-Inspired Operator Dashboard and Control Surface
 
-Status: review
+Status: done
 
 ## Story
 

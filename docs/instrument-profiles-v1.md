@@ -26,19 +26,22 @@ be converted by supplying its structural payload directly.
 
 The authoritative catalog is
 [`instrument-profiles.v1.json`](reference-archive/catalog/instrument-profiles.v1.json).
-All four records are retained as independent `unavailable_blocking` planning
-candidates:
+The records retain their independent evidence limits. The FB420 current-domain
+profile is available with the explicit prototype configuration below; the
+remaining candidate profiles stay blocked where their closure is absent:
 
 | Profile | Retained evidence claim | Blocking closure |
 | --- | --- | --- |
 | TH320 | D73 Pt100, 0-100 degC, four-wire | exact 4-20 mapping/configuration and quality policy |
 | P200 | provisional P200, gauge 0-10 bar, two-wire 4-20 mA | archived official option/as-configured bytes; SKU is only a lead |
-| FB420 | programmable user-min/user-max RPM relation | RPM endpoints, PPR/geometry, configuration and diagnostics |
+| FB420 | programmable user-min/user-max RPM relation and direct 4-20 mA output | prototype configuration frozen at 500 RPM = 4 mA and 5000 RPM = 20 mA; this is not a plant calibration, PPR/geometry proof, or manufacturer recommendation |
 | CDS803 | documented 4/20 mA terminal relation and planning-frozen 0/100 decision | terminal 53 current-mode verification and exact upstream closure |
 
-No profile substitutes legacy ranges, manufacturer defaults, a generic NAMUR
-rule, or a `1200-4200 rpm` fallback. In particular, 4 mA alone is not an FB420
-fault assertion; it may be its configured lower endpoint.
+No profile substitutes legacy ranges, manufacturer defaults, or a generic
+NAMUR rule. The prior `1200-4200 rpm` fallback is quarantined and has been
+replaced by the explicitly selected 500-5000 RPM prototype configuration. In
+particular, 4 mA alone is not an FB420 fault assertion; it is the configured
+lower endpoint for this prototype profile.
 
 ## Pure conversion and evaluation
 

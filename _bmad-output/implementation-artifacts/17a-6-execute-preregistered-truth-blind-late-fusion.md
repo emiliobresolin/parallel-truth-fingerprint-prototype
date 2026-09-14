@@ -1,6 +1,6 @@
 # Story 17A.6: Execute Preregistered Truth-Blind Late Fusion
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 11.4: Integrate Consensus v2 With Go ABCI and CometBFT
 
-Status: ready-for-dev
+Status: done
 
 <!-- Planning approval does not authorize implementation, route activation, consensus execution, persistence, control, publication or dashboard work. -->
 

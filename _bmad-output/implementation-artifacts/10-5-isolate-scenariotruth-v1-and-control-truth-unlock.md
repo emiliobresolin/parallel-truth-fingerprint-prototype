@@ -1,6 +1,6 @@
 # Story 10.5: Isolate `ScenarioTruth.v1` and Control Truth Unlock
 
-Status: ready-for-dev
+Status: done
 
 <!-- Note: Planning READY does not authorize implementation, source acquisition, feature activation, experiment execution, command emission, truth production/unlock/join, persistence, capture, training, evaluation, publication, dashboard work, or access to restricted data. -->
 

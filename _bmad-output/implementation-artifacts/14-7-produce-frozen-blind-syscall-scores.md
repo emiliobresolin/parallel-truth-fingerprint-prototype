@@ -1,6 +1,6 @@
 # Story 14.7: Produce Frozen Blind Syscall Scores
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

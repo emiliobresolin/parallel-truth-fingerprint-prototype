@@ -1,6 +1,6 @@
 # Story 17B.3: Publish the Paired Custom-Only Ablation Table
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 

@@ -1,6 +1,6 @@
 # Story 4.2A: Persist Inspectable Training Dataset Artifacts and Establish Normal-History Adequacy
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
