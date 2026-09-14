@@ -1,7 +1,7 @@
 """Thin wrapper around the offline training CLI.
 
 Usage:
-    venv\\Scripts\\python.exe scripts\\train_lstm_offline.py \\
+    .venv\\Scripts\\python.exe scripts\\train_lstm_offline.py \\
         --benchmark dummy --model dummy \\
         --epochs 2 --batch-size 4 --learning-rate 0.01 \\
         --sequence-length 5 --seed 42

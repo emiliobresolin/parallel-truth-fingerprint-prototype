@@ -6,12 +6,12 @@ online inference helper reads from this single source of truth at
 runtime start-up.
 
 Usage (local filesystem store, no MinIO required):
-    venv\\Scripts\\python.exe scripts\\promote_lstm_run.py \\
+    .venv\\Scripts\\python.exe scripts\\promote_lstm_run.py \\
         --run-id run-adfa-ld-lstm-classifier-... \\
         --persist-local _bmad-output\\local-store
 
 Usage (real MinIO):
-    venv\\Scripts\\python.exe scripts\\promote_lstm_run.py \\
+    .venv\\Scripts\\python.exe scripts\\promote_lstm_run.py \\
         --run-id run-adfa-ld-lstm-classifier-... \\
         --persist
 """

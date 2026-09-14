@@ -5,7 +5,7 @@ Reads the MinIO-backed training history (default prefix
 `--output` path.
 
 Usage:
-    venv\\Scripts\\python.exe scripts\\build_cross_benchmark_report.py \\
+    .venv\\Scripts\\python.exe scripts\\build_cross_benchmark_report.py \\
         --output _bmad-output\\implementation-artifacts\\7-13-cross-benchmark-report.md \\
         --benchmark adfa-ld --benchmark lid-ds-2021
 

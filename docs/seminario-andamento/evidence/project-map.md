@@ -38,7 +38,7 @@ tests/                            # suíte de testes
 
 ```powershell
 # 1) deps
-venv\Scripts\uv.exe sync --extra ml-training --extra runtime-demo
+.\scripts\setup_windows.ps1
 # 2) MQTT + MinIO
 docker compose -f compose.local.yml up -d mqtt-broker minio
 # 3) consenso (init uma vez, depois start)
@@ -58,10 +58,10 @@ Verificação rápida da camada de consenso: `curl http://127.0.0.1:26657/status
 ```powershell
 $env:PYTHONPATH='src'; $env:KERAS_BACKEND='torch'
 # normal (caminho feliz)
-.\.venv\Scripts\python scripts\run_local_demo.py
+.\.venv\Scripts\python.exe scripts\run_local_demo.py
 # cenários (caminho oficial, sem bypass)
-$env:DEMO_SCENARIO='quorum_loss';      .\.venv\Scripts\python scripts\run_local_demo.py
-$env:DEMO_SCENARIO='scada_divergence'; .\.venv\Scripts\python scripts\run_local_demo.py
+$env:DEMO_SCENARIO='quorum_loss';      .\.venv\Scripts\python.exe scripts\run_local_demo.py
+$env:DEMO_SCENARIO='scada_divergence'; .\.venv\Scripts\python.exe scripts\run_local_demo.py
 ```
 Variáveis úteis: `DEMO_MAX_CYCLES` (0 = infinito), `DEMO_CYCLE_INTERVAL_SECONDS`,
 `MINIO_BUCKET` (bucket alvo), `DEMO_LOG_PATH` (log JSON), `DEMO_DISABLE_RUNTIME_AUTOENCODER=true`

@@ -102,7 +102,7 @@ This mixed process/container model is a local setup decision only. It is not a p
 ### 1. Install the local runtime dependencies
 
 ```powershell
-venv\Scripts\uv.exe sync --extra ml-training --extra runtime-demo
+.\scripts\setup_windows.ps1
 ```
 
 ### 2. Start MQTT and MinIO
@@ -181,7 +181,7 @@ $env:DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES='30'
 
 ```powershell
 $env:PYTHONPATH='src'
-.\venv\Scripts\python scripts\run_local_demo.py
+.\.venv\Scripts\python.exe scripts\run_local_demo.py
 ```
 
 This will:
@@ -208,7 +208,7 @@ Stop the runtime with `Ctrl+C`.
 
 ```powershell
 $env:PYTHONPATH='src'
-.\venv\Scripts\python scripts\run_local_dashboard.py
+.\.venv\Scripts\python.exe scripts\run_local_dashboard.py
 ```
 
 Open:
@@ -264,13 +264,13 @@ Examples:
 ```powershell
 $env:DEMO_SCENARIO='scada_replay'
 $env:DEMO_SCENARIO_START_CYCLE='35'
-.\venv\Scripts\python scripts\run_local_demo.py
+.\.venv\Scripts\python.exe scripts\run_local_demo.py
 ```
 
 ```powershell
 $env:DEMO_SCENARIO='single_edge_exclusion'
 $env:DEMO_SCENARIO_START_CYCLE='2'
-.\venv\Scripts\python scripts\run_local_demo.py
+.\.venv\Scripts\python.exe scripts\run_local_demo.py
 ```
 
 Lower-level controls are still supported and map into the same runtime path:
@@ -396,7 +396,8 @@ extend the search without touching Python.
 
 ```powershell
 .venv\Scripts\python.exe scripts\build_cross_benchmark_report.py `
-    --output _bmad-output\implementation-artifacts\7-13-cross-benchmark-report.md
+    --output _bmad-output\implementation-artifacts\7-13-cross-benchmark-report.md `
+    --persist-local _bmad-output\local-store
 ```
 
 The report has three sections: champion runs per benchmark, per-class
@@ -429,7 +430,7 @@ Run the current test suite with:
 
 ```powershell
 $env:PYTHONPATH='src'
-.\venv\Scripts\python -m unittest discover -s tests
+.\.venv\Scripts\python.exe -m unittest discover -s tests
 ```
 
 ## Payload Samples
@@ -445,7 +446,7 @@ Reference payload artifacts are available in:
 # QUICK MANUAL RUNTIME FOR DEMO:
 
 ## copy and paste the following commands:
-cd "C:\Users\emili\OneDrive\Área de Trabalho\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype"
+# Open PowerShell in the repository root before running these commands.
 
 # Clean any remaining consensus containers and volumes
 docker compose -f compose.consensus.yml down -v
@@ -464,4 +465,4 @@ $env:DEMO_LOG_PATH='logs/strong-fingerprint-demo.log'
 $env:DEMO_TRAIN_AFTER_ELIGIBLE_CYCLES='30'
 
 # Start the dashboard
-.\venv\Scripts\python scripts\run_local_dashboard.py
+.\.venv\Scripts\python.exe scripts\run_local_dashboard.py

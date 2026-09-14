@@ -1,7 +1,7 @@
 """Story 7.9 CLI: drive a hyperparameter sweep from a JSON config file.
 
 Usage:
-    venv\\Scripts\\python.exe scripts\\train_lstm_sweep.py \\
+    .venv\\Scripts\\python.exe scripts\\train_lstm_sweep.py \\
         --config scripts\\sweeps\\adfa_ld_first_sweep.json \\
         --output _bmad-output\\implementation-artifacts\\7-9-adfa-ld-sweep-summary.md \\
         --persist
