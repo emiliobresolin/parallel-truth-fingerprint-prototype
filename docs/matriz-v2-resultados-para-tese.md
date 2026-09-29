@@ -26,3 +26,9 @@ Use este documento junto com o relatório derivado em `evidence/academic/thesis-
 ## Regra simples para não errar na redação
 
 Escreva apenas o que a tabela mostra. Não complete células ausentes por média, não transforme diferenças descritivas em significância estatística e não apresente o custo de CPU como resultado de desempenho.
+
+## Conjunto customizado de corrente e syscalls
+
+O conjunto próprio do protótipo existe, mas é uma trilha de integração separada da Matriz V2. Ele reúne quatro campanhas e 17 linhas que associam, pelo mesmo `round_id`, medidas de corrente, rastros reais de syscall e a saída disponível do autoencoder. A Matriz V2 foi congelada para ADFA-LD, HAI 23.05 e LID-DS 2021; por isso, a tabela comparativa continua restrita a essas três bases.
+
+Use a nota [conjunto customizado de corrente e syscalls](conjunto-customizado-autoencoder-syscalls-para-tese.md) para apresentar os números e a explicação técnica. O nome correto é **autoencoder de corrente com rastros de syscall correlacionados**: os syscalls foram preservados junto da rodada, mas não foram usados como entrada do autoencoder. Essa distinção evita afirmar uma fusão de dados que não foi executada.
