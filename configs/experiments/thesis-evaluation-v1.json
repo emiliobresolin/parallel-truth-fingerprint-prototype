@@ -1,0 +1,196 @@
+{
+  "schema_version": "thesis-evaluation-config-v1",
+  "experiment_id": "thesis-evaluation-v1",
+  "protocol_version": "2026-09-14",
+  "output_root": "evidence/academic",
+  "legacy_report": "evidence/reports/cross-benchmark-comparison.md",
+  "research_question": "Can normal-only sequence models produce calibrated, reproducible anomaly scores that generalize to independent IoT/ICS and host-intrusion test units without partition leakage?",
+  "pilot_seeds": [101, 211, 307, 419, 523],
+  "confirmatory_seeds": [10001, 10002, 10003, 10004, 10005, 10006, 10007, 10008, 10009, 10010, 10011, 10012, 10013, 10014, 10015, 10016, 10017, 10018, 10019, 10020, 10021, 10022, 10023, 10024, 10025, 10026, 10027, 10028, 10029, 10030],
+  "statistical_protocol": {
+    "primary_metric": "auroc",
+    "reported_metrics": ["f1", "balanced_accuracy", "mcc", "auroc", "auprc"],
+    "confidence_level": 0.95,
+    "bootstrap_replicates": 2000,
+    "bootstrap_seed_offset": 1000003,
+    "target_ci_half_width": 0.025,
+    "minimum_stochastic_trials": 10,
+    "maximum_stochastic_trials": 30,
+    "comparison_seed": 99173,
+    "permutation_replicates": 20000,
+    "multiplicity": "Holm",
+    "threshold": {
+      "method": "target-fpr",
+      "target_fpr": 0.01,
+      "normal_quantile": 0.99,
+      "direction": "higher-is-more-anomalous",
+      "calibration_partition": "validation"
+    }
+  },
+  "datasets": {
+    "adfa-ld": {
+      "kind": "adfa-ld",
+      "root": "datasets/ADFA-LD",
+      "partition_seed": 1729,
+      "normal_validation_fraction": 0.5,
+      "numeric_clip": 10.0,
+      "phase_caps": {
+        "pilot": {
+          "train": 250,
+          "validation": 100,
+          "test_normal": 100,
+          "test_attack_per_class": 30
+        },
+        "confirmatory": {
+          "train": 0,
+          "validation": 0,
+          "test_normal": 0,
+          "test_attack_per_class": 0
+        }
+      },
+      "minimum_support": {
+        "pilot": {"test_normal": 50, "test_attack": 100},
+        "confirmatory": {"test_normal": 200, "test_attack": 200}
+      },
+      "window": {
+        "sequence_length": 128,
+        "stride": 64,
+        "max_windows_per_unit": 6,
+        "aggregation": "p95"
+      },
+      "models": {
+        "categorical-unigram": {
+          "deterministic": true,
+          "laplace_alpha": 1.0
+        },
+        "robust-distance": {
+          "deterministic": true,
+          "hash_bins": 128,
+          "max_robust_z": 20.0
+        },
+        "pca-autoencoder": {
+          "deterministic": true,
+          "hash_bins": 128,
+          "latent_dimensions": 16
+        },
+        "recurrent-autoencoder": {
+          "deterministic": false,
+          "epochs": 12,
+          "batch_size": 128,
+          "hidden_units": 32,
+          "latent_units": 16,
+          "embedding_dimensions": 16,
+          "learning_rate": 0.001,
+          "patience": 3,
+          "min_delta": 0.00001
+        }
+      }
+    },
+    "lid-ds-2021": {
+      "kind": "lid-ds-2021",
+      "root": "datasets/LID-DS-2021-real",
+      "partition_seed": 2718,
+      "phase_caps": {
+        "pilot": {"archives_per_scenario_partition": 6},
+        "confirmatory": {"archives_per_scenario_partition": 50}
+      },
+      "minimum_support": {
+        "pilot": {"test_normal": 30, "test_attack": 30},
+        "confirmatory": {"test_normal": 300, "test_attack": 300}
+      },
+      "window": {
+        "sequence_length": 128,
+        "stride": 128,
+        "max_windows_per_unit": 8,
+        "aggregation": "max"
+      },
+      "models": {
+        "categorical-unigram": {
+          "deterministic": true,
+          "laplace_alpha": 1.0
+        },
+        "robust-distance": {
+          "deterministic": true,
+          "hash_bins": 128,
+          "max_robust_z": 20.0
+        },
+        "pca-autoencoder": {
+          "deterministic": true,
+          "hash_bins": 128,
+          "latent_dimensions": 16
+        },
+        "recurrent-autoencoder": {
+          "deterministic": false,
+          "epochs": 12,
+          "batch_size": 128,
+          "hidden_units": 32,
+          "latent_units": 16,
+          "embedding_dimensions": 16,
+          "learning_rate": 0.001,
+          "patience": 3,
+          "min_delta": 0.00001
+        }
+      }
+    },
+    "hai-23.05": {
+      "kind": "hai-23.05",
+      "root": "datasets/HAI-23.05-kaggle/hai-23.05",
+      "partition_seed": 3141,
+      "block_rows": 128,
+      "numeric_clip": 10.0,
+      "phase_caps": {
+        "pilot": {
+          "train": {"normal": 120},
+          "validation": {"normal": 120},
+          "test": {"total": 400}
+        },
+        "confirmatory": {
+          "train": {"normal": 500},
+          "validation": {"normal": 500},
+          "test": {"total": 1000}
+        }
+      },
+      "minimum_support": {
+        "pilot": {"test_normal": 100, "test_attack": 20},
+        "confirmatory": {"test_normal": 500, "test_attack": 50}
+      },
+      "window": {
+        "sequence_length": 128,
+        "stride": 128,
+        "max_windows_per_unit": 1,
+        "aggregation": "max"
+      },
+      "models": {
+        "robust-distance": {
+          "deterministic": true,
+          "max_robust_z": 20.0
+        },
+        "pca-autoencoder": {
+          "deterministic": true,
+          "latent_dimensions": 24
+        },
+        "recurrent-autoencoder": {
+          "deterministic": false,
+          "epochs": 12,
+          "batch_size": 128,
+          "hidden_units": 32,
+          "latent_units": 16,
+          "learning_rate": 0.001,
+          "patience": 3,
+          "min_delta": 0.00001
+        }
+      }
+    }
+  },
+  "interpretation_contract": {
+    "pilot": "Exploratory only; used to estimate feasibility and stochastic dispersion.",
+    "confirmatory": "Eligible only after all frozen cells complete and all leakage/support gates pass.",
+    "forbidden": [
+      "select a lucky seed",
+      "tune a threshold on test truth",
+      "pool unlike datasets or modalities into a global champion",
+      "treat windows or epochs as independent executions",
+      "replace undefined metrics with zero"
+    ]
+  }
+}

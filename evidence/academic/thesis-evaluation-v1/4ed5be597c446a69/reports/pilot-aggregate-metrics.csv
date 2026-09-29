@@ -1,0 +1,12 @@
+dataset,model,trials,deterministic,F1 mean [seed CI],balanced accuracy mean [seed CI],MCC mean [seed CI],AUROC mean [seed CI],AUPRC mean [seed CI]
+adfa-ld,categorical-unigram,1,True,undefined,0.490000,-0.109985,0.565067,0.673037
+adfa-ld,pca-autoencoder,1,True,undefined,0.495000,-0.077615,0.516067,0.588522
+adfa-ld,recurrent-autoencoder,5,False,"0.104728 [0.090864, 0.118592]","0.519000 [0.517040, 0.520960]","0.094254 [0.091722, 0.096785]","0.558400 [0.550763, 0.566037]","0.657294 [0.653035, 0.661553]"
+adfa-ld,robust-distance,1,True,undefined,0.495000,-0.077615,0.412933,0.518251
+hai-23.05,pca-autoencoder,1,True,0.135593,0.536364,0.260898,0.826089,0.399558
+hai-23.05,recurrent-autoencoder,5,False,"0.276923 [0.276923, 0.276923]","0.581147 [0.581147, 0.581147]","0.369614 [0.369614, 0.369614]","0.699919 [0.690894, 0.708945]","0.333946 [0.324538, 0.343354]"
+hai-23.05,robust-distance,1,True,0.187500,0.552532,0.252060,0.667261,0.220572
+lid-ds-2021,categorical-unigram,1,True,0.021978,0.505556,0.074744,0.570802,0.598155
+lid-ds-2021,pca-autoencoder,1,True,0.021978,0.505556,0.074744,0.638827,0.677174
+lid-ds-2021,recurrent-autoencoder,5,False,"0.021978 [0.021978, 0.021978]","0.504444 [0.502267, 0.506622]","0.074744 [0.074744, 0.074744]","0.546000 [0.533840, 0.558160]","0.562734 [0.550523, 0.574946]"
+lid-ds-2021,robust-distance,1,True,0.064516,0.516667,0.130189,0.623580,0.665247

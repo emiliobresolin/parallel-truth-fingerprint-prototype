@@ -1,0 +1,31 @@
+..............................................................s......... [ 10%]
+............................................................. [ 18%]
+...................................................................................................................................................................................... [ 44%]
+...........................................s.............s....... [ 53%]
+......s........................... [ 58%]
+.................................................. [ 65%]
+.................ss.........................s.s......s........ [ 73%]
+........................................................................ [ 83%]
+...................s........s...s....s.....s............................ [ 94%]
+s.........................................                               [100%]
+============================== warnings summary ===============================
+tests/lstm_service/offline_training/test_cross_benchmark_report.py: 68 warnings
+tests/lstm_service/offline_training/test_embedding_classifiers.py: 44 warnings
+tests/lstm_service/offline_training/test_gru_classifier.py: 42 warnings
+tests/lstm_service/offline_training/test_lstm_classifier.py: 30 warnings
+tests/lstm_service/offline_training/test_online_inference.py: 46 warnings
+tests/lstm_service/offline_training/test_promoted_run_view.py: 12 warnings
+tests/lstm_service/offline_training/test_promotion.py: 48 warnings
+tests/lstm_service/offline_training/test_runner_adfa_ld.py: 12 warnings
+tests/lstm_service/offline_training/test_runner_lid_ds_2021.py: 10 warnings
+tests/lstm_service/offline_training/test_sweep.py: 96 warnings
+tests/lstm_service/offline_training/test_sweep_lid_ds.py: 40 warnings
+  D:\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\.venv\Lib\site-packages\keras\src\backend\torch\core.py:253: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    return np.array(x)
+
+tests/scada/test_opcua_service.py::FakeOpcUaScadaServiceOpcUaTests::test_service_exposes_temperature_pressure_and_rpm_over_opcua
+  D:\Projetos\parallel-truth-fingerprint-prototype\parallel-truth-fingerprint-prototype\.venv\Lib\site-packages\asyncua\common\methods.py:82: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if iscoroutinefunction(func):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+697 passed, 15 skipped, 449 warnings, 194 subtests passed in 56.67s

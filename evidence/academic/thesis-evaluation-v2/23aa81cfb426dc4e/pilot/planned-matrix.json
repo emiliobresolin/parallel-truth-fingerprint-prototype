@@ -1,0 +1,270 @@
+{
+  "cells": [
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "adfa-ld",
+      "deterministic": true,
+      "model": "categorical-unigram",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "deterministic-singleton",
+      "seed": 101,
+      "seed_position": 1
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "adfa-ld",
+      "deterministic": true,
+      "model": "pca-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "deterministic-singleton",
+      "seed": 101,
+      "seed_position": 1
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "adfa-ld",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 101,
+      "seed_position": 1
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "adfa-ld",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 211,
+      "seed_position": 2
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "adfa-ld",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 307,
+      "seed_position": 3
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "adfa-ld",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 419,
+      "seed_position": 4
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "adfa-ld",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 523,
+      "seed_position": 5
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "adfa-ld",
+      "deterministic": true,
+      "model": "robust-distance",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "deterministic-singleton",
+      "seed": 101,
+      "seed_position": 1
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "hai-23.05",
+      "deterministic": true,
+      "model": "pca-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "deterministic-singleton",
+      "seed": 101,
+      "seed_position": 1
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "hai-23.05",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 101,
+      "seed_position": 1
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "hai-23.05",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 211,
+      "seed_position": 2
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "hai-23.05",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 307,
+      "seed_position": 3
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "hai-23.05",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 419,
+      "seed_position": 4
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "hai-23.05",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 523,
+      "seed_position": 5
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "hai-23.05",
+      "deterministic": true,
+      "model": "robust-distance",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "deterministic-singleton",
+      "seed": 101,
+      "seed_position": 1
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "lid-ds-2021",
+      "deterministic": true,
+      "model": "categorical-unigram",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "deterministic-singleton",
+      "seed": 101,
+      "seed_position": 1
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "lid-ds-2021",
+      "deterministic": true,
+      "model": "pca-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "deterministic-singleton",
+      "seed": 101,
+      "seed_position": 1
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "lid-ds-2021",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 101,
+      "seed_position": 1
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "lid-ds-2021",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 211,
+      "seed_position": 2
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "lid-ds-2021",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 307,
+      "seed_position": 3
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "lid-ds-2021",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 419,
+      "seed_position": 4
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "lid-ds-2021",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "independent-seed-trials",
+      "seed": 523,
+      "seed_position": 5
+    },
+    {
+      "batch_id": null,
+      "batch_position": null,
+      "dataset": "lid-ds-2021",
+      "deterministic": true,
+      "model": "robust-distance",
+      "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+      "schedule_kind": "deterministic-singleton",
+      "seed": 101,
+      "seed_position": 1
+    }
+  ],
+  "config_identity": "sha256:23aa81cfb426dc4eb4d37b55c99a640d0bd7d93230d2b44dadb35b849b5782dd",
+  "excluded_trial_surrogates": [
+    "epochs",
+    "windows",
+    "bootstrap replicates",
+    "cycles"
+  ],
+  "execution_schedule_adaptive": false,
+  "phase": "pilot",
+  "planning_error": null,
+  "schedule_identity": "sha256:9f22821a5409e19e8186702ea51de95597e6177afcedb1accc2b3a17675de39a",
+  "schema_version": "academic-logical-plan-v2",
+  "trial_definition": "one independent model fit at one frozen seed"
+}

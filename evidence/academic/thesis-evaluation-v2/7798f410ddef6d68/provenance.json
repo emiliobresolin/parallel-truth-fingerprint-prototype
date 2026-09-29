@@ -1,0 +1,37 @@
+{
+  "config_identity": "sha256:7798f410ddef6d68fa3d7ec8c6bdce9045dfe5f433204ceebc2a812556b5ce7e",
+  "environment": {
+    "accelerators": [],
+    "keras_backend": "torch",
+    "locale_encoding": "cp1252",
+    "logical_cpu_count": 8,
+    "machine": "AMD64",
+    "numpy": "2.4.4",
+    "numpy_build_configuration": "{'Compilers': {'c': {'name': 'msvc', 'linker': 'link', 'version': '19.44.35225', 'commands': 'cl'}, 'cython': {'name': 'cython', 'linker': 'cython', 'version': '3.2.4', 'commands': 'cython'}, 'c++': {'name': 'msvc', 'linker': 'link', 'version': '19.44.35225', 'commands': 'cl'}}, 'Machine Information': {'host': {'cpu': 'x86_64', 'family': 'x86_64', 'endian': 'little', 'system': 'windows'}, 'build': {'cpu': 'x86_64', 'family': 'x86_64', 'endian': 'little', 'system': 'windows'}}, 'Build Dependencies': {'blas': {'name': 'scipy-openblas', 'found': True, 'version': '0.3.31.188.0', 'detection method': 'pkgconfig', 'include directory': 'C:/Users/runneradmin/AppData/Local/Temp/cibw-run-ucojyb64/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/include', 'lib directory': 'C:/Users/runneradmin/AppData/Local/Temp/cibw-run-ucojyb64/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/lib', 'openblas configuration': 'OpenBLAS 0.3.31.188.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=24', 'pc file directory': 'D:/a/numpy-release/numpy-release/.openblas'}, 'lapack': {'name': 'scipy-openblas', 'found': True, 'version': '0.3.31.188.0', 'detection method': 'pkgconfig', 'include directory': 'C:/Users/runneradmin/AppData/Local/Temp/cibw-run-ucojyb64/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/include', 'lib directory': 'C:/Users/runneradmin/AppData/Local/Temp/cibw-run-ucojyb64/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/lib', 'openblas configuration': 'OpenBLAS 0.3.31.188.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=24', 'pc file directory': 'D:/a/numpy-release/numpy-release/.openblas'}}, 'Python Information': {'path': 'C:\\\\Users\\\\runneradmin\\\\AppData\\\\Local\\\\Temp\\\\build-env-1f6ndr68\\\\Scripts\\\\python.exe', 'version': '3.14'}, 'SIMD Extensions': {'baseline': ['X86_V2'], 'found': ['X86_V3']}}",
+    "package_versions": {
+      "keras": "3.13.2",
+      "numpy": "2.4.4",
+      "torch": "2.11.0"
+    },
+    "platform": "Windows-10-10.0.19045-SP0",
+    "processor": "AMD64 Family 23 Model 24 Stepping 1, AuthenticAMD",
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "python_executable": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\.venv\\Scripts\\python.exe",
+    "python_hash_seed": "unspecified",
+    "thread_environment": {
+      "MKL_NUM_THREADS": "unspecified",
+      "NUMEXPR_NUM_THREADS": "unspecified",
+      "OMP_NUM_THREADS": "unspecified",
+      "OPENBLAS_NUM_THREADS": "unspecified"
+    },
+    "torch": "2.11.0+cpu",
+    "torch_cuda_available": false,
+    "torch_cudnn_benchmark": false,
+    "torch_cudnn_deterministic": false,
+    "torch_cudnn_version": null,
+    "torch_deterministic_algorithms": false,
+    "torch_thread_count": 4
+  },
+  "runner_protocol": "thesis-evaluation-runner-v2",
+  "schema_version": "academic-provenance-v2"
+}

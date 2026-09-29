@@ -1,0 +1,163 @@
+{
+  "schema_version": "thesis-result-cutoff-v1",
+  "generated_at_utc": "2026-09-29T11:49:45.865766Z",
+  "reporting_status": "closed-for-thesis-writing",
+  "collection_cutoff_decision": "O titular do trabalho determinou o encerramento da coleta e o uso do corpus V6 disponível de 23 células completas para a redação da tese.",
+  "experiment_id": "thesis-evaluation-v2",
+  "source_phase": "pilot",
+  "config_identity": "sha256:73c6eadb15c3c35ac3dcbfa3b4ffa5df596914481746e01b351306b6dd93f6e7",
+  "source_run_summary": {
+    "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/run-summary.json",
+    "sha256": "sha256:2f84afff7ed349af2156b25bde02740801258a40573f8fd24bfc46d63640857a",
+    "analysis_input_identity": "sha256:110a9d722e3bfe7614e66a6cea43f7d35e29057ea9cba5c5829750ffc0fe4855",
+    "analysis_identity": "sha256:b9023c9a368a1088ef08b63556c995f02ff8521a2841a83dd87d2be6b3301684"
+  },
+  "reported_cell_count": 23,
+  "reported_failure_count": 0,
+  "excluded_non_source_cell_count": 5,
+  "source_cells": [
+    {
+      "cell_id": "adfa-ld__categorical-unigram__seed-101__3073b18160ec",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/adfa-ld__categorical-unigram__seed-101__3073b18160ec.json",
+      "sha256": "sha256:61e8d12752d3786fe49f95d79de18382592338d868c5485ee520b4e2017b672e"
+    },
+    {
+      "cell_id": "adfa-ld__pca-autoencoder__seed-101__6ba4735446ad",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/adfa-ld__pca-autoencoder__seed-101__6ba4735446ad.json",
+      "sha256": "sha256:cf4f76ccea0c624cd35e67daf8c1471069eb7052bd0b850915fa8ad2956ca8bd"
+    },
+    {
+      "cell_id": "adfa-ld__recurrent-autoencoder__seed-101__d3eb395a1c58",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/adfa-ld__recurrent-autoencoder__seed-101__d3eb395a1c58.json",
+      "sha256": "sha256:6bbd8ec81c758ac3b34ad1cd34e68e2aae3538479441b22de0f10352ae999999"
+    },
+    {
+      "cell_id": "adfa-ld__recurrent-autoencoder__seed-211__396de3005bb4",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/adfa-ld__recurrent-autoencoder__seed-211__396de3005bb4.json",
+      "sha256": "sha256:cc27c5cc44e31d7ff9ae537630cac636f70320d1970acd496ba8bea664ef80b4"
+    },
+    {
+      "cell_id": "adfa-ld__recurrent-autoencoder__seed-307__46bbc2da0baa",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/adfa-ld__recurrent-autoencoder__seed-307__46bbc2da0baa.json",
+      "sha256": "sha256:459f2209dc2c579e6bb3b74a619264c474d9d7ee189636d6f3eacf7ce50e6746"
+    },
+    {
+      "cell_id": "adfa-ld__recurrent-autoencoder__seed-419__3bd643e5b132",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/adfa-ld__recurrent-autoencoder__seed-419__3bd643e5b132.json",
+      "sha256": "sha256:959881be13f2b4bf07d1a7ba6199522b92977a7974686fdaf88bc35a3d09e396"
+    },
+    {
+      "cell_id": "adfa-ld__recurrent-autoencoder__seed-523__3f9bd80c05f4",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/adfa-ld__recurrent-autoencoder__seed-523__3f9bd80c05f4.json",
+      "sha256": "sha256:e2dd89702b80cbbeb0893de34f0f848de2cb74c471089817fd737495d4c99cd5"
+    },
+    {
+      "cell_id": "adfa-ld__robust-distance__seed-101__ec64196cef18",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/adfa-ld__robust-distance__seed-101__ec64196cef18.json",
+      "sha256": "sha256:3f6ced6f613dd1f1a9f4e44199dd53003ea4fc6a8508de449b3510a060cd3b53"
+    },
+    {
+      "cell_id": "hai-23-05__pca-autoencoder__seed-101__c909bcbfc19f",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/hai-23-05__pca-autoencoder__seed-101__c909bcbfc19f.json",
+      "sha256": "sha256:15e3d6236bc11a6a3fbbab701e0093b0c7ed6e5b0e3ffcd04617bb0d4ef3f50e"
+    },
+    {
+      "cell_id": "hai-23-05__recurrent-autoencoder__seed-101__ae9e0429cc6d",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/hai-23-05__recurrent-autoencoder__seed-101__ae9e0429cc6d.json",
+      "sha256": "sha256:29de9d7a574d309307a193d24abf372e3433de3afde06dc6281e65de84c8b909"
+    },
+    {
+      "cell_id": "hai-23-05__recurrent-autoencoder__seed-211__fb3479750073",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/hai-23-05__recurrent-autoencoder__seed-211__fb3479750073.json",
+      "sha256": "sha256:8b75b067369e8882aaa58ef43182e69f5bc6b36f84a485c9432c2ca3c08ae2e3"
+    },
+    {
+      "cell_id": "hai-23-05__recurrent-autoencoder__seed-307__78a79c318a73",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/hai-23-05__recurrent-autoencoder__seed-307__78a79c318a73.json",
+      "sha256": "sha256:31614afa244c72e767f48d214eee7ba0ad60a11567338747ba7ed9aaf1f1f2ed"
+    },
+    {
+      "cell_id": "hai-23-05__recurrent-autoencoder__seed-419__3762feb0482e",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/hai-23-05__recurrent-autoencoder__seed-419__3762feb0482e.json",
+      "sha256": "sha256:66a1ae474f821588c1b565565526da0f9a07cf5a718aaf6f037d22f260d4f75a"
+    },
+    {
+      "cell_id": "hai-23-05__recurrent-autoencoder__seed-523__07e5532938b3",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/hai-23-05__recurrent-autoencoder__seed-523__07e5532938b3.json",
+      "sha256": "sha256:43f8c7076aaf3b36c8058528c47af7408921631f99c5ef47245b86602453eacc"
+    },
+    {
+      "cell_id": "hai-23-05__robust-distance__seed-101__1bc1417abe50",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/hai-23-05__robust-distance__seed-101__1bc1417abe50.json",
+      "sha256": "sha256:61ac36e2455e1ae4004fa3d88b93bc2591df3bdec152132202bd06061932054f"
+    },
+    {
+      "cell_id": "lid-ds-2021__categorical-unigram__seed-101__24ce6abf5ecd",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/lid-ds-2021__categorical-unigram__seed-101__24ce6abf5ecd.json",
+      "sha256": "sha256:40a01ba375c3fc3a135668076d8afb59968edea4d3ab07248904388b0daff3e3"
+    },
+    {
+      "cell_id": "lid-ds-2021__pca-autoencoder__seed-101__ab503df44c81",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/lid-ds-2021__pca-autoencoder__seed-101__ab503df44c81.json",
+      "sha256": "sha256:cf35d7abcb8511dcb3ffeaf273594984d3e7d1a31807f31fc6e2444350870359"
+    },
+    {
+      "cell_id": "lid-ds-2021__recurrent-autoencoder__seed-101__527f041f1aa1",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/lid-ds-2021__recurrent-autoencoder__seed-101__527f041f1aa1.json",
+      "sha256": "sha256:8897faf8f2362251f1b00bcfd742c75dc5183d66a5c0375d3a288cfa9c0730a4"
+    },
+    {
+      "cell_id": "lid-ds-2021__recurrent-autoencoder__seed-211__465ea27ddf5a",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/lid-ds-2021__recurrent-autoencoder__seed-211__465ea27ddf5a.json",
+      "sha256": "sha256:96179144c8fe0383fa02194c91bd682364313b5ce401ed55f1859d3418b7f29c"
+    },
+    {
+      "cell_id": "lid-ds-2021__recurrent-autoencoder__seed-307__c8c7e6204c93",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/lid-ds-2021__recurrent-autoencoder__seed-307__c8c7e6204c93.json",
+      "sha256": "sha256:6096c8b2463065706a951e40078fb986776dae89000bd4f7a4d221813a2c2367"
+    },
+    {
+      "cell_id": "lid-ds-2021__recurrent-autoencoder__seed-419__efaa9d8f10a2",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/lid-ds-2021__recurrent-autoencoder__seed-419__efaa9d8f10a2.json",
+      "sha256": "sha256:db4409a32154e16760d3ef60eef4cc76d6d4c7596993367f8d1d5446c2778851"
+    },
+    {
+      "cell_id": "lid-ds-2021__recurrent-autoencoder__seed-523__7656d832364d",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/lid-ds-2021__recurrent-autoencoder__seed-523__7656d832364d.json",
+      "sha256": "sha256:9f64e6ab421b699cf95b695f442d0fcc1621f5783fd23cbdaa59deaa463b5f1b"
+    },
+    {
+      "cell_id": "lid-ds-2021__robust-distance__seed-101__c73f3c7ffd3b",
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/pilot/cells/lid-ds-2021__robust-distance__seed-101__c73f3c7ffd3b.json",
+      "sha256": "sha256:8d446f196e4d6ba00296e4e48100e6066bb45d41f5143daf973a1a6ae3a32430"
+    }
+  ],
+  "reporting_rules": [
+    "Only complete source cells with status complete are included.",
+    "No missing execution is estimated or added.",
+    "Seeded summaries retain the original source aggregation and interval.",
+    "Deterministic cells remain single authenticated executions."
+  ],
+  "outputs": [
+    {
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/reports/matrix-v2-resultados-data-de-corte.md",
+      "sha256": "sha256:b7eaf56fad119007973c7f627b70813db0d88212effbbe227cdd032376928e4e"
+    },
+    {
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/reports/matrix-v2-resultados-agregados.csv",
+      "sha256": "sha256:fbb43c762a2f07846085eacc3abd3bd42de6f3b23088bf52fb660f770dbb36a0"
+    },
+    {
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/reports/matrix-v2-resultados-por-execucao.csv",
+      "sha256": "sha256:8329e60d8c27c1751d05212eab0a1353bcb24be46624e0bb0587097b4677e0f4"
+    },
+    {
+      "path": "evidence/academic/thesis-evaluation-v2/73c6eadb15c3c35a/reports/matrix-v2-tabela-resultados.tex",
+      "sha256": "sha256:853cc2debf9b5e8d51657a482874d2e0a79a7f702615a1f9d824d1251772fbc9"
+    },
+    {
+      "path": "docs/matriz-v2-resultados-para-tese.md",
+      "sha256": "sha256:00195c2ad2da06b63a5359ff0ff5d0b2cc85f492f73e613843ecff1841449da5"
+    }
+  ]
+}

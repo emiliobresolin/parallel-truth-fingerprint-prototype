@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="420" viewBox="0 0 860 420">
+<rect width="100%" height="100%" fill="white"/>
+<text x="430.0" y="22" text-anchor="middle" font-size="17" font-family="sans-serif">Trial variation — hai-23.05</text>
+<g font-family="sans-serif" fill="#111827">
+<rect x="70" y="45" width="740" height="300" fill="#f9fafb" stroke="#374151"/>
+<line x1="70" y1="345.00" x2="810" y2="345.00" stroke="#e5e7eb"/>
+<text x="62" y="349.00" text-anchor="end" font-size="10">0.0</text>
+<line x1="70" y1="285.00" x2="810" y2="285.00" stroke="#e5e7eb"/>
+<text x="62" y="289.00" text-anchor="end" font-size="10">0.2</text>
+<line x1="70" y1="225.00" x2="810" y2="225.00" stroke="#e5e7eb"/>
+<text x="62" y="229.00" text-anchor="end" font-size="10">0.4</text>
+<line x1="70" y1="165.00" x2="810" y2="165.00" stroke="#e5e7eb"/>
+<text x="62" y="169.00" text-anchor="end" font-size="10">0.6</text>
+<line x1="70" y1="105.00" x2="810" y2="105.00" stroke="#e5e7eb"/>
+<text x="62" y="109.00" text-anchor="end" font-size="10">0.8</text>
+<line x1="70" y1="45.00" x2="810" y2="45.00" stroke="#e5e7eb"/>
+<text x="62" y="49.00" text-anchor="end" font-size="10">1.0</text>
+<circle cx="144.00" cy="304.32" r="4" fill="#2563eb"/>
+<circle cx="144.00" cy="97.17" r="4" fill="#dc2626"/>
+<circle cx="144.00" cy="225.13" r="4" fill="#059669"/>
+<circle cx="292.00" cy="261.92" r="4" fill="#2563eb"/>
+<circle cx="292.00" cy="140.08" r="4" fill="#dc2626"/>
+<circle cx="292.00" cy="248.98" r="4" fill="#059669"/>
+<circle cx="366.00" cy="261.92" r="4" fill="#2563eb"/>
+<circle cx="366.00" cy="132.87" r="4" fill="#dc2626"/>
+<circle cx="366.00" cy="242.37" r="4" fill="#059669"/>
+<circle cx="440.00" cy="261.92" r="4" fill="#2563eb"/>
+<circle cx="440.00" cy="133.00" r="4" fill="#dc2626"/>
+<circle cx="440.00" cy="242.84" r="4" fill="#059669"/>
+<circle cx="514.00" cy="261.92" r="4" fill="#2563eb"/>
+<circle cx="514.00" cy="133.26" r="4" fill="#dc2626"/>
+<circle cx="514.00" cy="247.62" r="4" fill="#059669"/>
+<circle cx="588.00" cy="261.92" r="4" fill="#2563eb"/>
+<circle cx="588.00" cy="135.91" r="4" fill="#dc2626"/>
+<circle cx="588.00" cy="242.28" r="4" fill="#059669"/>
+<circle cx="736.00" cy="288.75" r="4" fill="#2563eb"/>
+<circle cx="736.00" cy="144.82" r="4" fill="#dc2626"/>
+<circle cx="736.00" cy="278.83" r="4" fill="#059669"/>
+<text x="144.00" y="370" text-anchor="middle" font-size="11">pca-autoencoder</text>
+<text x="440.00" y="370" text-anchor="middle" font-size="11">recurrent-autoencoder</text>
+<text x="736.00" y="370" text-anchor="middle" font-size="11">robust-distance</text>
+<rect x="70" y="392" width="12" height="12" fill="#2563eb"/>
+<text x="88" y="403" font-size="12">F1</text>
+<rect x="175" y="392" width="12" height="12" fill="#dc2626"/>
+<text x="193" y="403" font-size="12">AUROC</text>
+<rect x="280" y="392" width="12" height="12" fill="#059669"/>
+<text x="298" y="403" font-size="12">AUPRC</text>
+</g>
+</svg>

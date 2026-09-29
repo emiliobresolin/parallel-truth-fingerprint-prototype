@@ -1,0 +1,9 @@
+{
+  "context_id": "temporal-gate-context:thesis-evaluation-v2:ed9d289500e1d9e1e7b3",
+  "freeze_identity": "sha256:dfc8f545679c6f77604fda86b0cb645c8351bd60aea83b6113cb801cd20eaf9c",
+  "freeze_time": "2026-09-27T02:11:26.704357Z",
+  "test_identity": "sha256:d0af782977b6fdc9eb6a2474b75c1e5aaf4853094bd6a5fb069cd1320c2d3e22",
+  "test_time": "2026-09-27T02:30:30.727184Z",
+  "truth_identity": "sha256:ab2a856dc091b50e0cffc847a47211ea4e8e369c0bef04e334409917fad68ed7",
+  "truth_time": "2026-09-27T02:30:56.028558Z"
+}

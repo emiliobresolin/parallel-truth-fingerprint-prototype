@@ -1,0 +1,24 @@
+{
+  "schema_version": "academic-matrix-v2-owner-approval-v1",
+  "approval_id": "approval:thesis-evaluation-v2:interactive-owner-2026-09-27-v4",
+  "approved_by": "workspace-human-owner",
+  "approved_at": "2026-09-27T19:45:58.594325Z",
+  "approval_channel": "interactive Codex conversation",
+  "approval_statement": "V4: 1 sim; 2 sim; 3 sim; 4 sim; 5 sim; 6 sim; 7 sim; orçamento: sim, até 440 CPU-h",
+  "candidate_config_identity": "sha256:96a5f4ea33e92de89a18cb6e17e2cfa0f0673731e5143f429381bd52afcfc97b",
+  "candidate_requirements_sha256": "sha256:ce65320c3e5c6e89ea2b9e2ac037d81dd791349f207ebdbf133af88c45a3a187",
+  "groups": [
+    {"group": "1", "label": "compute-governance", "status": "approved"},
+    {"group": "2", "label": "randomness-and-execution-schedule", "status": "approved"},
+    {"group": "3", "label": "statistical-protocol", "status": "approved"},
+    {"group": "4", "label": "validation-role", "status": "approved"},
+    {"group": "5", "label": "dataset-allocation-and-support", "status": "approved"},
+    {"group": "6", "label": "window-and-preprocessing", "status": "approved"},
+    {"group": "7", "label": "model-and-stopping", "status": "approved"}
+  ],
+  "authorization_effect": "none",
+  "limitations": [
+    "This approval freezes only the V4 Matrix V2 protocol and its maximum approved computation; it does not waive integrity, support, truth-lock, or completion gates.",
+    "Confirmatory execution remains prohibited if the fresh full-protocol projection exceeds 440 CPU-h or any preflight gate fails."
+  ]
+}

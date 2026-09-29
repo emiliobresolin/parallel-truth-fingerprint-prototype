@@ -1,0 +1,26 @@
+% Gerado por scripts/build_thesis_result_cutoff.py; nao editar manualmente.
+\begin{table}[htbp]
+\centering
+\caption{Matriz V2: resultados disponíveis na data de corte.}
+\label{tab:matrix-v2-resultados-corte}
+\begin{tabular}{llrrrrr}
+\toprule
+Base & Modelo & n & AUROC & AUPRC & Acc. bal. & F1 \\
+\midrule
+ADFA-LD & Unigrama categórico & 1 & 0.5651 & 0.6730 & 0.5300 & 0.1463 \\
+ADFA-LD & Autoencoder PCA & 1 & 0.5161 & 0.5885 & 0.4900 & — \\
+ADFA-LD & Distância robusta & 1 & 0.4129 & 0.5183 & 0.4950 & — \\
+ADFA-LD & Autoencoder recorrente & 5 & 0.5575 [0.5455; 0.5694] & 0.6594 [0.6536; 0.6652] & 0.5193 [0.5090; 0.5296] & 0.1486 [0.1387; 0.1585] \\
+HAI 23.05 & Autoencoder PCA & 1 & 0.7677 & 0.3072 & 0.6371 & 0.3582 \\
+HAI 23.05 & Distância robusta & 1 & 0.7145 & 0.2942 & 0.6078 & 0.3396 \\
+HAI 23.05 & Autoencoder recorrente & 5 & 0.7225 [0.7158; 0.7292] & 0.3372 [0.3324; 0.3419] & 0.6543 [0.6496; 0.6589] & 0.3513 [0.3220; 0.3807] \\
+LID-DS 2021 & Unigrama categórico & 1 & 0.5693 & 0.5950 & 0.5056 & 0.0220 \\
+LID-DS 2021 & Autoencoder PCA & 1 & 0.6359 & 0.6748 & 0.5056 & 0.0220 \\
+LID-DS 2021 & Distância robusta & 1 & 0.6191 & 0.6620 & 0.5278 & 0.1053 \\
+LID-DS 2021 & Autoencoder recorrente & 5 & 0.5438 [0.5171; 0.5705] & 0.5602 [0.5357; 0.5847] & 0.5044 [0.4987; 0.5102] & 0.0291 [-0.0017; 0.0600] (n=3) \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\footnotesize Valores entre colchetes sao IC95\% entre sementes quando ha mais de uma execucao finita; (n=3) identifica uma metrica indefinida em parte das sementes. Valores sem colchetes provem de uma unica execucao deterministica. As metricas sao calculadas no teste apos calibracao do limiar somente na validacao.
+\end{flushleft}
+\end{table}

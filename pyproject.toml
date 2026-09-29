@@ -12,3 +12,4 @@ dataset-tools = ["kaggle>=2,<3"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src"]

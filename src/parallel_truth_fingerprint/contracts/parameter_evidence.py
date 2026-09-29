@@ -63,6 +63,7 @@ class Unit(StrEnum):
     MILLISECOND = "millisecond"
     COUNT = "count"
     BYTE = "byte"
+    CPU_HOUR = "CPU-hour"
 
 
 class QuantityKind(StrEnum):
@@ -86,6 +87,11 @@ class QuantityKind(StrEnum):
     RAMP_DURATION = "ramp_duration"
     DWELL_DURATION = "dwell_duration"
     REPETITION_COUNT = "repetition_count"
+    BOOTSTRAP_REPLICATE_COUNT = "bootstrap_replicate_count"
+    INDEPENDENT_CLUSTER_COUNT = "independent_cluster_count"
+    SAMPLE_COUNT = "sample_count"
+    SAMPLE_OFFSET = "sample_offset"
+    WINDOW_COUNT = "window_count"
     RANDOM_SEED = "random_seed"
     MODEL_HYPERPARAMETER = "model_hyperparameter"
     TRAINING_STOPPING = "training_stopping"
@@ -93,6 +99,7 @@ class QuantityKind(StrEnum):
     CALIBRATION_PARAMETER = "calibration_parameter"
     METRIC_PARAMETER = "metric_parameter"
     FUSION_PARAMETER = "fusion_parameter"
+    COMPUTATIONAL_BUDGET = "computational_budget"
 
 
 class UncertaintyKind(StrEnum):

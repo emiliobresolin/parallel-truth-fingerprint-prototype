@@ -1,0 +1,27 @@
+{
+  "schema_version": "academic-matrix-v2-owner-approval-v1",
+  "approval_id": "approval:thesis-evaluation-v2:interactive-owner-2026-09-28-v6",
+  "approved_by": "workspace-human-owner",
+  "approved_at": "2026-09-28T00:00:00.000000Z",
+  "approval_channel": "interactive Codex conversation",
+  "approval_statement": "Continue the experiment through statistical confirmation and simplify where necessary to finish. V6 applies a support-preserving LID-DS-2021 repair: lower the confirmatory content cap and its four matching allocation counts from 44 to 40 after the fresh V5 preflight found only 43 content-unique valid validation recordings in one scenario. The repair preserves phase disjointness, all other frozen protocol values, the required 15 scenarios x 40 = 600 normal and 600 attack test units, and the previously authorized maximum of 440 CPU-h.",
+  "candidate_config_identity": "sha256:c23be7e56a60a49e380faef50240bc11099a52741dd07d07dbcb5baf4416bc2b",
+  "candidate_requirements_sha256": "sha256:dee9050fb03e860f971345103dfdbef7f0c6aafcfa7c17bc6b0b59d2229d2a44",
+  "groups": [
+    {"group": "1", "label": "compute-governance", "status": "approved"},
+    {"group": "2", "label": "randomness-and-execution-schedule", "status": "approved"},
+    {"group": "3", "label": "statistical-protocol", "status": "approved"},
+    {"group": "4", "label": "validation-role", "status": "approved"},
+    {"group": "5", "label": "dataset-allocation-and-support", "status": "approved"},
+    {"group": "6", "label": "window-and-preprocessing", "status": "approved"},
+    {"group": "7", "label": "model-and-stopping", "status": "approved"}
+  ],
+  "authorization_effect": "none",
+  "limitations": [
+    "This V6 approval changes only the LID-DS-2021 confirmatory cap/count from 44 to 40 after the V5 preflight found an insufficient 43-recording content-unique validation stratum under the 44 cap.",
+    "The uniform cap preserves the frozen minimum LID confirmatory support exactly: 15 scenarios x 40 equals 600 normal and 600 attack test units.",
+    "Confirmatory execution remains prohibited if fresh V6 pilot/preflight, support, leakage, truth-lock, artifact-integrity, and total-cost gates do not pass.",
+    "The maximum authorized computation remains 440 CPU-h; no over-budget execution is authorized.",
+    "The frozen statistical protocol reports uncertainty only where its cluster and stochastic-design assumptions are met; it does not turn deterministic-versus-stochastic descriptive contrasts or HAI two-cluster results into unsupported significance claims."
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "cell_id": "hai-23-05__recurrent-autoencoder__seed-211__0a1b11169c46",
+  "cell_payload_path": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\evidence\\academic\\thesis-evaluation-v2\\23aa81cfb426dc4e\\pilot\\transactions\\hai-23-05__recurrent-autoencoder__seed-211__0a1b11169c46.cell.dce67191b78c879beb8d70bd0cc813814cd2cf8b6e92bda074502ada595bb45b.json",
+  "cell_sha256": "sha256:dce67191b78c879beb8d70bd0cc813814cd2cf8b6e92bda074502ada595bb45b",
+  "cell_target_path": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\evidence\\academic\\thesis-evaluation-v2\\23aa81cfb426dc4e\\pilot\\cells\\hai-23-05__recurrent-autoencoder__seed-211__0a1b11169c46.json",
+  "identity": "sha256:63774d74aebd1190e449bcade2652644db4282dc78d61574a415196bdd710348",
+  "prediction_payload_path": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\evidence\\academic\\thesis-evaluation-v2\\23aa81cfb426dc4e\\pilot\\transactions\\hai-23-05__recurrent-autoencoder__seed-211__0a1b11169c46.prediction.395a7b405a287db28bfdebcccb85d0e7c66db66e60a1392318516c5e2ce61a0b.jsonl",
+  "prediction_rows": 800,
+  "prediction_sha256": "sha256:395a7b405a287db28bfdebcccb85d0e7c66db66e60a1392318516c5e2ce61a0b",
+  "prediction_target_path": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\evidence\\academic\\thesis-evaluation-v2\\23aa81cfb426dc4e\\pilot\\predictions\\hai-23-05__recurrent-autoencoder__seed-211__0a1b11169c46.jsonl",
+  "schema_version": "academic-cell-publication-transaction-v1",
+  "state": "committed",
+  "transaction_id": "academic-cell-publication:hai-23-05__recurrent-autoencoder__seed-211__0a1b11169c46"
+}

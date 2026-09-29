@@ -1,0 +1,52 @@
+{
+  "schema_version": "academic-matrix-v2-owner-approval-v1",
+  "approval_id": "approval:thesis-evaluation-v2:interactive-owner-2026-09-27",
+  "approved_by": "workspace-human-owner",
+  "approved_at": "2026-09-27T02:01:36.481506Z",
+  "approval_channel": "interactive Codex conversation",
+  "approval_statement": "1 sim; 2 sim; 3 sim; 4 sim; 5 sim; 6 sim; 7 sim",
+  "candidate_config_identity": "sha256:f27ca1389f3a21adf7077bda2fac70362e6318782bd8c3d2770ce49a3be1bbb1",
+  "candidate_requirements_sha256": "sha256:f1252521e4f0a9ff4b80e90961e71b5ac4cfa6b82b0841d5442dd34ccab24bbf",
+  "groups": [
+    {
+      "group": "1",
+      "label": "compute-governance",
+      "status": "approved"
+    },
+    {
+      "group": "2",
+      "label": "randomness-and-execution-schedule",
+      "status": "approved"
+    },
+    {
+      "group": "3",
+      "label": "statistical-protocol",
+      "status": "approved"
+    },
+    {
+      "group": "4",
+      "label": "validation-role",
+      "status": "approved"
+    },
+    {
+      "group": "5",
+      "label": "dataset-allocation-and-support",
+      "status": "approved"
+    },
+    {
+      "group": "6",
+      "label": "window-and-preprocessing",
+      "status": "approved"
+    },
+    {
+      "group": "7",
+      "label": "model-and-stopping",
+      "status": "approved"
+    }
+  ],
+  "authorization_effect": "none",
+  "limitations": [
+    "The approval freezes only the exact candidate Matrix V2 values and does not assert that they are externally mandated or optimal.",
+    "Execution remains subject to temporal, data-integrity, leakage, support, uncertainty, and computational-cost gates."
+  ]
+}

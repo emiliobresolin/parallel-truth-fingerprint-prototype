@@ -1,0 +1,172 @@
+{
+  "schema_version": "thesis-evaluation-config-v2",
+  "experiment_id": "thesis-evaluation-v2",
+  "protocol_version": "2026-09-20",
+  "output_root": "evidence/academic",
+  "legacy_report": "evidence/reports/cross-benchmark-comparison.md",
+  "research_question": "Can normal-only sequence models produce calibrated, reproducible anomaly scores that generalize to phase-disjoint independent IoT/ICS and host-intrusion test units without partition leakage?",
+  "pilot_seeds": [101, 211, 307, 419, 523],
+  "confirmatory_seeds": [10001, 10002, 10003, 10004, 10005, 10006, 10007, 10008, 10009, 10010, 10011, 10012, 10013, 10014, 10015, 10016, 10017, 10018, 10019, 10020, 10021, 10022, 10023, 10024, 10025, 10026, 10027, 10028, 10029, 10030, 10031, 10032, 10033, 10034, 10035, 10036, 10037, 10038, 10039, 10040, 10041, 10042, 10043, 10044, 10045, 10046, 10047, 10048, 10049, 10050],
+  "execution_protocol": {
+    "confirmatory_batch_size": 10,
+    "seed_schedule_policy": "all-configured-seeds-in-order",
+    "interim_analysis_policy": "withheld-until-full-matrix-authenticated"
+  },
+  "numeric_authority": {
+    "numeric_schema_version": "academic-v2-numeric-consumer-schema-v1",
+    "numeric_schema_identity": "sha256:f72c2d4cece03829d7eb3989148042ad82d04a683273dba22c4558d5aacdfaaf",
+    "requirements_path": "configs/experiments/thesis-evaluation-v2.parameter-requirements-v4.unresolved.json",
+    "requirements_sha256": "sha256:ce65320c3e5c6e89ea2b9e2ac037d81dd791349f207ebdbf133af88c45a3a187",
+    "temporal_context_path": "configs/experiments/thesis-evaluation-v2.temporal-context-v1.json",
+    "temporal_context_sha256": "UNRESOLVED",
+    "catalog_path": "docs/reference-archive/catalog/parameter-evidence-current-domain.v1.json",
+    "catalog_sha256": "sha256:69697f606dac743cce02d1caaf6028f21a1b13ea92af0353e8b80e3e04b6fcbf",
+    "source_catalog_path": "docs/reference-archive/catalog/source-catalog.v1.json",
+    "source_catalog_sha256": "sha256:3b05e209b075168c7b4c88e445f1f9b7a1f2d3166b7457b6842174d125f68ddf",
+    "inventory_id": "numeric-consumer-inventory:thesis-evaluation-v2",
+    "required_set_id": "required-parameter-set:thesis-evaluation-v2"
+  },
+  "computational_budget": {
+    "ask_first_cpu_hours": 440.0,
+    "safety_factor": 2.0
+  },
+  "validation_protocol": {
+    "early_stopping_fraction": 0.5,
+    "split_seed": 424242,
+    "minimum_units_per_role": 2
+  },
+  "statistical_protocol": {
+    "primary_metric": "auroc",
+    "reported_metrics": ["f1", "balanced_accuracy", "mcc", "auroc", "auprc"],
+    "confidence_level": 0.95,
+    "bootstrap_replicates": 2000,
+    "minimum_bootstrap_clusters": 5,
+    "minimum_class_carrying_clusters": 5,
+    "minimum_valid_bootstrap_replicates": 1900,
+    "minimum_valid_bootstrap_fraction": 0.95,
+    "bootstrap_seed_offset": 1000003,
+    "target_ci_half_width": 0.025,
+    "minimum_stochastic_trials": 10,
+    "maximum_stochastic_trials": 50,
+    "comparison_seed": 99173,
+    "permutation_replicates": 20000,
+    "curve_max_points": 201,
+    "multiplicity": "Holm",
+    "threshold": {
+      "method": "target-fpr",
+      "target_fpr": 0.01,
+      "normal_quantile": 0.99,
+      "sensitivity_normal_quantiles": [0.90, 0.95, 0.975, 0.99, 0.995],
+      "direction": "higher-is-more-anomalous",
+      "calibration_partition": "validation-calibration"
+    }
+  },
+  "datasets": {
+    "adfa-ld": {
+      "kind": "adfa-ld",
+      "evidence_origin": "official_native",
+      "root": "datasets/ADFA-LD",
+      "partition_seed": 1729,
+      "normal_validation_fraction": 0.5,
+      "numeric_clip": 10.0,
+      "phase_caps": {
+        "pilot": {"train": 250, "validation": 100, "test_normal": 100, "test_attack_per_class": 30},
+        "confirmatory": {"train": 500, "validation": 500, "test_normal": 500, "test_attack_per_class": 50}
+      },
+      "phase_allocation": {
+        "method": "disjoint-priority-slices-v1",
+        "pilot": {
+          "offsets": {"train": 0, "validation": 0, "test_normal": 0, "attack_per_class": 0},
+          "counts": {"train": 250, "validation": 100, "test_normal": 100, "attack_per_class": 30}
+        },
+        "confirmatory": {
+          "offsets": {"train": 250, "validation": 100, "test_normal": 100, "attack_per_class": 30},
+          "counts": {"train": 500, "validation": 500, "test_normal": 500, "attack_per_class": 50}
+        }
+      },
+      "minimum_support": {
+        "pilot": {"test_normal": 50, "test_attack": 100},
+        "confirmatory": {"test_normal": 400, "test_attack": 200}
+      },
+      "window": {"sequence_length": 128, "stride": 64, "max_windows_per_unit": 6, "aggregation": "p95"},
+      "models": {
+        "categorical-unigram": {"deterministic": true, "laplace_alpha": 1.0},
+        "robust-distance": {"deterministic": true, "hash_bins": 128, "max_robust_z": 20.0},
+        "pca-autoencoder": {"deterministic": true, "hash_bins": 128, "latent_dimensions": 16},
+        "recurrent-autoencoder": {"deterministic": false, "epochs": 12, "batch_size": 128, "hidden_units": 32, "latent_units": 16, "embedding_dimensions": 16, "learning_rate": 0.001, "patience": 3, "min_delta": 0.00001}
+      }
+    },
+    "lid-ds-2021": {
+      "kind": "lid-ds-2021",
+      "evidence_origin": "official_native",
+      "root": "datasets/LID-DS-2021-real",
+      "scenarios": ["Bruteforce_CWE-307", "CVE-2012-2122", "CVE-2014-0160", "CVE-2017-12635_6", "CVE-2017-7529", "CVE-2018-3760", "CVE-2019-5418", "CVE-2020-13942", "CVE-2020-23839", "CVE-2020-9484", "CWE-89-SQL-injection", "EPS_CWE-434", "Juice-Shop", "PHP_CWE-434", "ZipSlip"],
+      "partition_seed": 2718,
+      "numeric_clip": 10.0,
+      "phase_caps": {
+        "pilot": {"archives_per_scenario_partition": 6},
+        "confirmatory": {"archives_per_scenario_partition": 45}
+      },
+      "phase_allocation": {
+        "method": "disjoint-content-priority-slices-v2",
+        "pilot": {
+          "offsets": {"training": 0, "validation": 0, "test-normal": 0, "test-normal-and-attack": 0},
+          "counts": {"training": 6, "validation": 6, "test-normal": 6, "test-normal-and-attack": 6}
+        },
+        "confirmatory": {
+          "offsets": {"training": 6, "validation": 6, "test-normal": 6, "test-normal-and-attack": 6},
+          "counts": {"training": 45, "validation": 45, "test-normal": 45, "test-normal-and-attack": 45}
+        }
+      },
+      "minimum_support": {
+        "pilot": {"test_normal": 30, "test_attack": 30},
+        "confirmatory": {"test_normal": 600, "test_attack": 600}
+      },
+      "window": {"sequence_length": 128, "stride": 128, "max_windows_per_unit": 8, "aggregation": "max"},
+      "models": {
+        "categorical-unigram": {"deterministic": true, "laplace_alpha": 1.0},
+        "robust-distance": {"deterministic": true, "hash_bins": 128, "max_robust_z": 20.0},
+        "pca-autoencoder": {"deterministic": true, "hash_bins": 128, "latent_dimensions": 16},
+        "recurrent-autoencoder": {"deterministic": false, "epochs": 12, "batch_size": 128, "hidden_units": 32, "latent_units": 16, "embedding_dimensions": 16, "learning_rate": 0.001, "patience": 3, "min_delta": 0.00001}
+      }
+    },
+    "hai-23.05": {
+      "kind": "hai-23.05",
+      "evidence_origin": "official_native",
+      "root": "datasets/HAI-23.05-kaggle/hai-23.05",
+      "partition_seed": 3141,
+      "block_rows": 128,
+      "numeric_clip": 10.0,
+      "phase_caps": {
+        "pilot": {"train": {"normal": 360}, "validation": {"normal": 120}, "test": {"total": 800}},
+        "confirmatory": {"train": {"normal": 500}, "validation": {"normal": 500}, "test": {"total": 1000}}
+      },
+      "phase_allocation": {
+        "method": "disjoint-priority-slices-v1",
+        "pilot": {
+          "offsets": {"train": 0, "validation": 0, "test": 0},
+          "counts": {"train": 360, "validation": 120, "test": 800}
+        },
+        "confirmatory": {
+          "offsets": {"train": 360, "validation": 120, "test": 800},
+          "counts": {"train": 500, "validation": 500, "test": 1000}
+        }
+      },
+      "minimum_support": {
+        "pilot": {"test_normal": 700, "test_attack": 20},
+        "confirmatory": {"test_normal": 850, "test_attack": 50}
+      },
+      "window": {"sequence_length": 128, "stride": 128, "max_windows_per_unit": 1, "aggregation": "max"},
+      "models": {
+        "robust-distance": {"deterministic": true, "max_robust_z": 20.0},
+        "pca-autoencoder": {"deterministic": true, "latent_dimensions": 24},
+        "recurrent-autoencoder": {"deterministic": false, "epochs": 12, "batch_size": 128, "hidden_units": 32, "latent_units": 16, "learning_rate": 0.001, "patience": 3, "min_delta": 0.00001}
+      }
+    }
+  },
+  "interpretation_contract": {
+    "pilot": "Exploratory only; used to estimate feasibility and stochastic dispersion.",
+    "confirmatory": "Eligible only after numeric authority, phase disjointness, all frozen cells, artifact integrity, leakage, support, and total-cost gates pass.",
+    "forbidden": ["select a lucky seed", "tune a threshold on test truth", "pool unlike datasets or modalities into a global champion", "treat windows, blocks, epochs, or cycles as independent executions", "replace undefined metrics with zero", "promote thesis-evaluation-v1 artifacts"]
+  }
+}

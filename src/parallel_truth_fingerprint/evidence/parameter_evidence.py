@@ -66,8 +66,21 @@ UNIT_BY_QUANTITY = {
     QuantityKind.RAMP_DURATION.value: {Unit.SECOND.value, Unit.MILLISECOND.value},
     QuantityKind.DWELL_DURATION.value: {Unit.SECOND.value, Unit.MILLISECOND.value},
     QuantityKind.REPETITION_COUNT.value: {Unit.COUNT.value},
+    QuantityKind.BOOTSTRAP_REPLICATE_COUNT.value: {Unit.COUNT.value},
+    QuantityKind.INDEPENDENT_CLUSTER_COUNT.value: {Unit.COUNT.value},
+    QuantityKind.SAMPLE_COUNT.value: {Unit.COUNT.value},
+    QuantityKind.SAMPLE_OFFSET.value: {Unit.COUNT.value},
+    QuantityKind.WINDOW_COUNT.value: {Unit.COUNT.value},
     QuantityKind.RANDOM_SEED.value: {Unit.COUNT.value},
     QuantityKind.SPLIT_FRACTION.value: {Unit.ONE.value},
+    QuantityKind.MODEL_HYPERPARAMETER.value: {Unit.ONE.value, Unit.COUNT.value},
+    QuantityKind.TRAINING_STOPPING.value: {Unit.ONE.value, Unit.COUNT.value},
+    QuantityKind.CALIBRATION_PARAMETER.value: {Unit.ONE.value, Unit.COUNT.value},
+    QuantityKind.METRIC_PARAMETER.value: {Unit.ONE.value, Unit.COUNT.value},
+    QuantityKind.COMPUTATIONAL_BUDGET.value: {
+        Unit.ONE.value,
+        Unit.CPU_HOUR.value,
+    },
 }
 QUANTITY_LOCATOR_TERMS = {
     QuantityKind.LOOP_CURRENT.value: ("current", "ma"),

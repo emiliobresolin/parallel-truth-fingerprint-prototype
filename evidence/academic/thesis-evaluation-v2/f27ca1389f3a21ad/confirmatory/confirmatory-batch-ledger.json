@@ -1,0 +1,96 @@
+{
+  "batch_count": 5,
+  "batch_size": 10,
+  "batches": [
+    {
+      "batch_id": "batch-01",
+      "seed_position_end": 10,
+      "seed_position_start": 1,
+      "seeds": [
+        10001,
+        10002,
+        10003,
+        10004,
+        10005,
+        10006,
+        10007,
+        10008,
+        10009,
+        10010
+      ]
+    },
+    {
+      "batch_id": "batch-02",
+      "seed_position_end": 20,
+      "seed_position_start": 11,
+      "seeds": [
+        10011,
+        10012,
+        10013,
+        10014,
+        10015,
+        10016,
+        10017,
+        10018,
+        10019,
+        10020
+      ]
+    },
+    {
+      "batch_id": "batch-03",
+      "seed_position_end": 30,
+      "seed_position_start": 21,
+      "seeds": [
+        10021,
+        10022,
+        10023,
+        10024,
+        10025,
+        10026,
+        10027,
+        10028,
+        10029,
+        10030
+      ]
+    },
+    {
+      "batch_id": "batch-04",
+      "seed_position_end": 40,
+      "seed_position_start": 31,
+      "seeds": [
+        10031,
+        10032,
+        10033,
+        10034,
+        10035,
+        10036,
+        10037,
+        10038,
+        10039,
+        10040
+      ]
+    },
+    {
+      "batch_id": "batch-05",
+      "seed_position_end": 50,
+      "seed_position_start": 41,
+      "seeds": [
+        10041,
+        10042,
+        10043,
+        10044,
+        10045,
+        10046,
+        10047,
+        10048,
+        10049,
+        10050
+      ]
+    }
+  ],
+  "config_identity": "sha256:f27ca1389f3a21adf7077bda2fac70362e6318782bd8c3d2770ce49a3be1bbb1",
+  "execution_schedule_adaptive": false,
+  "schedule_identity": "sha256:e9d9aa659f43e2e6b838a8284410ed4e6a0a3e1311d1b8e19ba99726b87b059d",
+  "schema_version": "academic-confirmatory-batch-ledger-v1",
+  "trial_count": 50
+}

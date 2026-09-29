@@ -1,0 +1,1164 @@
+{
+  "analysis": {
+    "confidence_level": 0.95,
+    "groups": {
+      "adfa-ld/categorical-unigram": {
+        "dataset": "adfa-ld",
+        "deterministic": true,
+        "fit_cost": {
+          "cpu_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.0,
+            "median": 0.0,
+            "n": 1,
+            "sd": null
+          },
+          "projected_fit_cpu_hours_at_recommended_trials": 0.0,
+          "projection_scope": "fit only at pilot support; excludes larger confirmatory caps, preflight, scoring, and bootstrap",
+          "wall_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.0007573000038973987,
+            "median": 0.0007573000038973987,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "metrics": {
+          "auprc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.6730373569078596,
+            "median": 0.6730373569078596,
+            "n": 1,
+            "sd": null
+          },
+          "auroc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.5650666666666667,
+            "median": 0.5650666666666667,
+            "n": 1,
+            "sd": null
+          },
+          "balanced_accuracy": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.49,
+            "median": 0.49,
+            "n": 1,
+            "sd": null
+          },
+          "f1": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": null,
+            "mean": null,
+            "median": null,
+            "n": 0,
+            "sd": null
+          },
+          "mcc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": -0.10998533626601498,
+            "median": -0.10998533626601498,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "model": "categorical-unigram",
+        "repetition_plan": {
+          "confidence_level": 0.95,
+          "maximum": 30,
+          "minimum": 10,
+          "observed_sd": null,
+          "pilot_trials": 1,
+          "reason": "deterministic fit; uncertainty is estimated by unit bootstrap",
+          "recommended_total_trials": 1,
+          "target_ci_half_width": 0.025
+        },
+        "seeds": [
+          101
+        ],
+        "trial_count": 1
+      },
+      "adfa-ld/pca-autoencoder": {
+        "dataset": "adfa-ld",
+        "deterministic": true,
+        "fit_cost": {
+          "cpu_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.109375,
+            "median": 0.109375,
+            "n": 1,
+            "sd": null
+          },
+          "projected_fit_cpu_hours_at_recommended_trials": 3.0381944444444444e-05,
+          "projection_scope": "fit only at pilot support; excludes larger confirmatory caps, preflight, scoring, and bootstrap",
+          "wall_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.23000010001123883,
+            "median": 0.23000010001123883,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "metrics": {
+          "auprc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.5885221259779182,
+            "median": 0.5885221259779182,
+            "n": 1,
+            "sd": null
+          },
+          "auroc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.5160666666666667,
+            "median": 0.5160666666666667,
+            "n": 1,
+            "sd": null
+          },
+          "balanced_accuracy": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.495,
+            "median": 0.495,
+            "n": 1,
+            "sd": null
+          },
+          "f1": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": null,
+            "mean": null,
+            "median": null,
+            "n": 0,
+            "sd": null
+          },
+          "mcc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": -0.07761505257063328,
+            "median": -0.07761505257063328,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "model": "pca-autoencoder",
+        "repetition_plan": {
+          "confidence_level": 0.95,
+          "maximum": 30,
+          "minimum": 10,
+          "observed_sd": null,
+          "pilot_trials": 1,
+          "reason": "deterministic fit; uncertainty is estimated by unit bootstrap",
+          "recommended_total_trials": 1,
+          "target_ci_half_width": 0.025
+        },
+        "seeds": [
+          101
+        ],
+        "trial_count": 1
+      },
+      "adfa-ld/recurrent-autoencoder": {
+        "dataset": "adfa-ld",
+        "deterministic": false,
+        "fit_cost": {
+          "cpu_seconds": {
+            "ci_high": 1435.9547032417597,
+            "ci_low": 1379.0015467582405,
+            "iqr": 52.96875,
+            "mean": 1407.478125,
+            "median": 1414.59375,
+            "n": 5,
+            "sd": 32.488129968762244
+          },
+          "projected_fit_cpu_hours_at_recommended_trials": 3.9096614583333333,
+          "projection_scope": "fit only at pilot support; excludes larger confirmatory caps, preflight, scoring, and bootstrap",
+          "wall_seconds": {
+            "ci_high": 397.38383917330304,
+            "ci_low": 376.74938390670343,
+            "iqr": 15.158121899992693,
+            "mean": 387.06661154000324,
+            "median": 393.4415120999911,
+            "n": 5,
+            "sd": 11.77063583350091
+          }
+        },
+        "metrics": {
+          "auprc": {
+            "ci_high": 0.661552678946875,
+            "ci_low": 0.6530349818465219,
+            "iqr": 0.005802940877903673,
+            "mean": 0.6572938303966984,
+            "median": 0.6569712377774881,
+            "n": 5,
+            "sd": 0.004858800943032824
+          },
+          "auroc": {
+            "ci_high": 0.5660373235382213,
+            "ci_low": 0.5507626764617787,
+            "iqr": 0.00880000000000003,
+            "mean": 0.5584,
+            "median": 0.5598666666666666,
+            "n": 5,
+            "sd": 0.008713208364316804
+          },
+          "balanced_accuracy": {
+            "ci_high": 0.5209599639861202,
+            "ci_low": 0.5170400360138798,
+            "iqr": 0.0,
+            "mean": 0.519,
+            "median": 0.52,
+            "n": 5,
+            "sd": 0.0022360679774997916
+          },
+          "f1": {
+            "ci_high": 0.11859166676101954,
+            "ci_low": 0.09086356922426353,
+            "iqr": 0.0,
+            "mean": 0.10472761799264153,
+            "median": 0.11180124223602485,
+            "n": 5,
+            "sd": 0.0158171046554956
+          },
+          "mcc": {
+            "ci_high": 0.09678549368527344,
+            "ci_low": 0.09172217036348758,
+            "iqr": 0.0,
+            "mean": 0.09425383202438051,
+            "median": 0.09554551987110693,
+            "n": 5,
+            "sd": 0.002888301830990615
+          }
+        },
+        "model": "recurrent-autoencoder",
+        "repetition_plan": {
+          "confidence_level": 0.95,
+          "maximum": 30,
+          "minimum": 10,
+          "observed_sd": 0.008713208364316804,
+          "pilot_trials": 5,
+          "reason": "normal-approximation precision calculation from pilot SD",
+          "recommended_total_trials": 10,
+          "target_ci_half_width": 0.025
+        },
+        "seeds": [
+          101,
+          211,
+          307,
+          419,
+          523
+        ],
+        "trial_count": 5
+      },
+      "adfa-ld/robust-distance": {
+        "dataset": "adfa-ld",
+        "deterministic": true,
+        "fit_cost": {
+          "cpu_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.03125,
+            "median": 0.03125,
+            "n": 1,
+            "sd": null
+          },
+          "projected_fit_cpu_hours_at_recommended_trials": 8.680555555555556e-06,
+          "projection_scope": "fit only at pilot support; excludes larger confirmatory caps, preflight, scoring, and bootstrap",
+          "wall_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.03755750000709668,
+            "median": 0.03755750000709668,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "metrics": {
+          "auprc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.5182511245581366,
+            "median": 0.5182511245581366,
+            "n": 1,
+            "sd": null
+          },
+          "auroc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.4129333333333333,
+            "median": 0.4129333333333333,
+            "n": 1,
+            "sd": null
+          },
+          "balanced_accuracy": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.495,
+            "median": 0.495,
+            "n": 1,
+            "sd": null
+          },
+          "f1": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": null,
+            "mean": null,
+            "median": null,
+            "n": 0,
+            "sd": null
+          },
+          "mcc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": -0.07761505257063328,
+            "median": -0.07761505257063328,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "model": "robust-distance",
+        "repetition_plan": {
+          "confidence_level": 0.95,
+          "maximum": 30,
+          "minimum": 10,
+          "observed_sd": null,
+          "pilot_trials": 1,
+          "reason": "deterministic fit; uncertainty is estimated by unit bootstrap",
+          "recommended_total_trials": 1,
+          "target_ci_half_width": 0.025
+        },
+        "seeds": [
+          101
+        ],
+        "trial_count": 1
+      },
+      "hai-23.05/pca-autoencoder": {
+        "dataset": "hai-23.05",
+        "deterministic": true,
+        "fit_cost": {
+          "cpu_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.15625,
+            "median": 0.15625,
+            "n": 1,
+            "sd": null
+          },
+          "projected_fit_cpu_hours_at_recommended_trials": 4.340277777777778e-05,
+          "projection_scope": "fit only at pilot support; excludes larger confirmatory caps, preflight, scoring, and bootstrap",
+          "wall_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.19848459999775514,
+            "median": 0.19848459999775514,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "metrics": {
+          "auprc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.39955833345634234,
+            "median": 0.39955833345634234,
+            "n": 1,
+            "sd": null
+          },
+          "auroc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.8260890787065284,
+            "median": 0.8260890787065284,
+            "n": 1,
+            "sd": null
+          },
+          "balanced_accuracy": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.5363636363636364,
+            "median": 0.5363636363636364,
+            "n": 1,
+            "sd": null
+          },
+          "f1": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.13559322033898305,
+            "median": 0.13559322033898305,
+            "n": 1,
+            "sd": null
+          },
+          "mcc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.2608977017552639,
+            "median": 0.2608977017552639,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "model": "pca-autoencoder",
+        "repetition_plan": {
+          "confidence_level": 0.95,
+          "maximum": 30,
+          "minimum": 10,
+          "observed_sd": null,
+          "pilot_trials": 1,
+          "reason": "deterministic fit; uncertainty is estimated by unit bootstrap",
+          "recommended_total_trials": 1,
+          "target_ci_half_width": 0.025
+        },
+        "seeds": [
+          101
+        ],
+        "trial_count": 1
+      },
+      "hai-23.05/recurrent-autoencoder": {
+        "dataset": "hai-23.05",
+        "deterministic": false,
+        "fit_cost": {
+          "cpu_seconds": {
+            "ci_high": 450.394868292218,
+            "ci_low": 438.21138170778204,
+            "iqr": 9.953125,
+            "mean": 444.303125,
+            "median": 442.921875,
+            "n": 5,
+            "sd": 6.949899181485477
+          },
+          "projected_fit_cpu_hours_at_recommended_trials": 1.2341753472222223,
+          "projection_scope": "fit only at pilot support; excludes larger confirmatory caps, preflight, scoring, and bootstrap",
+          "wall_seconds": {
+            "ci_high": 17924.16975583066,
+            "ci_low": -5647.338436430632,
+            "iqr": 24.799884800013388,
+            "mean": 6138.415659700014,
+            "median": 126.74753310001688,
+            "n": 5,
+            "sd": 13446.0365147896
+          }
+        },
+        "metrics": {
+          "auprc": {
+            "ci_high": 0.3433539931276232,
+            "ci_low": 0.3245382990705144,
+            "iqr": 0.0174946181599972,
+            "mean": 0.3339461460990688,
+            "median": 0.34052141977748696,
+            "n": 5,
+            "sd": 0.01073314898984935
+          },
+          "auroc": {
+            "ci_high": 0.7089447513430952,
+            "ci_low": 0.6908941748314014,
+            "iqr": 0.00968883465527759,
+            "mean": 0.6999194630872483,
+            "median": 0.7057962172056131,
+            "n": 5,
+            "sd": 0.010296698408501542
+          },
+          "balanced_accuracy": {
+            "ci_high": 0.5811470408785845,
+            "ci_low": 0.5811470408785845,
+            "iqr": 0.0,
+            "mean": 0.5811470408785845,
+            "median": 0.5811470408785845,
+            "n": 5,
+            "sd": 0.0
+          },
+          "f1": {
+            "ci_high": 0.27692307692307694,
+            "ci_low": 0.27692307692307694,
+            "iqr": 0.0,
+            "mean": 0.27692307692307694,
+            "median": 0.27692307692307694,
+            "n": 5,
+            "sd": 0.0
+          },
+          "mcc": {
+            "ci_high": 0.36961417510853295,
+            "ci_low": 0.36961417510853295,
+            "iqr": 0.0,
+            "mean": 0.36961417510853295,
+            "median": 0.36961417510853295,
+            "n": 5,
+            "sd": 0.0
+          }
+        },
+        "model": "recurrent-autoencoder",
+        "repetition_plan": {
+          "confidence_level": 0.95,
+          "maximum": 30,
+          "minimum": 10,
+          "observed_sd": 0.010296698408501542,
+          "pilot_trials": 5,
+          "reason": "normal-approximation precision calculation from pilot SD",
+          "recommended_total_trials": 10,
+          "target_ci_half_width": 0.025
+        },
+        "seeds": [
+          101,
+          211,
+          307,
+          419,
+          523
+        ],
+        "trial_count": 5
+      },
+      "hai-23.05/robust-distance": {
+        "dataset": "hai-23.05",
+        "deterministic": true,
+        "fit_cost": {
+          "cpu_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.0625,
+            "median": 0.0625,
+            "n": 1,
+            "sd": null
+          },
+          "projected_fit_cpu_hours_at_recommended_trials": 1.736111111111111e-05,
+          "projection_scope": "fit only at pilot support; excludes larger confirmatory caps, preflight, scoring, and bootstrap",
+          "wall_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.16585290001239628,
+            "median": 0.16585290001239628,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "metrics": {
+          "auprc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.22057173124892948,
+            "median": 0.22057173124892948,
+            "n": 1,
+            "sd": null
+          },
+          "auroc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.6672605247101892,
+            "median": 0.6672605247101892,
+            "n": 1,
+            "sd": null
+          },
+          "balanced_accuracy": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.5525320317266625,
+            "median": 0.5525320317266625,
+            "n": 1,
+            "sd": null
+          },
+          "f1": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.1875,
+            "median": 0.1875,
+            "n": 1,
+            "sd": null
+          },
+          "mcc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.25206014293738616,
+            "median": 0.25206014293738616,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "model": "robust-distance",
+        "repetition_plan": {
+          "confidence_level": 0.95,
+          "maximum": 30,
+          "minimum": 10,
+          "observed_sd": null,
+          "pilot_trials": 1,
+          "reason": "deterministic fit; uncertainty is estimated by unit bootstrap",
+          "recommended_total_trials": 1,
+          "target_ci_half_width": 0.025
+        },
+        "seeds": [
+          101
+        ],
+        "trial_count": 1
+      },
+      "lid-ds-2021/categorical-unigram": {
+        "dataset": "lid-ds-2021",
+        "deterministic": true,
+        "fit_cost": {
+          "cpu_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.0,
+            "median": 0.0,
+            "n": 1,
+            "sd": null
+          },
+          "projected_fit_cpu_hours_at_recommended_trials": 0.0,
+          "projection_scope": "fit only at pilot support; excludes larger confirmatory caps, preflight, scoring, and bootstrap",
+          "wall_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.0007958000060170889,
+            "median": 0.0007958000060170889,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "metrics": {
+          "auprc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.5981552661703814,
+            "median": 0.5981552661703814,
+            "n": 1,
+            "sd": null
+          },
+          "auroc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.5708024691358025,
+            "median": 0.5708024691358025,
+            "n": 1,
+            "sd": null
+          },
+          "balanced_accuracy": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.5055555555555555,
+            "median": 0.5055555555555555,
+            "n": 1,
+            "sd": null
+          },
+          "f1": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.02197802197802198,
+            "median": 0.02197802197802198,
+            "n": 1,
+            "sd": null
+          },
+          "mcc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.07474350927519358,
+            "median": 0.07474350927519358,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "model": "categorical-unigram",
+        "repetition_plan": {
+          "confidence_level": 0.95,
+          "maximum": 30,
+          "minimum": 10,
+          "observed_sd": null,
+          "pilot_trials": 1,
+          "reason": "deterministic fit; uncertainty is estimated by unit bootstrap",
+          "recommended_total_trials": 1,
+          "target_ci_half_width": 0.025
+        },
+        "seeds": [
+          101
+        ],
+        "trial_count": 1
+      },
+      "lid-ds-2021/pca-autoencoder": {
+        "dataset": "lid-ds-2021",
+        "deterministic": true,
+        "fit_cost": {
+          "cpu_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.046875,
+            "median": 0.046875,
+            "n": 1,
+            "sd": null
+          },
+          "projected_fit_cpu_hours_at_recommended_trials": 1.3020833333333334e-05,
+          "projection_scope": "fit only at pilot support; excludes larger confirmatory caps, preflight, scoring, and bootstrap",
+          "wall_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.04826489998959005,
+            "median": 0.04826489998959005,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "metrics": {
+          "auprc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.677174000862485,
+            "median": 0.677174000862485,
+            "n": 1,
+            "sd": null
+          },
+          "auroc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.6388271604938272,
+            "median": 0.6388271604938272,
+            "n": 1,
+            "sd": null
+          },
+          "balanced_accuracy": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.5055555555555555,
+            "median": 0.5055555555555555,
+            "n": 1,
+            "sd": null
+          },
+          "f1": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.02197802197802198,
+            "median": 0.02197802197802198,
+            "n": 1,
+            "sd": null
+          },
+          "mcc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.07474350927519358,
+            "median": 0.07474350927519358,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "model": "pca-autoencoder",
+        "repetition_plan": {
+          "confidence_level": 0.95,
+          "maximum": 30,
+          "minimum": 10,
+          "observed_sd": null,
+          "pilot_trials": 1,
+          "reason": "deterministic fit; uncertainty is estimated by unit bootstrap",
+          "recommended_total_trials": 1,
+          "target_ci_half_width": 0.025
+        },
+        "seeds": [
+          101
+        ],
+        "trial_count": 1
+      },
+      "lid-ds-2021/recurrent-autoencoder": {
+        "dataset": "lid-ds-2021",
+        "deterministic": false,
+        "fit_cost": {
+          "cpu_seconds": {
+            "ci_high": 1510.2390249455643,
+            "ci_low": 1453.8484750544358,
+            "iqr": 24.875,
+            "mean": 1482.04375,
+            "median": 1486.03125,
+            "n": 5,
+            "sd": 32.16719892255833
+          },
+          "projected_fit_cpu_hours_at_recommended_trials": 4.116788194444444,
+          "projection_scope": "fit only at pilot support; excludes larger confirmatory caps, preflight, scoring, and bootstrap",
+          "wall_seconds": {
+            "ci_high": 431.53270054991043,
+            "ci_low": 402.8965646500987,
+            "iqr": 25.80556889998843,
+            "mean": 417.21463260000456,
+            "median": 405.9673352999962,
+            "n": 5,
+            "sd": 16.335082414359803
+          }
+        },
+        "metrics": {
+          "auprc": {
+            "ci_high": 0.5749460079752916,
+            "ci_low": 0.5505228909464114,
+            "iqr": 0.008488860688318,
+            "mean": 0.5627344494608515,
+            "median": 0.5592535144461505,
+            "n": 5,
+            "sd": 0.013931824841107034
+          },
+          "auroc": {
+            "ci_high": 0.5581603539678471,
+            "ci_low": 0.533839646032153,
+            "iqr": 0.011419753086419848,
+            "mean": 0.546,
+            "median": 0.5419135802469136,
+            "n": 5,
+            "sd": 0.013873407009070403
+          },
+          "balanced_accuracy": {
+            "ci_high": 0.5066221822068002,
+            "ci_low": 0.5022667066820887,
+            "iqr": 0.0,
+            "mean": 0.5044444444444445,
+            "median": 0.5055555555555555,
+            "n": 5,
+            "sd": 0.0024845199749997577
+          },
+          "f1": {
+            "ci_high": 0.02197802197802198,
+            "ci_low": 0.02197802197802198,
+            "iqr": 0.0,
+            "mean": 0.02197802197802198,
+            "median": 0.02197802197802198,
+            "n": 4,
+            "sd": 0.0
+          },
+          "mcc": {
+            "ci_high": 0.07474350927519358,
+            "ci_low": 0.07474350927519358,
+            "iqr": 0.0,
+            "mean": 0.07474350927519358,
+            "median": 0.07474350927519358,
+            "n": 4,
+            "sd": 0.0
+          }
+        },
+        "model": "recurrent-autoencoder",
+        "repetition_plan": {
+          "confidence_level": 0.95,
+          "maximum": 30,
+          "minimum": 10,
+          "observed_sd": 0.013873407009070403,
+          "pilot_trials": 5,
+          "reason": "normal-approximation precision calculation from pilot SD",
+          "recommended_total_trials": 10,
+          "target_ci_half_width": 0.025
+        },
+        "seeds": [
+          101,
+          211,
+          307,
+          419,
+          523
+        ],
+        "trial_count": 5
+      },
+      "lid-ds-2021/robust-distance": {
+        "dataset": "lid-ds-2021",
+        "deterministic": true,
+        "fit_cost": {
+          "cpu_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.03125,
+            "median": 0.03125,
+            "n": 1,
+            "sd": null
+          },
+          "projected_fit_cpu_hours_at_recommended_trials": 8.680555555555556e-06,
+          "projection_scope": "fit only at pilot support; excludes larger confirmatory caps, preflight, scoring, and bootstrap",
+          "wall_seconds": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.030785899987677112,
+            "median": 0.030785899987677112,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "metrics": {
+          "auprc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.6652474213330458,
+            "median": 0.6652474213330458,
+            "n": 1,
+            "sd": null
+          },
+          "auroc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.6235802469135803,
+            "median": 0.6235802469135803,
+            "n": 1,
+            "sd": null
+          },
+          "balanced_accuracy": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.5166666666666667,
+            "median": 0.5166666666666667,
+            "n": 1,
+            "sd": null
+          },
+          "f1": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.06451612903225806,
+            "median": 0.06451612903225806,
+            "n": 1,
+            "sd": null
+          },
+          "mcc": {
+            "ci_high": null,
+            "ci_low": null,
+            "iqr": 0.0,
+            "mean": 0.13018891098082386,
+            "median": 0.13018891098082386,
+            "n": 1,
+            "sd": null
+          }
+        },
+        "model": "robust-distance",
+        "repetition_plan": {
+          "confidence_level": 0.95,
+          "maximum": 30,
+          "minimum": 10,
+          "observed_sd": null,
+          "pilot_trials": 1,
+          "reason": "deterministic fit; uncertainty is estimated by unit bootstrap",
+          "recommended_total_trials": 1,
+          "target_ci_half_width": 0.025
+        },
+        "seeds": [
+          101
+        ],
+        "trial_count": 1
+      }
+    },
+    "multiplicity_control": "Holm family-wise adjustment within generated report",
+    "paired_comparisons": {
+      "adfa-ld/categorical-unigram-vs-pca-autoencoder": {
+        "cohen_dz": null,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": 0.049000000000000044,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.0
+      },
+      "adfa-ld/categorical-unigram-vs-recurrent-autoencoder": {
+        "cohen_dz": 0.7651219146748203,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": 0.006666666666666732,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.1875,
+        "paired_trials": 5,
+        "sd_difference": 0.008713208364316804
+      },
+      "adfa-ld/categorical-unigram-vs-robust-distance": {
+        "cohen_dz": null,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": 0.1521333333333334,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.0
+      },
+      "adfa-ld/pca-autoencoder-vs-recurrent-autoencoder": {
+        "cohen_dz": -4.858524158185059,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": -0.04233333333333331,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.008713208364316804
+      },
+      "adfa-ld/pca-autoencoder-vs-robust-distance": {
+        "cohen_dz": 6646971326355693.0,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": 0.10313333333333334,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 1.5515838457795457e-17
+      },
+      "adfa-ld/recurrent-autoencoder-vs-robust-distance": {
+        "cohen_dz": 16.69496017820442,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": 0.1454666666666667,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.008713208364316804
+      },
+      "hai-23.05/pca-autoencoder-vs-recurrent-autoencoder": {
+        "cohen_dz": 12.253404986117417,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": 0.12616961561928006,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.010296698408501542
+      },
+      "hai-23.05/pca-autoencoder-vs-robust-distance": {
+        "cohen_dz": null,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": 0.15882855399633922,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.0
+      },
+      "hai-23.05/recurrent-autoencoder-vs-robust-distance": {
+        "cohen_dz": 3.1717874100395202,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": 0.03265893837705915,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.010296698408501542
+      },
+      "lid-ds-2021/categorical-unigram-vs-pca-autoencoder": {
+        "cohen_dz": null,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": -0.06802469135802469,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.0
+      },
+      "lid-ds-2021/categorical-unigram-vs-recurrent-autoencoder": {
+        "cohen_dz": 1.787770597344015,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": 0.02480246913580244,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.013873407009070403
+      },
+      "lid-ds-2021/categorical-unigram-vs-robust-distance": {
+        "cohen_dz": null,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": -0.05277777777777781,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.0
+      },
+      "lid-ds-2021/pca-autoencoder-vs-recurrent-autoencoder": {
+        "cohen_dz": 6.691013997725068,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": 0.09282716049382714,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.013873407009070403
+      },
+      "lid-ds-2021/pca-autoencoder-vs-robust-distance": {
+        "cohen_dz": null,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": 0.01524691358024688,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.0
+      },
+      "lid-ds-2021/recurrent-autoencoder-vs-robust-distance": {
+        "cohen_dz": -5.59201116660518,
+        "holm_adjusted_p_value": 0.9375,
+        "mean_difference": -0.07758024691358026,
+        "method": "exact paired sign-flip permutation",
+        "p_value": 0.0625,
+        "paired_trials": 5,
+        "sd_difference": 0.013873407009070403
+      }
+    },
+    "phase": "pilot",
+    "primary_metric": "auroc"
+  },
+  "complete_cell_count": 23,
+  "completed_now": [
+    "adfa-ld__categorical-unigram__seed-101__15a2c92115a2",
+    "adfa-ld__robust-distance__seed-101__4af7ef411f55",
+    "adfa-ld__pca-autoencoder__seed-101__ad01e77cd0a3",
+    "lid-ds-2021__categorical-unigram__seed-101__2258fc1f5c98",
+    "lid-ds-2021__robust-distance__seed-101__84a635c31fcf",
+    "lid-ds-2021__pca-autoencoder__seed-101__d5d36fbc7680",
+    "lid-ds-2021__recurrent-autoencoder__seed-101__8787a74e45d5",
+    "lid-ds-2021__recurrent-autoencoder__seed-211__fd5ebe4c1dc0",
+    "lid-ds-2021__recurrent-autoencoder__seed-307__e725376afe7b",
+    "lid-ds-2021__recurrent-autoencoder__seed-419__0acb78374966",
+    "lid-ds-2021__recurrent-autoencoder__seed-523__9f32a92e9e22",
+    "hai-23-05__robust-distance__seed-101__ad372bdda922",
+    "hai-23-05__pca-autoencoder__seed-101__d694d4724673",
+    "hai-23-05__recurrent-autoencoder__seed-101__4467b6f40a93",
+    "hai-23-05__recurrent-autoencoder__seed-211__fb795dd5e3c8",
+    "hai-23-05__recurrent-autoencoder__seed-307__d14bde79ad6f",
+    "hai-23-05__recurrent-autoencoder__seed-419__35790d41b066",
+    "hai-23-05__recurrent-autoencoder__seed-523__4410a17744ff"
+  ],
+  "config_identity": "sha256:4ed5be597c446a69a82c4e6be91ae9f0ff1b3be33051291c9fd33ecf7e41256e",
+  "elapsed_seconds": 33084.17429899998,
+  "experiment_id": "thesis-evaluation-v1",
+  "failed": [],
+  "generated_at_utc": "2026-09-15T09:39:09.660816Z",
+  "phase": "pilot",
+  "planned_cell_count": 23,
+  "resumed": [
+    "adfa-ld__recurrent-autoencoder__seed-101__90f05165ab70",
+    "adfa-ld__recurrent-autoencoder__seed-211__a455714dce5b",
+    "adfa-ld__recurrent-autoencoder__seed-307__b756fe8020d2",
+    "adfa-ld__recurrent-autoencoder__seed-419__b12a6511953e",
+    "adfa-ld__recurrent-autoencoder__seed-523__95d3c4a03984"
+  ],
+  "runner_protocol": "thesis-evaluation-runner-v1",
+  "schema_version": "academic-phase-summary-v1"
+}

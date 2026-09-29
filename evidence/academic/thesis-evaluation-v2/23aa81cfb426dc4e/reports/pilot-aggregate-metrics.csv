@@ -1,0 +1,12 @@
+dataset,dataset protocol,evidence origin,model,trials,deterministic,F1 mean [seed CI],balanced accuracy mean [seed CI],MCC mean [seed CI],AUROC mean [seed CI],AUPRC mean [seed CI]
+adfa-ld,adfa-ld-native-normal-only-v2,official_native,categorical-unigram,1,True,0.146341,0.530000,0.127843,0.565067,0.673037
+adfa-ld,adfa-ld-native-normal-only-v2,official_native,pca-autoencoder,1,True,undefined,0.490000,-0.109985,0.516067,0.588522
+adfa-ld,adfa-ld-native-normal-only-v2,official_native,recurrent-autoencoder,5,False,"0.148573 [0.138661, 0.158486]","0.519333 [0.509028, 0.529639]","0.078173 [0.032976, 0.123369]","0.557493 [0.545547, 0.569440]","0.659430 [0.653632, 0.665228]"
+adfa-ld,adfa-ld-native-normal-only-v2,official_native,robust-distance,1,True,undefined,0.495000,-0.077615,0.412933,0.518251
+hai-23.05,hai-23.05-native-file-temporal-block-v2,official_native,pca-autoencoder,1,True,0.358209,0.637119,0.341022,0.767666,0.307184
+hai-23.05,hai-23.05-native-file-temporal-block-v2,official_native,recurrent-autoencoder,5,False,"0.351335 [0.321998, 0.380672]","0.654263 [0.649636, 0.658890]","0.318111 [0.283714, 0.352508]","0.722498 [0.715770, 0.729225]","0.337167 [0.332416, 0.341917]"
+hai-23.05,hai-23.05-native-file-temporal-block-v2,official_native,robust-distance,1,True,0.339623,0.607780,0.391045,0.714515,0.294203
+lid-ds-2021,lid-ds-2021-native-recording-v4,official_native,categorical-unigram,1,True,0.021978,0.505556,0.074744,0.569321,0.595013
+lid-ds-2021,lid-ds-2021-native-recording-v4,official_native,pca-autoencoder,1,True,0.021978,0.505556,0.074744,0.635864,0.674786
+lid-ds-2021,lid-ds-2021-native-recording-v4,official_native,recurrent-autoencoder,5,False,"0.029145 [-0.001691, 0.059981]","0.504444 [0.498673, 0.510216]","0.085162 [0.040334, 0.129991]","0.543840 [0.517130, 0.570549]","0.560219 [0.535715, 0.584722]"
+lid-ds-2021,lid-ds-2021-native-recording-v4,official_native,robust-distance,1,True,0.105263,0.527778,0.169031,0.619136,0.662024

@@ -1,0 +1,18 @@
+{
+  "config_identity": "sha256:3a6a8de5bfe3fd07ae967b324a86a04c39d3afd0bc9a06726e8ca0931659747f",
+  "environment": {
+    "keras_backend": "torch",
+    "logical_cpu_count": 8,
+    "machine": "AMD64",
+    "numpy": "2.4.4",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "processor": "AMD64 Family 23 Model 24 Stepping 1, AuthenticAMD",
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "python_executable": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\.venv\\Scripts\\python.exe",
+    "torch": "2.11.0+cpu",
+    "torch_cuda_available": false,
+    "torch_thread_count": 4
+  },
+  "runner_protocol": "thesis-evaluation-runner-v1",
+  "schema_version": "academic-provenance-v1"
+}

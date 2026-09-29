@@ -1,0 +1,26 @@
+{
+  "schema_version": "academic-matrix-v2-owner-approval-v1",
+  "approval_id": "approval:thesis-evaluation-v2:interactive-owner-2026-09-28-v5",
+  "approved_by": "workspace-human-owner",
+  "approved_at": "2026-09-28T00:00:00.000000Z",
+  "approval_channel": "interactive Codex conversation",
+  "approval_statement": "Continue the experiment through statistical confirmation. V5 applies the smallest data-integrity repair: lower the LID-DS-2021 confirmatory content cap and its four matching allocation counts from 45 to 44, preserving phase disjointness, all other frozen protocol values, and the previously authorized maximum of 440 CPU-h.",
+  "candidate_config_identity": "sha256:551869a743710fd71b4b3c08c0e94120a4aec91d5405ac36a98e470923f5514d",
+  "candidate_requirements_sha256": "sha256:9c1db7a158e8ed9d3e4aedbe091c6798f52aa757e4304eaf0b4c8a6cdf76e493",
+  "groups": [
+    {"group": "1", "label": "compute-governance", "status": "approved"},
+    {"group": "2", "label": "randomness-and-execution-schedule", "status": "approved"},
+    {"group": "3", "label": "statistical-protocol", "status": "approved"},
+    {"group": "4", "label": "validation-role", "status": "approved"},
+    {"group": "5", "label": "dataset-allocation-and-support", "status": "approved"},
+    {"group": "6", "label": "window-and-preprocessing", "status": "approved"},
+    {"group": "7", "label": "model-and-stopping", "status": "approved"}
+  ],
+  "authorization_effect": "none",
+  "limitations": [
+    "This V5 approval changes only the LID-DS-2021 confirmatory cap/count from 45 to 44 after the V4 preflight found 44 content-unique valid validation recordings in one scenario.",
+    "Confirmatory execution remains prohibited if fresh V5 pilot/preflight, support, leakage, truth-lock, artifact-integrity, and total-cost gates do not pass.",
+    "The maximum authorized computation remains 440 CPU-h; no over-budget execution is authorized.",
+    "The frozen statistical protocol reports uncertainty only where its cluster and stochastic-design assumptions are met; it does not turn deterministic-versus-stochastic descriptive contrasts or HAI two-cluster results into unsupported significance claims."
+  ]
+}

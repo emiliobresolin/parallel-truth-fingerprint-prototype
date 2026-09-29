@@ -1,0 +1,145 @@
+{
+  "cells": [
+    {
+      "dataset": "adfa-ld",
+      "deterministic": true,
+      "model": "categorical-unigram",
+      "seed": 101
+    },
+    {
+      "dataset": "adfa-ld",
+      "deterministic": true,
+      "model": "robust-distance",
+      "seed": 101
+    },
+    {
+      "dataset": "adfa-ld",
+      "deterministic": true,
+      "model": "pca-autoencoder",
+      "seed": 101
+    },
+    {
+      "dataset": "adfa-ld",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 101
+    },
+    {
+      "dataset": "adfa-ld",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 211
+    },
+    {
+      "dataset": "adfa-ld",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 307
+    },
+    {
+      "dataset": "adfa-ld",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 419
+    },
+    {
+      "dataset": "adfa-ld",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 523
+    },
+    {
+      "dataset": "lid-ds-2021",
+      "deterministic": true,
+      "model": "categorical-unigram",
+      "seed": 101
+    },
+    {
+      "dataset": "lid-ds-2021",
+      "deterministic": true,
+      "model": "robust-distance",
+      "seed": 101
+    },
+    {
+      "dataset": "lid-ds-2021",
+      "deterministic": true,
+      "model": "pca-autoencoder",
+      "seed": 101
+    },
+    {
+      "dataset": "lid-ds-2021",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 101
+    },
+    {
+      "dataset": "lid-ds-2021",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 211
+    },
+    {
+      "dataset": "lid-ds-2021",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 307
+    },
+    {
+      "dataset": "lid-ds-2021",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 419
+    },
+    {
+      "dataset": "lid-ds-2021",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 523
+    },
+    {
+      "dataset": "hai-23.05",
+      "deterministic": true,
+      "model": "robust-distance",
+      "seed": 101
+    },
+    {
+      "dataset": "hai-23.05",
+      "deterministic": true,
+      "model": "pca-autoencoder",
+      "seed": 101
+    },
+    {
+      "dataset": "hai-23.05",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 101
+    },
+    {
+      "dataset": "hai-23.05",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 211
+    },
+    {
+      "dataset": "hai-23.05",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 307
+    },
+    {
+      "dataset": "hai-23.05",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 419
+    },
+    {
+      "dataset": "hai-23.05",
+      "deterministic": false,
+      "model": "recurrent-autoencoder",
+      "seed": 523
+    }
+  ],
+  "config_identity": "sha256:4ed5be597c446a69a82c4e6be91ae9f0ff1b3be33051291c9fd33ecf7e41256e",
+  "phase": "pilot",
+  "schema_version": "academic-logical-plan-v1"
+}

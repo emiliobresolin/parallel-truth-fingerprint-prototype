@@ -1,0 +1,49 @@
+{
+  "blocking_reasons": [
+    "no frozen, powered custom-campaign preregistration is bound to these files",
+    "only 2/17 rows contain an autoencoder result",
+    "available autoencoder results are marked runtime_valid_only",
+    "scenario truth does not provide separate physical/syscall/replay/pipeline labels"
+  ],
+  "campaign_ids": [
+    "current-ae-edgefault-v2-20260914",
+    "current-ae-edgefault-v3-20260914",
+    "current-ae-normal-v2-20260914",
+    "current-ae-normal-v3-20260914"
+  ],
+  "classification_counts": {
+    "normal": 2
+  },
+  "interpretation": "The existing files are integration evidence only. `faulty_edge_exclusion` is a cyber/availability condition, while every captured physical vector has zero malfunction, saturation, and cold-start flags; it cannot be relabelled as a physical anomaly. A new paired pilot must capture separate physical, syscall, replay, and pipeline-outcome truth for every run, then derive confirmatory repetitions from between-pair dispersion.",
+  "physical_quality_flag_row_count": 0,
+  "root": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\evidence\\custom-dataset",
+  "row_count": 17,
+  "scenario_row_counts": {
+    "faulty_edge_exclusion": 4,
+    "normal": 13
+  },
+  "schema_version": "custom-track-readiness-v1",
+  "scored_row_count": 2,
+  "source_file_sha256": {
+    "evidence/custom-dataset/current-ae-edgefault-v2-20260914/current-syscall-windows.jsonl": "sha256:a08dd67cf60ece46a5510c4c1811eb246583f6269dc0016908a1cc9b55c42972",
+    "evidence/custom-dataset/current-ae-edgefault-v3-20260914/current-syscall-windows.jsonl": "sha256:6c7449e6555f0f632f8a5cc03334988ed22261765dbeda4380d90c08ab368576",
+    "evidence/custom-dataset/current-ae-normal-v2-20260914/current-syscall-windows.jsonl": "sha256:75020274fee7040326ccf0c1b944fc6cae04024880b87f9b392b700e4ecd2f0c",
+    "evidence/custom-dataset/current-ae-normal-v3-20260914/current-syscall-windows.jsonl": "sha256:b350c83d2e869b560874733a19fc96add77f2bd989e458f1a7729cd33bf26a80"
+  },
+  "status": "BLOCKED — INTEGRATION-SMOKE ONLY",
+  "summary_rows": [
+    {
+      "AE anomaly classifications": 0,
+      "campaigns": 4,
+      "edge-exclusion rows": 4,
+      "normal rows": 13,
+      "round rows": 17,
+      "rows with AE score": 2,
+      "rows with physical quality flag": 0,
+      "validation levels": "runtime_valid_only:2"
+    }
+  ],
+  "validation_level_counts": {
+    "runtime_valid_only": 2
+  }
+}

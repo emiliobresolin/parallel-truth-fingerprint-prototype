@@ -1,0 +1,889 @@
+{
+  "config_identity": "sha256:3a6a8de5bfe3fd07ae967b324a86a04c39d3afd0bc9a06726e8ca0931659747f",
+  "datasets": {
+    "adfa-ld": {
+      "array_bytes": {
+        "test": 525824,
+        "train": 432128,
+        "validation": 206848
+      },
+      "array_shapes": {
+        "test": [
+          1027,
+          128,
+          1
+        ],
+        "train": [
+          844,
+          128,
+          1
+        ],
+        "validation": [
+          404,
+          128,
+          1
+        ]
+      },
+      "dataset_identity": "sha256:441f75f9315285b0ae335130c3f716340fdb91671b0f7d2754bd8b35d8135ec1",
+      "dataset_name": "adfa-ld",
+      "feature_count": 1,
+      "group_leakage_audit": {
+        "group_count": 600,
+        "group_overlap_count": 0,
+        "passed": true,
+        "unit_count": 600,
+        "unit_overlap_count": 0,
+        "violations": {
+          "groups": {},
+          "units": {}
+        }
+      },
+      "modality": "categorical-syscall",
+      "phase": "pilot",
+      "preprocessing": {
+        "center": [],
+        "clip": null,
+        "feature_names": [
+          "syscall_id"
+        ],
+        "identity": "sha256:5b1ae6a84fa1e534aff80f993c34ddcc0e59ef9752e6291da6aa050974bcdb61",
+        "method": "train-only-categorical-vocabulary-v1",
+        "modality": "categorical-syscall",
+        "scale": [],
+        "vocabulary": [
+          "<PAD>",
+          "<UNK>",
+          "1",
+          "10",
+          "102",
+          "11",
+          "114",
+          "117",
+          "118",
+          "119",
+          "12",
+          "120",
+          "122",
+          "125",
+          "13",
+          "133",
+          "140",
+          "141",
+          "142",
+          "143",
+          "146",
+          "148",
+          "15",
+          "155",
+          "157",
+          "158",
+          "159",
+          "160",
+          "162",
+          "163",
+          "168",
+          "174",
+          "175",
+          "179",
+          "180",
+          "183",
+          "19",
+          "191",
+          "192",
+          "194",
+          "195",
+          "196",
+          "197",
+          "199",
+          "20",
+          "200",
+          "201",
+          "202",
+          "203",
+          "204",
+          "205",
+          "206",
+          "207",
+          "208",
+          "209",
+          "21",
+          "211",
+          "212",
+          "213",
+          "214",
+          "219",
+          "220",
+          "221",
+          "240",
+          "243",
+          "252",
+          "254",
+          "255",
+          "256",
+          "258",
+          "26",
+          "265",
+          "266",
+          "268",
+          "269",
+          "27",
+          "270",
+          "272",
+          "289",
+          "292",
+          "293",
+          "298",
+          "3",
+          "30",
+          "300",
+          "307",
+          "308",
+          "311",
+          "322",
+          "33",
+          "331",
+          "340",
+          "37",
+          "38",
+          "39",
+          "4",
+          "40",
+          "41",
+          "42",
+          "45",
+          "5",
+          "54",
+          "57",
+          "6",
+          "60",
+          "63",
+          "64",
+          "65",
+          "66",
+          "7",
+          "75",
+          "78",
+          "83",
+          "85",
+          "9",
+          "91",
+          "93",
+          "94",
+          "96",
+          "97",
+          "99"
+        ]
+      },
+      "protocol": "adfa-ld-native-normal-only-v1",
+      "source_manifest": {
+        "deduplication": {
+          "canonical_preference": [
+            "Training_Data_Master",
+            "Validation_Data_Master",
+            "Attack_Data_Master"
+          ],
+          "contradictory_groups": {
+            "sha256:227688310611ba22988abf5913dd8ce3223ec36bddda051e5484a2b501e438d9": [
+              {
+                "class_name": "Adduser",
+                "label": 1,
+                "path": "Attack_Data_Master/Adduser_8/UAD-Adduser-8-18868.txt"
+              },
+              {
+                "class_name": "Web-Shell",
+                "label": 1,
+                "path": "Attack_Data_Master/Web_Shell_8/UAD-WS8-5437.txt"
+              }
+            ],
+            "sha256:283978655cc5c40b7a331f5116016c6d6c05f381ebd9b0dae06488317fb68666": [
+              {
+                "class_name": "Java-Meterpreter",
+                "label": 1,
+                "path": "Attack_Data_Master/Meterpreter_9/UAD-Meterpreter-9-17366.txt"
+              },
+              {
+                "class_name": "Web-Shell",
+                "label": 1,
+                "path": "Attack_Data_Master/Web_Shell_9/UAD-WS9-5539.txt"
+              }
+            ],
+            "sha256:446d82e0d9bac075603de543d9124de15c6c508fc7e9680bef1556c9e9188f28": [
+              {
+                "class_name": "Normal",
+                "label": 0,
+                "path": "Validation_Data_Master/UVD-2897.txt"
+              },
+              {
+                "class_name": "Web-Shell",
+                "label": 1,
+                "path": "Attack_Data_Master/Web_Shell_10/UAD-WS10-1083.txt"
+              }
+            ],
+            "sha256:523416240078a33637633872615d6b455fcdb0e4be031b9575d83af699d9a0c8": [
+              {
+                "class_name": "Adduser",
+                "label": 1,
+                "path": "Attack_Data_Master/Adduser_6/UAD-Adduser-6-18759.txt"
+              },
+              {
+                "class_name": "Web-Shell",
+                "label": 1,
+                "path": "Attack_Data_Master/Web_Shell_7/UAD-WS7-5262.txt"
+              }
+            ],
+            "sha256:774cc8738934801a2dea942e84ab63bfabf9dd349d3ae8edd26001ba3239c084": [
+              {
+                "class_name": "Normal",
+                "label": 0,
+                "path": "Validation_Data_Master/UVD-0392.txt"
+              },
+              {
+                "class_name": "Hydra-FTP",
+                "label": 1,
+                "path": "Attack_Data_Master/Hydra_FTP_6/UAD-Hydra-FTP-612596.txt"
+              },
+              {
+                "class_name": "Hydra-SSH",
+                "label": 1,
+                "path": "Attack_Data_Master/Hydra_SSH_2/UAD-Hydra-SSH-2-6154.txt"
+              },
+              {
+                "class_name": "Hydra-SSH",
+                "label": 1,
+                "path": "Attack_Data_Master/Hydra_SSH_3/UAD-Hydra-SSH-3-6522.txt"
+              },
+              {
+                "class_name": "Java-Meterpreter",
+                "label": 1,
+                "path": "Attack_Data_Master/Java_Meterpreter_8/UAD-Java-Meterpreter-8-20507.txt"
+              },
+              {
+                "class_name": "Java-Meterpreter",
+                "label": 1,
+                "path": "Attack_Data_Master/Meterpreter_1/UAD-Meterpreter-1-16391.txt"
+              }
+            ],
+            "sha256:91689b8a0385478311f41fab93e2f2d7e9dc0e580b7f22001712a46b88cdc3a9": [
+              {
+                "class_name": "Hydra-FTP",
+                "label": 1,
+                "path": "Attack_Data_Master/Hydra_FTP_4/UAD-Hydra-FTP-4-11184.txt"
+              },
+              {
+                "class_name": "Hydra-SSH",
+                "label": 1,
+                "path": "Attack_Data_Master/Hydra_SSH_9/UAD-Hydra-SSH-9-8188.txt"
+              }
+            ]
+          },
+          "identity": "raw file SHA-256"
+        },
+        "layout": "Training_Data_Master/Validation_Data_Master/Attack_Data_Master",
+        "native_inventory": {
+          "Attack_Data_Master": 746,
+          "Training_Data_Master": 833,
+          "Validation_Data_Master": 4372,
+          "attack_per_class": {
+            "Adduser": 91,
+            "Hydra-FTP": 162,
+            "Hydra-SSH": 176,
+            "Java-Meterpreter": 199,
+            "Web-Shell": 118
+          },
+          "contradictory_content_hash_groups_excluded": 6,
+          "deduplicated_copy_count": 2089,
+          "unique_noncontradictory_content_hashes": 3846
+        },
+        "normal_validation_split": {
+          "fraction": 0.5,
+          "method": "seeded stable unit split before windowing",
+          "seed": 1729,
+          "source": "Validation_Data_Master"
+        },
+        "origin": "ADFA-LD official 2013 archive",
+        "root": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\datasets\\ADFA-LD",
+        "selected_content_identity": "sha256:fccfd3e048b7d5be863f718ed420b7b9b6826b36e8e838fc5f6356ae71a1fdd5",
+        "selection_caps": {
+          "test_attack_per_class": 30,
+          "test_normal": 100,
+          "train": 250,
+          "validation": 100
+        },
+        "selection_phase": "pilot"
+      },
+      "status": "ready",
+      "support": {
+        "test": {
+          "attack": 150,
+          "normal": 100,
+          "per_class": {
+            "Adduser": 30,
+            "Hydra-FTP": 30,
+            "Hydra-SSH": 30,
+            "Java-Meterpreter": 30,
+            "Normal": 100,
+            "Web-Shell": 30
+          },
+          "units": 250
+        },
+        "train": {
+          "attack": 0,
+          "normal": 250,
+          "per_class": {
+            "Normal": 250
+          },
+          "units": 250
+        },
+        "validation": {
+          "attack": 0,
+          "normal": 100,
+          "per_class": {
+            "Normal": 100
+          },
+          "units": 100
+        }
+      },
+      "support_gate": {
+        "issues": [],
+        "passed": true,
+        "support": {
+          "test": {
+            "attack": 150,
+            "normal": 100,
+            "per_class": {
+              "Adduser": 30,
+              "Hydra-FTP": 30,
+              "Hydra-SSH": 30,
+              "Java-Meterpreter": 30,
+              "Normal": 100,
+              "Web-Shell": 30
+            },
+            "units": 250
+          },
+          "train": {
+            "attack": 0,
+            "normal": 250,
+            "per_class": {
+              "Normal": 250
+            },
+            "units": 250
+          },
+          "validation": {
+            "attack": 0,
+            "normal": 100,
+            "per_class": {
+              "Normal": 100
+            },
+            "units": 100
+          }
+        }
+      },
+      "window_parentage_audit": {
+        "passed": true,
+        "violations": [],
+        "window_count": 2275
+      },
+      "windowing": {
+        "aggregation": "p95",
+        "identity": "sha256:32aabf2ac32de94e16a345739ccb9a3c8178ce78b5d65832d68204296858ec1e",
+        "sequence_length": 128,
+        "stride": 64,
+        "window_count": {
+          "test": 1027,
+          "train": 844,
+          "validation": 404
+        }
+      }
+    },
+    "hai-23.05": {
+      "array_bytes": {
+        "test": 35225600,
+        "train": 15851520,
+        "validation": 5283840
+      },
+      "array_shapes": {
+        "test": [
+          800,
+          128,
+          86
+        ],
+        "train": [
+          360,
+          128,
+          86
+        ],
+        "validation": [
+          120,
+          128,
+          86
+        ]
+      },
+      "dataset_identity": "sha256:31e82adcdb29652fae7bfe367b9c4b06e61a3c3472b5e23af2417f6ae0095930",
+      "dataset_name": "hai-23.05",
+      "feature_count": 86,
+      "group_leakage_audit": {
+        "group_count": 1280,
+        "group_overlap_count": 0,
+        "passed": true,
+        "unit_count": 1280,
+        "unit_overlap_count": 0,
+        "violations": {
+          "groups": {},
+          "units": {}
+        }
+      },
+      "modality": "numeric-multivariate",
+      "phase": "pilot",
+      "preprocessing": {
+        "center": [
+          34.51315947178821,
+          34.36728774500967,
+          42.19596390234379,
+          38.13019215819673,
+          54.71229704513891,
+          55.40590073329314,
+          62.151594823563975,
+          323.5963745700961,
+          1169.184584222194,
+          1752.390430833343,
+          245.9087138524213,
+          996.9122189455233,
+          15.219367627170103,
+          15.093178925347022,
+          345.9111340073903,
+          27.791068386718635,
+          28.2542015434019,
+          12.000002421223957,
+          11.853166040577182,
+          1.1134798539496455,
+          524320.0,
+          0.6036980865885724,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          25.63183271028652,
+          0.6624782986111111,
+          27.750894749990135,
+          524320.0,
+          524320.0,
+          1.0,
+          30.493376267796567,
+          35.909052937282645,
+          27.986603007812256,
+          28.03450484831074,
+          0.8944661458333333,
+          0.8944661458333333,
+          118.59238819882046,
+          0.0,
+          0.10551215277777778,
+          0.10551215277777778,
+          0.10553385416666666,
+          10.094474547304866,
+          1.0,
+          2880.0,
+          54720.36603732639,
+          720.4648176655877,
+          905.2951171875,
+          1.0,
+          6.750381391059044,
+          -3.1005011870659636,
+          9.678642133246568,
+          -1.053827569444452,
+          11.958673506727425,
+          50.0,
+          50.0,
+          50.0,
+          50.0,
+          1041.8942274305555,
+          4741.1125,
+          7970.288541666667,
+          70.0,
+          14988.934895833334,
+          30.0,
+          735.5132378472222,
+          -0.00019897873263887125,
+          37.31008247721031,
+          4.086779008245522,
+          368.4359697322107,
+          -5.793858506944736e-05,
+          18100.082356770832,
+          331.05535792686464,
+          331.42100220529636,
+          14.826140578554917,
+          9972.823719618056,
+          27117.1017578125,
+          0.12930478168404422,
+          1.1127048081597126,
+          345.33729651746756,
+          997.0235759672028,
+          1752.5759017754012,
+          26.77270089106841,
+          30.550762044704722
+        ],
+        "clip": 10.0,
+        "feature_names": [
+          "P1_FCV01D",
+          "P1_FCV01Z",
+          "P1_FCV02D",
+          "P1_FCV02Z",
+          "P1_FCV03D",
+          "P1_FCV03Z",
+          "P1_FT01",
+          "P1_FT01Z",
+          "P1_FT02",
+          "P1_FT02Z",
+          "P1_FT03",
+          "P1_FT03Z",
+          "P1_LCV01D",
+          "P1_LCV01Z",
+          "P1_LIT01",
+          "P1_PCV01D",
+          "P1_PCV01Z",
+          "P1_PCV02D",
+          "P1_PCV02Z",
+          "P1_PIT01",
+          "P1_PIT01_HH",
+          "P1_PIT02",
+          "P1_PP01AD",
+          "P1_PP01AR",
+          "P1_PP01BD",
+          "P1_PP01BR",
+          "P1_PP02D",
+          "P1_PP02R",
+          "P1_PP04",
+          "P1_PP04D",
+          "P1_PP04SP",
+          "P1_SOL01D",
+          "P1_SOL03D",
+          "P1_STSP",
+          "P1_TIT01",
+          "P1_TIT02",
+          "P1_TIT03",
+          "P2_24Vdc",
+          "P2_ATSW_Lamp",
+          "P2_AutoGO",
+          "P2_AutoSD",
+          "P2_Emerg",
+          "P2_MASW",
+          "P2_MASW_Lamp",
+          "P2_ManualGO",
+          "P2_ManualSD",
+          "P2_OnOff",
+          "P2_RTR",
+          "P2_SCO",
+          "P2_SCST",
+          "P2_SIT01",
+          "P2_TripEx",
+          "P2_VIBTR01",
+          "P2_VIBTR02",
+          "P2_VIBTR03",
+          "P2_VIBTR04",
+          "P2_VT01",
+          "P2_VTR01",
+          "P2_VTR02",
+          "P2_VTR03",
+          "P2_VTR04",
+          "P3_FIT01",
+          "P3_LCP01D",
+          "P3_LCV01D",
+          "P3_LH01",
+          "P3_LIT01",
+          "P3_LL01",
+          "P3_PIT01",
+          "P4_HT_FD",
+          "P4_HT_PO",
+          "P4_HT_PS",
+          "P4_LD",
+          "P4_ST_FD",
+          "P4_ST_GOV",
+          "P4_ST_LD",
+          "P4_ST_PO",
+          "P4_ST_PS",
+          "P4_ST_PT01",
+          "P4_ST_TT01",
+          "x1001_05_SETPOINT_OUT",
+          "x1001_15_ASSIGN_OUT",
+          "x1002_07_SETPOINT_OUT",
+          "x1002_08_SETPOINT_OUT",
+          "x1003_10_SETPOINT_OUT",
+          "x1003_18_SETPOINT_OUT",
+          "x1003_24_SUM_OUT"
+        ],
+        "identity": "sha256:a7657e6fc4f06527a6945eeebe8c06e7c889fce4c22af65d86025d672d4e3461",
+        "method": "train-only-standardization-v1",
+        "modality": "numeric-multivariate",
+        "scale": [
+          25.761041305915352,
+          26.042941904474716,
+          39.392031132081144,
+          36.79610504580136,
+          3.0862008239191434,
+          3.1554054706472154,
+          7.55226695514704,
+          39.3357527823287,
+          1050.4467104623805,
+          1290.4791865602235,
+          14.697085049094225,
+          29.83517378115233,
+          2.642018707955164,
+          2.6366840774495723,
+          27.63965213145744,
+          2.452454568296947,
+          2.460233986991465,
+          0.0003423761296443178,
+          0.15285780069422258,
+          0.1003736474470735,
+          1.0,
+          0.3559567849503077,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          16.36401963207771,
+          0.4728644652333762,
+          0.2868247935459789,
+          1.0,
+          1.0,
+          1.0,
+          1.3316229611153094,
+          1.9253285957900124,
+          1.255656183916288,
+          0.003464171818426499,
+          0.30724006866185294,
+          0.30724006866185294,
+          7.602417679094106,
+          1.0,
+          0.30721220417494033,
+          0.30721220417494033,
+          0.30724006866185294,
+          4.946401953313238,
+          1.0,
+          1.0,
+          159.83376394681102,
+          0.22665671934560797,
+          32.92491250270922,
+          1.0,
+          0.41669568032247684,
+          0.38778918581783955,
+          0.4142099195580058,
+          0.36115365042484093,
+          0.04554543036765795,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1680.8308135932348,
+          5135.579227972335,
+          6838.422761728895,
+          1.0,
+          3061.1941850310764,
+          1.0,
+          1278.8050616058342,
+          0.002089476050020851,
+          31.462511295970188,
+          2.292391007641086,
+          61.55419605202643,
+          0.0016417518847262542,
+          1779.2652059736158,
+          36.434339874345525,
+          32.980560309360676,
+          8.044383947814184,
+          28.492176936503547,
+          128.7419802533372,
+          0.03987982303441599,
+          0.10344783333217727,
+          26.76243313791,
+          29.60720844799322,
+          1290.5169154622802,
+          0.7943420498542557,
+          0.8733466810105215
+        ],
+        "vocabulary": []
+      },
+      "protocol": "hai-23.05-native-file-temporal-block-v1",
+      "source_manifest": {
+        "block_rows": 128,
+        "native_inventory": {
+          "hai-test1.csv": {
+            "attack": 38,
+            "dropped_partial": 112,
+            "normal": 383,
+            "selected_attack": 37,
+            "selected_normal": 363
+          },
+          "hai-test2.csv": {
+            "attack": 102,
+            "dropped_partial": 0,
+            "normal": 1698,
+            "selected_attack": 18,
+            "selected_normal": 382
+          },
+          "hai-train1.csv": {
+            "attack": 0,
+            "dropped_partial": 96,
+            "normal": 2193,
+            "selected_attack": 0,
+            "selected_normal": 120
+          },
+          "hai-train2.csv": {
+            "attack": 0,
+            "dropped_partial": 16,
+            "normal": 2278,
+            "selected_attack": 0,
+            "selected_normal": 120
+          },
+          "hai-train3.csv": {
+            "attack": 0,
+            "dropped_partial": 48,
+            "normal": 984,
+            "selected_attack": 0,
+            "selected_normal": 120
+          },
+          "hai-train4.csv": {
+            "attack": 0,
+            "dropped_partial": 112,
+            "normal": 1546,
+            "selected_attack": 0,
+            "selected_normal": 120
+          }
+        },
+        "origin": "HAI-23.05 official native CSV release",
+        "partition_policy": {
+          "test": "hai-test1 and hai-test2 with published labels, untouched until evaluation",
+          "train": "hai-train1..3",
+          "validation": "hai-train4 normal chronology (no published test truth)"
+        },
+        "root": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\datasets\\HAI-23.05-kaggle\\hai-23.05",
+        "schema": "HAI-23.05-native-csv-v1",
+        "selected_content_identity": "sha256:e899bdec05a4c640c44ad413ceb0f6aeaf107394865424c276ee6decd02b93b9",
+        "selection_caps": {
+          "test": {
+            "total": 400
+          },
+          "train": {
+            "normal": 120
+          },
+          "validation": {
+            "normal": 120
+          }
+        },
+        "selection_phase": "pilot",
+        "source_file_sha256": {
+          "hai-test1.csv": "sha256:78c7f1d4de1f2ab9ccc2f8c719f80f831033543adb0c81d0d78f84f40838d4be",
+          "hai-test2.csv": "sha256:b2b8dd295aefd87e39260fe43cb4c73ee86d6264b0ac4b0761e7efb0c2b545c3",
+          "hai-train1.csv": "sha256:53007b0ba604fbf338e7ac2e08cd81d874b5d1388f3aecb213ddcba5bf2bec4a",
+          "hai-train2.csv": "sha256:0e520e82bf78a661ab19ce4967f3c766bd809820f457a9c90c365102d4534c56",
+          "hai-train3.csv": "sha256:bfcec2dc05adea103e7491546b0e28268faaa26d3cc717d10f4595c94b81e85d",
+          "hai-train4.csv": "sha256:56658c83657d42a65db982b864362e0d0ffeb96d1f7b357d5e76e3a5c522d940",
+          "label-test1.csv": "sha256:eaf69edb9c5834bc393afd7bf658b5e408d34fd7bfc3261f80516765fb818fbc",
+          "label-test2.csv": "sha256:8090c44981176e39b0f01a7126a80248ac0b93355c00f9db4d4e2f2106452b92"
+        }
+      },
+      "status": "ready",
+      "support": {
+        "test": {
+          "attack": 55,
+          "normal": 745,
+          "per_class": {
+            "Attack": 55,
+            "Normal": 745
+          },
+          "units": 800
+        },
+        "train": {
+          "attack": 0,
+          "normal": 360,
+          "per_class": {
+            "Normal": 360
+          },
+          "units": 360
+        },
+        "validation": {
+          "attack": 0,
+          "normal": 120,
+          "per_class": {
+            "Normal": 120
+          },
+          "units": 120
+        }
+      },
+      "support_gate": {
+        "issues": [],
+        "passed": true,
+        "support": {
+          "test": {
+            "attack": 55,
+            "normal": 745,
+            "per_class": {
+              "Attack": 55,
+              "Normal": 745
+            },
+            "units": 800
+          },
+          "train": {
+            "attack": 0,
+            "normal": 360,
+            "per_class": {
+              "Normal": 360
+            },
+            "units": 360
+          },
+          "validation": {
+            "attack": 0,
+            "normal": 120,
+            "per_class": {
+              "Normal": 120
+            },
+            "units": 120
+          }
+        }
+      },
+      "window_parentage_audit": {
+        "passed": true,
+        "violations": [],
+        "window_count": 1280
+      },
+      "windowing": {
+        "aggregation": "max",
+        "identity": "sha256:3c251b101a1ea889908bfb3f124661bdc5543fb03ad127a9b5978ab0bd105742",
+        "sequence_length": 128,
+        "stride": 128,
+        "window_count": {
+          "test": 800,
+          "train": 360,
+          "validation": 120
+        }
+      }
+    },
+    "lid-ds-2021": {
+      "error": "LID-DS recording has no syscalls: D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\datasets\\LID-DS-2021-real\\CVE-2017-7529\\training\\agreeable_burnell_9113.zip",
+      "error_type": "ValueError",
+      "status": "blocked"
+    }
+  },
+  "elapsed_seconds": 319.18585569999414,
+  "environment": {
+    "keras_backend": "torch",
+    "logical_cpu_count": 8,
+    "machine": "AMD64",
+    "numpy": "2.4.4",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "processor": "AMD64 Family 23 Model 24 Stepping 1, AuthenticAMD",
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "python_executable": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\.venv\\Scripts\\python.exe",
+    "torch": "2.11.0+cpu",
+    "torch_cuda_available": false,
+    "torch_thread_count": 4
+  },
+  "experiment_id": "thesis-evaluation-v1",
+  "generated_at_utc": "2026-09-14T23:00:25.721273Z",
+  "phase": "pilot",
+  "ready": false,
+  "runner_protocol": "thesis-evaluation-runner-v1",
+  "schema_version": "academic-preflight-v1"
+}

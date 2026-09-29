@@ -1,0 +1,58 @@
+{
+  "config_identity": "sha256:f27ca1389f3a21adf7077bda2fac70362e6318782bd8c3d2770ce49a3be1bbb1",
+  "environment": {
+    "accelerators": [],
+    "keras_backend": "torch",
+    "locale_encoding": "cp1252",
+    "logical_cpu_count": 8,
+    "machine": "AMD64",
+    "numpy": "2.4.4",
+    "numpy_build_configuration": "{'Compilers': {'c': {'name': 'msvc', 'linker': 'link', 'version': '19.44.35225', 'commands': 'cl'}, 'cython': {'name': 'cython', 'linker': 'cython', 'version': '3.2.4', 'commands': 'cython'}, 'c++': {'name': 'msvc', 'linker': 'link', 'version': '19.44.35225', 'commands': 'cl'}}, 'Machine Information': {'host': {'cpu': 'x86_64', 'family': 'x86_64', 'endian': 'little', 'system': 'windows'}, 'build': {'cpu': 'x86_64', 'family': 'x86_64', 'endian': 'little', 'system': 'windows'}}, 'Build Dependencies': {'blas': {'name': 'scipy-openblas', 'found': True, 'version': '0.3.31.188.0', 'detection method': 'pkgconfig', 'include directory': 'C:/Users/runneradmin/AppData/Local/Temp/cibw-run-ucojyb64/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/include', 'lib directory': 'C:/Users/runneradmin/AppData/Local/Temp/cibw-run-ucojyb64/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/lib', 'openblas configuration': 'OpenBLAS 0.3.31.188.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=24', 'pc file directory': 'D:/a/numpy-release/numpy-release/.openblas'}, 'lapack': {'name': 'scipy-openblas', 'found': True, 'version': '0.3.31.188.0', 'detection method': 'pkgconfig', 'include directory': 'C:/Users/runneradmin/AppData/Local/Temp/cibw-run-ucojyb64/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/include', 'lib directory': 'C:/Users/runneradmin/AppData/Local/Temp/cibw-run-ucojyb64/cp314-win_amd64/build/venv/Lib/site-packages/scipy_openblas64/lib', 'openblas configuration': 'OpenBLAS 0.3.31.188.0  USE64BITINT DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=24', 'pc file directory': 'D:/a/numpy-release/numpy-release/.openblas'}}, 'Python Information': {'path': 'C:\\\\Users\\\\runneradmin\\\\AppData\\\\Local\\\\Temp\\\\build-env-1f6ndr68\\\\Scripts\\\\python.exe', 'version': '3.14'}, 'SIMD Extensions': {'baseline': ['X86_V2'], 'found': ['X86_V3']}}",
+    "package_versions": {
+      "keras": "3.13.2",
+      "numpy": "2.4.4",
+      "torch": "2.11.0"
+    },
+    "platform": "Windows-10-10.0.19045-SP0",
+    "processor": "AMD64 Family 23 Model 24 Stepping 1, AuthenticAMD",
+    "python": "3.14.5 (tags/v3.14.5:5607950, May 10 2026, 10:43:50) [MSC v.1944 64 bit (AMD64)]",
+    "python_executable": "D:\\Projetos\\parallel-truth-fingerprint-prototype\\parallel-truth-fingerprint-prototype\\.venv\\Scripts\\python.exe",
+    "python_hash_seed": "unspecified",
+    "thread_environment": {
+      "MKL_NUM_THREADS": "unspecified",
+      "NUMEXPR_NUM_THREADS": "unspecified",
+      "OMP_NUM_THREADS": "unspecified",
+      "OPENBLAS_NUM_THREADS": "unspecified"
+    },
+    "torch": "2.11.0+cpu",
+    "torch_cuda_available": false,
+    "torch_cudnn_benchmark": false,
+    "torch_cudnn_deterministic": false,
+    "torch_cudnn_version": null,
+    "torch_deterministic_algorithms": false,
+    "torch_thread_count": 4
+  },
+  "files": {
+    "scripts/run_academic_experiments.py": "sha256:59048f2ca7145e24305d242acf0f15ee9cd6f83e79a029894dc0899a64c9ad57",
+    "src/parallel_truth_fingerprint/contracts/parameter_evidence.py": "sha256:0a6cef02ee6c005054388e571cbe4c5a2bcfb1227e41259ae65fd02429cd143c",
+    "src/parallel_truth_fingerprint/contracts/semantic_vocabulary.py": "sha256:6833d126c0c4f358080a72934fb1e16c81d2e09c6543ae20868811cf47940a6b",
+    "src/parallel_truth_fingerprint/contracts/source_catalog.py": "sha256:2efbb5d9177c7a7c684ce9e9628fb49225b2b58aa97c6d1bd966da3e39ba3c0f",
+    "src/parallel_truth_fingerprint/evidence/hai_adapter.py": "sha256:0acfc47cb802f136a7ce0c63652ee6c70bd5c04b4f90815142b7f789b922c938",
+    "src/parallel_truth_fingerprint/evidence/parameter_evidence.py": "sha256:b66794cdbd066f2b8f54bc9527dc2e67f175c4bf15bacc9928f08479c14a2e41",
+    "src/parallel_truth_fingerprint/evidence/source_catalog.py": "sha256:4acd075bf274b4442ae2c107db27acca1ae7ed8150d5cab680545572d47c5d2e",
+    "src/parallel_truth_fingerprint/lstm_service/offline_training/academic_metrics.py": "sha256:3f4261fefb5349ed1e699f0f51f2a368815aac4e22274118068029e42b683fe0",
+    "src/parallel_truth_fingerprint/lstm_service/offline_training/academic_models.py": "sha256:c8a8d1ed32e7389c57c2306de1db585db30e22f7a2c38608115fb4d99b48c375",
+    "src/parallel_truth_fingerprint/lstm_service/offline_training/academic_numeric_schema.py": "sha256:4adb00a3ab489b107dd8b207c0b58b36f8cbcd69e698c610f3a2ae137a509247",
+    "src/parallel_truth_fingerprint/lstm_service/offline_training/academic_protocol.py": "sha256:2ca6803a0e49d85e5fc387700ff0f02614f60ff61d0869de5104ce0a199a0bb2",
+    "src/parallel_truth_fingerprint/lstm_service/offline_training/academic_report.py": "sha256:05bd67cb567eff3a5a676e92ff398234ddd7709477ca1f0f63c610c6c4fcd435",
+    "src/parallel_truth_fingerprint/lstm_service/offline_training/academic_runner.py": "sha256:27d5e7b0d1885e9c0236f0c6f464cc7ea91cc0ee593555488494e11ceb899892",
+    "src/parallel_truth_fingerprint/lstm_service/offline_training/benchmarks/adfa_ld.py": "sha256:85ca04351a2dd356e0c1ee1f8f20c8eb41fee05ff6c666972e71fc0b787ca83f",
+    "src/parallel_truth_fingerprint/lstm_service/offline_training/benchmarks/base.py": "sha256:ae9370137b0647d631209a9d8cf17bea74b1fa70d8f3f549c2b82269db7cfef3",
+    "src/parallel_truth_fingerprint/lstm_service/offline_training/benchmarks/lid_ds_2021.py": "sha256:66680fcb75dc07b377aa3eee7f27947ce9968252c3ab6e349d1a2fe3204e817b",
+    "src/parallel_truth_fingerprint/lstm_service/offline_training/models/base.py": "sha256:4995d910f728638babfc2163b8ecbe04a2e53b2313b945c0ca4fdb73edbeed9c",
+    "src/parallel_truth_fingerprint/lstm_service/offline_training/models/lstm_classifier.py": "sha256:e7959500422f0afd1f02dba054a1229a028cc340fe7a3cc801f4f83e4740138c"
+  },
+  "identity": "sha256:3928958f0cf4546210f01274a8a95cafbf964fc26b39894f2368cc74c4075a99",
+  "runner_protocol": "thesis-evaluation-runner-v2",
+  "schema_version": "academic-numerical-core-v2"
+}

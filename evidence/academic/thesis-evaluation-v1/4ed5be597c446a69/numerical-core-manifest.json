@@ -1,0 +1,11 @@
+{
+  "config_identity": "sha256:4ed5be597c446a69a82c4e6be91ae9f0ff1b3be33051291c9fd33ecf7e41256e",
+  "files": {
+    "parallel_truth_fingerprint/lstm_service/offline_training/academic_metrics.py": "sha256:6bcabbde07422b28e7ea48f58fb2de3e555f872024d6a64222ec07f09017c22f",
+    "parallel_truth_fingerprint/lstm_service/offline_training/academic_models.py": "sha256:1bf467ac69f889dfec25b166afd016747a1ed810aad2d3023c5b1560dcd86388",
+    "parallel_truth_fingerprint/lstm_service/offline_training/academic_protocol.py": "sha256:de3e525d2c76efcca5fe24202cf99e3d8c5c1220b21e537441f46c629febef13"
+  },
+  "identity": "sha256:97247e367c57770bb69d467217fad725913d0710a8376b0edcb2082511346a28",
+  "runner_protocol": "thesis-evaluation-runner-v1",
+  "schema_version": "academic-numerical-core-v1"
+}
