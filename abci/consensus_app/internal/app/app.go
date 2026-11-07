@@ -18,17 +18,11 @@ const (
 	statusSuccess         = "success"
 	statusFailedConsensus = "failed_consensus"
 
-	reasonInconsistentView       = "inconsistent_view"
-	reasonSuspectedByzantine     = "suspected_byzantine_behavior"
-	pairwiseConsistencyThreshold = 0.35
-	suspectedByzantineThreshold  = 0.75
+	reasonInconsistentView   = "inconsistent_view"
+	currentSchemaVersion     = "current-consensus-v2"
+	currentMeasurementDomain = "loop_current_ma"
+	currentSpanMA            = 16.0
 )
-
-var sensorScales = map[string]float64{
-	"temperature": 20.0,
-	"pressure":    3.0,
-	"rpm":         600.0,
-}
 
 type sensorOrder struct {
 	Name string
@@ -88,8 +82,13 @@ func (app *ConsensusApplication) CheckTx(_ context.Context, req *abcitypes.Check
 	if err := json.Unmarshal(req.Tx, &tx); err != nil {
 		return &abcitypes.CheckTxResponse{Code: 1, Log: err.Error()}, nil
 	}
-	if tx.RoundID == "" || len(tx.ParticipatingEdges) == 0 || len(tx.ReplicatedStates) == 0 {
-		return &abcitypes.CheckTxResponse{Code: 1, Log: "invalid round tx"}, nil
+	if err := validateRoundInput(tx); err != nil {
+		return &abcitypes.CheckTxResponse{Code: 1, Log: err.Error()}, nil
+	}
+	app.mu.Lock()
+	defer app.mu.Unlock()
+	if app.hasLegacyRounds() {
+		return &abcitypes.CheckTxResponse{Code: 1, Log: "legacy state requires a fresh current-domain session"}, nil
 	}
 	return &abcitypes.CheckTxResponse{Code: 0}, nil
 }
@@ -122,6 +121,10 @@ func (app *ConsensusApplication) FinalizeBlock(_ context.Context, req *abcitypes
 			continue
 		}
 
+		if app.hasLegacyRounds() {
+			txResults[idx] = &abcitypes.ExecTxResult{Code: 1, Log: "legacy state requires a fresh current-domain session"}
+			continue
+		}
 		round, err := evaluateRound(tx, req.Height)
 		if err != nil {
 			txResults[idx] = &abcitypes.ExecTxResult{Code: 1, Log: err.Error()}
@@ -217,6 +220,9 @@ func (app *ConsensusApplication) VerifyVoteExtension(_ context.Context, _ *abcit
 }
 
 func evaluateRound(tx RoundInputTx, height int64) (CommittedRound, error) {
+	if err := validateRoundInput(tx); err != nil {
+		return CommittedRound{}, err
+	}
 	stateByEdge := map[string]ReplicatedState{}
 	for _, state := range tx.ReplicatedStates {
 		stateByEdge[state.OwnerEdgeID] = state
@@ -236,7 +242,7 @@ func evaluateRound(tx RoundInputTx, height int64) (CommittedRound, error) {
 		}
 	}
 
-	quorum := (len(tx.ParticipatingEdges) / 2) + 1
+	quorum := 2*len(tx.ParticipatingEdges)/3 + 1
 	ranking := make([]TrustRankEntry, 0, len(tx.ParticipatingEdges))
 	exclusions := []ExclusionDecision{}
 	trustEvidence := make([]PerEdgeTrustEvidence, 0, len(tx.ParticipatingEdges))
@@ -265,6 +271,9 @@ func evaluateRound(tx RoundInputTx, height int64) (CommittedRound, error) {
 			for _, peerID := range peerIDs {
 				peerSensor := stateByEdge[peerID].SensorValues[sensorName]
 				distance := math.Abs(selfSensor.Value - peerSensor.Value)
+				if math.IsInf(distance, 0) || math.IsInf(totalDistance+distance, 0) {
+					return CommittedRound{}, fmt.Errorf("current diagnostic distance overflow")
+				}
 				totalDistance += distance
 				pairwiseDistances = append(pairwiseDistances, PairwiseDistanceEvidence{
 					PeerEdgeID:    peerID,
@@ -273,7 +282,10 @@ func evaluateRound(tx RoundInputTx, height int64) (CommittedRound, error) {
 					Unit:          selfSensor.Unit,
 				})
 			}
-			meanDistance := totalDistance / float64(len(peerIDs))
+			meanDistance := 0.0
+			if len(peerIDs) > 0 {
+				meanDistance = totalDistance / float64(len(peerIDs))
+			}
 			sensorDeviations = append(sensorDeviations, SensorDeviationEvidence{
 				SensorName:     sensorName,
 				DeviationValue: round(meanDistance),
@@ -286,11 +298,17 @@ func evaluateRound(tx RoundInputTx, height int64) (CommittedRound, error) {
 		for _, peerID := range peerIDs {
 			normalized := pairwise[edgeID+"->"+peerID]
 			totalPairwise += normalized
-			if normalized <= pairwiseConsistencyThreshold {
+			if math.IsInf(totalPairwise, 0) {
+				return CommittedRound{}, fmt.Errorf("current diagnostic aggregate overflow")
+			}
+			if compatibleStates(state, stateByEdge[peerID]) {
 				compatiblePeers++
 			}
 		}
-		overallDeviation := round(totalPairwise / float64(len(peerIDs)))
+		overallDeviation := 0.0
+		if len(peerIDs) > 0 {
+			overallDeviation = round(totalPairwise / float64(len(peerIDs)))
+		}
 		score := round(1.0 / (1.0 + overallDeviation))
 		ranking = append(ranking, TrustRankEntry{EdgeID: edgeID, Score: score})
 
@@ -306,15 +324,12 @@ func evaluateRound(tx RoundInputTx, height int64) (CommittedRound, error) {
 
 		if compatiblePeers+1 < quorum {
 			reason := reasonInconsistentView
-			if overallDeviation >= suspectedByzantineThreshold {
-				reason = reasonSuspectedByzantine
-			}
 			details := []string{
 				fmt.Sprintf("compatible_peers=%d", compatiblePeers),
 				fmt.Sprintf("overall_normalized_deviation=%.3f", overallDeviation),
 			}
 			for _, deviation := range sensorDeviations {
-				scale := sensorScales[deviation.SensorName]
+				scale := currentSpanMA
 				details = append(
 					details,
 					fmt.Sprintf(
@@ -364,6 +379,7 @@ func evaluateRound(tx RoundInputTx, height int64) (CommittedRound, error) {
 	}
 
 	return CommittedRound{
+		SchemaVersion: currentSchemaVersion, MeasurementDomain: currentMeasurementDomain,
 		RoundID:               tx.RoundID,
 		WindowStartedAt:       tx.WindowStartedAt,
 		WindowEndedAt:         tx.WindowEndedAt,
@@ -378,46 +394,108 @@ func evaluateRound(tx RoundInputTx, height int64) (CommittedRound, error) {
 	}, nil
 }
 
+func validateRoundInput(tx RoundInputTx) error {
+	if tx.SchemaVersion != currentSchemaVersion || tx.MeasurementDomain != currentMeasurementDomain {
+		return fmt.Errorf("requires current-consensus-v2 schema and loop_current_ma measurement domain")
+	}
+	if tx.RoundID == "" || len(tx.ParticipatingEdges) == 0 || len(tx.ReplicatedStates) != len(tx.ParticipatingEdges) {
+		return fmt.Errorf("invalid round tx")
+	}
+	participants := map[string]bool{}
+	for _, id := range tx.ParticipatingEdges {
+		if strings.TrimSpace(id) == "" || participants[id] {
+			return fmt.Errorf("invalid or duplicate participant")
+		}
+		participants[id] = true
+	}
+	seen := map[string]bool{}
+	var schema map[string]SensorValue
+	for _, state := range tx.ReplicatedStates {
+		if !participants[state.OwnerEdgeID] || seen[state.OwnerEdgeID] {
+			return fmt.Errorf("invalid or duplicate replicated owner")
+		}
+		seen[state.OwnerEdgeID] = true
+		if len(state.SensorValues) == 0 {
+			return fmt.Errorf("empty sensor schema")
+		}
+		if schema == nil {
+			schema = state.SensorValues
+		}
+		if len(schema) != len(state.SensorValues) {
+			return fmt.Errorf("replicated sensor schemas differ")
+		}
+		for name, value := range state.SensorValues {
+			if _, ok := schema[name]; !ok || strings.TrimSpace(name) == "" {
+				return fmt.Errorf("replicated sensor schemas differ")
+			}
+			if value.Unit != "mA" || strings.TrimSpace(value.SourceEventID) == "" || math.IsNaN(value.Value) || math.IsInf(value.Value, 0) {
+				return fmt.Errorf("sensor %s requires finite acquired mA and source_event_id", name)
+			}
+		}
+	}
+	return nil
+}
+
+func (app *ConsensusApplication) hasLegacyRounds() bool {
+	for _, r := range app.state.Rounds {
+		if r.SchemaVersion != currentSchemaVersion || r.MeasurementDomain != currentMeasurementDomain {
+			return true
+		}
+	}
+	return false
+}
+
+func compatibleStates(left, right ReplicatedState) bool {
+	if len(left.SensorValues) != len(right.SensorValues) {
+		return false
+	}
+	for name, value := range left.SensorValues {
+		other, ok := right.SensorValues[name]
+		if !ok || value != other {
+			return false
+		}
+	}
+	return true
+}
+
 func normalizedPairDistance(left ReplicatedState, right ReplicatedState) (float64, error) {
+	if len(left.SensorValues) == 0 || len(left.SensorValues) != len(right.SensorValues) {
+		return 0, fmt.Errorf("replicated sensor schemas differ")
+	}
+	names := make([]string, 0, len(left.SensorValues))
+	for name := range left.SensorValues {
+		names = append(names, name)
+	}
+	sort.Strings(names)
 	total := 0.0
-	count := 0.0
-	sensorNames := make([]string, 0, len(sensorScales))
-	for sensorName := range sensorScales {
-		sensorNames = append(sensorNames, sensorName)
-	}
-	sort.Strings(sensorNames)
-	for _, sensorName := range sensorNames {
-		scale := sensorScales[sensorName]
-		leftSensor, ok := left.SensorValues[sensorName]
+	for _, name := range names {
+		other, ok := right.SensorValues[name]
 		if !ok {
-			return 0, fmt.Errorf("missing sensor %s for %s", sensorName, left.OwnerEdgeID)
+			return 0, fmt.Errorf("replicated sensor schemas differ")
 		}
-		rightSensor, ok := right.SensorValues[sensorName]
-		if !ok {
-			return 0, fmt.Errorf("missing sensor %s for %s", sensorName, right.OwnerEdgeID)
+		difference := math.Abs(left.SensorValues[name].Value - other.Value)
+		if math.IsInf(difference, 0) || math.IsInf(total+difference/currentSpanMA, 0) {
+			return 0, fmt.Errorf("current diagnostic distance overflow")
 		}
-		total += math.Abs(leftSensor.Value-rightSensor.Value) / scale
-		count++
+		total += difference / currentSpanMA
 	}
-	return total / count, nil
+	return total / float64(len(names)), nil
 }
 
 func buildValidState(stateByEdge map[string]ReplicatedState, validEdges []string) *ConsensusedValidState {
-	sensorValues := map[string]float64{}
-	for sensorName := range sensorScales {
-		total := 0.0
-		for _, edgeID := range validEdges {
-			total += stateByEdge[edgeID].SensorValues[sensorName].Value
-		}
-		sensorValues[sensorName] = round(total / float64(len(validEdges)))
+	values := map[string]float64{}
+	for name, value := range stateByEdge[validEdges[0]].SensorValues {
+		values[name] = value.Value
 	}
-	return &ConsensusedValidState{
-		SourceEdges:  append([]string(nil), validEdges...),
-		SensorValues: sensorValues,
-	}
+	return &ConsensusedValidState{MeasurementDomain: currentMeasurementDomain, SourceEdges: append([]string(nil), validEdges...), SensorValues: values}
 }
 
 func round(value float64) float64 {
+	// At this magnitude adjacent binary64 numbers are farther apart than 0.001.
+	// Multiplying such a value by 1000 can overflow without adding precision.
+	if math.Abs(value) >= 1<<43 {
+		return value
+	}
 	return math.Round(value*1000) / 1000
 }
 

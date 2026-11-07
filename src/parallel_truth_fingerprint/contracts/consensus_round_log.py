@@ -82,6 +82,8 @@ class ConsensusRoundLog:
                 else {
                     "source_edges": list(self.consensused_valid_state.source_edges),
                     "sensor_values": dict(self.consensused_valid_state.sensor_values),
+                    "measurement_domain": self.consensused_valid_state.measurement_domain,
+                    "unit": "mA",
                 }
             ),
         }

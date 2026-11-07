@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from parallel_truth_fingerprint.consensus.quorum import required_quorum
 from parallel_truth_fingerprint.consensus.trust_model import evaluate_trust
+from parallel_truth_fingerprint.consensus.current_domain import raw_current
 from parallel_truth_fingerprint.contracts.consensus_audit_package import (
     ConsensusAuditPackage,
 )
@@ -70,18 +71,20 @@ class ConsensusEngine:
         round_input: ConsensusRoundInput,
         valid_states: tuple[EdgeLocalReplicatedStateContract, ...],
     ) -> ConsensusedValidState:
-        """Build the valid state using simple averages over non-excluded edges."""
+        """Retain agreed acquired currents without synthesizing measurements."""
 
         sensor_values = {}
-        for sensor_name in ("temperature", "pressure", "rpm"):
+        for sensor_name in valid_states[0].observations_by_sensor:
             values = [
-                state.observations_by_sensor[sensor_name].process_data.pv.value
+                raw_current(state.observations_by_sensor[sensor_name])
                 for state in valid_states
             ]
-            sensor_values[sensor_name] = round(sum(values) / len(values), 3)
+            if len(set(values)) != 1:
+                raise ValueError('Selected views must agree on the acquired current.')
+            sensor_values[sensor_name] = values[0]
 
         return ConsensusedValidState(
             round_identity=round_input.round_identity,
-            source_edges=tuple(state.owner_edge_id for state in valid_states),
+            source_edges=tuple(sorted(state.owner_edge_id for state in valid_states)),
             sensor_values=sensor_values,
         )

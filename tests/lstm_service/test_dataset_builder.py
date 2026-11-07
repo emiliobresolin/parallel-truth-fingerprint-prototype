@@ -41,21 +41,25 @@ def build_persisted_artifact(
             "window_ended_at": ended_at.isoformat(),
         },
         "consensus_context": {
+            "schema_version": "current-consensus-v2",
+            "measurement_domain": "loop_current_ma",
             "final_consensus_status": "success",
             "participating_edges": ["edge-1", "edge-2", "edge-3"],
-            "quorum_required": 2,
+            "quorum_required": 3,
             "source_edges": ["edge-1", "edge-2", "edge-3"],
             "trust_ranking": [],
             "exclusions": [],
             "trust_evidence": [],
         },
         "validated_state": {
+            "measurement_domain": "loop_current_ma",
+            "unit": "mA",
             "state_type": "consensused_valid_state",
             "source_edges": ["edge-1", "edge-2", "edge-3"],
             "sensor_values": {
-                "temperature": temperature,
-                "pressure": pressure,
-                "rpm": rpm,
+                "temperature": 14.0 + index * 0.1,
+                "pressure": 13.1 + index * 0.1,
+                "rpm": 14.8,
             },
             "structured_payload_snapshot": {
                 "snapshot_type": "validated_source_view",
@@ -309,6 +313,7 @@ class DatasetBuilderTests(unittest.TestCase):
         del mismatched_schema["validated_state"]["structured_payload_snapshot"][
             "payloads_by_sensor"
         ]["temperature"]
+        del mismatched_schema['validated_state']['sensor_values']['temperature']
 
         for artifact in (normal, faulty, divergent, mismatched_schema):
             store.save_json(artifact["artifact_key"], artifact)

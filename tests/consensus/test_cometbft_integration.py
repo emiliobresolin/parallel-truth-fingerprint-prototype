@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+from dataclasses import replace
 from datetime import datetime, timezone
 import json
 import unittest
@@ -46,15 +47,19 @@ class SerializeRoundInputTest(unittest.TestCase):
         payload = json.loads(serialized.decode("utf-8"))
 
         self.assertEqual(payload["round_id"], "round-cometbft-001")
+        self.assertEqual(payload["schema_version"], "current-consensus-v2")
+        self.assertEqual(payload["measurement_domain"], "loop_current_ma")
+        self.assertEqual(serialized, serialize_round_input(round_input))
+        self.assertTrue(payload["replicated_states"][0]["sensor_values"]["temperature"]["source_event_id"])
         self.assertEqual(payload["participating_edges"], ["edge-1", "edge-2", "edge-3"])
         self.assertEqual(payload["replicated_states"][0]["owner_edge_id"], "edge-1")
         self.assertEqual(
             payload["replicated_states"][0]["sensor_values"]["temperature"]["value"],
-            80.0,
+            12.0,
         )
         self.assertEqual(
             payload["replicated_states"][1]["sensor_values"]["pressure"]["unit"],
-            "bar",
+            "mA",
         )
 
 
@@ -104,21 +109,27 @@ class CometBftRpcClientTest(unittest.TestCase):
 class CommittedRoundMapperTest(unittest.TestCase):
     def test_committed_round_to_audit_package_uses_committed_result_as_truth(self) -> None:
         round_input = make_round_input()
+        participants = ("edge-1", "edge-2", "edge-3", "edge-4")
+        states = round_input.replicated_states + (make_replicated_state(round_input.round_identity, "edge-4", 80, 6, 3200, currents=(18, 18, 18)),)
+        round_input = replace(round_input, participating_edges=participants, replicated_states=tuple(replace(state, participating_edges=participants) for state in states))
         committed_round = {
+            "schema_version": "current-consensus-v2",
+            "measurement_domain": "loop_current_ma",
             "round_id": "round-cometbft-001",
             "window_started_at": "2026-03-26T10:00:00+00:00",
             "window_ended_at": "2026-03-26T10:01:00+00:00",
-            "participating_edges": ["edge-1", "edge-2", "edge-3"],
+            "participating_edges": list(participants),
             "replicated_states": [],
             "trust_ranking": [
                 {"edge_id": "edge-1", "score": 1.0},
                 {"edge_id": "edge-2", "score": 0.94},
                 {"edge_id": "edge-3", "score": 0.23},
+                {"edge_id": "edge-4", "score": 0.2},
             ],
             "exclusions": [
                 {
-                    "edge_id": "edge-3",
-                    "reason": "suspected_byzantine_behavior",
+                    "edge_id": "edge-4",
+                    "reason": "inconsistent_view",
                     "detail": "compatible_peers=0",
                 }
             ],
@@ -132,7 +143,7 @@ class CommittedRoundMapperTest(unittest.TestCase):
                         {
                             "sensor_name": "temperature",
                             "deviation_value": 0.5,
-                            "unit": "degC",
+                            "unit": "mA",
                         }
                     ],
                     "pairwise_distances": [
@@ -140,18 +151,19 @@ class CommittedRoundMapperTest(unittest.TestCase):
                             "peer_edge_id": "edge-2",
                             "sensor_name": "temperature",
                             "distance_value": 1.0,
-                            "unit": "degC",
+                            "unit": "mA",
                         }
                     ],
                 }
             ],
             "final_status": "success",
             "consensused_valid_state": {
-                "source_edges": ["edge-1", "edge-2"],
+                "measurement_domain": "loop_current_ma",
+                "source_edges": ["edge-1", "edge-2", "edge-3"],
                 "sensor_values": {
-                    "temperature": 80.5,
-                    "pressure": 6.05,
-                    "rpm": 3205.0,
+                    "temperature": 12.0,
+                    "pressure": 12.0,
+                    "rpm": 12.0,
                 },
             },
             "commit_height": 9,
@@ -160,9 +172,25 @@ class CommittedRoundMapperTest(unittest.TestCase):
         audit_package = committed_round_to_audit_package(round_input, committed_round)
 
         self.assertEqual(audit_package.final_status, ConsensusStatus.SUCCESS)
-        self.assertEqual(audit_package.consensused_valid_state.source_edges, ("edge-1", "edge-2"))
-        self.assertEqual(audit_package.exclusions[0].reason, ExclusionReason.SUSPECTED_BYZANTINE_BEHAVIOR)
+        self.assertEqual(audit_package.consensused_valid_state.source_edges, ("edge-1", "edge-2", "edge-3"))
+        self.assertEqual(audit_package.exclusions[0].reason, ExclusionReason.INCONSISTENT_VIEW)
         self.assertEqual(audit_package.trust_ranking.entries[0].edge_id, "edge-1")
+        for key in ("measurement_domain", "schema_version"):
+            legacy = dict(committed_round)
+            legacy.pop(key)
+            with self.subTest(missing=key), self.assertRaises(ValueError):
+                committed_round_to_audit_package(round_input, legacy)
+        import copy
+        for corruption in ('quorum', 'excluded_source', 'changed_current'):
+            invalid = copy.deepcopy(committed_round)
+            if corruption == 'quorum':
+                invalid['consensused_valid_state']['source_edges'] = ['edge-1']
+            elif corruption == 'excluded_source':
+                invalid['consensused_valid_state']['source_edges'] = ['edge-1','edge-2','edge-4']
+            else:
+                invalid['consensused_valid_state']['sensor_values']['temperature'] = 12.000001
+            with self.subTest(corruption=corruption), self.assertRaises(ValueError):
+                committed_round_to_audit_package(round_input, invalid)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,27 @@
+{
+  "schema_version": "PTFP-CurrentDomainRuntime.v2",
+  "runtime_transaction_schema": "current-consensus-v2",
+  "measurement_domain": "loop_current_ma",
+  "unit": "mA",
+  "acquired_field": "process_data.loop_current_ma",
+  "nominal_interval_ma": [4.0, 20.0],
+  "normalization": "(current_ma - 4) / 16; no clipping of acquired values",
+  "replication_rule": "same gateway/tag/acquisition timestamp identity and exact acquired current per channel",
+  "quorum": "strictly more than two thirds equal-power participants; three of four",
+  "validated_value": "copy agreed observation; no averaging or engineering conversion",
+  "advisory_index": "1/(1 + mean absolute pair distance in mA divided by 16); software diagnostic, no acceptance role",
+  "comparison": "same-event digital projections, zero mA tolerance by default",
+  "engineering_fields_role": "raw HART metadata or configured SCADA display only",
+  "edge_derived_physics_metrics": "not generated; optional historic field only",
+  "model_input": "acquired currents and recorded diagnostic flags; contextual model uses four physical and four supervisory currents",
+  "future_independent_adc_path": "requires selected hardware, acquisition uncertainty and timing specification; not implied by exact digital copy equality",
+  "sources": [
+    "https://support.fieldcommgroup.org/support/solutions/articles/8000029592-hart-7-device-variables-example",
+    "https://infosys.beckhoff.com/content/1033/ioanalogmanual/3311873931.html",
+    "https://docs.tia.siemens.cloud/r/simatic_s7_1200_manual_collection_enus_20/plc-concepts/processing-of-analog-values",
+    "https://infosys.beckhoff.com/content/1033/ep3632/3311875851.html?id=965061838302185754",
+    "https://docs.cosmos.network/cometbft/latest/docs/README"
+  ],
+  "accessed_local_date": "2026-10-29",
+  "previous_contract": "current-domain-runtime-contract.v1.json (historical, preserved)"
+}

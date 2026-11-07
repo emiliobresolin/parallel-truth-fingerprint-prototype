@@ -25,7 +25,7 @@ from parallel_truth_fingerprint.contracts.edge_local_replicated_state import (
 )
 
 
-def make_payload(tag: str, value: float, unit: str) -> RawHartPayload:
+def make_payload(tag: str, value: float, unit: str, current_ma: float = 12.0) -> RawHartPayload:
     return RawHartPayload(
         protocol="HART",
         gateway_id="GW",
@@ -39,7 +39,7 @@ def make_payload(tag: str, value: float, unit: str) -> RawHartPayload:
         process_data=ProcessData(
             pv=ProcessVariable(value=value, unit=unit),
             sv=ProcessVariable(value=65.0, unit="percent", description="Compressor_Power"),
-            loop_current_ma=12.0,
+            loop_current_ma=current_ma,
             pv_percent_range=50.0,
             physics_metrics=PhysicsMetrics(
                 noise_floor=0.1,
@@ -62,6 +62,7 @@ def make_replicated_state(
     temperature: float,
     pressure: float,
     rpm: float,
+    currents: tuple[float, float, float] = (12.0, 12.0, 12.0),
 ) -> EdgeLocalReplicatedStateContract:
     participants = ("edge-1", "edge-2", "edge-3")
     return EdgeLocalReplicatedStateContract(
@@ -69,9 +70,9 @@ def make_replicated_state(
         owner_edge_id=owner_edge_id,
         participating_edges=participants,
         observations_by_sensor={
-            "temperature": make_payload("TIT-101", temperature, "degC"),
-            "pressure": make_payload("PIT-101", pressure, "bar"),
-            "rpm": make_payload("RIT-101", rpm, "rpm"),
+            "temperature": make_payload("TIT-101", temperature, "degC", currents[0]),
+            "pressure": make_payload("PIT-101", pressure, "bar", currents[1]),
+            "rpm": make_payload("RIT-101", rpm, "rpm", currents[2]),
         },
         is_validated=False,
     )
@@ -101,7 +102,7 @@ class ConsensusSummaryTest(unittest.TestCase):
 
         self.assertEqual(summary.round_id, "round-visibility")
         self.assertEqual(summary.total_participants, 3)
-        self.assertEqual(summary.quorum_required, 2)
+        self.assertEqual(summary.quorum_required, 3)
         self.assertEqual(summary.valid_participants_after_exclusions, 3)
         self.assertEqual(summary.excluded_edge_ids, ())
         self.assertEqual(summary.exclusion_reasons, ())
@@ -113,8 +114,8 @@ class ConsensusSummaryTest(unittest.TestCase):
             participating_edges=("edge-1", "edge-2", "edge-3"),
             replicated_states=(
                 make_replicated_state(self.round_identity, "edge-1", 80.0, 6.0, 3200.0),
-                make_replicated_state(self.round_identity, "edge-2", 150.0, 11.5, 5000.0),
-                make_replicated_state(self.round_identity, "edge-3", 20.0, 1.0, 900.0),
+                make_replicated_state(self.round_identity, "edge-2", 150.0, 11.5, 5000.0, currents=(18.0, 18.0, 18.0)),
+                make_replicated_state(self.round_identity, "edge-3", 20.0, 1.0, 900.0, currents=(4.0, 4.0, 4.0)),
             ),
         )
 
@@ -127,14 +128,14 @@ class ConsensusSummaryTest(unittest.TestCase):
         self.assertEqual(
             summary.exclusion_reasons,
             (
-                "suspected_byzantine_behavior",
-                "suspected_byzantine_behavior",
-                "suspected_byzantine_behavior",
+                "inconsistent_view",
+                "inconsistent_view",
+                "inconsistent_view",
             ),
         )
         self.assertIn("status=failed_consensus", formatted)
         self.assertIn("valid_state=absent", formatted)
-        self.assertIn("edge-2:suspected_byzantine_behavior", formatted)
+        self.assertIn("edge-2:inconsistent_view", formatted)
 
     def test_summary_serialization_is_stable(self) -> None:
         round_input = ConsensusRoundInput(

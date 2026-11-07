@@ -30,9 +30,9 @@ def build_valid_state(
         ),
         source_edges=("edge-1", "edge-2"),
         sensor_values={
-            "temperature": temperature,
-            "pressure": pressure,
-            "rpm": rpm,
+            "temperature": 4.0 + (temperature - 48.0) / 47.0 * 16.0,
+            "pressure": 4.0 + (pressure - 1.8) / 6.7 * 16.0,
+            "rpm": 4.0 + (rpm - 500.0) / 4500.0 * 16.0,
         },
     )
 
@@ -61,7 +61,11 @@ class FakeOpcUaScadaServiceTests(unittest.TestCase):
         )
         self.assertEqual(
             scada_state.behavioral_sensor_values["temperature"].loop_current_ma,
-            14.2,
+            build_valid_state().sensor_values["temperature"],
+        )
+        self.assertNotEqual(
+            scada_state.behavioral_sensor_values["temperature"].loop_current_ma,
+            source_state.observations_by_sensor["temperature"].process_data.loop_current_ma,
         )
         self.assertEqual(
             scada_state.behavioral_sensor_values["temperature"].source_round_id,
@@ -86,7 +90,7 @@ class FakeOpcUaScadaServiceTests(unittest.TestCase):
                 round_id="round-002"
             ).round_input.replicated_states[0],
         )
-        self.assertEqual(offset_state.sensor_values["temperature"].value, 72.5)
+        self.assertAlmostEqual(offset_state.sensor_values["temperature"].value, 70.0 + 2.5 / 16.0 * 47.0)
         self.assertEqual(offset_state.sensor_values["temperature"].mode, "offset")
         self.assertEqual(
             offset_state.behavioral_sensor_values["temperature"].mode,
@@ -123,7 +127,7 @@ class FakeOpcUaScadaServiceTests(unittest.TestCase):
                 round_id="round-005"
             ).round_input.replicated_states[0],
         )
-        self.assertEqual(replay_state.sensor_values["rpm"].value, 3500.0)
+        self.assertAlmostEqual(replay_state.sensor_values["rpm"].value, 3000.0)
         self.assertEqual(replay_state.sensor_values["rpm"].mode, "replay")
         self.assertEqual(replay_state.behavioral_source_round_id, "round-001")
         self.assertEqual(
@@ -170,3 +174,8 @@ class FakeOpcUaScadaServiceOpcUaTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(live_values["temperature"], 68.4)
         self.assertEqual(live_values["pressure"], 4.9)
         self.assertEqual(live_values["rpm"], 2875.0)
+        current_node = self.service._current_nodes["temperature"]
+        self.assertEqual(await current_node.read_value(), build_valid_state(temperature=68.4).sensor_values["temperature"])
+        self.assertEqual(await (await current_node.get_child(f"{namespace_index}:unit")).read_value(), "mA")
+        display_node = self.service._sensor_nodes["temperature"]
+        self.assertEqual(await (await display_node.get_child(f"{namespace_index}:unit")).read_value(), "degC")

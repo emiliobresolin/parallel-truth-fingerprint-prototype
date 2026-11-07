@@ -1,0 +1,8 @@
+# Reuse an existing local compiler/dependency environment; compile CURRENT sources.
+FROM ptfp-current-go-base:20261028
+WORKDIR /src
+COPY go.mod go.sum ./
+COPY cmd ./cmd
+COPY internal ./internal
+RUN GOPROXY=off CGO_ENABLED=0 go build -o /usr/local/bin/consensus_abci ./cmd/consensus_abci
+ENTRYPOINT ["consensus_abci"]

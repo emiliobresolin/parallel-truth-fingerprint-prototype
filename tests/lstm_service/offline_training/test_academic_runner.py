@@ -634,6 +634,44 @@ class AcademicConfigurationTests(unittest.TestCase):
 
 
 class AcademicExecutionAndResumeTests(unittest.TestCase):
+    def test_pilot_filter_prepares_only_requested_dataset(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config = _config(root / "academic-output")
+            config["datasets"]["unrequested"] = dict(config["datasets"]["synthetic"])
+            with patch.object(academic_runner, "_prepare_one_dataset", return_value=_prepared_dataset()) as prepare:
+                record = run_preflight(config, project_root=root, phase="pilot", dataset_filter=("synthetic",))
+            self.assertTrue(record["ready"])
+            self.assertEqual(set(record["datasets"]), {"synthetic"})
+            self.assertTrue(record["partial_dataset_scope"])
+            self.assertEqual(prepare.call_count, 1)
+            self.assertEqual(prepare.call_args.args[0], "synthetic")
+
+    def test_preflight_filter_cannot_narrow_confirmatory_or_accept_unknown_dataset(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config = _config(root / "academic-output")
+            for phase, selected, message in [("confirmatory", "synthetic", "pilot"), ("pilot", "missing", "Unknown")]:
+                with self.assertRaisesRegex(ValueError, message):
+                    run_preflight(config, project_root=root, phase=phase, dataset_filter=(selected,))
+            self.assertFalse((root / "academic-output").exists())
+
+    def test_filtered_pilot_never_prepares_other_dataset_even_at_finalization(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config = _config(root / "academic-output")
+            config["datasets"]["unrequested"] = dict(config["datasets"]["synthetic"])
+            def prepare_selected(name, *args, **kwargs):
+                self.assertEqual(name, "synthetic")
+                return _prepared_dataset()
+            with patch.object(academic_runner, "_prepare_one_dataset", side_effect=prepare_selected), patch.object(
+                academic_runner, "fit_detector", side_effect=_fake_fit_detector
+            ):
+                record = run_academic_phase(config, project_root=root, phase="pilot", dataset_filter=("synthetic",))
+            self.assertFalse(record["failed"])
+            self.assertEqual(len(record["completed_now"]), 3)
+            self.assertFalse(record["eligibility_gate"]["exact_matrix_match"])
+
     def test_v2_unresolved_numeric_authority_blocks_before_dataset_loading(self) -> None:
         repository_root = Path(__file__).resolve().parents[3]
         config = load_academic_config(

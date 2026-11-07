@@ -6,7 +6,7 @@ services:
       - "1883:1883"
     volumes:
       - ./docs/infrastructure/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
-    restart: unless-stopped
+    restart: "no"
 
   minio:
     image: minio/minio:latest
@@ -18,5 +18,5 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
-    restart: unless-stopped
+    restart: "no"
   # lstm-service:

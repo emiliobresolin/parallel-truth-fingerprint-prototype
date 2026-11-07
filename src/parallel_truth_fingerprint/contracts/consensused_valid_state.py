@@ -14,3 +14,9 @@ class ConsensusedValidState:
     round_identity: RoundIdentity
     source_edges: tuple[str, ...]
     sensor_values: dict[str, float]
+    measurement_domain: str = 'loop_current_ma'
+
+    def __post_init__(self):
+        import math
+        if self.measurement_domain != 'loop_current_ma' or not self.sensor_values or any(not math.isfinite(float(v)) for v in self.sensor_values.values()):
+            raise ValueError('Validated state must contain finite acquired currents in mA.')

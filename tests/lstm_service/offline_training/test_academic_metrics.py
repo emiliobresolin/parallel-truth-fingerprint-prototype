@@ -113,14 +113,37 @@ class OperatingAndRankingMetricTests(unittest.TestCase):
         self.assertAlmostEqual(result["mcc"], 0.0)
         self.assertEqual(result["undefined"], {})
 
-    def test_undefined_precision_and_f1_are_none_not_synthetic_zeroes(self) -> None:
+    def test_undefined_precision_does_not_make_f1_undefined_with_missed_attacks(self) -> None:
         result = binary_operating_metrics([0.1, 0.2, 0.3], [0, 1, 1], threshold=1.0)
 
         self.assertIsNone(result["precision"])
-        self.assertIsNone(result["f1"])
+        self.assertEqual(result["f1"], 0.0)
         self.assertIn("precision", result["undefined"])
-        self.assertIn("f1", result["undefined"])
+        self.assertNotIn("f1", result["undefined"])
         self.assertEqual(result["recall"], 0.0)
+
+    def test_f1_zero_when_false_positives_and_false_negatives_exist_without_true_positives(self) -> None:
+        result = binary_operating_metrics([0.9, 0.1], [0, 1], threshold=0.5)
+        self.assertEqual(result["confusion_matrix"], {"tp": 0, "fp": 1, "tn": 0, "fn": 1})
+        self.assertEqual(result["f1"], 0.0)
+        self.assertNotIn("f1", result["undefined"])
+
+    def test_f1_is_undefined_only_when_its_own_count_denominator_is_zero(self) -> None:
+        all_normal = binary_operating_metrics([0.1, 0.2], [0, 0], threshold=0.5)
+        false_alarm = binary_operating_metrics([0.9, 0.2], [0, 0], threshold=0.5)
+        self.assertIsNone(all_normal["f1"])
+        self.assertIn("f1", all_normal["undefined"])
+        self.assertEqual(false_alarm["f1"], 0.0)
+        self.assertIsNone(false_alarm["recall"])
+
+    def test_zero_detection_has_defined_zero_f1_bootstrap_replicates(self) -> None:
+        result = bootstrap_confidence_intervals(
+            [0.1, 0.2, 0.3, 0.4], [0, 0, 1, 1], threshold=1.0,
+            replicates=40, confidence_level=0.95, seed=913,
+        )
+        self.assertEqual(result["f1"]["estimate"], 0.0)
+        self.assertEqual(result["f1"]["valid_replicates"], 40)
+        self.assertEqual((result["f1"]["low"], result["f1"]["high"]), (0.0, 0.0))
 
     def test_ranking_metrics_cover_perfect_reversed_and_one_class_cases(self) -> None:
         perfect = ranking_metrics([0.1, 0.2, 0.8, 0.9], [0, 0, 1, 1])

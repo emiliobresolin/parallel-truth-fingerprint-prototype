@@ -17,8 +17,8 @@ import (
 
 type goldenCatalog struct {
 	CatalogID string `json:"catalog_id"`
-	Entries []struct {
-		RequirementID    string `json:"requirement_id"`
+	Entries   []struct {
+		RequirementID     string `json:"requirement_id"`
 		FilesystemLocator string `json:"filesystem_locator"`
 		DecodedSHA256     string `json:"decoded_sha256"`
 	} `json:"entries"`
@@ -93,13 +93,12 @@ func TestV1GoldenConsensusTransactionAndState(t *testing.T) {
 	if err := json.Unmarshal(txBytes, &tx); err != nil {
 		t.Fatal(err)
 	}
-	round, err := evaluateRound(tx, 7)
-	if err != nil {
-		t.Fatal(err)
+	if _, err := evaluateRound(tx, 7); err == nil {
+		t.Fatal("legacy PV transaction accepted")
 	}
-	if round.FinalStatus != statusSuccess || round.CommitHeight != 7 || round.RoundID != "fixture-round" {
-		t.Fatalf("unexpected golden round: %+v", round)
-	}
+	tx = fourSensorRound()
+	tx.RoundID = "fixture-round"
+	txBytes, _ = json.Marshal(tx)
 
 	statePath := filepath.Join(t.TempDir(), "state.json")
 	application, err := NewConsensusApplication(statePath)
@@ -134,29 +133,6 @@ func TestV1GoldenConsensusTransactionAndState(t *testing.T) {
 	info, err := reloaded.Info(context.Background(), &abcitypes.InfoRequest{})
 	if err != nil || info.LastBlockHeight != 7 || len(info.LastBlockAppHash) == 0 {
 		t.Fatalf("persisted v1 state drifted: %+v %v", info, err)
-	}
-}
-
-func TestV1GoldenFailureExclusionAndDeclaredRoundingDivergence(t *testing.T) {
-	var tx RoundInputTx
-	if err := json.Unmarshal(fixtureBytes(t, "consensus.go.transaction"), &tx); err != nil {
-		t.Fatal(err)
-	}
-	tx.ReplicatedStates[2].SensorValues["rpm"] = SensorValue{Value: 5000, Unit: "sentinel"}
-	round, err := evaluateRound(tx, 8)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(round.Exclusions) == 0 {
-		t.Fatal("expected the preserved exclusion path")
-	}
-	tx.ReplicatedStates[0].SensorValues = map[string]SensorValue{}
-	if _, err := evaluateRound(tx, 9); err == nil {
-		t.Fatal("expected missing-sensor failure path")
-	}
-	// Python Decimal/half-even can round this tie down; Go math.Round is away from zero.
-	if roundValue := roundToV1Precision(0.0005); roundValue != 0.001 {
-		t.Fatalf("declared Go v1 half-tie behavior drifted: %v", roundValue)
 	}
 }
 

@@ -28,9 +28,12 @@ class ScadaBehavioralSensorState:
     cold_start: bool | None = None
     mode: str = "match"
     source_round_id: str | None = None
+    totalizer1_kg: float | None = None
 
     def to_dict(self) -> dict[str, object]:
         return {
+            "unit": "mA",
+            "measurement_domain": "loop_current_ma",
             "loop_current_ma": self.loop_current_ma,
             "pv_percent_range": self.pv_percent_range,
             "noise_floor": self.noise_floor,
@@ -41,6 +44,7 @@ class ScadaBehavioralSensorState:
             "cold_start": self.cold_start,
             "mode": self.mode,
             "source_round_id": self.source_round_id,
+            **({"totalizer1_kg": self.totalizer1_kg} if self.totalizer1_kg is not None else {}),
         }
 
 
@@ -63,6 +67,12 @@ class ScadaState:
             "source_round_id": self.source_round_id,
             "timestamp": self.timestamp,
             "behavioral_source_round_id": self.behavioral_source_round_id,
+            "measurement_domain": "loop_current_ma",
+            "loop_current_unit": "mA",
+            "loop_currents_ma": {
+                name: state.loop_current_ma
+                for name, state in sorted((self.behavioral_sensor_values or {}).items())
+            },
             "sensor_values": {
                 sensor_name: {
                     "value": sensor_state.value,

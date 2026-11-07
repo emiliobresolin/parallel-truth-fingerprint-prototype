@@ -1359,6 +1359,7 @@ class DemoFormattingTest(unittest.TestCase):
 
 class DemoFaultInjectionTest(unittest.TestCase):
     def test_inject_faults_can_preserve_quorum_with_single_faulty_edge(self) -> None:
+        from dataclasses import replace
         from parallel_truth_fingerprint.config.runtime import RuntimeDemoConfig
         from parallel_truth_fingerprint.consensus import ConsensusEngine, build_round_summary
         from scripts.run_local_demo import inject_faults
@@ -1385,6 +1386,15 @@ class DemoFaultInjectionTest(unittest.TestCase):
             ),
         )
 
+        participants = ("edge-1", "edge-2", "edge-3", "edge-4")
+        states = round_input.replicated_states + (
+            make_replicated_state(round_identity, "edge-4", 81.0, 6.1, 3210.0),
+        )
+        round_input = replace(
+            round_input,
+            participating_edges=participants,
+            replicated_states=tuple(replace(state, participating_edges=participants) for state in states),
+        )
         injected = inject_faults(
             round_input,
             RuntimeDemoConfig(
@@ -1396,7 +1406,7 @@ class DemoFaultInjectionTest(unittest.TestCase):
         summary = build_round_summary(ConsensusEngine().evaluate(injected))
 
         self.assertEqual(summary.final_consensus_status.value, "success")
-        self.assertEqual(summary.valid_participants_after_exclusions, 2)
+        self.assertEqual(summary.valid_participants_after_exclusions, 3)
         self.assertEqual(summary.excluded_edge_ids, ("edge-3",))
 
     def test_inject_faults_can_force_failed_consensus(self) -> None:
@@ -1449,6 +1459,8 @@ class DemoConsensusPathTest(unittest.TestCase):
         from scripts import run_local_demo
 
         committed_round = {
+            "schema_version": "current-consensus-v2",
+            "measurement_domain": "loop_current_ma",
             "round_id": "round-20260326100000000000",
             "window_started_at": "2026-03-26T10:00:00+00:00",
             "window_ended_at": "2026-03-26T10:01:00+00:00",
@@ -1463,11 +1475,13 @@ class DemoConsensusPathTest(unittest.TestCase):
             "trust_evidence": [],
             "final_status": "success",
             "consensused_valid_state": {
+                "measurement_domain": "loop_current_ma",
                 "source_edges": ["edge-1", "edge-2", "edge-3"],
                 "sensor_values": {
-                    "temperature": 80.0,
-                    "pressure": 6.0,
-                    "rpm": 3200.0,
+                    "temperature": 12.0,
+                    "pressure": 12.0,
+                    "rpm": 12.0,
+                    "mass_flow": 12.0,
                 },
             },
             "commit_height": 11,
@@ -1484,6 +1498,7 @@ class DemoConsensusPathTest(unittest.TestCase):
                 }
 
             def broadcast_round(self, round_input):
+                self.round_input = round_input
                 return type(
                     "Receipt",
                     (),
@@ -1499,6 +1514,16 @@ class DemoConsensusPathTest(unittest.TestCase):
             def query_committed_round(self, round_id: str):
                 payload = dict(committed_round)
                 payload["round_id"] = round_id
+                payload['participating_edges'] = list(self.round_input.participating_edges)
+                payload['trust_ranking'] = [{'edge_id': edge, 'score': 1.0} for edge in self.round_input.participating_edges]
+                payload["consensused_valid_state"] = {
+                    "measurement_domain": "loop_current_ma",
+                    "source_edges": list(self.round_input.participating_edges),
+                    "sensor_values": {
+                        name: observation.process_data.loop_current_ma
+                        for name, observation in self.round_input.replicated_states[0].observations_by_sensor.items()
+                    },
+                }
                 return payload
 
         config = RuntimeDemoConfig(

@@ -1424,10 +1424,17 @@ def _requested_batch_id(
 
 
 def run_preflight(
-    config: Mapping[str, object], *, project_root: Path, phase: str
+    config: Mapping[str, object], *, project_root: Path, phase: str,
+    dataset_filter: Sequence[str] = (),
 ) -> dict[str, object]:
     """Materialize protocol metadata and fail-closed leakage/support checks."""
 
+    selected_datasets = set(dataset_filter)
+    unknown = selected_datasets - set(_dataset_configs(config))
+    if unknown:
+        raise ValueError(f"Unknown preflight datasets: {sorted(unknown)}")
+    if selected_datasets and phase != "pilot":
+        raise ValueError("Dataset-filtered preflight is restricted to pilot evaluation.")
     started = time.perf_counter()
     cpu_started = time.process_time()
     paths = _initialize_evidence(config, project_root=project_root, phase=phase)
@@ -1457,6 +1464,8 @@ def run_preflight(
         )
     dataset_results: dict[str, object] = {}
     for dataset_key, raw_config in _dataset_configs(config).items():
+        if selected_datasets and dataset_key not in selected_datasets:
+            continue
         if _is_v2(config) and numeric_authority.get("accountability_outcome") != "accountable":
             dataset_results[dataset_key] = {
                 "status": "blocked",
@@ -1560,6 +1569,8 @@ def run_preflight(
         "repetition_planning_gate": repetition_planning,
         "historical_admissibility": _legacy_admissibility(config, project_root),
         "datasets": dataset_results,
+        "dataset_scope": sorted(selected_datasets) if selected_datasets else sorted(_dataset_configs(config)),
+        "partial_dataset_scope": bool(selected_datasets),
         "computational_load": computational_load,
         "ready": (
             bool(dataset_results)
@@ -1900,7 +1911,10 @@ def run_academic_phase(
     failed: list[dict[str, str]] = []
     started = time.perf_counter()
     cpu_started = time.process_time()
-    preflight = run_preflight(config, project_root=project_root, phase=phase)
+    preflight = run_preflight(
+        config, project_root=project_root, phase=phase,
+        dataset_filter=tuple(sorted(selected_datasets)),
+    )
     try:
         all_logical_rows = _filtered_logical_plan(
             config,
@@ -2683,10 +2697,13 @@ def validate_cell_raw_reconstruction(
 
 
 def _expected_descriptors(
-    config: Mapping[str, object], *, project_root: Path, phase: str
+    config: Mapping[str, object], *, project_root: Path, phase: str,
+    dataset_filter: Sequence[str] = (),
 ) -> list[dict[str, object]]:
     descriptors: list[dict[str, object]] = []
     for dataset_key, dataset_config in _dataset_configs(config).items():
+        if dataset_filter and dataset_key not in dataset_filter:
+            continue
         prepared = _prepare_one_dataset(
             dataset_key, dataset_config, project_root=project_root, phase=phase
         )
@@ -2745,7 +2762,11 @@ def _finalize_phase_summary(
     )
     try:
         expected = (
-            _expected_descriptors(config, project_root=project_root, phase=phase)
+            _expected_descriptors(
+                config, project_root=project_root, phase=phase,
+                dataset_filter=(tuple(preflight.get("dataset_scope", ()))
+                                if phase == "pilot" and preflight.get("partial_dataset_scope") else ()),
+            )
             if preflight.get("ready") is True
             else list(planned)
         )
@@ -2823,6 +2844,7 @@ def _finalize_phase_summary(
     )
     exact_matrix = (
         bool(expected_by_id)
+        and not preflight.get("partial_dataset_scope", False)
         and set(authenticated) == set(expected_by_id)
         and len(authenticated) == len(expected_by_id)
         and not extra_ids

@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from parallel_truth_fingerprint.consensus.current_domain import DOMAIN, SCHEMA
+from parallel_truth_fingerprint.consensus.current_domain import raw_current, same_observation
+from parallel_truth_fingerprint.consensus.quorum import required_quorum
 from datetime import datetime
 
 from parallel_truth_fingerprint.contracts.consensus_audit_package import (
@@ -31,6 +34,8 @@ def committed_round_to_audit_package(
 ) -> ConsensusAuditPackage:
     """Convert a CometBFT-committed round result into the local audit contracts."""
 
+    if committed_round.get('measurement_domain') != DOMAIN or committed_round.get('schema_version') != SCHEMA:
+        raise ValueError('Committed round must explicitly identify the current-domain schema.')
     round_identity = RoundIdentity(
         round_id=str(committed_round["round_id"]),
         window_started_at=datetime.fromisoformat(str(committed_round["window_started_at"])),
@@ -48,6 +53,8 @@ def committed_round_to_audit_package(
     )
 
     participating_edges = tuple(committed_round["participating_edges"])
+    if len(set(participating_edges)) != len(participating_edges) or set(participating_edges) != set(round_input.participating_edges):
+        raise ValueError('Committed participants must match the submitted participants.')
     trust_ranking = TrustRanking(
         round_identity=round_identity,
         participating_edges=participating_edges,
@@ -95,7 +102,22 @@ def committed_round_to_audit_package(
     valid_state_payload = committed_round.get("consensused_valid_state")
     valid_state = None
     if valid_state_payload is not None:
+        sources = valid_state_payload['source_edges']
+        excluded = {entry.edge_id for entry in exclusions}
+        if (len(set(sources)) != len(sources) or len(sources) < required_quorum(len(participating_edges))
+                or not set(sources).issubset(set(participating_edges)-excluded)):
+            raise ValueError('Committed current sources must satisfy quorum and exclusion rules.')
+        by_edge = {s.owner_edge_id: s for s in round_input.replicated_states}
+        reference = by_edge[sources[0]].observations_by_sensor
+        currents = valid_state_payload['sensor_values']
+        if set(currents) != set(reference):
+            raise ValueError('Committed current schema differs from the source.')
+        for edge in sources:
+            observations = by_edge[edge].observations_by_sensor
+            if set(observations) != set(reference) or any(not same_observation(reference[name], observations[name]) or currents[name] != raw_current(observations[name]) for name in reference):
+                raise ValueError('Committed currents must retain the agreed acquired observations.')
         valid_state = ConsensusedValidState(
+            measurement_domain=valid_state_payload['measurement_domain'],
             round_identity=round_identity,
             source_edges=tuple(valid_state_payload["source_edges"]),
             sensor_values={

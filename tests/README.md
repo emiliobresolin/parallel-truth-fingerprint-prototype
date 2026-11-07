@@ -1,5 +1,10 @@
 # Tests
 
-This folder is reserved for structural, service-level, and integration tests added in later stories.
+```powershell
+$env:PYTHONPATH='src'
+.\.venv\Scripts\python.exe -m unittest discover -s tests
+```
 
-No business-logic tests are implemented in Story 1.1.
+Contract and service tests use local fixtures. Runtime smoke tests require the
+corresponding optional dependencies and explicit environment configuration.
+Go tests run under `abci/consensus_app` with `go test ./...`.

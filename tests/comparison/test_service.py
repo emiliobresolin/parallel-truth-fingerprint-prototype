@@ -22,9 +22,9 @@ from tests.persistence.test_service import build_valid_audit_package
 def build_valid_state(
     *,
     round_id: str = "round-200",
-    temperature: float = 72.5,
-    pressure: float = 5.3,
-    rpm: float = 3120.0,
+    temperature: float = 12.5,
+    pressure: float = 10.3,
+    rpm: float = 14.0,
 ) -> ConsensusedValidState:
     ended_at = datetime(2026, 4, 1, 13, 0, 0, tzinfo=timezone.utc)
     return ConsensusedValidState(
@@ -80,7 +80,7 @@ class ScadaComparisonServiceTests(unittest.TestCase):
         self.assertFalse(result.all_within_tolerance)
         self.assertTrue(by_sensor["temperature"].within_tolerance)
         self.assertFalse(by_sensor["pressure"].within_tolerance)
-        self.assertEqual(by_sensor["pressure"].absolute_difference, 0.9)
+        self.assertAlmostEqual(by_sensor["pressure"].absolute_difference, 0.9)
         self.assertEqual(by_sensor["pressure"].tolerance, 0.3)
 
     def test_contextual_evidence_is_attached_but_not_decision_driving(self) -> None:

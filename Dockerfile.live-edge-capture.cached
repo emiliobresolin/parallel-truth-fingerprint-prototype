@@ -1,0 +1,8 @@
+# Reuse the frozen local Python/dependency environment; replace runtime sources.
+FROM ptfp-current-capture-base:20261028
+WORKDIR /workspace
+COPY src ./src
+COPY scripts/run_local_demo.py ./scripts/run_local_demo.py
+ENV PYTHONPATH=/workspace/src
+ENV KERAS_BACKEND=torch
+ENTRYPOINT ["strace", "-ff", "-ttt", "-s", "256", "-o", "/captures/edge-syscalls", "python", "scripts/run_local_demo.py"]

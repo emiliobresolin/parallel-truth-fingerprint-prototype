@@ -147,9 +147,10 @@ def inject_faults(round_input: ConsensusRoundInput, config) -> ConsensusRoundInp
 
     offsets_by_edge = {
         edge_id: {
-            "temperature": 40.0 if index % 2 == 0 else -60.0,
-            "pressure": 3.4 if index % 2 == 0 else -5.0,
-            "rpm": 1490.0 if index % 2 == 0 else -2300.0,
+            "temperature": 1.0 if index % 2 == 0 else -1.0,
+            "pressure": 1.0 if index % 2 == 0 else -1.0,
+            "rpm": 1.0 if index % 2 == 0 else -1.0,
+            "mass_flow": 1.0 if index % 2 == 0 else -1.0,
         }
         for index, edge_id in enumerate(faulty_edges)
     }
@@ -163,11 +164,8 @@ def inject_faults(round_input: ConsensusRoundInput, config) -> ConsensusRoundInp
         offsets = offsets_by_edge[state.owner_edge_id]
         mutated_observations = {}
         for sensor_name, payload in state.observations_by_sensor.items():
-            mutated_pv = replace(
-                payload.process_data.pv,
-                value=round(payload.process_data.pv.value + offsets[sensor_name], 3),
-            )
-            mutated_process_data = replace(payload.process_data, pv=mutated_pv)
+            mutated_process_data = replace(payload.process_data,
+                loop_current_ma=payload.process_data.loop_current_ma + offsets[sensor_name])
             mutated_observations[sensor_name] = replace(
                 payload,
                 process_data=mutated_process_data,
@@ -890,7 +888,7 @@ def build_demo_artifact_store(config) -> MinioArtifactStore:
     )
 
 
-def build_demo_runtime_components(config) -> dict[str, object]:
+def build_demo_runtime_components(config, *, edge_count=4) -> dict[str, object]:
     """Build the local runtime components for CLI or dashboard control."""
 
     simulator = CompressorSimulator(seed=101)
@@ -899,6 +897,14 @@ def build_demo_runtime_components(config) -> dict[str, object]:
         PressureEdgeService(),
         RpmEdgeService(),
     ]
+    if edge_count not in (3, 4):
+        raise ValueError('Supported acquisition topologies contain three or four edges.')
+    if edge_count == 4:
+        from parallel_truth_fingerprint.edge_nodes.edge_4.service import MassFlowEdgeService
+        from parallel_truth_fingerprint.sensor_simulation.mass_flow import MassFlowCompressorSimulator
+        simulator = MassFlowCompressorSimulator(modulated=False,
+            sample_seconds=config.demo_cycle_interval_seconds/config.demo_steps, seed=101)
+        edges.append(MassFlowEdgeService())
     transports = []
     if config.mqtt_transport == "passive":
         shared_transport = create_transport(
@@ -906,7 +912,7 @@ def build_demo_runtime_components(config) -> dict[str, object]:
             host=config.mqtt_broker_host,
             port=config.mqtt_broker_port,
         )
-        transports = [shared_transport, shared_transport, shared_transport]
+        transports = [shared_transport for _ in edges]
     else:
         transports = [
             create_transport(
@@ -926,7 +932,8 @@ def build_demo_runtime_components(config) -> dict[str, object]:
         "edges": edges,
         "cometbft_client": CometBftRpcClient(config.cometbft_rpc_url),
         "artifact_store": build_demo_artifact_store(config),
-        "scada_service": FakeOpcUaScadaService(compressor_id="compressor-1"),
+        "scada_service": FakeOpcUaScadaService(compressor_id="compressor-1",
+            sensor_names=('temperature','pressure','rpm','mass_flow') if edge_count == 4 else ('temperature','pressure','rpm')),
     }
 
 

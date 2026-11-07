@@ -13,3 +13,6 @@ dataset-tools = ["kaggle>=2,<3"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.setuptools.package-data]
+"parallel_truth_fingerprint.sensor_simulation" = ["generic_plant_config.json"]

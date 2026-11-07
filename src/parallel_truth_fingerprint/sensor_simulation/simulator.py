@@ -15,6 +15,9 @@ from parallel_truth_fingerprint.config.ranges import (
     SensorRange,
 )
 from parallel_truth_fingerprint.sensor_simulation.behavior_model import clamp
+from parallel_truth_fingerprint.sensor_simulation.current_noise import (
+    SampledCurrentNoise, noise_configuration, noise_rms_ma,
+)
 from parallel_truth_fingerprint.sensor_simulation.normal_profiles import (
     default_compressor_profile,
 )
@@ -108,6 +111,7 @@ class CompressorSimulator:
     ) -> None:
         self.profile = profile or default_compressor_profile()
         self._rng = random.Random(seed)
+        self._current_noise = SampledCurrentNoise(seed)
         self._step_index = 0
         self._control = SimulationControl()
 
@@ -122,7 +126,7 @@ class CompressorSimulator:
         current_noise_multiplier: float = 1.0,
     ) -> None:
         """Adjust electrical input without bypassing the normal data flow."""
-
+        noise_rms_ma(current_noise_multiplier)
         resolved_offset = (
             operating_state_offset if operating_state_offset is not None else power_offset or 0.0
         )
@@ -171,7 +175,9 @@ class CompressorSimulator:
             metadata={
                 "step": self._step_index,
                 "input_domain": "loop_current_ma",
-                "current_noise_ma": round(current_noise_ma, 4),
+                "current_noise_ma": current_noise_ma,
+                "current_noise_statistic": "pre-saturation RMS, mA",
+                "current_noise_configuration": noise_configuration(),
                 "hidden_process_state": {
                     "driver": "compressor_load_pct",
                     "operating_state_pct": round(effective_operating_state, 3),
@@ -213,30 +219,21 @@ class CompressorSimulator:
         base_current = LOOP_CURRENT_MIN_MA + (
             (LOOP_CURRENT_MAX_MA - LOOP_CURRENT_MIN_MA) * state_ratio
         )
-        # This acquisition jitter is an explicit prototype electrical policy,
-        # not a claim about a public benchmark or a physical compressor.
-        current_noise_ma = (
-            0.0
-            if state_ratio in {0.0, 1.0}
-            else (0.02 + (0.08 * state_ratio)) * self._control.current_noise_multiplier
-        )
+        current_noise_ma = noise_rms_ma(self._control.current_noise_multiplier)
         biases = {
             "temperature": self._control.temperature_current_bias_ma,
             "pressure": self._control.pressure_current_bias_ma,
             "rpm": self._control.rpm_current_bias_ma,
         }
         currents = {
-            sensor_name: round(
-                max(
+            sensor_name: max(
                     LOOP_CURRENT_MIN_MA,
                     min(
                         LOOP_CURRENT_MAX_MA,
                         base_current
                         + bias
-                        + self._rng.uniform(-current_noise_ma, current_noise_ma),
+                        + self._current_noise.sample_ma(sensor_name, multiplier=self._control.current_noise_multiplier),
                     ),
-                ),
-                3,
             )
             for sensor_name, bias in biases.items()
         }

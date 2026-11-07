@@ -1,0 +1,148 @@
+{
+  "date": "2026-11-02",
+  "status": "proposal only; parameters not activated",
+  "archived": [
+    {
+      "id": "DOE-CAC-SOURCEBOOK-3",
+      "path": "docs/reference-archive/documents/DOE_CAC_Compressed_Air_Sourcebook_3rd_Edition.pdf",
+      "url": "https://www.compressedairchallenge.org/data/sites/1/media/library/sourcebook/Improving_Compressed_Air-Sourcebook.pdf",
+      "locator": "Third edition; DOE/EE-1340; storage printed pp43-44",
+      "year_verified_by": "https://www.govinfo.gov/app/details/GOVPUB-E-PURL-gpo176573",
+      "provenance": "government/coauthor publication",
+      "sha256": "ecf69bc0b8fee4157187deb38c2502ee52de5bdb5e3acb8a1300c190cc9cc3de",
+      "bytes": 2376295,
+      "pdf_pages": 114
+    },
+    {
+      "id": "VIBROTECH-SV3300-2021",
+      "path": "docs/reference-archive/documents/VibroTech_SV3300_Proximity_Products_05-2021_Vibcon_mirror.pdf",
+      "url": "https://vibconinc.com/wp-content/uploads/2022/04/SV3300-Proximity-Products-05-2021.pdf",
+      "locator": "PDF pp4,7: SVT lower range zero; upper range 120..100000rpm; HART; configuration",
+      "provenance": "manufacturer-authored primary document hosted by Vibcon, not original manufacturer domain",
+      "sha256": "c4de8cffd0faf5b7577b9f593af4aaf22997aec4625cce6cbbf534ca9440a180",
+      "bytes": 395197,
+      "pdf_pages": 8
+    },
+    {
+      "id": "SIEMENS-TH-FCG-2022",
+      "path": "docs/reference-archive/documents/Siemens_TH320_TH420_FieldComm_2A2F02_2022.pdf",
+      "url": "https://cache.industry.siemens.com/dl/files/674/109815674/att_1124858/v1/2A2F02_cert.pdf",
+      "locator": "Registration certificate manufacturer 002A, expanded type 2A2F; issued 2022-12-05",
+      "provenance": "registration certificate hosted by manufacturer",
+      "sha256": "585b0cc6475cf1071521d18809d7dfc1cf4876c5cc6879bce1f140d45032642d",
+      "bytes": 127534,
+      "pdf_pages": 1
+    },
+    {
+      "id": "SIEMENS-P320-FCG-2024",
+      "path": "docs/reference-archive/documents/Siemens_P320_FieldComm_2A3D03_2024.pdf",
+      "url": "https://cache.industry.siemens.com/dl/files/623/109971623/att_1285879/v1/2A3D03_-_FCG_device_registration_certificate__HART_.pdf",
+      "locator": "Registration certificate 002A/2A3D HART device revision03; issued2024-01-30",
+      "provenance": "registration certificate hosted by manufacturer",
+      "sha256": "67ed1e8f8d82bdb810dce37d6af5c9d240c15224c48fb02e625017651fe57406",
+      "bytes": 128249,
+      "pdf_pages": 1
+    },
+    {
+      "id": "SIEMENS-P320-HART-2024",
+      "path": "docs/reference-archive/documents/Siemens_SITRANS_P320_P420_HART_A5E44852162-AF_2024-03_EN.pdf",
+      "url": "https://cache.industry.siemens.com/dl/files/273/109955273/att_1267115/v1/A5E44852162en_P320P420_HART_OI_en-US.pdf",
+      "locator": "pp114 damping; pp217-218 gauge pressure cell/span",
+      "provenance": "reused manufacturer archive",
+      "sha256": "e667aa9f9d5cccdf98eaa02f445ff640c773122871cca6d70a6498bd192e5d9c",
+      "bytes": 9863732,
+      "pdf_pages": 300
+    },
+    {
+      "id": "SIEMENS-TH-HART-AC",
+      "path": "docs/reference-archive/documents/Siemens_SITRANS_TH320420_HART_OI_A5E41864807-AC_EN.pdf",
+      "url": "https://cache.industry.siemens.com/dl/files/149/109793149/att_1053674/v1/A5E41864807-ACen_TH320420_TR320420_TF320420_HART_OI_en-US.pdf",
+      "locator": "pp151 damping; p203 RTD range/span",
+      "provenance": "reused manufacturer archive",
+      "sha256": "c04b0b47580d15fa0addbc197c350a6c1c09f33406e77733c7620d430a11af7c",
+      "bytes": 11728491,
+      "pdf_pages": 236
+    },
+    {
+      "id": "E+H-FLOW-2023",
+      "path": "docs/reference-archive/documents/EndressHauser_t-mass_F300_HART_BA01992DEN_0323-00.pdf",
+      "url": "https://bdih-download.endress.com/file/9bf358f8845b222e0c1c5d9b8b0573bf/BA01992DEN_0323-00.pdf",
+      "locator": "pp71-74 HART; p91 damping; pp170-171 air calibration range",
+      "provenance": "reused manufacturer archive",
+      "sha256": "f7fd51195abcc8b2c427c067835d59dd2a985b0e5cfb5fdba4f16a4cd2b9d37d",
+      "bytes": 8100171,
+      "pdf_pages": 206
+    },
+    {
+      "id": "SCHMIDT-KISSOCK-2005",
+      "path": "docs/reference-archive/documents/ACEEE_Schmidt_Kissock_2005_Modeling_Simulation_Air_Compressor_Energy_Use.pdf",
+      "url": "https://www.aceee.org/files/proceedings/2005/data/papers/SS05_Panel01_Paper13.pdf",
+      "locator": "Printed pp1-137..1-138; mass balance, storage and proportional controller eq14",
+      "provenance": "reused conference archive",
+      "sha256": "541b38195321f47a582b959dd910464a9a4e74f3c7885553e790af61eea30986",
+      "bytes": 809070,
+      "pdf_pages": 12
+    }
+  ],
+  "online_only": [
+    {
+      "id": "MATHWORKS-GAS-DOMAIN",
+      "url": "https://www.mathworks.com/help/simscape/lang/gas-domain.html",
+      "access": "web full page; local HTML not archived",
+      "use": "perfect gas cp/cv/R reference set"
+    },
+    {
+      "id": "MATHWORKS-PD-COMPRESSOR",
+      "url": "https://www.mathworks.com/help/hydro/ref/positivedisplacementcompressorg.html",
+      "access": "previous web consultation; no local HTML",
+      "use": "ideal displacement/flow/speed structure"
+    },
+    {
+      "id": "ORNL-MEASUR-STORAGE",
+      "url": "https://industrialresources.ornl.gov/measur/suite/docs/group__receiver__tank__metered__storage__size__formula",
+      "access": "web full page",
+      "use": "net deficit and replenishment storage sizing; isothermal reference separated from final adiabatic calculation"
+    },
+    {
+      "id": "FCG-SV3300-2026",
+      "url": "https://www.fieldcommgroup.org/old-registered-products/e6a7d0eb-3fce-e811-8156-e0071b6af231",
+      "access": "official search-index content read; direct open cache miss and local HTTP403",
+      "use": "registered HART SVT functionality and manufacturer/type IDs"
+    },
+    {
+      "id": "VIBROTECH-SV3300-PRODUCT",
+      "url": "https://en.vibrotech.cn/products-details/1332399801388011520.html",
+      "access": "web full page; local HTTP403",
+      "use": "manufacturer application and product family"
+    },
+    {
+      "id": "SIEMENS-TS500-2020",
+      "url": "https://support.industry.siemens.com/cs/attachments/109781321/A5E47810090-AAen_TS_OI_en-US.pdf",
+      "access": "indexed official manual excerpt p22; local HTTP403",
+      "use": "TS500/TH320 HART assembly compatibility"
+    },
+    {
+      "id": "SIEMENS-TS500-PRODUCT",
+      "url": "https://www.siemens.com/de-de/products/sitrans/ts500/",
+      "access": "official indexed product information",
+      "use": "Pt100 and TH320 HART options"
+    },
+    {
+      "id": "ATLAS-RECEIVER-2020",
+      "url": "https://www.atlascopco.com/en-uk/compressors/air-compressor-blog/what-is-an-air-receiver",
+      "access": "web full page",
+      "numeric_rule_used": false,
+      "reason": "published gallon/CFM and liter/(liter/s) ranges are not equivalent; replaced by explicit reserve sizing"
+    }
+  ],
+  "other_retrievals": [
+    {
+      "url": "https://www1.eere.energy.gov/manufacturing/tech_assistance/pdfs/compressed_air_sourcebook.pdf",
+      "result": "Python SSL certificate verification failed; web read second-edition bibliographic data; checks not disabled"
+    },
+    {
+      "url": "https://www.cagi.org/assets/documents/pdfs/handbook/Chapter%204%20handbook_Final2021.pdf?updated=1659534959",
+      "result": "HTTP505; full text not retrieved or selected"
+    }
+  ]
+}

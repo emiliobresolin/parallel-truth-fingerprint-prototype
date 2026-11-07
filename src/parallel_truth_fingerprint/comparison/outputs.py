@@ -37,6 +37,8 @@ def build_scada_comparison_output(
                     else ScadaDivergenceClassification.DIVERGENT
                 ),
                 contextual_evidence=item.contextual_evidence,
+                unit=item.unit,
+                measurement_domain=item.measurement_domain,
             )
         )
 

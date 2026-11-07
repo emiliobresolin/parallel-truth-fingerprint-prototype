@@ -87,7 +87,7 @@ class EdgeAcquisitionServicesTest(unittest.TestCase):
         self.assertIsNone(rpm_payload.process_data.sv)
         self.assertNotIn("sv", rpm_payload.to_dict()["process_data"])
 
-    def test_payload_preserves_temporal_and_physics_context_for_replay_checks(self) -> None:
+    def test_payload_preserves_acquired_current_without_inventing_physics_metrics(self) -> None:
         edge_service = TemperatureEdgeService()
 
         first_payload = edge_service.acquire(snapshot=self.snapshot)
@@ -95,8 +95,9 @@ class EdgeAcquisitionServicesTest(unittest.TestCase):
 
         self.assertNotEqual(first_payload.timestamp, second_payload.timestamp)
         self.assertIn("T", first_payload.timestamp)
-        self.assertEqual(second_payload.process_data.physics_metrics.rate_of_change_dtdt, 0.0)
-        self.assertIn("noise_floor", second_payload.to_dict()["process_data"]["physics_metrics"])
+        self.assertIsNone(second_payload.process_data.physics_metrics)
+        self.assertEqual(second_payload.process_data.loop_current_ma,
+                         self.snapshot.transmitter_observations['temperature'].loop_current_ma)
 
 
 if __name__ == "__main__":

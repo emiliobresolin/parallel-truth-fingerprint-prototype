@@ -24,6 +24,7 @@ class CurrentDomainRuntimeContractTests(unittest.TestCase):
         self.assertEqual(DEFAULT_COMPRESSOR_PROFILE.rpm.minimum, projection["selected_minimum_rpm"])
         self.assertEqual(DEFAULT_COMPRESSOR_PROFILE.rpm.maximum, projection["selected_maximum_rpm"])
         simulator = CompressorSimulator(seed=1)
+        simulator.set_control_hook(current_noise_multiplier=0)
         low = simulator.step(operating_state_pct=0).transmitter_observations["rpm"]
         high = simulator.step(operating_state_pct=100).transmitter_observations["rpm"]
         self.assertEqual(low.loop_current_ma, 4.0)

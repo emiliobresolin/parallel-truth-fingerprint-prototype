@@ -19,7 +19,6 @@ from parallel_truth_fingerprint.contracts.edge_local_replicated_state import (
 from parallel_truth_fingerprint.contracts.raw_hart_payload import (
     DeviceInfo,
     Diagnostics,
-    PhysicsMetrics,
     ProcessData,
     ProcessVariable,
     RawHartPayload,
@@ -102,11 +101,6 @@ EDGE_DEVICE_CONFIGS: dict[str, EdgeDeviceConfig] = {
 }
 
 
-def _stability_score(rate_of_change: float, noise_floor: float) -> float:
-    score = 1.0 - min(0.95, abs(rate_of_change) * 0.015 + noise_floor * 0.1)
-    return round(max(0.0, score), 3)
-
-
 class EdgeAcquisitionService:
     """Acquire a single local sensor and emit a raw HART-style payload.
 
@@ -174,17 +168,14 @@ class EdgeAcquisitionService:
         pv_value = round(transmitter_observation.pv.value, 3)
         percent_range = transmitter_observation.pv_percent_range
         loop_current = transmitter_observation.loop_current_ma
-        rate_of_change = 0.0
-        if self._runtime.previous_pv is not None:
-            rate_of_change = round(pv_value - self._runtime.previous_pv, 3)
-
-        noise_floor = round(float(reading.metadata.get("noise_level", 0.0)), 3)
-        physics_metrics = PhysicsMetrics(
-            noise_floor=noise_floor,
-            rate_of_change_dtdt=rate_of_change,
-            local_stability_score=_stability_score(rate_of_change, noise_floor),
-        )
-
+        cold_start_flags = reading.metadata.get('device_cold_start_by_sensor')
+        if cold_start_flags is not None:
+            if (not isinstance(cold_start_flags, dict)
+                    or set(cold_start_flags) != set(reading.transmitter_observations)
+                    or any(type(value) is not bool for value in cold_start_flags.values())):
+                raise ValueError('Explicit transmitter startup flags must cover actual sensors with booleans.')
+        cold_start = (cold_start_flags[self.device_config.sensor_name]
+                      if cold_start_flags is not None else self._runtime.acquisition_count == 0)
         # The payload is the digital representation of the interpreted
         # physical measurement at the edge acquisition boundary.
         payload = RawHartPayload(
@@ -207,13 +198,13 @@ class EdgeAcquisitionService:
                 sv=self._payload_secondary_variable(transmitter_observation.sv),
                 loop_current_ma=loop_current,
                 pv_percent_range=percent_range,
-                physics_metrics=physics_metrics,
+                physics_metrics=None,
             ),
             diagnostics=Diagnostics(
                 device_status_hex=transmitter_observation.diagnostics.device_status_hex,
                 field_device_malfunction=transmitter_observation.diagnostics.field_device_malfunction,
                 loop_current_saturated=transmitter_observation.diagnostics.loop_current_saturated,
-                cold_start=self._runtime.acquisition_count == 0,
+                cold_start=cold_start,
             ),
         )
 

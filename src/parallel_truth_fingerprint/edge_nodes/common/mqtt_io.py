@@ -42,7 +42,7 @@ def deserialize_payload(payload_text: str) -> RawHartPayload:
     data = json.loads(payload_text)
     process_data = data["process_data"]
     diagnostics = data["diagnostics"]
-    physics_metrics = process_data["physics_metrics"]
+    physics_metrics = process_data.get("physics_metrics")
 
     return RawHartPayload(
         protocol=data["protocol"],
@@ -58,7 +58,7 @@ def deserialize_payload(payload_text: str) -> RawHartPayload:
             ),
             loop_current_ma=process_data["loop_current_ma"],
             pv_percent_range=process_data["pv_percent_range"],
-            physics_metrics=PhysicsMetrics(**physics_metrics),
+            physics_metrics=PhysicsMetrics(**physics_metrics) if physics_metrics is not None else None,
         ),
         diagnostics=Diagnostics(**diagnostics),
     )

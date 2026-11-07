@@ -1,6 +1,13 @@
 package app
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type RoundInputTx struct {
+	SchemaVersion      string            `json:"schema_version"`
+	MeasurementDomain  string            `json:"measurement_domain"`
 	RoundID            string            `json:"round_id"`
 	WindowStartedAt    string            `json:"window_started_at"`
 	WindowEndedAt      string            `json:"window_ended_at"`
@@ -14,8 +21,27 @@ type ReplicatedState struct {
 }
 
 type SensorValue struct {
-	Value float64 `json:"value"`
-	Unit  string  `json:"unit"`
+	SourceEventID string  `json:"source_event_id,omitempty"`
+	Value         float64 `json:"value"`
+	Unit          string  `json:"unit"`
+}
+
+// UnmarshalJSON distinguishes an acquired zero from an absent/null observation.
+// Programmatic literals remain valid; only the wire requires numeric presence.
+func (value *SensorValue) UnmarshalJSON(raw []byte) error {
+	var wire struct {
+		Value         *float64 `json:"value"`
+		Unit          string   `json:"unit"`
+		SourceEventID string   `json:"source_event_id"`
+	}
+	if err := json.Unmarshal(raw, &wire); err != nil {
+		return err
+	}
+	if wire.Value == nil {
+		return fmt.Errorf("acquired current value must be a present nonnull number")
+	}
+	*value = SensorValue{Value: *wire.Value, Unit: wire.Unit, SourceEventID: wire.SourceEventID}
+	return nil
 }
 
 type TrustRankEntry struct {
@@ -52,11 +78,14 @@ type PerEdgeTrustEvidence struct {
 }
 
 type ConsensusedValidState struct {
-	SourceEdges  []string           `json:"source_edges"`
-	SensorValues map[string]float64 `json:"sensor_values"`
+	MeasurementDomain string             `json:"measurement_domain,omitempty"`
+	SourceEdges       []string           `json:"source_edges"`
+	SensorValues      map[string]float64 `json:"sensor_values"`
 }
 
 type CommittedRound struct {
+	SchemaVersion         string                 `json:"schema_version,omitempty"`
+	MeasurementDomain     string                 `json:"measurement_domain,omitempty"`
 	RoundID               string                 `json:"round_id"`
 	WindowStartedAt       string                 `json:"window_started_at"`
 	WindowEndedAt         string                 `json:"window_ended_at"`

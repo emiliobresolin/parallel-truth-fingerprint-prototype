@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-02",
+  "status": "documentary proposal; no runtime changes",
+  "sources": [
+    {
+      "path": "docs\\reference-archive\\documents\\ACEEE_Schmidt_Kissock_2005_Modeling_Simulation_Air_Compressor_Energy_Use.pdf",
+      "bytes": 809070,
+      "sha256": "541b38195321f47a582b959dd910464a9a4e74f3c7885553e790af61eea30986"
+    },
+    {
+      "path": "docs\\reference-archive\\documents\\Chukanova_Stosic_Kovacevic_2013_Screw_Compressor_Plant_Dynamics.pdf",
+      "bytes": 1013686,
+      "sha256": "22740b5fbef7beae775dfe8542295178af4e6248c83f8c5701b98717f55f328e"
+    },
+    {
+      "path": "docs\\reference-archive\\documents\\Bezold_et_al_2025_arXiv_2512.18317v1_Compressed_Air_Control.pdf",
+      "bytes": 1564375,
+      "sha256": "3d8c3fcd0a09aaf8617b14a2dfc537f750e10fa12561ad236c92aadcfaaf3458"
+    }
+  ]
+}

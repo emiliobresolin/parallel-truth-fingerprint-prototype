@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-02",
+  "status": "research proposal; measurement point change pending; no runtime changes",
+  "archived": [
+    {
+      "path": "docs/reference-archive/documents/Husak_et_al_2019_Screw_Compressor_Thermal_Analysis.pdf",
+      "url": "https://openaccess.city.ac.uk/23341/1/Husak_2019_IOP_Conf._Ser.__Mater._Sci._Eng._604_012001.pdf",
+      "bytes": 4820194,
+      "sha256": "bcc5452436c26dc33628835be08c6cd407e0dc225889dae61313435cbd192ff1"
+    },
+    {
+      "path": "docs/reference-archive/documents/Sauls_Powell_Weathers_2006_Transient_Thermal_Part_I_VDI.pdf",
+      "url": "https://ft.mb.tu-dortmund.de/storages/ft-mb/r/Publikationen/ICSM/2006/Sauls__Powell_et_al._2006_-_Transient_Thermal_Analysis_of_Screw__1_.pdf",
+      "bytes": 1117382,
+      "sha256": "378314f9ea5d75f4abd2f6526c7eb1ff34f6384f7238906a1083d641cb058f6d"
+    }
+  ],
+  "online_only": [
+    {
+      "url": "https://www.mathworks.com/help/hydro/ref/positivedisplacementcompressorg.html",
+      "local_download": "HTTP 403; read via web tool"
+    },
+    {
+      "url": "https://www.mathworks.com/help/simscape/ref/constantvolumechamberg.html",
+      "local_download": "HTTP 403; read via web tool"
+    },
+    {
+      "url": "https://us.kaeser.com/compressed-air-resources/kaeser-talks-shop/choosing-between-air-cooled-water-cooled-compressors.aspx",
+      "local_download": "certificate verification failed; read via web tool; certificate checks retained"
+    }
+  ],
+  "partial_candidate": {
+    "doi": "10.1016/j.mechatronics.2010.08.004",
+    "access": "indexed editorial excerpts only; full text and parameter table not retrieved"
+  },
+  "atlas_manual_attempt": {
+    "url": "https://www.atlascopco.com/content/dam/atlas-copco/local-countries/greece/documents/mechanical-electrical-contractors/Compressed%20Air%20Manual%209th%20edition1.pdf",
+    "local_download": "HTTP 403; no file archived"
+  }
+}

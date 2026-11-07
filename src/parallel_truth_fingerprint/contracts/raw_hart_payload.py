@@ -38,7 +38,7 @@ class ProcessData:
     sv: ProcessVariable | None
     loop_current_ma: float
     pv_percent_range: float
-    physics_metrics: PhysicsMetrics
+    physics_metrics: PhysicsMetrics | None = None
 
 
 @dataclass(frozen=True)

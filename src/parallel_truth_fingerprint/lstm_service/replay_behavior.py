@@ -52,17 +52,20 @@ def configure_scada_replay_runtime_stage(
 ) -> ScadaReplayRuntimeStage:
     """Configure the stateful fake SCADA service for one runtime cycle."""
 
-    scada_service.clear_overrides()
     mode = getattr(config, "demo_scada_mode", "match")
     start_cycle = getattr(config, "demo_scada_start_cycle", 0)
     if mode in {"none", "match"} or start_cycle <= 0 or cycle_index < start_cycle:
+        scada_service.clear_overrides()
         return ScadaReplayRuntimeStage(active=False, mode="match", start_cycle=start_cycle)
+
+    if mode != "freeze":
+        scada_service.clear_overrides()
 
     replay_source_round_id = None
     if mode == "replay" and scada_service.history():
         replay_source_round_id = scada_service.history()[0].source_round_id
 
-    for sensor_name in SUPPORTED_SCADA_SENSORS:
+    for sensor_name in scada_service.sensor_names:
         if mode == "freeze":
             scada_service.set_sensor_override(sensor_name, mode="freeze")
         elif mode == "replay":
@@ -279,8 +282,8 @@ def extract_scada_behavioral_feature_vector(
         )
         feature_values.extend(
             [
-                float(behavioral_state.loop_current_ma or 0.0),
-                (float(behavioral_state.loop_current_ma or 0.0) - 4.0) / 16.0,
+                _required_current(behavioral_state.loop_current_ma),
+                (_required_current(behavioral_state.loop_current_ma) - 4.0) / 16.0,
                 _bool_to_float(bool(behavioral_state.field_device_malfunction)),
                 _bool_to_float(bool(behavioral_state.loop_current_saturated)),
                 _bool_to_float(bool(behavioral_state.cold_start)),
@@ -309,12 +312,14 @@ def _build_scada_state_artifact_key(
 def _resolve_scada_offset(sensor_name: str, config) -> float:
     """Return a simple demo-safe SCADA offset for divergence scenarios."""
 
-    base_offset = float(getattr(config, "demo_scada_offset_value", 6.0))
-    if sensor_name == "temperature":
-        return round(base_offset, 3)
-    if sensor_name == "pressure":
-        return round(base_offset / 10.0, 3)
-    return round(base_offset * 50.0, 3)
+    return float(getattr(config, "demo_scada_offset_value", 1.0))
+
+
+def _required_current(value):
+    import math
+    if value is None or not math.isfinite(float(value)):
+        raise ValueError('Finite supervisory current is required; no PV substitution is permitted.')
+    return float(value)
 
 
 def _bool_to_float(value: bool) -> float:

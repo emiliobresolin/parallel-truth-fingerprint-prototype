@@ -2,8 +2,8 @@
 
 
 def required_quorum(participant_count: int) -> int:
-    """Return the strict majority quorum."""
+    """Return strictly more than two thirds of equal-power participants."""
 
     if participant_count <= 0:
         raise ValueError("Participant count must be positive.")
-    return (participant_count // 2) + 1
+    return (2 * participant_count // 3) + 1

@@ -1,0 +1,172 @@
+{
+  "plant": {
+    "topology": "equivalent variable-speed positive-displacement production -> conditioned dry-air inlet -> receiver -> FIT101 -> consumption",
+    "gas": {
+      "model": "perfect_dry_constant_specific_heats",
+      "cp_j_kg_k": 1000,
+      "cv_j_kg_k": 713,
+      "R_j_kg_k": 287,
+      "source": "MATHWORKS-GAS-DOMAIN",
+      "classification": "documented_reference_property_set"
+    },
+    "atmosphere": {
+      "pressure_pa": 101325,
+      "reference_temperature_k": 293.15,
+      "classification": "selected_reference_conditions"
+    },
+    "inlet": {
+      "temperature_k": 303.15,
+      "nominal_mass_flow_kg_h": 1000,
+      "classification": "experimental_boundary_and_capacity_selection"
+    },
+    "receiver": {
+      "volume_m3": 6,
+      "wall_heat_flow_w": 0,
+      "thermal_boundary": "explicit_adiabatic_reference_case",
+      "classification": "sized_volume_and_selected_idealization"
+    },
+    "production": {
+      "model": "ideal_fixed_displacement",
+      "volumetric_efficiency": 1,
+      "nominal_rpm": 5000,
+      "classification": "ideal_model_and_experimental_scale",
+      "equation": "qin = rho_ref * displacement_m3_per_rev * rpm / 60; displacement derived from nominal capacity"
+    },
+    "control": {
+      "model": "bounded_proportional_pressure_capacity",
+      "source": "SCHMIDT-KISSOCK-2005 eq14",
+      "low_gauge_pa": 650000,
+      "high_gauge_pa": 750000,
+      "min_rpm": 500,
+      "max_rpm": 5000,
+      "equation": "u=clamp((high-pg)/(high-low),0.1,1); rpm=5000*u",
+      "classification": "published_structure_with_selected_band_limits"
+    },
+    "demand": {
+      "low_pct": 50,
+      "high_pct": 75,
+      "sinusoidal_amplitude_percentage_points": 5,
+      "sinusoidal_period_seconds": 120,
+      "ramp_seconds": 60,
+      "classification": "experimental_excitation_selection"
+    },
+    "initial_state": {
+      "demand_pct": 50,
+      "pressure_gauge_pa": 700000,
+      "temperature_k": 303.15,
+      "initialization": "complete equilibrium; derive mass and energy from selected gas/volume; initialize instrument filters consistently"
+    },
+    "sizing_criterion": {
+      "initial_pressure_gauge_pa": 700000,
+      "minimum_final_pressure_gauge_pa": 650000,
+      "duration_seconds": 30,
+      "inlet_mass_flow_kg_h": 500,
+      "outlet_mass_flow_kg_h": 750,
+      "inlet_temperature_k": 303.15,
+      "wall_heat_flow_w": 0,
+      "classification": "selected_reserve_requirement; fixed flows for sizing only; not motor response time",
+      "verification": "analytic mass-energy component; not acquisition or detector experiment"
+    },
+    "eligibility": {
+      "relative_mass_energy_tolerance": 1e-08,
+      "comparison_window_seconds": 120,
+      "consecutive_comparable_windows": 2,
+      "max_preconditioning_windows": 200,
+      "periodic_comparison": "complete trajectories at matching demand phases",
+      "classification": "selected_numerical_convergence_controls_not_instrument_accuracy_or_attack_threshold"
+    },
+    "cadence_proposal": {
+      "acquisition_seconds": 5,
+      "requires_step_refinement_check": true,
+      "initial_substeps": 3,
+      "refinement_factor": 2,
+      "maximum_selected_substeps": 768,
+      "numerical_budget_ma": 0.000782,
+      "totalizer_equivalent_difference": "16*abs(delta_increment_kg)/(nominal_mass_flow_kg_s*acquisition_seconds)",
+      "selection": "normal deterministic forcing only; choose finer verified member; abort if no convergence"
+    }
+  },
+  "instruments": {
+    "TIT-101": {
+      "reference": "SITRANS TS500 Pt100 with TH320 HART",
+      "point": "receiver_gas",
+      "long_tag": "Temperature_Receiver_Air",
+      "wires": 3,
+      "lower_range": 0,
+      "upper_range": 100,
+      "unit": "degC",
+      "manufacturer_id_hex": "002A",
+      "device_type_hex": "2A2F",
+      "damping_seconds": 0,
+      "response_model": "ideal process reading; no identified probe/thermowell thermal lag",
+      "references": [
+        "SIEMENS-TS500-2020",
+        "SIEMENS-TH-HART-AC",
+        "SIEMENS-TH-FCG-2022"
+      ]
+    },
+    "PIT-101": {
+      "reference": "SITRANS P320 4-20mA/HART gauge pressure",
+      "point": "receiver",
+      "long_tag": "Pressure_Receiver_Gauge",
+      "nominal_cell_upper_bar": 16,
+      "lower_range": 0,
+      "upper_range": 10,
+      "unit": "bar_gauge",
+      "manufacturer_id_hex": "002A",
+      "device_type_hex": "2A3D",
+      "damping_seconds": 2,
+      "response_model": "declared first-order approximation for selected damping",
+      "references": [
+        "SIEMENS-P320-HART-2024",
+        "SIEMENS-P320-FCG-2024"
+      ]
+    },
+    "RIT-101": {
+      "reference": "VibroTech SV3300 SVT HART",
+      "point": "equivalent_compressor_shaft",
+      "long_tag": "Speed_Compressor_Shaft",
+      "lower_range": 0,
+      "upper_range": 5000,
+      "unit": "rpm",
+      "keyways": 1,
+      "probe_diameter_mm": 8,
+      "system_length_m": 5,
+      "manufacturer_id_hex": "006118",
+      "device_type_hex": "E43C",
+      "response_model": "quasi_static; no undocumented SVT damping assigned",
+      "references": [
+        "VIBROTECH-SV3300-2021",
+        "FCG-SV3300-2026"
+      ]
+    },
+    "FIT-101": {
+      "reference": "Endress+Hauser t-mass F300 HART DN65 SA air",
+      "point": "receiver_outlet_consumption",
+      "lower_range": 0,
+      "upper_range": 1000,
+      "unit": "kg/h",
+      "manufacturer_id_hex": "0011",
+      "device_type_hex": "1160",
+      "damping_seconds": 1,
+      "totalizer": {
+        "dynamic_variable": "SV",
+        "device_variable": 6,
+        "unit": "kg",
+        "source": "qout before analog damping and sampled electrical noise"
+      },
+      "references": [
+        "E+H-FLOW-2023"
+      ]
+    }
+  },
+  "invariants": {
+    "consensus_and_main_features": "loop current mA",
+    "additional_feature": "previously approved within-episode HART totalizer increment",
+    "rewrite_legacy_evidence": false,
+    "undocumented_legacy_electronics_temperature_SVs": "remove from new profile",
+    "clamp_physical_states": false
+  },
+  "model": "generic-receiver-plant-v1",
+  "collection_version": "documented-noise-generic-receiver-hart-v1"
+}

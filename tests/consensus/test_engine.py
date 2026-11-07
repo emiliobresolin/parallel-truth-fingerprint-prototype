@@ -20,7 +20,7 @@ from parallel_truth_fingerprint.consensus.engine import ConsensusEngine
 from parallel_truth_fingerprint.consensus.quorum import required_quorum
 
 
-def make_payload(tag: str, value: float, unit: str) -> RawHartPayload:
+def make_payload(tag: str, value: float, unit: str, current_ma: float = 12.0) -> RawHartPayload:
     return RawHartPayload(
         protocol="HART",
         gateway_id="GW",
@@ -34,7 +34,7 @@ def make_payload(tag: str, value: float, unit: str) -> RawHartPayload:
         process_data=ProcessData(
             pv=ProcessVariable(value=value, unit=unit),
             sv=ProcessVariable(value=65.0, unit="percent", description="Compressor_Power"),
-            loop_current_ma=12.0,
+            loop_current_ma=current_ma,
             pv_percent_range=50.0,
             physics_metrics=PhysicsMetrics(
                 noise_floor=0.1,
@@ -57,6 +57,7 @@ def make_replicated_state(
     temperature: float,
     pressure: float,
     rpm: float,
+    currents: tuple[float, float, float] = (12.0, 12.0, 12.0),
 ) -> EdgeLocalReplicatedStateContract:
     participants = ("edge-1", "edge-2", "edge-3")
     return EdgeLocalReplicatedStateContract(
@@ -64,162 +65,111 @@ def make_replicated_state(
         owner_edge_id=owner_edge_id,
         participating_edges=participants,
         observations_by_sensor={
-            "temperature": make_payload("TIT-101", temperature, "degC"),
-            "pressure": make_payload("PIT-101", pressure, "bar"),
-            "rpm": make_payload("RIT-101", rpm, "rpm"),
+            "temperature": make_payload("TIT-101", temperature, "degC", currents[0]),
+            "pressure": make_payload("PIT-101", pressure, "bar", currents[1]),
+            "rpm": make_payload("RIT-101", rpm, "rpm", currents[2]),
         },
         is_validated=False,
     )
 
 
 class ConsensusEngineTest(unittest.TestCase):
-    def setUp(self) -> None:
+    def setUp(self):
         start = datetime(2026, 3, 25, 12, 0, tzinfo=timezone.utc)
-        self.round_identity = RoundIdentity(
-            round_id="round-002",
-            window_started_at=start,
-            window_ended_at=start + timedelta(minutes=1),
-        )
+        self.round_identity = RoundIdentity("round-current", start, start + timedelta(minutes=1))
 
-    def test_required_quorum_for_three_edges_is_two(self) -> None:
-        self.assertEqual(required_quorum(3), 2)
+    def evaluate(self, currents=(12.0, 12.0, 12.0), *, pv_values=None, stale=False):
+        from dataclasses import replace
+        ids = tuple(f"edge-{i+1}" for i in range(len(currents)))
+        states = []
+        for index, (edge, current) in enumerate(zip(ids, currents)):
+            pv = (pv_values or [80.0] * len(ids))[index]
+            state = make_replicated_state(self.round_identity, edge, pv, 6.0, 3200.0, currents=(current,) * 3)
+            state = replace(state, participating_edges=ids)
+            if stale and index == len(ids)-1:
+                obs = dict(state.observations_by_sensor)
+                obs["temperature"] = replace(obs["temperature"], timestamp="2026-03-25T11:59:00Z")
+                state = replace(state, observations_by_sensor=obs)
+            states.append(state)
+        return ConsensusEngine().evaluate(ConsensusRoundInput(self.round_identity, ids, tuple(states)))
 
-    def test_successful_consensus_uses_simple_average_of_non_excluded_edges(self) -> None:
-        round_input = ConsensusRoundInput(
-            round_identity=self.round_identity,
-            participating_edges=("edge-1", "edge-2", "edge-3"),
-            replicated_states=(
-                make_replicated_state(self.round_identity, "edge-1", 80.0, 6.0, 3200.0),
-                make_replicated_state(self.round_identity, "edge-2", 82.0, 6.2, 3220.0),
-                make_replicated_state(self.round_identity, "edge-3", 81.0, 6.1, 3210.0),
-            ),
-        )
+    def test_required_quorum_is_strictly_above_two_thirds(self):
+        self.assertEqual([required_quorum(n) for n in (1, 2, 3, 4, 6)], [1, 2, 3, 3, 5])
 
-        audit_package = ConsensusEngine().evaluate(round_input)
+    def test_success_retains_exact_acquired_current_without_averaging(self):
+        audit = self.evaluate((12.123456789,) * 3)
+        self.assertEqual(audit.final_status, ConsensusStatus.SUCCESS)
+        self.assertEqual(audit.consensused_valid_state.sensor_values, dict.fromkeys(("temperature", "pressure", "rpm"), 12.123456789))
+        self.assertEqual(audit.consensused_valid_state.measurement_domain, "loop_current_ma")
 
-        self.assertEqual(audit_package.consensus_result.status, ConsensusStatus.SUCCESS)
-        valid_state = audit_package.consensus_result.consensused_valid_state
-        assert valid_state is not None
-        self.assertEqual(valid_state.sensor_values["temperature"], 81.0)
-        self.assertEqual(valid_state.sensor_values["pressure"], 6.1)
-        self.assertEqual(valid_state.sensor_values["rpm"], 3210.0)
+    def test_engineering_pv_changes_do_not_change_decision_or_scores(self):
+        normal = self.evaluate()
+        changed = self.evaluate(pv_values=[-1000.0, 3000.0, 999999.0])
+        self.assertEqual(normal.consensus_result, changed.consensus_result)
+        self.assertEqual(normal.trust_evidence, changed.trust_evidence)
 
-    def test_exclusions_below_quorum_produce_failed_consensus(self) -> None:
-        round_input = ConsensusRoundInput(
-            round_identity=self.round_identity,
-            participating_edges=("edge-1", "edge-2", "edge-3"),
-            replicated_states=(
-                make_replicated_state(self.round_identity, "edge-1", 80.0, 6.0, 3200.0),
-                make_replicated_state(self.round_identity, "edge-2", 150.0, 11.5, 5000.0),
-                make_replicated_state(self.round_identity, "edge-3", 20.0, 1.0, 900.0),
-            ),
-        )
+    def test_current_only_disagreement_fails_three_edge_quorum(self):
+        audit = self.evaluate((12.0, 12.0, 16.0))
+        self.assertEqual(audit.final_status, ConsensusStatus.FAILED_CONSENSUS)
+        self.assertIsNone(audit.consensused_valid_state)
+        self.assertEqual(len(audit.exclusions), 3)
 
-        audit_package = ConsensusEngine().evaluate(round_input)
+    def test_failed_round_retains_advisory_ranking_and_evidence(self):
+        audit = self.evaluate((4.0, 12.0, 20.0))
+        self.assertEqual(len(audit.trust_ranking.entries), 3)
+        self.assertEqual(len(audit.trust_evidence), 3)
+        self.assertTrue(all(ex.reason == ExclusionReason.INCONSISTENT_VIEW for ex in audit.exclusions))
+        self.assertTrue(all(d.unit == "mA" for e in audit.trust_evidence for d in e.sensor_deviations))
 
-        self.assertEqual(
-            audit_package.consensus_result.status,
-            ConsensusStatus.FAILED_CONSENSUS,
-        )
-        self.assertIsNone(audit_package.consensus_result.consensused_valid_state)
-        self.assertGreaterEqual(len(audit_package.consensus_result.exclusions), 2)
+    def test_advisory_ranking_uses_sixteen_ma_span(self):
+        audit = self.evaluate((12.0, 12.0, 20.0))
+        evidence = {e.edge_id: e for e in audit.trust_evidence}
+        self.assertEqual(evidence["edge-1"].overall_normalized_deviation, 0.25)
+        self.assertEqual(evidence["edge-3"].overall_normalized_deviation, 0.5)
+        self.assertEqual(evidence["edge-1"].score, 0.8)
+        self.assertEqual(evidence["edge-3"].score, 0.667)
 
-    def test_failed_consensus_still_contains_ranking_and_exclusions(self) -> None:
-        round_input = ConsensusRoundInput(
-            round_identity=self.round_identity,
-            participating_edges=("edge-1", "edge-2", "edge-3"),
-            replicated_states=(
-                make_replicated_state(self.round_identity, "edge-1", 80.0, 6.0, 3200.0),
-                make_replicated_state(self.round_identity, "edge-2", 80.5, 6.1, 3210.0),
-                make_replicated_state(self.round_identity, "edge-3", 120.0, 9.5, 4700.0),
-            ),
-        )
+    def test_same_value_different_source_event_is_incompatible(self):
+        audit = self.evaluate(stale=True)
+        self.assertEqual(audit.final_status, ConsensusStatus.FAILED_CONSENSUS)
+        self.assertEqual(audit.trust_evidence[-1].compatible_peer_count, 0)
+        self.assertEqual(audit.trust_evidence[-1].overall_normalized_deviation, 0.0)
 
-        audit_package = ConsensusEngine().evaluate(round_input)
+    def test_tiny_current_drift_is_detected_even_when_score_rounds_to_one(self):
+        audit = self.evaluate((12.0, 12.0, 12.0000001))
+        self.assertEqual(audit.final_status, ConsensusStatus.FAILED_CONSENSUS)
+        self.assertTrue(all(entry.score == 1.0 for entry in audit.trust_ranking.entries))
 
-        self.assertGreater(len(audit_package.consensus_result.trust_ranking.entries), 0)
-        self.assertGreater(len(audit_package.consensus_result.exclusions), 0)
-        self.assertIn(
-            audit_package.consensus_result.exclusions[0].reason,
-            (
-                ExclusionReason.INCONSISTENT_VIEW,
-                ExclusionReason.SUSPECTED_BYZANTINE_BEHAVIOR,
-            ),
-        )
+    def test_three_of_four_agreeing_copies_succeed(self):
+        audit = self.evaluate((12.0, 12.0, 12.0, 18.0))
+        self.assertEqual(audit.final_status, ConsensusStatus.SUCCESS)
+        self.assertEqual(audit.consensused_valid_state.source_edges, ("edge-1", "edge-2", "edge-3"))
+        self.assertEqual(tuple(ex.edge_id for ex in audit.exclusions), ("edge-4",))
 
-    def test_trust_ranking_is_derived_from_pairwise_deviation(self) -> None:
-        round_input = ConsensusRoundInput(
-            round_identity=self.round_identity,
-            participating_edges=("edge-1", "edge-2", "edge-3"),
-            replicated_states=(
-                make_replicated_state(self.round_identity, "edge-1", 80.0, 6.0, 3200.0),
-                make_replicated_state(self.round_identity, "edge-2", 81.0, 6.1, 3210.0),
-                make_replicated_state(self.round_identity, "edge-3", 120.0, 9.5, 4700.0),
-            ),
-        )
+    def test_two_against_two_fails(self):
+        audit = self.evaluate((12.0, 12.0, 18.0, 18.0))
+        self.assertEqual(audit.final_status, ConsensusStatus.FAILED_CONSENSUS)
+        self.assertIsNone(audit.consensused_valid_state)
 
-        audit_package = ConsensusEngine().evaluate(round_input)
-        ranking_by_edge = {
-            entry.edge_id: entry.score
-            for entry in audit_package.consensus_result.trust_ranking.entries
-        }
+    def test_nonfinite_current_is_blocked(self):
+        for current in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(current=current), self.assertRaises(ValueError):
+                self.evaluate((current,) * 3)
 
-        self.assertGreater(ranking_by_edge["edge-1"], ranking_by_edge["edge-3"])
-        self.assertGreater(ranking_by_edge["edge-2"], ranking_by_edge["edge-3"])
+    def test_unknown_current_is_blocked(self):
+        from dataclasses import replace
+        state = make_replicated_state(self.round_identity, "edge-1", 80, 6, 3200)
+        payload = state.observations_by_sensor["temperature"]
+        payload = replace(payload, process_data=replace(payload.process_data, loop_current_ma=None))
+        state = replace(state, participating_edges=("edge-1",), observations_by_sensor={"temperature": payload})
+        with self.assertRaises((ValueError, TypeError)):
+            ConsensusEngine().evaluate(ConsensusRoundInput(self.round_identity, ("edge-1",), (state,)))
 
-    def test_replay_style_stale_view_produces_detectable_inconsistency(self) -> None:
-        round_input = ConsensusRoundInput(
-            round_identity=self.round_identity,
-            participating_edges=("edge-1", "edge-2", "edge-3"),
-            replicated_states=(
-                make_replicated_state(self.round_identity, "edge-1", 85.0, 6.8, 3400.0),
-                make_replicated_state(self.round_identity, "edge-2", 84.5, 6.7, 3390.0),
-                make_replicated_state(self.round_identity, "edge-3", 74.0, 5.7, 3080.0),
-            ),
-        )
-
-        audit_package = ConsensusEngine().evaluate(round_input)
-        excluded_edges = {decision.edge_id for decision in audit_package.consensus_result.exclusions}
-
-        self.assertIn("edge-3", excluded_edges)
-
-    def test_small_drift_reduces_trust_without_breaking_quorum(self) -> None:
-        round_input = ConsensusRoundInput(
-            round_identity=self.round_identity,
-            participating_edges=("edge-1", "edge-2", "edge-3"),
-            replicated_states=(
-                make_replicated_state(self.round_identity, "edge-1", 80.0, 6.0, 3200.0),
-                make_replicated_state(self.round_identity, "edge-2", 80.8, 6.08, 3208.0),
-                make_replicated_state(self.round_identity, "edge-3", 83.5, 6.4, 3280.0),
-            ),
-        )
-
-        audit_package = ConsensusEngine().evaluate(round_input)
-        ranking_by_edge = {
-            entry.edge_id: entry.score
-            for entry in audit_package.consensus_result.trust_ranking.entries
-        }
-
-        self.assertEqual(audit_package.final_status, ConsensusStatus.SUCCESS)
-        self.assertLess(ranking_by_edge["edge-3"], ranking_by_edge["edge-1"])
-
-    def test_audit_package_contains_inputs_status_and_valid_state_only_on_success(self) -> None:
-        round_input = ConsensusRoundInput(
-            round_identity=self.round_identity,
-            participating_edges=("edge-1", "edge-2", "edge-3"),
-            replicated_states=(
-                make_replicated_state(self.round_identity, "edge-1", 80.0, 6.0, 3200.0),
-                make_replicated_state(self.round_identity, "edge-2", 82.0, 6.2, 3220.0),
-                make_replicated_state(self.round_identity, "edge-3", 81.0, 6.1, 3210.0),
-            ),
-        )
-
-        audit_package = ConsensusEngine().evaluate(round_input)
-
-        self.assertEqual(audit_package.round_input, round_input)
-        self.assertEqual(audit_package.final_status, ConsensusStatus.SUCCESS)
-        self.assertIsNotNone(audit_package.consensus_result.consensused_valid_state)
-        self.assertIsNotNone(audit_package.consensused_valid_state)
+    def test_audit_package_contains_inputs_status_and_selected_state(self):
+        audit = self.evaluate()
+        self.assertEqual(audit.round_input.round_identity, self.round_identity)
+        self.assertEqual(audit.final_status, ConsensusStatus.SUCCESS)
+        self.assertEqual(audit.consensus_result.consensused_valid_state, audit.consensused_valid_state)
 
 
 if __name__ == "__main__":

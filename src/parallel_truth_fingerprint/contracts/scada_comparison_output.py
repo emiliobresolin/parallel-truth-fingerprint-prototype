@@ -27,10 +27,14 @@ class SensorScadaComparisonOutput:
     tolerance_evaluation: str
     divergence_classification: ScadaDivergenceClassification
     contextual_evidence: dict[str, object] | None = None
+    unit: str = 'mA'
+    measurement_domain: str = 'loop_current_ma'
 
     def to_dict(self) -> dict[str, object]:
         payload = {
             "sensor_name": self.sensor_name,
+            "unit": self.unit,
+            "measurement_domain": self.measurement_domain,
             "physical_value": self.physical_value,
             "scada_value": self.scada_value,
             "absolute_difference": self.absolute_difference,
@@ -67,6 +71,8 @@ class ScadaComparisonOutput:
                 "window_ended_at": self.round_identity.window_ended_at.isoformat(),
             },
             "scada_source_round_id": self.scada_source_round_id,
+            "measurement_domain": "loop_current_ma",
+            "unit": "mA",
             "divergent_sensors": list(self.divergent_sensors),
             "sensor_outputs": [output.to_dict() for output in self.sensor_outputs],
         }

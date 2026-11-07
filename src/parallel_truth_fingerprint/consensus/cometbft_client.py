@@ -9,6 +9,7 @@ from typing import Any
 from urllib import parse, request
 
 from parallel_truth_fingerprint.contracts.consensus_round_input import ConsensusRoundInput
+from parallel_truth_fingerprint.consensus.current_domain import raw_current, source_event_id, DOMAIN, SCHEMA
 
 
 @dataclass(frozen=True)
@@ -29,8 +30,9 @@ def serialize_round_input(round_input: ConsensusRoundInput) -> bytes:
     for state in sorted(round_input.replicated_states, key=lambda item: item.owner_edge_id):
         sensor_values = {
             sensor_name: {
-                "value": payload.process_data.pv.value,
-                "unit": payload.process_data.pv.unit,
+                "value": raw_current(payload),
+                "unit": "mA",
+                "source_event_id": source_event_id(payload),
             }
             for sensor_name, payload in sorted(state.observations_by_sensor.items())
         }
@@ -42,6 +44,8 @@ def serialize_round_input(round_input: ConsensusRoundInput) -> bytes:
         )
 
     payload = {
+        "schema_version": SCHEMA,
+        "measurement_domain": DOMAIN,
         "round_id": round_input.round_identity.round_id,
         "window_started_at": round_input.round_identity.window_started_at.isoformat(),
         "window_ended_at": round_input.round_identity.window_ended_at.isoformat(),

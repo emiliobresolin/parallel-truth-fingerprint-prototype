@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "consulted_on": "2026-10-31",
+  "sources": [
+    {
+      "id": "E+H-FLOW-2023",
+      "path": "docs/reference-archive/documents/EndressHauser_t-mass_F300_HART_BA01992DEN_0323-00.pdf",
+      "url": "https://bdih-download.endress.com/file/9bf358f8845b222e0c1c5d9b8b0573bf/BA01992DEN_0323-00.pdf",
+      "locator": "pp72-74 HART SV and DeviceVariable6; pp103-104 totalizer configuration; pp128-133 read/reset",
+      "sha256": "f7fd51195abcc8b2c427c067835d59dd2a985b0e5cfb5fdba4f16a4cd2b9d37d"
+    },
+    {
+      "id": "ABB-C200-TOTALIZER",
+      "path": "docs/reference-archive/documents/ABB_IM_C200_RST_1_Totalizer.pdf",
+      "url": "https://library.e.abb.com/public/65f6260d570a63de8025693d003066c7/IM_C200-RST_1.pdf",
+      "locator": "Printedp13 PDFp15, integration/totalization",
+      "sha256": "41a8889a6ad1fe2e8b69f05aeb0fe356ede9cbed67d132dcf76a9bf27f82baa0"
+    },
+    {
+      "id": "SIEMENS-TH-HART-AC",
+      "path": "docs/reference-archive/documents/Siemens_SITRANS_TH320420_HART_OI_A5E41864807-AC_EN.pdf",
+      "url": "https://cache.industry.siemens.com/dl/files/149/109793149/att_1053674/v1/A5E41864807-ACen_TH320420_TR320420_TF320420_HART_OI_en-US.pdf",
+      "locator": "PDFp168 dynamic mapping/electronics temperature; candidate not added",
+      "sha256": "c04b0b47580d15fa0addbc197c350a6c1c09f33406e77733c7620d430a11af7c"
+    }
+  ]
+}

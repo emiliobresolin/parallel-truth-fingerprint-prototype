@@ -68,6 +68,8 @@ def persist_valid_consensus_artifact(
         },
         round_identity=round_identity,
         consensus_context={
+            "schema_version": "current-consensus-v2",
+            "measurement_domain": "loop_current_ma",
             "final_consensus_status": audit_package.final_status.value,
             "participating_edges": list(audit_package.round_input.participating_edges),
             "quorum_required": required_quorum(
@@ -120,6 +122,8 @@ def persist_valid_consensus_artifact(
             "state_type": "consensused_valid_state",
             "source_edges": list(valid_state.source_edges),
             "sensor_values": dict(valid_state.sensor_values),
+            "measurement_domain": valid_state.measurement_domain,
+            "unit": "mA",
             "structured_payload_snapshot": payload_snapshot,
         },
         dataset_context=dict(dataset_context),
@@ -176,6 +180,8 @@ def _build_validated_payload_snapshot(
 
     return {
         "snapshot_type": "validated_source_view",
+        "measurement_domain": "loop_current_ma",
+        "unit": "mA",
         "selected_source_edge_id": source_state.owner_edge_id,
         "payloads_by_sensor": payloads_by_sensor,
     }
@@ -198,10 +204,6 @@ def _build_validated_payload(
     payload: RawHartPayload,
     consensused_value: float,
 ) -> RawHartPayload:
-    return replace(
-        payload,
-        process_data=replace(
-            payload.process_data,
-            pv=replace(payload.process_data.pv, value=round(float(consensused_value), 3)),
-        ),
-    )
+    if float(payload.process_data.loop_current_ma) != float(consensused_value):
+        raise PersistenceBlockedError('Selected source current differs from agreed current.')
+    return payload

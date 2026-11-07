@@ -23,7 +23,7 @@ from parallel_truth_fingerprint.contracts.raw_hart_payload import (
 from parallel_truth_fingerprint.contracts.round_identity import RoundIdentity
 
 
-def make_payload(tag: str, value: float, unit: str) -> RawHartPayload:
+def make_payload(tag: str, value: float, unit: str, current_ma: float = 12.0) -> RawHartPayload:
     return RawHartPayload(
         protocol="HART",
         gateway_id="GW",
@@ -37,7 +37,7 @@ def make_payload(tag: str, value: float, unit: str) -> RawHartPayload:
         process_data=ProcessData(
             pv=ProcessVariable(value=value, unit=unit),
             sv=ProcessVariable(value=65.0, unit="percent", description="Compressor_Power"),
-            loop_current_ma=12.0,
+            loop_current_ma=current_ma,
             pv_percent_range=50.0,
             physics_metrics=PhysicsMetrics(
                 noise_floor=0.1,
@@ -60,6 +60,7 @@ def make_replicated_state(
     temperature: float,
     pressure: float,
     rpm: float,
+    currents: tuple[float, float, float] = (12.0, 12.0, 12.0),
 ) -> EdgeLocalReplicatedStateContract:
     participants = ("edge-1", "edge-2", "edge-3")
     return EdgeLocalReplicatedStateContract(
@@ -67,9 +68,9 @@ def make_replicated_state(
         owner_edge_id=owner_edge_id,
         participating_edges=participants,
         observations_by_sensor={
-            "temperature": make_payload("TIT-101", temperature, "degC"),
-            "pressure": make_payload("PIT-101", pressure, "bar"),
-            "rpm": make_payload("RIT-101", rpm, "rpm"),
+            "temperature": make_payload("TIT-101", temperature, "degC", currents[0]),
+            "pressure": make_payload("PIT-101", pressure, "bar", currents[1]),
+            "rpm": make_payload("RIT-101", rpm, "rpm", currents[2]),
         },
         is_validated=False,
     )
@@ -89,7 +90,7 @@ class ConsensusAlertTest(unittest.TestCase):
             round_identity=self.round_identity,
             participating_edges=("edge-1", "edge-2", "edge-3"),
             replicated_states=tuple(
-                make_replicated_state(self.round_identity, edge_id, temp, pressure, rpm)
+                make_replicated_state(self.round_identity, edge_id, temp, pressure, rpm, currents=((18.0,)*3 if temp == 150.0 else (4.0,)*3 if temp == 20.0 else (12.0,)*3))
                 for edge_id, temp, pressure, rpm in states
             ),
         )
@@ -134,8 +135,8 @@ class ConsensusAlertTest(unittest.TestCase):
 
         assert alert is not None
         self.assertGreaterEqual(len(alert.trust_evidence), 3)
-        self.assertEqual(alert.trust_evidence[1].sensor_deviations[0].unit, "degC")
-        self.assertEqual(alert.trust_evidence[1].sensor_deviations[0].deviation_value, 100.0)
+        self.assertEqual(alert.trust_evidence[1].sensor_deviations[0].unit, "mA")
+        self.assertEqual(alert.trust_evidence[1].sensor_deviations[0].deviation_value, 10.0)
         self.assertGreaterEqual(len(alert.trust_evidence[1].pairwise_distances), 6)
 
     def test_alert_formatting_is_readable_and_deterministic(self) -> None:
@@ -153,7 +154,7 @@ class ConsensusAlertTest(unittest.TestCase):
         self.assertIn("alert=consensus_failed", compact)
         self.assertIn("status=failed_consensus", compact)
         self.assertIn("alert_type=consensus_failed", detailed)
-        self.assertIn("excluded=edge-2 reason=suspected_byzantine_behavior", detailed)
+        self.assertIn("excluded=edge-2 reason=inconsistent_view", detailed)
         self.assertIn("compatible_peers=0", detailed)
         self.assertEqual(compact, format_consensus_alert_compact(alert))
 

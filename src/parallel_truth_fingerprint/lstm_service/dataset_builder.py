@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+import math
 
 from parallel_truth_fingerprint.contracts.training_dataset import (
     TrainingDatasetManifest,
@@ -140,6 +141,9 @@ def evaluate_training_eligibility(artifact: dict[str, object]) -> tuple[bool, st
     if consensus_context.get("final_consensus_status") != "success":
         return False, "consensus_not_success"
 
+    if not _current_domain_artifact(artifact):
+        return False, 'legacy_or_unknown_measurement_domain'
+
     dataset_context = artifact.get("dataset_context")
     if not isinstance(dataset_context, dict):
         return False, "missing_dataset_context"
@@ -162,6 +166,8 @@ def evaluate_inference_eligibility(artifact: dict[str, object]) -> tuple[bool, s
     consensus_context = artifact.get("consensus_context", {})
     if consensus_context.get("final_consensus_status") != "success":
         return False, "consensus_not_success"
+    if not _current_domain_artifact(artifact):
+        return False, 'legacy_or_unknown_measurement_domain'
     dataset_context = artifact.get("dataset_context")
     if not isinstance(dataset_context, dict):
         return False, "missing_dataset_context"
@@ -171,6 +177,21 @@ def evaluate_inference_eligibility(artifact: dict[str, object]) -> tuple[bool, s
     if diagnostics.get("has_scada_divergence", False):
         return False, "scada_divergence"
     return True, "evaluation_eligible"
+
+
+def _current_domain_artifact(artifact):
+    state = artifact.get('validated_state', {})
+    if not (state.get('measurement_domain') == 'loop_current_ma' and state.get('unit') == 'mA'
+            and artifact.get('consensus_context', {}).get('schema_version') == 'current-consensus-v2'):
+        return False
+    try:
+        payloads = state['structured_payload_snapshot']['payloads_by_sensor']
+        currents = state['sensor_values']
+        return bool(currents) and set(currents) == set(payloads) and all(
+            math.isfinite(float(current)) and current == payloads[name]['process_data']['loop_current_ma']
+            for name, current in currents.items())
+    except (KeyError, TypeError, ValueError):
+        return False
 
 
 def extract_feature_vector(
@@ -194,7 +215,12 @@ def extract_feature_vector(
         payload = payloads_by_sensor[sensor_name]
         process_data = payload["process_data"]
         diagnostics = payload["diagnostics"]
-        loop_current_ma = float(process_data["loop_current_ma"])
+        try:
+            loop_current_ma = float(process_data["loop_current_ma"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("Finite acquired current is required for model features.") from exc
+        if not math.isfinite(loop_current_ma):
+            raise ValueError("Finite acquired current is required for model features.")
 
         feature_schema.extend(
             [

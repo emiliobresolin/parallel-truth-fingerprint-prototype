@@ -8,6 +8,7 @@ __pycache__/
 
 # Virtual environments
 .venv/
+.venv-*/
 venv/
 
 # Build and packaging
@@ -22,6 +23,7 @@ dist/
 
 # IDE / editor
 .vscode/
+.vscode-*/
 .idea/
 
 # OS files
@@ -41,3 +43,50 @@ datasets/
 # Scratch directories used by the legacy autoencoder export path
 .tmp/
 src/.tmp/
+
+# Local writing, presentations, generated results and scratch files
+/output/
+/tmp/
+/logs/
+/evidence/
+node_modules/
+*.log
+
+# Authoring tools and local agent configuration
+/.agents/
+/.claude/
+/.codex/
+/_bmad/
+/_bmad-output/
+/AGENTS.md
+/RTK.md
+/seminario_evidencias_codex.md
+
+# Documentation is local; retain only executable reference inputs
+/docs/*
+!/docs/infrastructure/
+!/docs/evidence/
+!/docs/reference-archive/
+!/docs/evidence-manifests-v1.md
+!/docs/semantic-vocabulary-v1.md
+!/docs/hart-totalizer-lstm.md
+!/docs/documented-loop-current-noise.md
+/docs/reference-archive/*
+!/docs/reference-archive/catalog/
+!/docs/reference-archive/documents/
+
+# Thesis tables, figures and dataset-publication utilities
+/scripts/build_thesis_result_cutoff.py
+/scripts/catalog_p27_candidates.py
+/scripts/render_p27_results.py
+/scripts/catalog_p27_*.py
+/scripts/render_p27_*.py
+/scripts/report_p28_tables.py
+/scripts/report_contextual_replay.py
+/scripts/report_current_domain_confirmation.py
+/scripts/report_p06_replay.py
+/scripts/report_p10_common_calibration.py
+/scripts/report_p10_confirmation.py
+/scripts/report_p16_syscalls.py
+/scripts/prepare_p18_dataset_only.py
+/scripts/publish_p18_dataset_only.py

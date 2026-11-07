@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "consulted_on": "2026-10-29",
+  "sources": [
+    {
+      "id": "TI-SLAAE91-2023",
+      "path": "docs/reference-archive/documents/TI_SLAAE91_2023_2_Wire_4_20mA_Transmitters.pdf",
+      "url": "https://www.ti.com/lit/ab/slaae91/slaae91.pdf",
+      "locator": "PDF p.4 Table2; HTML Table1-2: RMS782nA, 3mA, 24bit ADC31kSPS",
+      "sha256": "75a66860a69c37c4e550ddd37b341488f5fd47c56723e8a45d808a73a046bce3"
+    },
+    {
+      "id": "TI-SLVA043B-2007",
+      "path": "docs/reference-archive/documents/TI_SLVA043B_2007_Noise_Analysis_Operational_Amplifier_Circuits.pdf",
+      "url": "https://www.ti.com/lit/an/slva043b/slva043b.pdf",
+      "locator": "Noise Characteristics printedp4 PDFp7: Gaussian RMS and standard deviation",
+      "sha256": "c22344cc96f3ee854fedb788461fe2bcbf0605b73f43fb54820dc0fadb24af3e"
+    },
+    {
+      "id": "ADI-NOISE-2024",
+      "path": "docs/reference-archive/documents/ADI_Activity_Noise_ADALM2000_2026-10-29.html",
+      "url": "https://wiki.analog.com/university/labs/noise_adalm2000",
+      "locator": "Modeling and Measuring ADC noise; approved2024-09-06",
+      "sha256": "cdd07ede6eef68671700c743a18c692bc7f3ff3d23a80a77caa4ce6fcc6dc8c4"
+    }
+  ]
+}

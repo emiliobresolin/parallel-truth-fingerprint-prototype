@@ -281,9 +281,9 @@ def build_valid_audit_package(
             round_identity=round_identity,
             source_edges=("edge-1", "edge-2", "edge-3"),
             sensor_values={
-                "temperature": 72.5,
-                "pressure": 5.3,
-                "rpm": 3120.0,
+                "temperature": 14.2,
+                "pressure": 13.7,
+                "rpm": 14.9,
             },
         )
     consensus_result = ConsensusResult(
@@ -377,7 +377,9 @@ class ValidArtifactPersistenceTests(unittest.TestCase):
             persisted["consensus_context"]["participating_edges"],
             ["edge-1", "edge-2", "edge-3"],
         )
-        self.assertEqual(persisted["consensus_context"]["quorum_required"], 2)
+        self.assertEqual(persisted["consensus_context"]["quorum_required"], 3)
+        self.assertEqual(persisted['validated_state']['measurement_domain'], 'loop_current_ma')
+        self.assertEqual(persisted['validated_state']['unit'], 'mA')
         self.assertIn("trust_ranking", persisted["consensus_context"])
         self.assertIn("trust_evidence", persisted["consensus_context"])
         self.assertEqual(

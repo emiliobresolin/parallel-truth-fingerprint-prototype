@@ -201,11 +201,9 @@ def binary_operating_metrics(
     specificity = _safe_ratio(tn, tn + fp)
     fpr = _safe_ratio(fp, fp + tn)
     fnr = _safe_ratio(fn, fn + tp)
-    f1 = (
-        None
-        if precision is None or recall is None or precision + recall == 0.0
-        else 2.0 * precision * recall / (precision + recall)
-    )
+    # Count form remains defined at zero TP when FP or FN is present.
+    # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html
+    f1 = _safe_ratio(2 * tp, 2 * tp + fp + fn)
     accuracy = _safe_ratio(tp + tn, tp + tn + fp + fn)
     balanced_accuracy = (
         None

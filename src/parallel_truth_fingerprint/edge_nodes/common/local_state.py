@@ -11,6 +11,7 @@ SENSOR_BY_TAG_PREFIX = {
     "T": "temperature",
     "P": "pressure",
     "R": "rpm",
+    "F": "mass_flow",
 }
 
 
@@ -34,7 +35,7 @@ class EdgeLocalReplicatedState:
 
     def to_dict(self) -> dict[str, object]:
         sensor_values = {
-            sensor_name: payload.process_data.pv.value
+            sensor_name: payload.process_data.loop_current_ma
             for sensor_name, payload in self.observations.items()
         }
         return {
@@ -45,4 +46,6 @@ class EdgeLocalReplicatedState:
                 sensor in sensor_values for sensor in ("temperature", "pressure", "rpm")
             ),
             "sensor_values": sensor_values,
+            "measurement_domain": "loop_current_ma",
+            "unit": "mA",
         }

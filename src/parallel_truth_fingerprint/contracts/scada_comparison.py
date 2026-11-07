@@ -18,11 +18,15 @@ class SensorScadaComparison:
     tolerance: float
     within_tolerance: bool
     contextual_evidence: dict[str, object] | None = None
+    unit: str = "mA"
+    measurement_domain: str = "loop_current_ma"
 
     def to_dict(self) -> dict[str, object]:
         """Return a serializable per-sensor comparison view."""
 
         payload = {
+            "unit": "mA",
+            "measurement_domain": "loop_current_ma",
             "sensor_name": self.sensor_name,
             "physical_value": self.physical_value,
             "scada_value": self.scada_value,
@@ -42,6 +46,8 @@ class ScadaComparisonResult:
     round_identity: RoundIdentity
     scada_source_round_id: str
     sensor_comparisons: tuple[SensorScadaComparison, ...]
+    unit: str = "mA"
+    measurement_domain: str = "loop_current_ma"
 
     @property
     def all_within_tolerance(self) -> bool:
@@ -53,6 +59,8 @@ class ScadaComparisonResult:
         """Return a serializable comparison result."""
 
         return {
+            "unit": "mA",
+            "measurement_domain": "loop_current_ma",
             "round_identity": {
                 "round_id": self.round_identity.round_id,
                 "window_started_at": self.round_identity.window_started_at.isoformat(),
